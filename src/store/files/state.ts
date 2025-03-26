@@ -4,7 +4,6 @@ export interface FileI {
   createdAt: number;
   name: string;
   size: number;
-  status: string;
   updatedAt: number;
   url: string;
   userId: string;
