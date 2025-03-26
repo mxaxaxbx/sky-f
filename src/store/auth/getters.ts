@@ -48,6 +48,13 @@ export const getters: GetterTree<AuthStateI, RootStateI> = {
       });
       return p as ProjectI;
     });
+
+    if (projectsMapped.length === 0) {
+      const { VUE_APP_DIGI_USERS_F } = process.env;
+      window.location.href = `${VUE_APP_DIGI_USERS_F}/app/projects/add?app=sky`;
+      throw new Error('No projects found');
+    }
+
     return projectsMapped;
   },
   project: (state) => {
