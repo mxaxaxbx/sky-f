@@ -57,6 +57,10 @@ function decodeArray(enc: string): any[] {
   const spl = str.split('-');
   const elements: Array<any> = [];
   for (let i = 0; i < spl.length; i += 1) {
+    if (spl[i] === undefined || spl[i] === '') {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     // eslint-disable-next-line no-use-before-define
     const { value, length } = decode(spl[i]);
     elements.push(value);
