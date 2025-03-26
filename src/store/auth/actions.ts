@@ -23,6 +23,11 @@ export const actions: ActionTree<AuthStateI, RootStateI> = {
     context.commit('setUser', data);
   },
   async getUserPermissions(context: ActionContext<AuthStateI, RootStateI>) {
+    if (context.state.projects.length === 0) {
+      const { VUE_APP_DIGI_USERS_F } = process.env;
+      window.location.href = `${VUE_APP_DIGI_USERS_F}/app/projects/add?app=care`;
+      throw new Error('No projects found');
+    }
     const { data } = await usersClient.get('/api/auth/userperms');
     context.commit('setPermissions', data);
   },
