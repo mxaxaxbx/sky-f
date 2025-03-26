@@ -83,25 +83,6 @@
               ></i>
               <h3 class="font-bold text-lg">{{ file.name }}</h3>
             </div>
-            <div>
-              <!-- status -->
-              <i
-                v-if="file.status === 'pending'"
-                class="fas fa-clock text-yellow-500 text-lg"
-              ></i>
-              <i
-                v-else-if="file.status === 'processing'"
-                class="fas fa-sync-alt text-blue-500 text-lg"
-              ></i>
-              <i
-                v-else-if="file.status === 'saving'"
-                class="fas fa-save text-green-500 text-lg"
-              ></i>
-              <i
-                v-else-if="file.status === 'uploaded'"
-                class="fas fa-check text-green-500 text-lg"
-              ></i>
-            </div>
           </div>
         </button>
       </div>
