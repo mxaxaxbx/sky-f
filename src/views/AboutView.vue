@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div>
     <!-- Hero Section -->
     <section class="bg-indigo-600 text-white py-20">
