@@ -17,5 +17,6 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vuejs-accessibility/label-has-for': 'off',
     'import/prefer-default-export': 'off',
+    'linebreak-style': 'off',
   },
 };
