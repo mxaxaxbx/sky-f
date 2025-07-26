@@ -39,7 +39,7 @@
           class="w-[450px] h-auto z-10"></object>
           <!-- Lluvia de datos -->
         <div id="wrapper"
-          class="absolute top-2/3 h-auto"
+          class="absolute top-3/4 h-auto"
           ref="wrapper">
           <canvas ref="canvas" class="block z-0"></canvas>
         </div>
@@ -72,87 +72,184 @@
             <canvas ref="canvas2" class="block"></canvas>
         </div>
       </div>
-      <div class="w-[75%] mx-auto flex flex-row items-center justify-between">
-        <div class="grid md:grid-cols-4 gap-8 text-center pt-36">
-          <div class="bg-[#ffffff] rounded-2xl h-[400px]">
-            <svg 
-              class="w-12 h-12 mx-auto text-purple-600" 
-              xmlns="http://www.w3.org/2000/svg" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v8m4-4H8" />
-            </svg>
-            <h3 class="text-xl font-semibold mt-4"> Secure Storage </h3>
-            <p class="mt-2 text-gray-600">
-              Store your files securely and access them from any device, anywhere.
-            </p>
-          </div>
-          <div class="bg-[#ffffff] rounded-xl h-[400px]">
-            <svg class="w-12 h-12 mx-auto text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
-            </svg>
-            <h3 class="text-xl font-semibold mt-4"> Secure Storage </h3>
-            <p class="mt-2 text-gray-600">
-              Store your files securely and access them from any device, anywhere.
-            </p>
-          </div>
-          <div class="bg-[#ffffff] rounded-xl h-[400px]">
-            <svg class="w-12 h-12 mx-auto text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
-            </svg>
-            <h3 class="text-xl font-semibold mt-4"> Secure Storage </h3>
-            <p class="mt-2 text-gray-600">
-              Store your files securely and access them from any device, anywhere.
-            </p>
-          </div>
-          <div class="bg-[#ffffff] rounded-xl h-[400px]">
-            <svg class="w-12 h-12 mx-auto text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
-            </svg>
-            <h3 class="text-xl font-semibold mt-4"> Secure Storage </h3>
-            <p class="mt-2 text-gray-600">
-              Store your files securely and access them from any device, anywhere.
-            </p>
-          </div>
+      <div
+        class="
+          w-[75%]
+          flex flex-row items-center justify-between
+          mx-auto spaces-x-4
+          pt-20
+        "
+      >
+        <div
+          class="
+            flex flex-col items-center justify-between
+            bg-[#ffffff]
+            w-80 h-auto
+            rounded-[56px]
+            pt-10 pb-10 gap-y-2
+          "
+        >
+        <h3
+          class="
+            text-[#0A77F3] text-3xl font-bold
+            mt-2
+          "
+        >
+          Secure Storage
+        </h3>
+        <!-- seguridad -->
+        <div
+          ref="lockContainer"
+          class="w-64 h-64
+            relative flex items-center justify-center
+          ">
+          <!-- Base del candado -->
+          <object
+            id="lockbase"
+            aria-label="lockBase SVG"
+            type="image/svg+xml"
+            data="lock-base.svg"
+            class="absolute z-50 left-1/2 top-1/2
+            -translate-x-1/2 -translate-y-1/2 w-full h-full
+            ">
+          </object>
+          <!-- Círculo izquierdo -->
+          <img
+            ref="dialInner"
+            src="/dial-inner.svg"
+            alt="inner"
+            class="absolute z-20"
+          />
+          <!-- Círculo del medio -->
+          <img
+            ref="dialMidder"
+            src="/dial-midder.svg"
+            alt="midder"
+            class="absolute z-30"
+          />
+          <!-- Círculo derecho -->
+          <img
+            ref="dialOuter"
+            src="/dial-outer.svg"
+            alt="outer"
+            class="absolute z-40"
+          />
+        </div>
+          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
+            Store your files securely with<br />end-to-end encryption.
+          </p>
+        </div>
+        <div
+          class="
+            flex flex-col items-center justify-between
+            bg-[#ffffff]
+            w-80 h-auto
+            rounded-[56px]
+            pt-10 pb-10
+          "
+        >
+        <h3
+          class="
+            text-[#0A77F3] text-3xl font-bold
+            mt-2
+          "
+        >
+          Secure Storage
+        </h3>
+        <!-- Aqui va la nueva animacion -->
+        <!-- Aqui va la nueva animacion -->
+        <!-- Aqui va la nueva animacion -->
+          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
+            Store your files securely with<br />end-to-end encryption.
+          </p>
+        </div>
+        <div
+          class="
+            flex flex-col items-center justify-between
+            bg-[#ffffff]
+            w-80 h-auto
+            rounded-[56px]
+            py-8 px-8 gap-y-2
+          "
+        >
+        <h3
+          class="
+            text-[#0A77F3] text-3xl font-bold
+            mt-2
+          "
+        >
+          Unlimited Access
+        </h3>
+       <!-- Aqui va la nueva animacion -->
+        <div
+          ref="planetContainer"
+          class="w-64 h-64
+            relative flex items-center justify-center
+          ">
+          <!-- Base del candado -->
+          <object
+            id="planetBase"
+            aria-label="planetBase SVG"
+            type="image/svg+xml"
+            data="sun.svg"
+            class="absolute z-50 left-1/2 top-1/2
+            -translate-x-1/2 -translate-y-1/2 w-full h-full
+            ">
+          </object>
+          <!-- Círculo izquierdo -->
+          <img
+            ref="orbit1"
+            src="/orbit1.svg"
+            alt="orbit1"
+            class="absolute z-20"
+          />
+          <!-- Círculo del medio -->
+          <img
+            ref="orbit2"
+            src="/orbit2.svg"
+            alt="orbit2"
+            class="absolute z-30"
+          />
+          <!-- Círculo derecho -->
+          <img
+            ref="orbit3"
+            src="/orbit3.svg"
+            alt="orbit3"
+            class="absolute z-40"
+          />
+        </div>
+          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
+            Collaborate instantly with your<br />friends and colleagues.
+          </p>
+        </div>
+        <div
+          class="
+            flex flex-col items-center justify-between
+            bg-[#ffffff]
+            w-80 h-auto
+            rounded-[56px]
+            pt-10 pb-10
+          "
+        >
+        <h3
+          class="
+            text-[#0A77F3] text-3xl font-bold
+            mt-2
+          "
+        >
+          Secure Storage
+        </h3>
+        <!-- Aqui va la nueva animacion -->
+        <!-- Aqui va la nueva animacion -->
+        <!-- Aqui va la nueva animacion -->
+          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
+            Store your files securely with<br />end-to-end encryption.
+          </p>
         </div>
       </div>
     </section>
-    <!-- Storage Features Section -->
-    <section id="storage-features" class="bg-gray-100 py-16">
-      <div class="container mx-auto">
-      <h2 class="text-3xl font-bold text-center mb-12">Storage Features</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <!-- Feature Card -->
-        <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-xl font-semibold mb-4">Secure Storage</h3>
-        <p class="text-gray-600 mb-4">
-          Store your files securely with end-to-end encryption.</p>
-        <a href="#" class="bg-purple-600 text-white px-4 py-2 rounded">Learn More</a>
-        </div>
-        <!-- Feature Card -->
-        <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-xl font-semibold mb-4">Easy Sharing</h3>
-        <p class="text-gray-600 mb-4">
-          Share your files with friends and colleagues with just a few clicks.</p>
-        <a href="#" class="bg-purple-600 text-white px-4 py-2 rounded">Learn More</a>
-        </div>
-        <!-- Feature Card -->
-        <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-xl font-semibold mb-4">Access Anywhere</h3>
-        <p class="text-gray-600 mb-4">
-          Access your files from any device, anywhere in the world.</p>
-        <a href="#" class="bg-purple-600 text-white px-4 py-2 rounded">Learn More</a>
-        </div>
-      </div>
-      </div>
+    <!-- map Section -->
+    <section class="bg-[#EDF5FF] font-alexandria py-24 pb-[90px] px-10">
     </section>
     <!-- Users Section -->
     <section class="container mx-auto py-16">
@@ -175,6 +272,243 @@ import { onMounted, ref, onBeforeUnmount } from 'vue';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 
+// animacion planetas
+onMounted(() => {
+  const svgObject = document.getElementById('planetBase');
+
+  svgObject.addEventListener('load', () => {
+    const svgDoc = svgObject.contentDocument;
+    const paths = svgDoc.querySelectorAll('circle');
+
+    const step = 0.3;
+    const animations = [];
+
+    paths.forEach((path, i) => {
+      // Empieza desde escala pequeña y opacidad completa
+      gsap.set(path, {
+        scale: 0.8,
+        opacity: 1,
+        transformOrigin: 'center center',
+      });
+
+      const delay = i * step + Math.random() * 0.5;
+
+      const tl = gsap.to(path, {
+        scale: 1.2,
+        stroke: 'rgba(255, 255, 255, 0.3)',
+        strokeWidth: 1,
+        filter: 'drop-shadow(0 0 3px rgba(0, 238, 255, 0.2))',
+        opacity: 1,
+        duration: 3,
+        delay,
+        repeat: -1,
+        ease: 'power1.out',
+      });
+
+      animations.push({ path, tl });
+    });
+
+    // Hover (opcional)
+    svgObject.addEventListener('mouseenter', () => {
+      animations.forEach(({ path, tl }) => {
+        tl.pause();
+        gsap.to(path, {
+          scale: 1,
+          duration: 0.5,
+          stroke: '#0A77F3',
+          opacity: 1,
+          ease: 'power1.out',
+        });
+      });
+    });
+
+    svgObject.addEventListener('mouseleave', () => {
+      animations.forEach(({ tl }) => {
+        tl.play();
+      });
+    });
+  });
+});
+
+// animacion orbitas
+const orbit1 = ref(null);
+const orbit2 = ref(null);
+const orbit3 = ref(null);
+const planetContainer = ref(null);
+
+let tlOrbit1;
+let tlOrbit2;
+let tlOrbit3;
+let onEnter1;
+let onLeave1;
+
+onMounted(() => {
+  // Animaciones circulares base
+  tlOrbit1 = gsap.to(orbit1.value, {
+    rotate: 360,
+    duration: 12,
+    repeat: -1,
+    ease: 'linear',
+    opacity: 1,
+    transformOrigin: '50% 50%',
+  });
+
+  tlOrbit2 = gsap.to(orbit2.value, {
+    rotate: -360,
+    duration: 12,
+    repeat: -1,
+    ease: 'linear',
+    transformOrigin: '50% 50%',
+  });
+
+  tlOrbit3 = gsap.to(orbit3.value, {
+    rotate: 360,
+    duration: 9,
+    repeat: -1,
+    ease: 'linear',
+    transformOrigin: '50% 50%',
+  });
+
+  // Guardamos funciones en variables
+  onEnter1 = () => {
+    tlOrbit1.timeScale(0.2);
+    tlOrbit2.timeScale(0.2);
+    tlOrbit3.timeScale(0.2);
+  };
+
+  onLeave1 = () => {
+    tlOrbit1.timeScale(1);
+    tlOrbit2.timeScale(1);
+    tlOrbit3.timeScale(1);
+  };
+
+  planetContainer.value.addEventListener('mouseenter', onEnter1);
+  planetContainer.value.addEventListener('mouseleave', onLeave1);
+});
+
+onBeforeUnmount(() => {
+  planetContainer.value.removeEventListener('mouseenter', onEnter1);
+  planetContainer.value.removeEventListener('mouseleave', onLeave1);
+});
+
+// animacion candado
+onMounted(() => {
+  const svgObject = document.getElementById('lockbase');
+
+  svgObject.addEventListener('load', () => {
+    const svgDoc = svgObject.contentDocument;
+    const paths = svgDoc.querySelectorAll('circle');
+
+    const step = 0.3;
+    const animations = [];
+
+    paths.forEach((path, i) => { // eslint-disable-next-line no-param-reassign
+      // Empieza desde escala pequeña y opacidad completa
+      gsap.set(path, {
+        scale: 0.8,
+        opacity: 1,
+        transformOrigin: 'center center',
+      });
+
+      const delay = i * step + Math.random() * 0.5;
+
+      const tl = gsap.to(path, {
+        scale: 1.5,
+        stroke: 'rgba(255, 255, 255, 0.3)',
+        strokeWidth: 1,
+        filter: 'drop-shadow(0 0 3px rgba(0, 238, 255, 0.2))',
+        opacity: 1,
+        duration: 3,
+        delay,
+        repeat: -1,
+        ease: 'power1.out',
+      });
+
+      animations.push({ path, tl });
+    });
+
+    // Hover handlers en el <object> que contiene el SVG
+    svgObject.addEventListener('mouseenter', () => {
+      animations.forEach(({ path, tl }) => {
+        tl.pause();
+        gsap.to(path, {
+          scale: 0.9,
+          duration: 0.5,
+          stroke: '#0A77F3',
+          opacity: 1,
+          ease: 'power1.out',
+        });
+      });
+    });
+    svgObject.addEventListener('mouseleave', () => {
+      animations.forEach(({ tl }) => {
+        tl.play();
+      });
+    });
+  });
+});
+
+// animacion dial
+const dialInner = ref(null);
+const dialMidder = ref(null);
+const dialOuter = ref(null);
+const lockContainer = ref(null);
+
+let tlInner;
+let tlMidder;
+let tlOuter;
+let onEnter;
+let onLeave;
+
+onMounted(() => {
+  // Animaciones circulares base
+  tlInner = gsap.to(dialInner.value, {
+    rotate: 360,
+    duration: 18,
+    repeat: -1,
+    ease: 'linear',
+    transformOrigin: '50% 50%',
+  });
+
+  tlMidder = gsap.to(dialMidder.value, {
+    rotate: -360,
+    duration: 10,
+    repeat: -1,
+    ease: 'linear',
+    transformOrigin: '50% 50%',
+  });
+
+  tlOuter = gsap.to(dialOuter.value, {
+    rotate: 360,
+    duration: 15,
+    repeat: -1,
+    ease: 'linear',
+    transformOrigin: '50% 50%',
+  });
+
+  // Guardamos funciones en variables
+  onEnter = () => {
+    tlInner.timeScale(3);
+    tlMidder.timeScale(3);
+    tlOuter.timeScale(3);
+  };
+
+  onLeave = () => {
+    tlInner.timeScale(0.3);
+    tlMidder.timeScale(0.3);
+    tlOuter.timeScale(0.3);
+  };
+
+  lockContainer.value.addEventListener('mouseenter', onEnter);
+  lockContainer.value.addEventListener('mouseleave', onLeave);
+});
+
+onBeforeUnmount(() => {
+  lockContainer.value.removeEventListener('mouseenter', onEnter);
+  lockContainer.value.removeEventListener('mouseleave', onLeave);
+});
+
+// lluvia de datos
 const canvas = ref(null);
 
 onMounted(() => {
@@ -251,8 +585,8 @@ onMounted(() => {
   });
 });
 
+// lluvia de datos 2
 const canvas2 = ref(null);
-
 onMounted(() => {
   const ctx = canvas2.value.getContext('2d');
   const symbolWidth = 30;
@@ -327,6 +661,7 @@ onMounted(() => {
   });
 });
 
+// nube animacion datos
 onMounted(() => {
   const svgObject = document.getElementById('network');
 
@@ -357,7 +692,8 @@ onMounted(() => {
     });
   });
 });
-onMounted(() => {
+
+onMounted(() => { // nube animacion iconos
   const svgObject = document.getElementById('Icons');
   svgObject.addEventListener('load', () => {
     const svgDoc = svgObject.contentDocument;
@@ -387,7 +723,7 @@ onMounted(() => {
   });
 });
 
-onMounted(() => {
+onMounted(() => { // animacion welcome
   const svgObject = document.getElementById('Welcome');
 
   svgObject.addEventListener('load', () => {
