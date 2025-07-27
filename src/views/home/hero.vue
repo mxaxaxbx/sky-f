@@ -11,7 +11,8 @@
         <a
           href="#storage-features"
           class="bg-[#0B77F3] text-lg text-white font-semibold
-            px-10 py-3 rounded-full mb-10
+            px-10 py-3 rounded-full
+            mb-10
             hover:bg-white hover:text-[#0B77F3] hover:shadow transition duration-300"
         >
           Get Started
@@ -52,6 +53,7 @@ import {
   onBeforeUnmount,
   defineAsyncComponent,
 } from 'vue';
+
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 
