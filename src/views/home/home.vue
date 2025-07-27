@@ -3,7 +3,7 @@
     <!-- Hero Section -->
     <HeroSection />
     <!-- Features Section -->
-    <section class="bg-[#EDF5FF] font-alexandria py-2  pt-72 pb-[160px]">
+    <section class="bg-[#EDF5FF] font-alexandria py-2  pt-32 pb-[160px]">
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
         <div class="absolute w-full h-[210px]
           bg-gradient-to-r from-transparent to-[#EDF5FF]/100">
@@ -18,7 +18,7 @@
               class="w-auto h-[210px]"></object>
       </div>
       <div class="w-[65%] mx-auto flex flex-row items-center justify-between pt-24">
-        <h2 class="text-6xl font-bold text-left mb-12 pt-12">
+        <h2 class="text-6xl font-bold text-left mb-12">
           We built a private cloud<br>
           that puts you in control,<br>
           with a fast, intuitive, and<br>
