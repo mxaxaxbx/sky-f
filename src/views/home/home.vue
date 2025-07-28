@@ -8,7 +8,7 @@
         <div class="absolute w-full h-[210px]
           bg-gradient-to-r from-transparent to-[#EDF5FF]/100">
         </div>
-        <div class="absolute w-full h-[210px]
+        <div class="absolute w-full h-[200px]
           bg-gradient-to-r from-transparent to-[#EDF5FF]/50">
         </div>
         <object id="Welcome"
