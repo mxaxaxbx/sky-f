@@ -5,26 +5,27 @@
     <!-- Features Section -->
     <section class="bg-[#EDF5FF] font-alexandria py-2  pt-32 pb-[160px]">
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
-        <div class="absolute w-full h-[210px]
+        <div class="absolute w-full lg:h-52 h-20
           bg-gradient-to-r from-transparent to-[#EDF5FF]/100">
         </div>
-        <div class="absolute w-full h-[200px]
+        <div class="absolute w-full lg:h-52 h-20
           bg-gradient-to-r from-transparent to-[#EDF5FF]/50">
         </div>
         <object id="Welcome"
               aria-label="Welcome SVG"
               type="image/svg+xml"
               data="Welcome.svg"
-              class="w-auto h-[210px]"></object>
+              class="w-auto lg:h-52 h-20"></object>
       </div>
-      <div class="w-[65%] mx-auto flex flex-row items-center justify-between pt-24">
-        <h2 class="text-6xl font-bold text-left mb-12">
+      <div class=" w-[90%] md:[80%] lg:w-[65%] mx-auto
+        flex flex-row items-center justify-between pt-24">
+        <h2 class="text-3xl lg:text-6xl font-semibold lg:font-bold text-left mb-4">
           We built a private cloud<br>
           that puts you in control,<br>
           with a fast, intuitive, and<br>
           hassle-free <span class="text-[#0B77F3]">Experience.</span></h2>
         <div id="wrapper2"
-            class="block opacity-50"
+            class="opacity-50 hidden md:block"
             ref="wrapper2">
             <canvas ref="canvas2" class="block"></canvas>
         </div>
