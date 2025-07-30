@@ -1,74 +1,70 @@
 <template>
-    <section class="bg-[#EDF5FF] font-alexandria py-16 px-8">
-      <div class="container mx-auto text-center">
-        <h2 class="text-5xl md:text-6xl lg:text-8xl
-          text-[#0B77F3] font-bold mb-6 sm:leading-tight">
-          Store. Share.<br>Access from Anywhere </h2>
-        <p class="text-md md:text-md lg:text-lg font-semibold text-[#5E5E5E] mb-10">
-          Keep your ideas, memories, and projects safe and accessible <br>anytime, anywhere.
-        </p>
-        <a
-          href="#storage-features"
-          class="bg-[#0B77F3] text-lg text-white font-semibold
-            px-10 py-3 rounded-full
-            mb-12
-            hover:bg-white hover:text-[#0B77F3] hover:shadow transition duration-300"
-        >
-          Get Started
-          <i class="fas fa-arrow-right pl-2"></i>
-        </a>
-      </div>
-      <div class="relative w-full h-full flex items-center justify-center pt-24 lg:pt-32">
-        <object id="Icons"
-          aria-label="Icons SVG"
-          type="image/svg+xml"
-          data="iconos.svg"
-          class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-30"></object>
-        <!-- red plano medio -->
-        <object id="network"
-          aria-label="Network SVG"
-          type="image/svg+xml"
-          data="red.svg"
-          class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-20"></object>
-          <!-- Nube fondo -->
-        <object id="cloud"
-          aria-label="cloud SVG"
-          type="image/svg+xml"
-          data="nube.svg"
-          class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-10"></object>
-          <!-- Lluvia de datos -->
-        <div id="wrapper"
-          class="translate-y-16 lg:translate-y-28 w-72 md:w-80 lg:w-[450px] h-10 z-0"
-          ref="wrapper">
+  <section class="bg-[#EDF5FF] font-alexandria py-16 px-8">
+    <div class="container mx-auto text-center">
+      <h2 class="text-5xl md:text-6xl lg:text-8xl text-[#0B77F3] font-bold mb-6 sm:leading-tight">
+        Store. Share.<br>Access from Anywhere
+      </h2>
+      <p class="text-md md:text-md lg:text-lg font-semibold text-[#5E5E5E] mb-10">
+        Keep your ideas, memories, and projects safe and accessible <br />anytime, anywhere.
+      </p>
+      <a
+        href="#storage-features"
+        class="bg-[#0B77F3] text-lg text-white font-semibold px-10 py-3 rounded-full mb-12
+          hover:bg-white hover:text-[#0B77F3] hover:shadow transition duration-300"
+      >
+        Get Started
+        <i class="fas fa-arrow-right pl-2"></i>
+      </a>
+    </div>
+    <div class="relative w-full h-full flex items-center justify-center pt-24 lg:pt-32">
+      <object
+        id="Icons"
+        aria-label="Icons SVG"
+        type="image/svg+xml"
+        data="iconos.svg"
+        class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-30"
+      ></object>
+      <object
+        id="network"
+        aria-label="Network SVG"
+        type="image/svg+xml"
+        data="red.svg"
+        class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-20"
+      ></object>
+      <object
+        id="cloud"
+        aria-label="Cloud SVG"
+        type="image/svg+xml"
+        data="nube.svg"
+        class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-10"
+      ></object>
+      <div
+        id="wrapper"
+        class="translate-y-16 lg:translate-y-28 w-72 md:w-80 lg:w-[450px] h-10 z-0"
+        ref="wrapper"
+      >
         <canvas ref="canvas" class="center"></canvas>
-</div>
       </div>
-    </section>
+    </div>
+  </section>
 </template>
+
 <script setup>
-import {
-  onMounted,
-  ref,
-  onBeforeUnmount,
-  defineAsyncComponent,
-} from 'vue';
-
+import { onMounted, ref, onBeforeUnmount } from 'vue';
 import gsap from 'gsap';
-import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+import { debounce } from 'lodash-es';
 
-// lluvia de datos
 const canvas = ref(null);
 
 onMounted(() => {
-  const { value: canvasEl } = canvas;
+  const canvasEl = canvas.value;
   const ctx = canvasEl.getContext('2d');
   const symbolWidth = 30;
   const symbolHeight = 16;
-
   const drops = [];
 
   const getRandomChar = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyz1234567890!"#%&';
+    const chars = 'abcdefghijklmnopqrstuvwxyz1234567890!#%&';
     return chars.charAt(Math.floor(Math.random() * chars.length));
   };
 
@@ -81,7 +77,7 @@ onMounted(() => {
     }
   };
 
-  const resizeCanvas = () => {
+  const resizeCanvas = debounce(() => {
     const { offsetWidth } = canvasEl.parentElement;
     const width = offsetWidth;
     const height = 220;
@@ -99,7 +95,7 @@ onMounted(() => {
         frameCount: 0,
       });
     }
-  };
+  }, 200);
 
   let animationFrameId;
 
@@ -149,65 +145,31 @@ onMounted(() => {
   });
 });
 
-// nube animacion datos
-onMounted(() => {
-  const svgObject = document.getElementById('network');
-
+const animateSVG = (id, strokeColor, duration, step) => {
+  const svgObject = document.getElementById(id);
   svgObject.addEventListener('load', () => {
     const svgDoc = svgObject.contentDocument;
-    const paths = svgDoc.querySelectorAll('line, path, circle');
+    const paths = svgDoc.querySelectorAll('line, path, circle, polygon, polyline');
 
-    const step = 0.3;
-
-    paths.forEach((path, i) => { // eslint-disable-next-line no-param-reassign
-      path.style.stroke = ''; // eslint-disable-next-line no-param-reassign
-      path.style.fill = ''; // eslint-disable-next-line no-param-reassign
-      path.style.filter = ''; // eslint-disable-next-line no-param-reassign
-      path.style.opacity = '1';
-
-      const delay = i * 0.5 + Math.random() * 2;
+    paths.forEach((path, i) => {
+      const delay = i * step + Math.random() * 0.5;
 
       gsap.to(path, {
-        stroke: '#ffffff',
+        stroke: strokeColor,
         strokeWidth: 2,
         filter: 'drop-shadow(0 0 3px rgba(0, 238, 255, 0.3))',
         repeat: -1,
         yoyo: true,
-        duration: 0.7,
-        delay: delay + i * step,
+        duration,
+        delay,
         ease: 'power2.inOut',
       });
     });
   });
-});
+};
 
-onMounted(() => { // nube animacion iconos
-  const svgObject = document.getElementById('Icons');
-  svgObject.addEventListener('load', () => {
-    const svgDoc = svgObject.contentDocument;
-    const paths = svgDoc.querySelectorAll('polygon,polyline, path');
-
-    const step = 0.8;
-
-    paths.forEach((path, i) => { // eslint-disable-next-line no-param-reassign
-      path.style.stroke = ''; // eslint-disable-next-line no-param-reassign
-      path.style.fill = ''; // eslint-disable-next-line no-param-reassign
-      path.style.filter = ''; // eslint-disable-next-line no-param-reassign
-      path.style.opacity = '1';
-
-      const delay = i * 0.9 + Math.random() * 0;
-
-      gsap.to(path, {
-        stroke: '#71C4FF',
-        strokeWidth: 0,
-        filter: 'drop-shadow(0 0 0.5px rgba(0, 238, 255, 0.3))',
-        repeat: -1,
-        yoyo: true,
-        duration: 1,
-        delay: delay + i * step,
-        ease: 'power2.inOut',
-      });
-    });
-  });
+onMounted(() => {
+  animateSVG('network', '#ffffff', 0.7, 0.3);
+  animateSVG('Icons', '#71C4FF', 1, 0.8);
 });
 </script>
