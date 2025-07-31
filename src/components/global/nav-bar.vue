@@ -1,34 +1,61 @@
 <template>
-  <nav
+    <nav
     class="
-      w-100
-      bg-gray-300
-      p-4
-      flex items-center space-x-4
+      w-[55%]
+      bg-white
+      py-2
+      flex items-center justify-between mx-auto
+      rounded-full mt-8
+      reltive
+      font-alexandria
     "
   >
-    <button @click="toggleSidebar">
-      <i class="fas fa-bars"></i>
-    </button>
-    <router-link
-      :to="isAuthenticated ? '/app' : '/'"
-      class="text-2xl font-bold text-purple-500"
-    >
-      storage
+    <!-- LOGO -->
+    <router-link :to="isAuthenticated ? '/app' : '/'">
+      <img
+        src="dgsky-logo.svg"
+        alt="logo"
+        class="w-20 ml-8"
+      >
     </router-link>
-    <div class="shrink w-5/6"></div>
+    <div class="absolute left-1/2 -translate-x-1/2 flex items-center">
+  <div class="w-px h-6 bg-gray-200 mx-16"></div>
+  <div class="flex items-center gap-6 text-gray-500 font-semibold text-md">
+    <a href="#features" class="px-3 hover:text-[#0A77F3]">Features</a>
+    <a href="#plans" class="px-3 hover:text-[#0A77F3]">Plans</a>
+    <a href="#services" class="px-3 hover:text-[#0A77F3]">Services</a>
+    <a href="#faq" class="px-3 hover:text-[#0A77F3]">FAQ</a>
+  </div>
+  <div class="w-px h-6 bg-gray-200 mx-16"></div>
+</div>
+    <!-- REGISTER + USER, agrupados y pegados a la derecha -->
+    <div class="flex items-center gap-4 ml-auto mr-2">
+      <!-- Botón Register -->
+      <button
+        class="border border-[#0A77F3] text-lg text-[#0A77F3] font-semibold h-10 px-8
+        rounded-full hover:bg-[#0A77F3] hover:text-white transition-all"
+      >
+        Register
+      </button>
 
-    <Dropdown
-      v-if="isAuthenticated"
-      :content="dropdownContent"
-      :options="dropdownOptions"
-      :loading="loading"
-      @action="handleAction"
-    />
-    <a v-else :href="usersLink" aria-label="User Profile">
-      <i class="fas fa-user" aria-hidden="true"></i>
-      <span class="sr-only">User Profile</span>
-    </a>
+      <!-- Ícono de usuario -->
+      <Dropdown
+        v-if="isAuthenticated"
+        :content="dropdownContent"
+        :options="dropdownOptions"
+        :loading="loading"
+        @action="handleAction"
+      />
+      <div
+        v-else
+        class="bg-[#0A77f3] w-10 h-10 rounded-full flex justify-center items-center"
+      >
+        <a :href="usersLink" aria-label="User Profile">
+          <i class="fas fa-user text-white text-lg" aria-hidden="true"></i>
+          <span class="sr-only">User Profile</span>
+        </a>
+      </div>
+    </div>
   </nav>
 </template>
 
