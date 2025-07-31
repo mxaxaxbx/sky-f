@@ -1,9 +1,10 @@
 <template>
-   <section class="bg-[#EDF5FF] font-alexandria py-2  pt-32 pb-[160px]">
+   <section class="bg-[#EDF5FF] font-alexandria py-2  pt-32">
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
         <div class="absolute w-full lg:h-52 h-20
           bg-gradient-to-r from-transparent to-[#EDF5FF]/100">
         </div>
+        <div class="relative overflow-hidden w-full">
         <div class="absolute w-full lg:h-52 h-20
           bg-gradient-to-r from-transparent to-[#EDF5FF]/50">
         </div>
@@ -13,8 +14,10 @@
               data="Welcome.svg"
               class="w-auto lg:h-52 h-20"></object>
       </div>
-      <div class=" w-[90%] md:[80%] lg:w-[65%] mx-auto
-        flex flex-row items-center justify-between pt-24">
+      </div>
+      <div class="container w-[90%] md:[80%] lg:w-[75%]
+        flex flex-row items-center justify-between
+        mx-auto pt-10">
         <h2 class="text-3xl lg:text-6xl text-[#3D3D3D] font-semibold lg:font-bold text-left mb-4">
           We built a private cloud<br>
           that puts you in control,<br>
@@ -27,12 +30,11 @@
         </div>
       </div>
       <div
-        class="
+        class=" container
           w-[75%]
           flex flex-row items-center justify-between
           mx-auto spaces-x-4
-          pt-20
-        "
+          pt-8 pb-20"
       >
         <div
           class="
