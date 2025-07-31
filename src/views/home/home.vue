@@ -5,20 +5,19 @@
     <!-- Features Section -->
     <featuresSection />
     <!-- map Section -->
-    <section class="bg-[#EDF5FF] font-alexandria
-      flex flex-row items-center justify-between
-      pb-[90px] px-64">
-      <object
-        id="Icons"
-        aria-label="Icons SVG"
-        type="image/svg+xml"
-        data="dgsky-mapa.svg"
-        class="w-72 md:w-80 lg:w-[700px] h-auto z-30"
-      ></object>
+    <section class="bg-[#EDF5FF] pb-16">
+      <div class="container flex justify-between items-center gap-x-8 mx-auto w-[75%]">
+        <object
+          id="Icons"
+          aria-label="Icons SVG"
+          type="image/svg+xml"
+          data="dgsky-mapa.svg"
+          class="w-72 md:w-80 lg:w-[700px] h-auto z-30"
+          ></object>
       <div class="">
-  <h3 class="text-5xl text-left text-[#3D3D3D] font-bold mb-10">
-    Trusted by Thousands <br /> Worldwide
-  </h3>
+        <h2 class="text-5xl text-left text-[#3D3D3D] font-bold mb-10">
+          Trusted by Thousands <br /> Worldwide
+        </h2>
 
   <p class="text-md text-left text-[#797979] font-semibold">
     Create your account and start storing your files with total peace of mind. <br />
@@ -60,32 +59,193 @@
 </p>
   </div>
 </div>
+</div>
     </section>
     <!-- Users Section -->
-    <section class="container mx-auto py-16">
-      <div class="bg-purple-600 text-white p-12 rounded-lg text-center">
-      <h2 class="text-3xl font-bold mb-6"> Join thousands of users who trust our platform </h2>
-      <p class="text-lg mb-8">
-        Sign up and start storing your files securely.
-        Access them from anywhere and share with ease!
-      </p>
-      <a
-        href="#"
-        class="bg-white text-purple-600 px-8 py-3 rounded-full shadow hover:bg-gray-100"
-      >Get Started</a>
+    <section class="bg-[#EDF5FF] font-alexandria pb-20">
+      <div class="container flex justify-between items-end mx-auto w-[70%]">
+        <h3 class="text-5xl text-left text-[#3D3D3D] font-bold">
+          What Those Who Already<br /> Use It are Saying
+        </h3>
+  <!-- BOTONES a la derecha y abajo -->
+      <div class="flex flex-row items-end justify-end gap-4">
+        <button @click="prev" class="btn-nav">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path
+              d="M15 19l-7-7 7-7"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2" />
+          </svg>
+        </button>
+        <button @click="next" class="btn-nav">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path
+              d="M9 5l7 7-7 7"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2" />
+          </svg>
+        </button>
       </div>
-    </section>
-  </div>
+    </div>
+    <!-- Testimonial Cards -->
+    <div class="container mx-auto w-[70%] overflow-hidden">
+    <div id="testimonial-carrusel"
+      class="flex content-center
+        m-10 transition-transform duration-500 ease-in-out gap-40"
+      style="transform: translateX(0);">
+    <!-- Testimonial 01 -->
+      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I started using it for work,
+          and now I store everything here.
+          It just makes things easier."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+    <!-- Testimonial 02 -->
+    <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I started using it for work,
+          and now I store everything here.
+          It just makes things easier."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+    <!-- Testimonial 03 -->
+    <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I started using it for work,
+          and now I store everything here.
+          It just makes things easier."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+      <!-- Testimonial 04 -->
+      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I started using it for work,
+          and now I store everything here.
+          It just makes things easier."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+      <!-- Testimonial 04 -->
+      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I started using it for work,
+          and now I store everything here.
+          It just makes things easier."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+      <!-- Testimonial 04 -->
+      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I started using it for work,
+          and now I store everything here.
+          It just makes things easier."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+</div>
 </template>
 <script setup>
 import {
-  onMounted,
   ref,
-  onBeforeUnmount,
   defineAsyncComponent,
+  onMounted,
 } from 'vue';
-import gsap from 'gsap';
-import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+
+let currentIndex = 0;
+const visibleCards = 3;
+let carrusel = null;
+
+function updateCarrusel() {
+  if (!carrusel) return;
+
+  const card = carrusel.children[0];
+  const gap = 160;
+  const cardWidth = card.offsetWidth + gap;
+  const offset = currentIndex * cardWidth;
+  carrusel.style.transform = `translateX(-${offset}px)`;
+}
+
+function prev() {
+  if (!carrusel) return;
+
+  if (currentIndex > 0) {
+    currentIndex -= 1;
+    updateCarrusel();
+  } else {
+    console.log('No more previous cards');
+  }
+}
+
+function next() {
+  if (!carrusel) return;
+
+  if (currentIndex < carrusel.children.length - visibleCards) {
+    currentIndex += 1;
+    updateCarrusel();
+  } else {
+    console.log('No more next cards');
+  }
+}
+
+onMounted(() => {
+  carrusel = document.getElementById('testimonial-carrusel');
+});
 
 const heroSection = defineAsyncComponent(() => import('./hero.vue'));
 const featuresSection = defineAsyncComponent(() => import('./features.vue'));
@@ -110,6 +270,14 @@ function submit() {
 }
 </script>
 <style scoped>
+.btn-nav {
+  @apply w-10 h-10 rounded-full
+  border border-blue-500 text-blue-500 hover:bg-blue-100 transition
+  flex items-center justify-center;
+}
+.icon {
+  @apply w-4 h-4;
+}
 @keyframes sparkle {
   0% {
     opacity: 0;
