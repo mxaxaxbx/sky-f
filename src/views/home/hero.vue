@@ -1,22 +1,52 @@
 <template>
   <section class="bg-[#EDF5FF] font-alexandria py-16 px-8">
-    <div class="container mx-auto text-center">
-      <h2 class="text-5xl md:text-6xl lg:text-8xl text-[#0B77F3] font-bold mb-6 sm:leading-tight">
-        Store. Share.<br>Access from Anywhere
-      </h2>
+    <div class="container mx-auto text-center mt-8">
+      <h2 class="text-5xl md:text-6xl lg:text-8xl
+           text-[#0B77F3] font-bold mb-6 sm:leading-tight">
+  <span class="block animate-fadeInUp">Store. Share.</span>
+  <span class="block opacity-0 animate-fadeInUp" style="animation-delay: 0.3s;">
+    Access from Anywhere
+  </span>
+</h2>
       <p class="text-md md:text-md lg:text-lg font-semibold text-[#5E5E5E] mb-10">
-        Keep your ideas, memories, and projects safe and accessible <br />anytime, anywhere.
+        <span
+          class="block opacity-0 animate-fadeInUp"
+          style="animation-delay: 0.5s;">Keep your ideas, memories,
+        and projects safe and accessible</span>
+        <span
+          class="block opacity-0 animate-fadeInUp"
+          style="animation-delay: 0.57s;">anytime, anywhere.</span>
       </p>
-      <a
-        href="#storage-features"
-        class="bg-[#0B77F3] text-lg text-white font-semibold px-10 py-3 rounded-full mb-12
-          hover:bg-white hover:text-[#0B77F3] hover:shadow transition duration-300"
-      >
-        Get Started
-        <i class="fas fa-arrow-right pl-2"></i>
-      </a>
+<a
+  href="#storage-features"
+  class="group relative inline-block rounded-full border border-[#0B77F3] mb-6
+         bg-[#0B77F3] overflow-hidden transition-colors
+         duration-300 animate-pulse-fade-in opacity-0"
+  style="animation-delay: 1s;"
+>
+  <!-- Texto -->
+  <span
+    class="relative z-10 block pl-10 py-3 text-lg font-semibold
+    text-white transition-colors duration-300
+           group-hover:text-[#0A77F3]"
+  >
+    Get Started
+    <i class="fas fa-arrow-right pl-2 pr-8"></i>
+  </span>
+
+  <!-- Barrido blanco -->
+  <span
+    class="absolute inset-0 bg-white z-0 rounded-full transition-transform duration-300 ease-in-out
+           transform -translate-x-full group-hover:translate-x-0"
+  ></span>
+</a>
     </div>
-    <div class="relative w-full h-full flex items-center justify-center pt-24 lg:pt-32">
+    <div
+      class="relative w-full h-full
+        flex items-center justify-center
+        pt-24 lg:pt-32
+        opacity-0 animate-zoom-fade-in"
+        style="animation-delay: 0.65s;">
       <object
         id="Icons"
         aria-label="Icons SVG"
@@ -172,4 +202,5 @@ onMounted(() => {
   animateSVG('network', '#ffffff', 0.7, 0.3);
   animateSVG('Icons', '#71C4FF', 1, 0.8);
 });
+
 </script>
