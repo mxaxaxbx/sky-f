@@ -114,23 +114,40 @@
         </h3>
         <!-- Aqui va la nueva animacion -->
         <!-- Aqui va la nueva animacion -->
-        <div
-          ref="lockContainer"
-          class="w-64 h-64
-            relative flex items-center justify-center
-          ">
-          <!-- Base del candado -->
-          <object
-            id="Organice"
-            aria-label="Organice SVG"
-            type="image/svg+xml"
-            data="Organice.svg"
-            class="absolute z-50 left-1/2 top-1/2
-            -translate-x-1/2 -translate-y-1/2 w-full h-full
-            ">
-          </object>
-          <!-- Círculo izquierdo -->
-        </div>
+ <div class="w-64 h-64 relative flex" ref="organiceContainer">
+    <!-- Base -->
+    <img
+      src="Organice.svg"
+      alt="Organice"
+      class="absolute z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
+    />
+
+    <!-- Hotspots -->
+    <img
+      src="dgsky-organice1.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: 165px; top: 110px;"
+    />
+    <img
+      src="dgsky-organice2.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: 75px; top: 50px;"
+    />
+    <img
+      src="dgsky-organice3.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: 130px; top: 225px;"
+    />
+    <img
+      src="dgsky-organice4.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: -5px; top: 156px;"
+    />
+  </div>
           <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
             Keep your files organized with<br />folders and tags for easy access.
           </p>
@@ -227,63 +244,96 @@ import {
   ref,
   onBeforeUnmount,
   defineAsyncComponent,
+  nextTick,
 } from 'vue';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 
-// animacion planetas
+// 🎯 Clase adaptada directamente
+class MagneticCta {
+  constructor(element) {
+    this.element = element;
+
+    element.addEventListener('mousemove', (ev) => {
+      element.classList.add('is-active');
+      this.mousemoveFn(ev);
+    });
+
+    element.addEventListener('mouseleave', () => {
+      element.classList.remove('is-active');
+      this.mouseleaveFn();
+    });
+  }
+
+  mousemoveFn(ev) {
+    const rect = this.element.getBoundingClientRect();
+    const x = ev.clientX - rect.left - this.element.offsetWidth / 8;
+    const y = ev.clientY - rect.top - this.element.offsetHeight / 8;
+
+    const strength = 3;
+
+    gsap.to(this.element, {
+      x: x / strength,
+      y: y / strength,
+      ease: 'power3.out',
+      duration: 0.3,
+    });
+  }
+
+  mouseleaveFn() {
+    gsap.to(this.element, {
+      x: 0,
+      y: 0,
+      ease: 'power3.out',
+      duration: 0.5,
+    });
+  }
+}
+
 onMounted(() => {
-  const svgObject = document.getElementById('planetBase');
+  const hotspots = document.querySelectorAll('.js-hotspot');
 
-  svgObject.addEventListener('load', () => {
-    const svgDoc = svgObject.contentDocument;
-    const paths = svgDoc.querySelectorAll('circle');
+  hotspots.forEach((el) => {
+    const magneticCta = new MagneticCta(el);
+  });
+});
+// en pausa
+const organiceContainer = ref(null);
 
-    const step = 0.3;
-    const animations = [];
+onMounted(() => {
+  const container = organiceContainer.value;
 
-    paths.forEach((path, i) => {
-      // Empieza desde escala pequeña y opacidad completa
-      gsap.set(path, {
-        scale: 0.8,
-        opacity: 1,
-        transformOrigin: 'center center',
-      });
+  const layers = [
+    document.getElementById('Organice01'),
+    document.getElementById('Organice02'),
+    document.getElementById('Organice03'),
+    document.getElementById('Organice04'),
+  ];
 
-      const delay = i * step + Math.random() * 0.5;
+  const strength = [9, 12, 18, 20];
 
-      const tl = gsap.to(path, {
-        scale: 1.2,
-        stroke: 'rgba(255, 255, 255, 0.3)',
-        strokeWidth: 1,
-        filter: 'drop-shadow(0 0 3px rgba(0, 238, 255, 0.2))',
-        opacity: 1,
-        duration: 3,
-        delay,
-        repeat: -1,
-        ease: 'power1.out',
-      });
+  container.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - (rect.left + rect.width / 4);
+    const y = e.clientY - (rect.top + rect.height / 4);
 
-      animations.push({ path, tl });
-    });
-
-    // Hover (opcional)
-    svgObject.addEventListener('mouseenter', () => {
-      animations.forEach(({ path, tl }) => {
-        tl.pause();
-        gsap.to(path, {
-          scale: 1,
-          duration: 0.5,
-          stroke: '#0A77F3',
-          opacity: 1,
-          ease: 'power1.out',
-        });
+    layers.forEach((layer, i) => {
+      gsap.to(layer, {
+        x: x / strength[i],
+        y: y / strength[i],
+        duration: 0.4,
+        ease: 'power2.out',
       });
     });
+  });
 
-    svgObject.addEventListener('mouseleave', () => {
-      animations.forEach(({ tl }) => {
-        tl.play();
+  container.addEventListener('mouseleave', () => {
+    layers.forEach((layer) => {
+      gsap.to(layer, {
+        x: 0,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
       });
     });
   });
@@ -305,7 +355,7 @@ onMounted(() => {
   // Animaciones circulares base
   tlOrbit1 = gsap.to(orbit1.value, {
     rotate: 360,
-    duration: 12,
+    duration: 20,
     repeat: -1,
     ease: 'linear',
     opacity: 1,
@@ -314,7 +364,7 @@ onMounted(() => {
 
   tlOrbit2 = gsap.to(orbit2.value, {
     rotate: -360,
-    duration: 12,
+    duration: 25,
     repeat: -1,
     ease: 'linear',
     transformOrigin: '50% 50%',
@@ -322,7 +372,7 @@ onMounted(() => {
 
   tlOrbit3 = gsap.to(orbit3.value, {
     rotate: 360,
-    duration: 9,
+    duration: 30,
     repeat: -1,
     ease: 'linear',
     transformOrigin: '50% 50%',
@@ -330,9 +380,9 @@ onMounted(() => {
 
   // Guardamos funciones en variables
   onEnter1 = () => {
-    tlOrbit1.timeScale(0.2);
-    tlOrbit2.timeScale(0.2);
-    tlOrbit3.timeScale(0.2);
+    tlOrbit1.timeScale(2);
+    tlOrbit2.timeScale(2);
+    tlOrbit3.timeScale(2);
   };
 
   onLeave1 = () => {
@@ -348,63 +398,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   planetContainer.value.removeEventListener('mouseenter', onEnter1);
   planetContainer.value.removeEventListener('mouseleave', onLeave1);
-});
-
-// animacion candado
-onMounted(() => {
-  const svgObject = document.getElementById('lockbase');
-
-  svgObject.addEventListener('load', () => {
-    const svgDoc = svgObject.contentDocument;
-    const paths = svgDoc.querySelectorAll('circle');
-
-    const step = 0.3;
-    const animations = [];
-
-    paths.forEach((path, i) => { // eslint-disable-next-line no-param-reassign
-      // Empieza desde escala pequeña y opacidad completa
-      gsap.set(path, {
-        scale: 0.8,
-        opacity: 1,
-        transformOrigin: 'center center',
-      });
-
-      const delay = i * step + Math.random() * 0.5;
-
-      const tl = gsap.to(path, {
-        scale: 1.5,
-        stroke: 'rgba(255, 255, 255, 0.3)',
-        strokeWidth: 1,
-        filter: 'drop-shadow(0 0 3px rgba(0, 238, 255, 0.2))',
-        opacity: 1,
-        duration: 3,
-        delay,
-        repeat: -1,
-        ease: 'power1.out',
-      });
-
-      animations.push({ path, tl });
-    });
-
-    // Hover handlers en el <object> que contiene el SVG
-    svgObject.addEventListener('mouseenter', () => {
-      animations.forEach(({ path, tl }) => {
-        tl.pause();
-        gsap.to(path, {
-          scale: 0.9,
-          duration: 0.5,
-          stroke: '#0A77F3',
-          opacity: 1,
-          ease: 'power1.out',
-        });
-      });
-    });
-    svgObject.addEventListener('mouseleave', () => {
-      animations.forEach(({ tl }) => {
-        tl.play();
-      });
-    });
-  });
 });
 
 // animacion dial
