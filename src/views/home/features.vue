@@ -12,17 +12,20 @@
               aria-label="Welcome SVG"
               type="image/svg+xml"
               data="Welcome.svg"
-              class="w-auto lg:h-52 h-20"></object>
+              class="w-auto lg:h-52 h-20
+              animate-slide-in-left"></object>
       </div>
       </div>
       <div class="container w-[90%] md:[80%] lg:w-[75%]
         flex flex-row items-center justify-between
-        mx-auto pt-10">
-        <h2 class="text-3xl lg:text-6xl text-[#3D3D3D] font-semibold lg:font-bold text-left mb-4">
-          We built a private cloud<br>
-          that puts you in control,<br>
-          with a fast, intuitive, and<br>
-          hassle-free <span class="text-[#0B77F3]">Experience.</span></h2>
+        mx-auto pt-16 pb">
+        <h2 id="animated-heading"
+        class="text-3xl lg:text-6xl font-semibold
+        lg:font-bold text-left mb-4">
+        We built a private cloud
+        <br> that puts you in control,<br> with a fast, intuitive,<br> and hassle-free
+  <span class="text-[#0B77F3]">Experience.</span>
+</h2>
         <div id="wrapper2"
             class="opacity-50 hidden md:block"
             ref="wrapper2">
@@ -31,13 +34,14 @@
       </div>
       <div
         class=" container
-          w-[75%]
+          w-[65%]
           flex flex-row items-center justify-between
-          mx-auto spaces-x-4
-          pt-8 pb-20"
+          mx-auto spaces-x-2
+          pt-8 pb-20 px-12"
       >
         <div
           class="
+            animated-card
             flex flex-col items-center justify-between
             bg-[#ffffff]
             w-80 h-92
@@ -97,6 +101,7 @@
         </div>
         <div
           class="
+            animated-card
             flex flex-col items-center justify-between
             bg-[#ffffff]
             w-80 h-92
@@ -112,9 +117,7 @@
         >
           Organize Files
         </h3>
-        <!-- Aqui va la nueva animacion -->
-        <!-- Aqui va la nueva animacion -->
- <div class="w-64 h-64 relative flex" ref="organiceContainer">
+    <div class="w-64 h-64 relative flex" ref="organiceContainer">
     <!-- Base -->
     <img
       src="Organice.svg"
@@ -154,6 +157,7 @@
         </div>
         <div
           class="
+            animated-card
             flex flex-col items-center justify-between
             bg-[#ffffff]
             w-80 h-92
@@ -211,30 +215,6 @@
             Collaborate instantly with your<br />friends and colleagues.
           </p>
         </div>
-        <div
-          class="
-            flex flex-col items-center justify-between
-            bg-[#ffffff]
-            w-80 h-92
-            rounded-[56px]
-            pt-10 pb-10 gap-y-2
-          "
-        >
-        <h3
-          class="
-            text-[#0A77F3] text-3xl font-bold
-            mt-2
-          "
-        >
-          Secure Storage
-        </h3>
-        <!-- Aqui va la nueva animacion -->
-        <!-- Aqui va la nueva animacion -->
-        <!-- Aqui va la nueva animacion -->
-          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
-            Store your files securely with<br />end-to-end encryption.
-          </p>
-        </div>
       </div>
     </section>
 </template>
@@ -248,8 +228,80 @@ import {
 } from 'vue';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 
-// 🎯 Clase adaptada directamente
+gsap.registerPlugin(ScrollTrigger);
+
+onMounted(() => {
+  /* -------------------------
+     Slide-in-up para tarjetas (solo una vez)
+     ------------------------- */
+  const cards = Array.from(document.querySelectorAll('.animated-card'));
+  if (cards.length) {
+    cards.forEach((card, index) => {
+      gsap.from(card, {
+        y: 80,
+        opacity: 0,
+        duration: 1.2,
+        delay: index * 0.25,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 80%',
+          toggleActions: 'play none none none', // solo entra, no repite
+          once: true, // extra seguridad para que solo pase una vez
+        },
+      });
+    });
+  }
+
+  /* ------------------------------------------
+     Animación letra-por-letra reversible (heading)
+     ------------------------------------------ */
+  const heading = document.getElementById('animated-heading');
+  if (heading) {
+    const children = Array.from(heading.childNodes);
+    heading.innerHTML = '';
+
+    const animatedSpans = [];
+
+    children.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const chars = node.textContent.split('');
+        chars.forEach((char) => {
+          const safeChar = char === ' ' ? '\u00A0' : char;
+          const span = document.createElement('span');
+          span.className = 'inline-block text-current';
+          span.textContent = safeChar;
+          heading.appendChild(span);
+          animatedSpans.push(span);
+        });
+      } else {
+        heading.appendChild(node);
+      }
+    });
+
+    gsap.set(animatedSpans, { color: '#9DC9FA' });
+
+    gsap.to(animatedSpans, {
+      color: '#3d3d3d',
+      stagger: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: heading,
+        start: 'top 90%',
+        end: 'bottom 50%',
+        scrub: true,
+      },
+    });
+  }
+});
+
+onBeforeUnmount(() => {
+  ScrollTrigger.getAll().forEach((st) => st.kill());
+});
+
+// Clase adaptada directamente de organice
 class MagneticCta {
   constructor(element) {
     this.element = element;
@@ -536,22 +588,53 @@ onMounted(() => {
   });
 });
 
-onMounted(() => { // animacion welcome
+onMounted(() => { // animación welcome con aceleración inicial
   const svgObject = document.getElementById('Welcome');
 
-  svgObject.addEventListener('load', () => {
-    const svg = svgObject.contentDocument.querySelector('svg');
+  if (!svgObject) return;
 
+  const startAnimation = () => {
+    const svg = svgObject.contentDocument.querySelector('svg');
+    if (!svg) return;
+
+    // 🔹 Primera animación rápida (aceleración)
     gsap.fromTo(
       svg,
       { x: '0%' },
       {
-        x: '-100%',
-        duration: 120,
-        ease: 'linear',
-        repeat: -1,
+        x: '-10%',
+        duration: 1.5,
+        ease: 'power2.out',
+        onComplete: () => {
+          // 🔹 Luego animación infinita lenta
+          gsap.fromTo(
+            svg,
+            { x: '-10%' },
+            {
+              x: '-100%',
+              duration: 130,
+              ease: 'linear',
+              repeat: -1,
+            },
+          );
+        },
       },
     );
+  };
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        if (svgObject.contentDocument?.readyState === 'complete') {
+          startAnimation();
+        } else {
+          svgObject.addEventListener('load', startAnimation, { once: true });
+        }
+        obs.unobserve(svgObject);
+      }
+    });
   });
+
+  observer.observe(svgObject);
 });
 </script>
