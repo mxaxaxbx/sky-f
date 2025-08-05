@@ -13,6 +13,7 @@
     "gsap": "^3.13.0",
     "lodash-es": "^4.17.21",
     "moment": "^2.30.1",
+    "pixi.js": "^8.11.0",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.3",
