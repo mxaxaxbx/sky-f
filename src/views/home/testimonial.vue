@@ -1,11 +1,11 @@
 <template>
   <section class="bg-[#EDF5FF] font-alexandria pt-10 pb-16">
-      <div class="container flex justify-between items-end mx-auto w-[70%]">
-        <h3 class="text-5xl text-left text-[#3D3D3D] font-bold">
+      <div class="container flex justify-between items-end mx-auto w-[70%] pb-20">
+        <h3 class="testimonial-card text-5xl text-left text-[#3D3D3D] font-bold">
           What Those Who Already<br /> Use It are Saying
         </h3>
   <!-- BOTONES a la derecha y abajo -->
-      <div class="flex flex-row items-end justify-end gap-4">
+      <div class="testimonial-card flex flex-row items-end justify-end gap-4">
         <button @click="prev" class="btn-nav">
           <svg class="icon" viewBox="0 0 24 24">
             <path
@@ -37,12 +37,13 @@
         m-10 transition-transform duration-500 ease-in-out gap-40"
       style="transform: translateX(0);">
     <!-- Testimonial 01 -->
-      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+      <div class="testimonial-card
+        flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
         <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
         <p class="pl-2 pt-2 leading-tight">
-          "I started using it for work,
-          and now I store everything here.
-          It just makes things easier."</p>
+          "I used it once just to test,
+          and ended up moving all my stuff in.
+          It’s now my daily helper."</p>
         <div class="flex flex-row items-center mt-4">
         <img src="/img01.jpg" alt="User Avatar"
           class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
@@ -53,7 +54,8 @@
         </div>
       </div>
     <!-- Testimonial 02 -->
-    <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+    <div class="testimonial-card
+      flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
         <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
         <p class="pl-2 pt-2 leading-tight">
           "I started using it for work,
@@ -69,7 +71,25 @@
         </div>
       </div>
     <!-- Testimonial 03 -->
-    <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+    <div class="testimonial-card
+      flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
+        <p class="pl-2 pt-2 leading-tight">
+          "I used it once just to test,
+          and ended up moving all my stuff in.
+          It’s now my daily helper."</p>
+        <div class="flex flex-row items-center mt-4">
+        <img src="/img01.jpg" alt="User Avatar"
+          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
+        <div class="ml-4">
+        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
+        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
+        </div>
+        </div>
+      </div>
+      <!-- Testimonial 04 -->
+      <div class="testimonial-card
+        flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
         <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
         <p class="pl-2 pt-2 leading-tight">
           "I started using it for work,
@@ -84,13 +104,14 @@
         </div>
         </div>
       </div>
-      <!-- Testimonial 04 -->
-      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+      <!-- Testimonial 05 -->
+      <div class="testimonial-card
+        flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
         <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
         <p class="pl-2 pt-2 leading-tight">
-          "I started using it for work,
-          and now I store everything here.
-          It just makes things easier."</p>
+          "I used it once just to test,
+          and ended up moving all my stuff in.
+          It’s now my daily helper."</p>
         <div class="flex flex-row items-center mt-4">
         <img src="/img01.jpg" alt="User Avatar"
           class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
@@ -100,24 +121,9 @@
         </div>
         </div>
       </div>
-      <!-- Testimonial 04 -->
-      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
-        <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
-        <p class="pl-2 pt-2 leading-tight">
-          "I started using it for work,
-          and now I store everything here.
-          It just makes things easier."</p>
-        <div class="flex flex-row items-center mt-4">
-        <img src="/img01.jpg" alt="User Avatar"
-          class="flex inline-block w-12 h-12 rounded-full border-2 border-[#0A77F3]">
-        <div class="ml-4">
-        <h3 class="text-xl text-[#0A77F3] font-bold -mb-2">John Doe</h3>
-        <p class="text-lg text-[#797979] font-semibold -mt-2">Colombia</p>
-        </div>
-        </div>
-      </div>
-      <!-- Testimonial 04 -->
-      <div class="flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
+      <!-- Testimonial 06 -->
+      <div class="testimonial-card
+        flex-shrink-0 flex flex-col text-md text-[#3d3d3d] font-semibold w-80">
         <img src="/dgsky-comillas.svg" alt="comillas" class="w-10">
         <p class="pl-2 pt-2 leading-tight">
           "I started using it for work,
@@ -148,6 +154,22 @@ import {
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
+onMounted(() => {
+  gsap.utils.toArray('.testimonial-card').forEach((card, index) => {
+    gsap.from(card, {
+      scrollTrigger: {
+        trigger: card,
+        start: 'top 90%',
+        toggleActions: 'play none none none',
+      },
+      x: 100, // entra desde la derecha
+      opacity: 0,
+      duration: 1.2,
+      delay: index * 0.2, // efecto en cascada
+      ease: 'back.out(1.7)', // rebote suave al llegar
+    });
+  });
+});
 // aqui vamos bien
 let currentIndex = 0;
 const visibleCards = 3;
