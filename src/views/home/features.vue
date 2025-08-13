@@ -1,5 +1,5 @@
 <template>
-   <section class="bg-[#EDF5FF] font-alexandria py-2  pt-32">
+   <section class="bg-[#EDF5FF] font-alexandria py-2  pt-40 pb-8">
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
         <div class="absolute w-full lg:h-52 h-20
           bg-gradient-to-r from-transparent to-[#EDF5FF]/100">
@@ -20,11 +20,11 @@
         flex flex-row items-center justify-between
         mx-auto pt-16 pb">
         <h2 id="animated-heading"
-        class="text-3xl lg:text-6xl font-semibold
+        class="text-3xl lg:text-6xl font-bold lg:font-bold
         lg:font-bold text-left mb-4">
         We built a private cloud
         <br> that puts you in control,<br> with a fast, intuitive,<br> and hassle-free
-  <span class="text-[#0B77F3]">Experience.</span>
+  <span class="text-[#0B77F3] pl-2 lg:pl-0">Experience.</span>
 </h2>
         <div id="wrapper2"
             class="opacity-50 hidden md:block"
@@ -33,18 +33,19 @@
         </div>
       </div>
       <div
-        class=" container
-          w-[65%]
+        class="container w-full lg:w-[90%]
           flex flex-row items-center justify-between
-          mx-auto spaces-x-2
-          pt-8 pb-20 px-12"
+          mx-auto gap-8
+          pt-8 pb-20 px-6 lg:px-12
+          overflow-x-auto lg:overflow-x-visible
+          hide-scrollbar"
       >
         <div
           class="
             animated-card
             flex flex-col items-center justify-between
             bg-[#ffffff]
-            w-80 h-92
+            w-80 min-w-80 max-w-80 h-92
             rounded-[56px]
             pt-10 pb-10 gap-y-2
           "
@@ -104,7 +105,7 @@
             animated-card
             flex flex-col items-center justify-between
             bg-[#ffffff]
-            w-80 h-92
+            w-80 min-w-80 max-w-80 h-92
             rounded-[56px]
             pt-10 pb-10 gap-y-2
           "
@@ -160,7 +161,7 @@
             animated-card
             flex flex-col items-center justify-between
             bg-[#ffffff]
-            w-80 h-92
+            w-80 min-w-80 max-w-80 h-92
             rounded-[56px]
             pt-10 pb-10 gap-y-2
           "
@@ -213,6 +214,62 @@
         </div>
           <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
             Collaborate instantly with your<br />friends and colleagues.
+          </p>
+        </div>
+        <div
+          class="
+            animated-card
+            flex flex-col items-center justify-between
+            bg-[#ffffff]
+            w-80 min-w-80 max-w-80 h-92
+            rounded-[56px]
+            pt-10 pb-10 gap-y-2
+          "
+        >
+        <h3
+          class="
+            text-[#0A77F3] text-3xl font-bold
+            mt-2
+          "
+        >
+          Organize Files
+        </h3>
+    <div class="w-64 h-64 relative flex" ref="organiceContainer">
+    <!-- Base -->
+    <img
+      src="Organice.svg"
+      alt="Organice"
+      class="absolute z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
+    />
+
+    <!-- Hotspots -->
+    <img
+      src="dgsky-organice1.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: 165px; top: 110px;"
+    />
+    <img
+      src="dgsky-organice2.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: 75px; top: 50px;"
+    />
+    <img
+      src="dgsky-organice3.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: 130px; top: 225px;"
+    />
+    <img
+      src="dgsky-organice4.svg"
+      alt=""
+      class="js-hotspot absolute h-[20px] z-50"
+      style="left: -5px; top: 156px;"
+    />
+  </div>
+          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
+            Keep your files organized with<br />folders and tags for easy access.
           </p>
         </div>
       </div>
