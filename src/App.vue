@@ -32,7 +32,11 @@
       <router-view />
     </div>
     <!-- footer -->
-    <footer class="bg-[#0A77F3] text-white font-alexandria p-20">
+    <footer
+      id="footer"
+      class="bg-[#0A77F3]
+        text-white font-alexandria
+        p-20 overflow-hidden">
       <div class="container flex flex-row w-[75%] mx-auto">
         <!--div azul-->
         <div class="flex-1 flex flex-col pt-4">
@@ -87,7 +91,7 @@
             class="hover:text-white/100 hover:font-semibold">Transparency Report</a></li>
         <li><a
           href="#"
-            class="hover:text-white/100 hover:font-semibold">Copyright notice</a></li>
+            class="hover:text-white/100 hover:font-semibold">Copyright Notice</a></li>
         <li><a
         href="#"
           class="hover:text-white/100 hover:font-semibold">Submission</a></li>
@@ -100,8 +104,60 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, computed } from 'vue';
+import { defineAsyncComponent, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+onMounted((): void => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Estado inicial del fondo (cerrado)
+  gsap.set('#footer', { clipPath: 'inset(100% 0% 0% 0%)' });
+
+  // Línea de tiempo
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '#footer',
+      start: 'top 90%',
+      toggleActions: 'play none none reverse',
+    },
+  });
+
+  // 1) Despliegue del fondo
+  tl.to('#footer', {
+    clipPath: 'inset(0% 0% 0% 0%)',
+    duration: 1.2,
+    ease: 'power3.out',
+  });
+
+  // 2) Logo
+  tl.from('#footer img', {
+    y: 40,
+    opacity: 0,
+    duration: 0.4,
+    ease: 'power2.out',
+    delay: -0.09,
+  }); // empieza antes de que termine el fondo
+
+  // 3) Texto bajo el logo
+  tl.from('#footer .flex-1.flex.flex-col p', {
+    y: 20,
+    opacity: 0,
+    duration: 0.9,
+    ease: 'power2.out',
+    stagger: 0.04,
+  });
+
+  // 4) Mapa de sitio (tres columnas)
+  tl.from('#footer .mx-auto.pt-8 > div', {
+    y: 30,
+    opacity: 0,
+    duration: 0.9,
+    ease: 'power2.out',
+    stagger: 0.0,
+  }, '-=1.1');
+});
 
 const NavBar = defineAsyncComponent(() => import('./components/global/nav-bar.vue'));
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
