@@ -1,12 +1,12 @@
 <template>
-  <section class="bg-[#EDF5FF] pt-16 pb-24">
+  <section class="bg-[#EDF5FF] pt-16 pb-24 overflow-hidden">
       <div class="container flex justify-between items-center gap-x-8 mx-auto w-[75%]">
         <object
           id="Icons"
           aria-label="Icons SVG"
           type="image/svg+xml"
           data="dgsky-mapa.svg"
-          class="w-72 md:w-80 lg:w-[700px] h-auto z-30"
+          class="w-72 md:w-80 lg:w-[800px] h-auto z-30"
           ></object>
       <div class="">
         <h2 class="text-5xl text-left text-[#3D3D3D] font-bold mb-10">
