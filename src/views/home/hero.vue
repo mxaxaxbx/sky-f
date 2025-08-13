@@ -1,6 +1,6 @@
 <template>
   <section class="bg-[#EDF5FF] font-alexandria py-16 px-8">
-    <div class="container mx-auto text-center mt-8">
+    <div class="container mx-auto text-center  mt-0 lg:mt-8">
       <h2 class="text-5xl md:text-6xl lg:text-8xl
            text-[#0B77F3] font-bold mb-6 sm:leading-tight">
   <span class="block animate-fadeInUp">Store. Share.</span>
@@ -52,25 +52,25 @@
         aria-label="Icons SVG"
         type="image/svg+xml"
         data="iconos.svg"
-        class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-30"
+        class="absolute w-80 md:w-80 lg:w-[450px] h-auto z-30"
       ></object>
       <object
         id="network"
         aria-label="Network SVG"
         type="image/svg+xml"
         data="red.svg"
-        class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-20"
+        class="absolute w-80 md:w-80 lg:w-[450px] h-auto z-20"
       ></object>
       <object
         id="cloud"
         aria-label="Cloud SVG"
         type="image/svg+xml"
         data="nube.svg"
-        class="absolute w-72 md:w-80 lg:w-[450px] h-auto z-10"
+        class="absolute w-80 md:w-80 lg:w-[450px] h-auto z-10"
       ></object>
       <div
         id="wrapper"
-        class="translate-y-16 lg:translate-y-28 w-72 md:w-80 lg:w-[450px] h-10 z-0"
+        class="translate-y-16 lg:translate-y-20 pl-6 lg:pl-2 w-80 md:w-80 lg:w-[450px] h-12 z-0"
         ref="wrapper"
       >
         <canvas ref="canvas" class="center"></canvas>
