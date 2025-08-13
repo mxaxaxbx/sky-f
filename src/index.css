@@ -16,3 +16,15 @@
     font-weight: 400;
     font-style: normal;
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari y Opera */
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    /* IE y Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
