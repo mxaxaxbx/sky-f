@@ -32,83 +32,146 @@
       <router-view />
     </div>
     <!-- footer -->
-    <footer
-      id="footer"
-      class="bg-[#0A77F3]
-        text-white font-alexandria
-        p-20 overflow-hidden">
-      <div class="container flex flex-row w-[75%] mx-auto">
-        <!--div azul-->
-        <div class="flex-1 flex flex-col pt-4">
-          <img src="/dgsky-logo-white.svg" alt="sky logo" class="w-24 mb-4">
-          <p class="text-lg font-semibold">A digital experience from Digi Apps. </p>
-          <p class="text-md font-light mb-10">Simple. Safe. Always with you.</p>
-          <p clas="text-sm font-light">&copy; 2024 digi-storage. Alll rights reserved.</p>
+    <footer id="footer"
+      class="bg-[#0A77F3] text-white font-alexandria pt-8 px-6 pb-10 md:p-20 overflow-hidden">
+        <div class="container w-[100%] md:w-[75%] mx-auto
+        flex flex-col md:flex-row h-full md:h-auto">
+          <!--Logo-->
+          <div
+            class="flex-1 flex flex-col items-center text-center pt-8 md:pt-4
+              order-2 md:order-none md:items-start md:text-left gap-2">
+            <img src="/dgsky-logo-white.svg" alt="sky logo" class="w-24 mb-4">
+            <p class="text-md md:text-lg font-bold md:font-semibold">
+              A digital experience from Digi Apps.
+            </p>
+            <p class="text-md md:text-md font-light">Simple. Safe. Always with you.</p>
+            <p class="text-xs font-light mt-16">
+              &copy; 2024 digi-storage. All rights reserved.</p>
+          </div>
+        <div class="flex-1 pt-8 px-1 flex flex-col
+        md:flex-row md:gap-24 mb-20 md:mb-1 md:mx-auto">
+          <!--Products-->
+            <div class="flex-1 footer-col border-t border-b border-white/20 md:border-white/0">
+              <button class="w-full flex justify-between items-center text-left md:hidden"
+                @click="toggleFooter('products')">
+                <h3 class="text-lg my-4 font-bold">Products</h3>
+                <span class="text-xl font-bold">
+                  {{ openFooter.includes('products') ? '-' : '+' }}
+                </span>
+              </button>
+             <h3 class="hidden md:block text-md font-bold mb-4">Products</h3>
+
+            <ul class="overflow-hidden transition-all duration-300 ease-in-out
+                      space-y-4 text-white/70 text-sm pl-4 md:pl-1
+                      md:max-h-none md:opacity-100 md:overflow-visible md:transition-none"
+                :class="openFooter.includes('products')
+                  ? 'max-h-100 opacity-100'
+                  : 'max-h-0 opacity-0'">
+                  <li><a href="#" class="hover:text-white/100 hover:font-semibold">Sky</a></li>
+                  <li><a href="#" class="hover:text-white/100 hover:font-semibold">Fireweb</a></li>
+                  <li><a href="#" class="hover:text-white/100 hover:font-semibold">DigiCare</a></li>
+                  <br>
+                </ul>
+            </div>
+          <!-- Help -->
+          <div class="flex-1 footer-col border-b border-white/20 md:border-white/0">
+              <button class="w-full flex justify-between items-center text-left md:hidden"
+                @click="toggleFooter('help')">
+                <h3 class="text-lg my-4 font-bold">Help</h3>
+                <span class="text-xl font-bold">
+                  {{ openFooter.includes('help') ? '-' : '+' }}
+                </span>
+              </button>
+             <h3 class="hidden md:block text-md font-bold mb-4">Help</h3>
+
+            <ul class="overflow-hidden transition-all duration-300 ease-in-out
+                      space-y-4 text-white/70 text-sm pl-4 md:pl-1
+                      md:max-h-none md:opacity-100 md:overflow-visible md:transition-none"
+                :class="openFooter.includes('help')
+                  ? 'max-h-100 opacity-100'
+                  : 'max-h-0 opacity-0'">
+                  <li>
+                    <a href="#"
+                      class="hover:text-white/100 hover:font-semibold">Help Center
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      class="hover:text-white/100 hover:font-semibold">Contact Us
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      class="hover:text-white/100 hover:font-semibold">
+                      Vulnerability Reward Programme
+                    </a>
+                  </li>
+                  <br>
+                </ul>
+          </div>
+          <!-- Legal -->
+          <div class="flex-1 footer-col border-b border-white/20 md:border-white/0">
+              <button class="w-full flex justify-between items-center text-left md:hidden"
+                @click="toggleFooter('legal')">
+                <h3 class="text-lg my-4 font-bold">Legal</h3>
+                <span class="text-xl font-bold">
+                  {{ openFooter.includes('legal') ? '-' : '+' }}
+                </span>
+              </button>
+             <h3 class="hidden md:block text-md font-bold mb-4">Legal</h3>
+
+            <ul class="overflow-hidden transition-all duration-300 ease-in-out
+                      space-y-4 text-white/70 text-sm pl-4 md:pl-1
+                      md:max-h-none md:opacity-100 md:overflow-visible md:transition-none"
+                :class="openFooter.includes('legal')
+                  ? 'max-h-100 opacity-100'
+                  : 'max-h-0 opacity-0'">
+              <li>
+                <a href="#"
+                  class="hover:text-white/100 hover:font-semibold">Terms of Service</a></li>
+              <li>
+                <a href="#"
+                  class="hover:text-white/100 hover:font-semibold">Privacy Policy</a></li>
+              <li>
+                <a href="#"
+                  class="hover:text-white/100 hover:font-semibold">Transparency Report</a></li>
+              <li>
+                <a href="#"
+                  class="hover:text-white/100 hover:font-semibold">Copyright Notice</a></li>
+              <li>
+                <a href="#"
+                  class="hover:text-white/100 hover:font-semibold">Submission</a></li>
+            <br>
+            </ul>
+          </div>
         </div>
-        <!--div rojo-->
-        <div class="flex-1 mx-auto pt-8 px-4 flex flex-row gap-24">
-        <div class="flex-1">
-        <h3 class="text-md text-white font-bold mb-4">Products</h3>
-        <ul class="space-y-2 text-white/70 text-sm">
-          <li><a
-            href="#"
-            class="hover:text-white/100 hover:font-semibold">Sky</a></li>
-          <li><a
-            href="#"
-            class="hover:text-white/100 hover:font-semibold">Fireweb</a></li>
-          <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">DigiCare</a></li>
-        </ul>
-        </div>
-      <!-- Help -->
-    <div class="flex-1">
-        <h3 class="text-md text-white font-bold mb-4">Help</h3>
-        <ul class="space-y-2 text-white/70 text-sm">
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Help Center</a></li>
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Contact Us</a></li>
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Vulnerability Reward Programme</a></li>
-      </ul>
-    </div>
-    <!-- Legal -->
-    <div class="flex-1">
-        <h3 class="text-md text-white font-bold mb-4">Legal</h3>
-        <ul class="space-y-2 text-white/70 text-sm">
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Terms of Service</a></li>
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Privacy Policy</a></li>
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Transparency Report</a></li>
-        <li><a
-          href="#"
-            class="hover:text-white/100 hover:font-semibold">Copyright Notice</a></li>
-        <li><a
-        href="#"
-          class="hover:text-white/100 hover:font-semibold">Submission</a></li>
-      </ul>
-    </div>
-    </div>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, computed, onMounted } from 'vue';
+import {
+  defineAsyncComponent,
+  computed,
+  onMounted,
+  ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+const openFooter = ref<string[]>([]);
+
+function toggleFooter(item: string) {
+  if (openFooter.value.includes(item)) {
+    // si ya está abierto, lo quitamos
+    openFooter.value = openFooter.value.filter((i) => i !== item);
+  } else {
+    // si no está abierto, lo agregamos
+    openFooter.value.push(item);
+  }
+}
 onMounted((): void => {
   gsap.registerPlugin(ScrollTrigger);
 
@@ -150,7 +213,7 @@ onMounted((): void => {
   });
 
   // 4) Mapa de sitio (tres columnas)
-  tl.from('#footer .mx-auto.pt-8 > div', {
+  tl.from('#footer .footer-col .mx-auto.pt-8 > div', {
     y: 30,
     opacity: 0,
     duration: 0.9,
