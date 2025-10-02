@@ -110,7 +110,7 @@
         >
         <i class="fas fa-xmark"></i>
     </button>
-      <!-- 1️⃣ Icono de usuario -->
+      <!-- Icono de usuario -->
       <div v-if="isAuthenticated">
         <Dropdown :content="dropdownContent" :options="dropdownOptions"
                   :loading="loading" @action="handleAction" />
@@ -118,17 +118,17 @@
       <div v-else class="bg-[#0A77F3] mt-16 rounded-full
           w-20 h-20 flex justify-center items-center
           mx-auto text-white text-3xl">
-        <a :href="usersLink" aria-label="User Profile"><i class="fas fa-user"></i></a>
+        <a :href="usersLink" aria-label="User Profile"><i class="py-6 fas fa-user"></i></a>
       </div>
       <h1 class="text-xl text-[#3D3D3D] font-bold">Hi, Welcome to Sky!</h1>
 
-      <!-- 3️⃣ Botón Register -->
+      <!-- Botón Register -->
       <button class="border border-[#0A77F3] text-[#0A77F3] font-semibold
-          h-10 w-[70%] rounded-full mx-auto ">
+          h-10 py-2 w-[70%] rounded-full mx-auto ">
         Register
       </button>
 
-      <!-- 2️⃣ Menu links -->
+      <!-- Menu links -->
       <div
         class="flex flex-col bg-[#EDF5FF]
               text-left text-[#3D3D3D] rounded-3xl
