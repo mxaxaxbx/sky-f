@@ -16,7 +16,7 @@
               animate-slide-in-left"></object>
       </div>
       </div>
-      <div class="container w-[90%] md:[80%] lg:w-[75%]
+      <div class="container w-[95%] md:[80%] lg:w-[75%]
         flex flex-row items-center justify-between
         mx-auto pt-16 pb">
         <h2 id="animated-heading"
