@@ -1,83 +1,55 @@
-<template>
-  <div v-click-outside="closeOnClickOutside">
-    <button
-      @click="showMenu = !showMenu"
-      id="dropdownDefaultButton"
-      data-dropdown-toggle="dropdown"
-      class="
-        w-10 h-10
-        bg-gray-200
-        border border-gray-500
-        rounded-full
-        p-1
-      "
-      type="button"
-    >
-      <!-- initial of user -->
-      <span v-html="props.content"></span>
-    </button>
+<script setup lang="ts">
+import {
+  ref,
+  onUnmounted,
+  defineEmits,
+} from 'vue';
 
-    <!-- Dropdown user menu -->
-    <div
-      id="dropdown"
-      v-show="showMenu"
-      class="
-        border-2 border-gray-200
-        p-1
-        z-10
-        absolute
-        right-0
-        bg-white
-        divide-y divide-gray-100
-        rounded-lg shadow w-44
-      "
+const emit = defineEmits(['close']);
+
+const isOpen = ref(false);
+
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
+
+const close = () => {
+  isOpen.value = false;
+  emit('close');
+};
+
+// Cleanup on unmount
+onUnmounted(() => {
+  isOpen.value = false;
+});
+</script>
+
+<template>
+  <div class="relative inline-block" v-click-outside="close">
+    <!-- Trigger slot -->
+    <slot name="trigger" :isOpen="isOpen" :toggle="toggle" />
+
+    <!-- Dropdown content -->
+    <transition
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
     >
-      <ul
-        class="py-2 text-sm text-gray-700"
-        aria-labelledby="dropdownDefaultButton"
+      <div
+        v-if="isOpen"
+        class="
+          absolute
+          right-0
+          mt-2 w-80 max-w-[calc(100vw-2rem)] p-2
+          bg-gray-200
+          --border rounded shadow-xl z-50
+        "
       >
-        <li
-          v-for="option, k in props.options"
-          :key="k"
-          class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-          role="button"
-        >
-          <button
-            @click="emit('action', option.action); showMenu = false"
-            class="w-full"
-          >
-            {{ option.content }}
-          </button>
-        </li>
-      </ul>
-    </div>
+        <slot name="content" :close="close" />
+      </div>
+    </transition>
   </div>
 </template>
-
-<script setup lang="ts">
-import { defineProps, ref, defineEmits } from 'vue';
-
-const showMenu = ref(false);
-
-interface Options {
-  content: string;
-  action: string;
-}
-
-const emit = defineEmits(['action']);
-
-const props = defineProps<{
-  content: {
-    type: string;
-    required: true;
-  };
-  options: {
-    type: Options[];
-    required: true;
-  };
-}>();
-
-function closeOnClickOutside() {
-  showMenu.value = false;
-}
-</script>

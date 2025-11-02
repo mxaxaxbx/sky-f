@@ -11,8 +11,8 @@ import { useStore } from 'vuex';
 const store = useStore();
 
 onMounted(() => {
-  const isAuthenticated = store.getters['auth/isAuthenticated'];
-  if (!isAuthenticated) {
+  const isAuth = store.getters['auth/isAuth'];
+  if (!isAuth) {
     store.dispatch('auth/logout');
   }
 });
