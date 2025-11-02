@@ -54,12 +54,21 @@
 
     <!-- REGISTER + USER -->
     <div class="flex items-center gap-4 ml-auto mr-2 opacity-0 animate-showButtons">
-      <button
-        class="border border-[#0A77F3] text-lg text-[#0A77F3] font-semibold h-10 px-8
-               rounded-full hover:bg-[#0A77F3] hover:text-white transition-all"
+      <a
+        :href="usersLink"
+        class="
+          block
+          border border-[#0A77F3]
+          text-lg text-[#0A77F3] font-semibold
+          h-10
+          px-8
+          py-1
+          rounded-full
+          hover:bg-[#0A77F3] hover:text-white transition-all
+        "
       >
         Register
-      </button>
+      </a>
 
       <Dropdown
         v-if="isAuthenticated"
