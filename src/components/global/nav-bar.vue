@@ -4,7 +4,7 @@
     'h-14 bg-white py-2 flex items-center justify-between',
     'relative font-alexandria overflow-hidden',
     'transition-all duration-200 ease-in-out origin-center',
-    'hidden md:flex',
+    'hidden lg:flex',
     isSticky
       ? 'top-0 left-0 right-0 z-50 px-6 max-w-full rounded-none'
       : 'w-[55%] max-w-6xl mx-auto rounded-full',
@@ -61,8 +61,7 @@
           border border-[#0A77F3]
           text-lg text-[#0A77F3] font-semibold
           h-10
-          px-8
-          py-1
+          px-8 py-1
           rounded-full
           hover:bg-[#0A77F3] hover:text-white transition-all
         "
@@ -94,100 +93,137 @@
       </div>
     </div>
   </nav>
-  <!-- Navbar Mobile -->
+  <!-- Navbar Mobile & Tablet -->
 <nav class="fixed flex w-full items-center justify-between
-  px-6 h-16 bg-white md:hidden relative">
+  px-4 sm:px-6 h-16 bg-white lg:hidden relative z-50">
   <!-- LOGO izquierda -->
   <router-link :to="isAuthenticated ? '/app' : '/'" class="flex items-center">
-    <img src="dgsky-logo.svg" alt="logo" class="w-16 pt-2">
+    <img src="dgsky-logo.svg" alt="logo" class="w-16 sm:w-20 pt-2">
   </router-link>
 
   <!-- Botón hamburguesa derecha -->
   <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-    class="text-[#3D3D3D] mt-2 focus:outline-none">
-    <i class="fas fa-bars text-2xl"></i>
+    class="text-[#3D3D3D] mt-2 focus:outline-none hover:text-[#0A77F3] transition-colors"
+    :aria-label="isMobileMenuOpen ? 'Close menu' : 'Open menu'"
+    :aria-expanded="isMobileMenuOpen">
+    <i class="fas fa-bars text-2xl sm:text-3xl"></i>
   </button>
 
   <!-- Menú desplegable -->
   <transition name="slide-left">
     <div v-if="isMobileMenuOpen"
       class="menu-open fixed bg-white absolute top-0 text-center left-0 w-full h-[calc(100vh+1rem)]
-      shadow-lg flex flex-col p-4 gap-4 z-40 overflow-y-auto">
+      shadow-lg flex flex-col p-4 sm:p-6 gap-4 z-40 overflow-y-auto">
         <button
-          class="absolute top-6 right-6 text-3xl text-[#3D3D3D] font-bold"
+          class="absolute top-4 sm:top-6 right-4 sm:right-6
+            text-2xl sm:text-3xl text-[#3D3D3D] font-bold
+            hover:text-[#0A77F3] transition-colors focus:outline-none"
           @click="isMobileMenuOpen = false"
+          aria-label="Close menu"
         >
         <i class="fas fa-xmark"></i>
     </button>
       <!-- Icono de usuario -->
-      <div v-if="isAuthenticated">
+      <div v-if="isAuthenticated" class="mt-8 sm:mt-12">
         <Dropdown :content="dropdownContent" :options="dropdownOptions"
                   :loading="loading" @action="handleAction" />
       </div>
-      <div v-else class="bg-[#0A77F3] mt-16 rounded-full
-          w-20 h-20 flex justify-center items-center
-          mx-auto text-white text-3xl">
+      <div v-else class="bg-[#0A77F3] mt-12 sm:mt-16 rounded-full
+          w-20 h-20 sm:w-24 sm:h-24 flex justify-center items-center
+          mx-auto text-white text-3xl sm:text-4xl hover:bg-[#0a66d4] transition-colors">
         <a :href="usersLink" aria-label="User Profile"><i class="py-6 fas fa-user"></i></a>
       </div>
-      <h1 class="text-xl text-[#3D3D3D] font-bold">Hi, Welcome to Sky!</h1>
+      <h1 class="text-xl sm:text-2xl text-[#3D3D3D] font-bold mt-4">Hi, Welcome to Sky!</h1>
 
       <!-- Botón Register -->
-      <button class="border border-[#0A77F3] text-[#0A77F3] font-semibold
-          h-10 py-2 w-[70%] rounded-full mx-auto ">
+      <a :href="usersLink"
+        class="border border-[#0A77F3] text-[#0A77F3] font-semibold
+          h-10 py-2 w-[70%] sm:w-[60%] rounded-full mx-auto
+          flex items-center justify-center hover:bg-[#0A77F3]
+          hover:text-white transition-all mt-2 sm:mt-4">
         Register
-      </button>
+      </a>
 
       <!-- Menu links -->
       <div
         class="flex flex-col bg-[#EDF5FF]
               text-left text-[#3D3D3D] rounded-3xl
-              mx-auto mt-8 w-[94%]">
-        <a href="#features" class="border-b-4 py-4 pl-10 w-full border-white font-bold">
-          <i class="fa-solid fa-rectangle-list pr-4 text-xl"></i>Features</a>
-        <a href="#plans" class="border-b-4 py-4 pl-10 w-full border-white font-bold">
-          <i class="fa-solid fa-tags pr-4 text-xl"></i>Plans</a>
-        <a href="#services" class="py-4 pl-10 w-full font-bold">
-          <i class="fa-solid fa-suitcase pr-4 text-xl"></i>Services</a>
+              mx-auto mt-6 sm:mt-8 w-[94%] sm:w-[90%] max-w-md">
+        <a href="#features"
+          @click="isMobileMenuOpen = false"
+          class="border-b-4 py-4 pl-8 sm:pl-10 w-full border-white
+            font-bold hover:bg-[#d6e9ff] transition-colors hover:text-[#0A77F3]">
+          <i class="fa-solid fa-rectangle-list pr-4 text-lg sm:text-xl"></i>
+          Features</a>
+        <a href="#plans"
+          @click="isMobileMenuOpen = false"
+          class="border-b-4 py-4 pl-8 sm:pl-10 w-full border-white
+            font-bold hover:bg-[#d6e9ff] transition-colors hover:text-[#0A77F3]">
+          <i class="fa-solid fa-tags pr-4 text-lg sm:text-xl"></i>Plans</a>
+        <a href="#services"
+          @click="isMobileMenuOpen = false"
+          class="py-4 pl-8 sm:pl-10 w-full font-bold hover:bg-[#d6e9ff]
+            transition-colors hover:text-[#0A77F3]">
+          <i class="fa-solid fa-suitcase pr-4 text-lg sm:text-xl"></i>
+          Services</a>
       </div>
-      <div>
-      <p class="text-left text-gray-400 text-sm pl-8 pt-6 pb-2">Community</p>
+      <div class="w-[94%] sm:w-[90%] max-w-md mx-auto">
+      <p class="text-left text-gray-400 text-sm sm:text-base pl-4 sm:pl-8 pt-6 pb-2">Community</p>
       <div
         class="flex flex-col bg-[#EDF5FF]
               text-left text-[#3D3D3D] rounded-full
-              mx-auto mt-0 w-[94%]">
+              mx-auto mt-0 w-full">
         <a href="https://discord.com/invite/UsGXbTkJSE"
-          class="flex justify-between items-center font-bold py-4 pl-10 w-full"
-          target="_blank">
+          @click="isMobileMenuOpen = false"
+          class="flex justify-between items-center font-bold py-4
+            pl-8 sm:pl-10 w-full hover:bg-[#d6e9ff]
+            transition-colors hover:text-[#0A77F3]"
+          target="_blank"
+          rel="noopener noreferrer">
           <span>
-            <i class="fa-brands fa-discord pr-4 text-xl"></i>Discord
+            <i class="fa-brands fa-discord pr-4 text-lg sm:text-xl"></i>Discord
           </span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-sm mr-10"></i>
+          <i class="fa-solid fa-arrow-up-right-from-square text-sm mr-6 sm:mr-10"></i>
         </a>
       </div>
       </div>
-      <div>
-      <p class="text-left text-sm text-gray-400 pl-8 pt-6 pb-2">Support</p>
+      <div class="w-[94%] sm:w-[90%] max-w-md mx-auto">
+      <p class="text-left text-sm sm:text-base text-gray-400 pl-4 sm:pl-8 pt-6 pb-2">Support</p>
       <div
         class="flex flex-col bg-[#EDF5FF]
               text-left text-[#3D3D3D] rounded-full
-              mx-auto mt-0 w-[94%]">
+              mx-auto mt-0 w-full">
         <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
-          class="flex font-bold py-4 pl-10 w-full"
-          target="_blank">
-          <i class="fa-solid fa-envelope pr-4 text-xl"></i>support@digiapps.com.co</a>
+          @click="isMobileMenuOpen = false"
+          class="flex font-bold py-4 pl-8 sm:pl-10 w-full
+            hover:bg-[#d6e9ff] transition-colors hover:text-[#0A77F3]"
+          target="_blank"
+          rel="noopener noreferrer">
+          <i class="fa-solid fa-envelope pr-4 text-lg sm:text-xl"></i>
+          <span class="text-sm sm:text-base">support@digiapps.com.co</span>
+        </a>
         </div>
       </div>
       <div class="w-full text-gray-400
-        flex justify-center mb-4 items-center gap-4 mx-auto mt-auto">
+        flex flex-col sm:flex-row justify-center mb-4 items-center
+        gap-2 sm:gap-4 mx-auto mt-auto pb-4">
         <a
           href="https://www.digiapps.com.co/privacy-policy"
           target="_blank"
-          class="font-regular text-sm mt-4">Terms of Service</a>
-          <span class="mt-4">&bull;</span>
+          rel="noopener noreferrer"
+          @click="isMobileMenuOpen = false"
+          class="font-regular text-xs sm:text-sm mt-2 sm:mt-4
+            hover:text-gray-600 transition-colors">
+          Terms of Service</a>
+          <span class="hidden sm:inline mt-4">&bull;</span>
         <a
           href="https://www.digiapps.com.co/privacy-policy"
           target="_blank"
-          class="font-regular text-sm mt-4">Privacy Policy
+          rel="noopener noreferrer"
+          @click="isMobileMenuOpen = false"
+          class="font-regular text-xs sm:text-sm mt-2 sm:mt-4
+            hover:text-gray-600 transition-colors">
+          Privacy Policy
         </a>
       </div>
     </div>
@@ -224,8 +260,10 @@ watch(isMobileMenuOpen, (open) => {
 const isSticky = ref(false);
 const isRising = ref(false);
 
+let scrollHandler: (() => void) | null = null;
+
 onMounted(() => {
-  window.addEventListener('scroll', () => {
+  scrollHandler = () => {
     const { scrollY } = window;
 
     if (scrollY > 50 && !isSticky.value) {
@@ -241,7 +279,15 @@ onMounted(() => {
         isRising.value = false;
       }, 350); // vuelve al estado original más tarde
     }
-  });
+  };
+
+  window.addEventListener('scroll', scrollHandler);
+});
+
+onUnmounted(() => {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', scrollHandler);
+  }
 });
 
 // aqui
@@ -276,10 +322,6 @@ function handleAction(action: string) {
   if (action === 'logout') {
     store.dispatch('auth/logout');
   }
-}
-
-function toggleSidebar() {
-  store.commit('toggleSidebar');
 }
 
 </script>
