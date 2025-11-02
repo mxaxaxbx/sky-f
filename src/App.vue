@@ -24,7 +24,7 @@
     </div>
     <!-- content -->
     <div
-      class="pt-16"
+      class="pt-16 min-h-screen"
       :class="{
         'blocker': showSidebar,
       }"
