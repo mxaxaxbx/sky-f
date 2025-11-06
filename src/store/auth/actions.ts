@@ -8,8 +8,8 @@ import { AuthStateI, ProjectI } from './state';
 export const actions: ActionTree<AuthStateI, RootStateI> = {
   async confirmSession(context: ActionContext<AuthStateI, RootStateI>, payload: string) {
     if (!payload) {
-      const { VUE_APP_DIGI_USERS_F } = process.env;
-      window.location.href = `${VUE_APP_DIGI_USERS_F}/auth/login?app=storage`;
+      const { VUE_APP_DG_USERS_APP } = process.env;
+      window.location.href = `${VUE_APP_DG_USERS_APP}/auth/login?app=sky`;
       return;
     }
     context.commit('setToken', payload);
@@ -24,8 +24,8 @@ export const actions: ActionTree<AuthStateI, RootStateI> = {
   },
   async getUserPermissions(context: ActionContext<AuthStateI, RootStateI>) {
     if (context.state.projects.length === 0) {
-      const { VUE_APP_DIGI_USERS_F } = process.env;
-      window.location.href = `${VUE_APP_DIGI_USERS_F}/app/projects/add?app=care`;
+      const { VUE_APP_DG_USERS_APP } = process.env;
+      window.location.href = `${VUE_APP_DG_USERS_APP}/app/projects/add?app=care`;
       throw new Error('No projects found');
     }
     const { data } = await usersClient.get('/api/auth/userperms');
@@ -41,8 +41,8 @@ export const actions: ActionTree<AuthStateI, RootStateI> = {
     context.commit('setPermissions', '');
     context.commit('setProjects', '');
     context.commit('setProject', null);
-    const { VUE_APP_DIGI_USERS_F } = process.env;
-    window.location.href = `${VUE_APP_DIGI_USERS_F}/auth/login?app=storage`;
+    const { VUE_APP_DG_USERS_APP } = process.env;
+    window.location.href = `${VUE_APP_DG_USERS_APP}/auth/login?app=sky`;
   },
   async changeProject(
     context: ActionContext<AuthStateI, RootStateI>,

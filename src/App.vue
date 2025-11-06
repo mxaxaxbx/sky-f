@@ -46,7 +46,7 @@
             </p>
             <p class="text-md md:text-md font-light">Simple. Safe. Always with you.</p>
             <p class="text-xs font-light mt-16">
-              &copy; 2024 digi-storage. All rights reserved.</p>
+              &copy; 2024 sky. All rights reserved.</p>
           </div>
         <div class="flex-1 pt-8 px-1 flex flex-col
         md:flex-row md:gap-24 mb-20 md:mb-1 md:mx-auto">

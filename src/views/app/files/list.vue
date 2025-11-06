@@ -158,7 +158,7 @@ async function getData() {
     currentPage.value = Number(route.query.page) || 1;
     await store.dispatch('files/filter', find.value);
   } catch (err: any) {
-    const msg = err.response.data.error || 'Error al cargar los cursos';
+    const msg = err.response.data.error || 'Error al cargar los archivos';
     store.commit('notifications/addNotification', {
       message: msg,
       type: 'error',

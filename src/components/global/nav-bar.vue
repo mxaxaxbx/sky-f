@@ -150,7 +150,7 @@
                 hover:bg-gray-50 transition
               "
             >
-              Manage your digi Account
+              Manage your sky Account
             </a>
           </div>
 
@@ -403,9 +403,9 @@ const store = useStore();
 
 const loading = ref<boolean>(false);
 
-const { VUE_APP_DIGI_USERS_F } = process.env;
+const { VUE_APP_DG_USERS_APP } = process.env;
 
-const usersLink = ref(`${VUE_APP_DIGI_USERS_F}/auth/login?app=storage`);
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}/auth/login?app=sky`);
 
 const isAuth = computed(() => store.getters['auth/isAuthenticated']);
 const user = computed<UserI>(() => store.getters['auth/user']);
@@ -428,6 +428,10 @@ function handleAction(action: string) {
   if (action === 'logout') {
     store.dispatch('auth/logout');
   }
+}
+
+function logout() {
+  store.dispatch('auth/logout');
 }
 
 </script>

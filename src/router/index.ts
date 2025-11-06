@@ -79,15 +79,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // Set title
   if (to.meta.title) {
-    document.title = `${to.meta.title} - digi-storage`;
+    document.title = `${to.meta.title} - sky`;
   }
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
     if (!localStorage.getItem('token')) {
-      const { VUE_APP_DIGI_USERS_F } = process.env;
-      window.location.href = `${VUE_APP_DIGI_USERS_F}/auth/login?app=storage`;
+      const { VUE_APP_DG_USERS_APP } = process.env;
+      window.location.href = `${VUE_APP_DG_USERS_APP}/auth/login?app=sky`;
     } else {
       next();
     }

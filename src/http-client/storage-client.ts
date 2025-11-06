@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { camelToSnake } from '@/utils/index';
 import { decode } from '@/utils/custom-enc-dec';
 
-const DG_STORAGE = process.env.VUE_APP_URL_DG_STORAGE;
+const DG_STORAGE = process.env.VUE_APP_DG_SKY_SVC;
 
 const baseHttpClient = axios.create({
   baseURL: DG_STORAGE,
@@ -20,8 +20,8 @@ function customErrorHandler(error: any) {
 
   switch (error.response.status) {
     case 401: {
-      const { VUE_APP_DIGI_USERS_F } = process.env;
-      window.location.href = `${VUE_APP_DIGI_USERS_F}/auth/login?app=edu`;
+      const { VUE_APP_DG_USERS_APP } = process.env;
+      window.location.href = `${VUE_APP_DG_USERS_APP}/auth/login?app=sky`;
       break;
     }
     case 403:

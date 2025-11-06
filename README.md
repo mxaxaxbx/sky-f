@@ -1,4 +1,4 @@
-# digi-storage
+# sky
 
 ## Project setup
 ```
