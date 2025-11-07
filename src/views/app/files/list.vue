@@ -6,22 +6,38 @@
       <!-- <h2 class="font-bold"> Lista de docentes </h2> -->
       <div class="border-t border-gray-400 my-2 mb-5"></div>
       <!-- search box -->
-      <div class="flex justify-between items-center mb-5">
-        <label for="search" class="text-gray-500"></label>
-        <input
-          v-model="find.query"
-          @keyup="search"
-          type="text"
-          class="w-full border border-gray-200 rounded-lg p-2"
-          placeholder="Buscar por título o descripción"
-        />
-        <button
-          @click="getData"
-          class="btn btn-primary border border-gray-200 rounded-lg h-10 p-2"
-        >
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
+      <div class="flex items-center mb-5 relative w-full">
+    <label for="search" class="text-[#a3a3a3] hidden"></label>
+
+    <!-- Contenedor relativo -->
+    <div class="relative w-full">
+      <!-- Input -->
+      <input
+        v-model="find.query"
+        @keyup="search"
+        type="text"
+        placeholder="Search everything"
+        class="
+          w-full
+          border border-[#0B77F3]/50
+          rounded-full font-light
+          pl-12 pr-4 p-2
+          hover:border-[#0A77F3]
+          focus:ring-1 focus:ring-[#0A77F3]
+          focus:outline-none
+          transition-all duration-300
+        "
+      />
+
+      <!-- Ícono dentro del input -->
+      <img
+        src="/icon/icon-search.svg"
+        alt="Search Icon"
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
+      />
+    </div>
+  </div>
+
       <!-- loading -->
       <div v-if="loading" class="flex justify-center items-center">
         <i class="fas fa-spinner fa-spin text-2xl"></i>
