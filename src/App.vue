@@ -13,7 +13,7 @@
       v-click-outside="clickOutside"
       class="
         w-full fixed
-        z-40
+        z-50
         -mt-2
         mb-8
       "
@@ -24,7 +24,7 @@
     </div>
     <!-- content -->
     <div
-      class="pt-16 min-h-screen"
+      class="pt-14 min-h-screen z-40 font-alexandria"
       :class="{
         'blocker': showSidebar,
       }"
@@ -248,6 +248,6 @@ function toggleSidebar() {
   width: 100%;
   height: 100%;
   /* background-color: rgba(0, 0, 0, 0.9); /* Change the alpha value for darkness */
-  z-index: 20; /* Ensure it's above the sidebar */
+  /* z-index: 20; Ensure it's above the sidebar */
 }
 </style>
