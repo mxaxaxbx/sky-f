@@ -43,10 +43,13 @@ onUnmounted(() => {
         class="
           absolute
           right-0
-          mt-2 w-80 max-w-[calc(100vw-2rem)] p-2
-          bg-gray-200
-          --border rounded shadow-xl z-50
-        "
+          bg-[#ffffff]
+          w-80
+          mt-2 pt-8 pb-4
+          border-[0.5px] border-[#9DC9FA]
+          rounded-lg
+          shadow-lg z-50
+          overflow-hidden"
       >
         <slot name="content" :close="close" />
       </div>
