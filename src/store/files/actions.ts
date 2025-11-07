@@ -55,15 +55,12 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
-    const { data } = await storageClient.get(
-      `/api/storage/getfile/${payload.id}`,
-      { responseType: 'blob' },
-    );
-    const url = window.URL.createObjectURL(new Blob([data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', payload.name);
-    document.body.appendChild(link);
-    link.click();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
+    }
+    const DG_STORAGE = process.env.VUE_APP_DG_SKY_SVC;
+    const link = `${DG_STORAGE}/api/storage/getfile/${payload.id}?token=${token}`;
+    window.open(link, '_blank');
   },
 };
