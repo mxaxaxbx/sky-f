@@ -30,6 +30,36 @@
           ">
     </router-link>
     <!-- Centro -->
+     <!-- search box -->
+     <div class="absolute left-1/2 -translate-x-1/2 flex items-center w-[600px] mt-2 h-16">
+        <label for="search" class="text-[#a3a3a3] hidden"></label>
+
+        <!-- Contenedor relativo -->
+        <div class="relative w-full">
+          <!-- Input -->
+          <input
+            type="text"
+            placeholder="Search everything"
+            class="
+              w-full
+              border border-[#0B77F3]/50
+              rounded-full font-light
+              pl-12 pr-4 py-1
+              hover:border-[#0A77F3]
+              focus:ring-1 focus:ring-[#0A77F3]
+              focus:outline-none
+              transition-all duration-300
+            "
+          />
+
+          <!-- Ícono dentro del input -->
+          <img
+            src="/icon/icon-search.svg"
+            alt="Search Icon"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
+          />
+        </div>
+      </div>
     <div
       v-if="!isAuth"
       class="absolute left-1/2 -translate-x-1/2 flex items-center">

@@ -7,36 +7,36 @@
       <div class="border-t border-gray-400 my-2 mb-5"></div>
       <!-- search box -->
       <div class="flex items-center mb-5 relative w-full">
-    <label for="search" class="text-[#a3a3a3] hidden"></label>
+        <label for="search" class="text-[#a3a3a3] hidden"></label>
 
-    <!-- Contenedor relativo -->
-    <div class="relative w-full">
-      <!-- Input -->
-      <input
-        v-model="find.query"
-        @keyup="search"
-        type="text"
-        placeholder="Search everything"
-        class="
-          w-full
-          border border-[#0B77F3]/50
-          rounded-full font-light
-          pl-12 pr-4 p-2
-          hover:border-[#0A77F3]
-          focus:ring-1 focus:ring-[#0A77F3]
-          focus:outline-none
-          transition-all duration-300
-        "
-      />
+        <!-- Contenedor relativo -->
+        <div class="relative w-full">
+          <!-- Input -->
+          <input
+            v-model="find.query"
+            @keyup="search"
+            type="text"
+            placeholder="Search everything"
+            class="
+              w-full
+              border border-[#0B77F3]/50
+              rounded-full font-light
+              pl-12 pr-4 p-2
+              hover:border-[#0A77F3]
+              focus:ring-1 focus:ring-[#0A77F3]
+              focus:outline-none
+              transition-all duration-300
+            "
+          />
 
-      <!-- Ícono dentro del input -->
-      <img
-        src="/icon/icon-search.svg"
-        alt="Search Icon"
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
-      />
-    </div>
-  </div>
+          <!-- Ícono dentro del input -->
+          <img
+            src="/icon/icon-search.svg"
+            alt="Search Icon"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
+          />
+        </div>
+      </div>
 
       <!-- loading -->
       <div v-if="loading" class="flex justify-center items-center">
@@ -47,36 +47,50 @@
         <p class="text-gray-500">No hay resultados</p>
       </div>
       <!-- results -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div
+        class="
+          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6
+          text-[#3d3d3d]
+          ">
         <!-- results -->
         <button
           v-for="file in results.data"
           :key="file.id"
           @click="downloadFile(file)"
-          class="border border-gray-200 rounded-lg p-4"
+          class="border border-[#7DBAFF] rounded-lg p-4
+            hover:bg-[#E9F3FF] transition-colors duration-300"
         >
           <div class="flex items center justify-between">
-            <div class="flex items-center space-x-2">
+            <div
+              class="
+                flex items-center
+                space-x-2
+                font-regular
+                ">
               <!-- icons -->
               <i
                 v-if="file.contentType === 'application/pdf'"
-                class="fas fa-file-pdf text-red-500 text-2xl"
+                class="fas fa-file-pdf"
               ></i>
               <i
                 v-else-if="file.contentType === 'application/msword'"
-                class="fas fa-file-word text-blue-500 text-2xl"
+                class="fas fa-file-word"
               ></i>
-              <i
+              <img
                 v-else-if="file.contentType === 'image/png'"
-                class="fas fa-file-image text-green-500 text-2xl"
-              ></i>
-              <i
+                src="/icon/icon-png.svg"
+                alt="image file icon"
+                class="w-8"
+              />
+              <img
                 v-else-if="file.contentType === 'image/jpeg'"
-                class="fas fa-file-image text-green-500 text-2xl"
-              ></i>
+                src="/icon/icon-img.svg"
+                alt="image file icon"
+                class="w-8"
+              />
               <i
                 v-else-if="file.contentType === 'image/jpg'"
-                class="fas fa-file-image text-green-500 text-2xl"
+                class="fas fa-file-image text-green-500 text-xl"
               ></i>
               <i
                 v-else-if="file.contentType === 'video/mp4'"
@@ -97,7 +111,7 @@
                 v-if="file.loading"
                 class="fas fa-spinner fa-spin text-2xl text-gray-500"
               ></i>
-              <h3 class="font-bold text-lg">{{ file.name }}</h3>
+              <h3 class="font-semibold text-md">{{ file.name }}</h3>
             </div>
           </div>
         </button>
