@@ -4,8 +4,6 @@
     <heroSection />
     <!-- Features Section -->
     <featuresSection />
-    <!-- Users testimonial -->
-    <testimonialSection />
   <!-- map Section -->
     <mapSection />
 </div>

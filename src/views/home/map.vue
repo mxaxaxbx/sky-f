@@ -38,12 +38,15 @@
               placeholder="Enter your email"
               class="w-full font-semibold text-[#0A77F3] bg-transparent px-4 md:px-6 py-1 md:py-2
                      focus:outline-none placeholder-[#71C4FF]
-                     placeholder:text-lg placeholder:font-normal"
+                     placeholder:text-lg placeholder:font-light"
             />
             <button
               @click="handleSubmit"
-              class="bg-[#0A77F3] text-lg text-white font-semibold px-8 py-2 md:py-3 rounded-full"
-            >
+              class="
+                bg-[#0A77F3]
+                text-lg text-white font-semibold
+                px-8 py-2 md:py-3 rounded-full
+              ">
               Submit
             </button>
           </div>

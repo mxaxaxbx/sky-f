@@ -2,6 +2,7 @@
   <nav :class="[
     'relative flex items-center justify-between',
     'bg-white',
+    'font-alexandria',
     'w-full h-16',
     'py-2 px-8',
     'border-b border-[#9DC9FA]',
@@ -31,7 +32,9 @@
     </router-link>
     <!-- Centro -->
      <!-- search box -->
-     <div class="absolute left-1/2 -translate-x-1/2 flex items-center w-[600px] mt-2 h-16">
+     <div
+      v-if="isAuth"
+      class="absolute left-1/2 -translate-x-1/2 flex items-center w-[600px] mt-2 h-16">
         <label for="search" class="text-[#a3a3a3] hidden"></label>
 
         <!-- Contenedor relativo -->
@@ -95,20 +98,25 @@
     </div>
 
     <!-- REGISTER + USER -->
-    <div class="flex items-center gap-4 ml-auto mr-2 opacity-0 animate-showButtons">
+    <div class="flex items-center gap-4 ml-auto mr-[-16PX] opacity-0 animate-showButtons">
       <a
         v-if="!isAuth"
         :href="usersLink"
         class="
+          flex items-center justify-center
           block
           border border-[#0A77F3]
-          text-lg text-[#0A77F3] font-semibold
-          h-10
-          px-8 py-1
+          text-sm text-[#0A77F3] font-regular
+          h-8
+          px-6 py-4
           rounded-full
-          hover:bg-[#0A77F3] hover:text-white transition-all
-        ">
-        Register
+          hover:ring-4 hover:ring-[#0A77F3]/50
+          transition-all duration-300 ease-in-out
+          ">
+        Sign In
+        <img src="/icon/icon-signIn.svg"
+                  alt="icon"
+                  class="ml-2 w-[20px]"/>
       </a>
 
       <Dropdown v-if="isAuth">
@@ -316,12 +324,6 @@
             </div>
           </template>
         </Dropdown>
-      <div v-else>
-        <a :href="`${usersLink}/auth/login?app=care`" aria-label="User Profile">
-          <i class="fas fa-user" aria-hidden="true"></i>
-          <span class="sr-only">User Profile</span>
-        </a>
-      </div>
     </div>
   </nav>
   <!-- Navbar Mobile & Tablet -->
@@ -381,8 +383,11 @@
           h-10 py-2 w-[70%] sm:w-[60%] rounded-full mx-auto
           flex items-center justify-center hover:bg-[#0A77F3]
           hover:text-white transition-all mt-2 sm:mt-4">
-          Register
-        </a>
+          Sign In
+        <img src="/icon/icon-signIn.svg"
+                  alt="icon"
+                  class="ml-2 w-[20px]"/>
+      </a>
 
         <!-- Menu links -->
         <div class="flex flex-col bg-[#EDF5FF]
@@ -620,28 +625,6 @@ function logout() {
 }
 
 /* clase base para cada link */
-.nav-link {
-  position: relative;
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%) scale(0.3);
-  width: 120%;
-  height: 300%;
-  background: radial-gradient(circle, rgba(157, 201, 250, 1), white 70%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.nav-link:hover::after {
-  top: 90%;
-  /* se acerca pero no toca el texto */
-  transform: translateX(-50%) scale(1);
-  opacity: 1;
-}
 
 .nav-link:hover {
   color: #0A77F3;

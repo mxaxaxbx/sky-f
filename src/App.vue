@@ -68,7 +68,11 @@
                   ? 'max-h-100 opacity-100'
                   : 'max-h-0 opacity-0'">
                   <li><a href="#" class="hover:text-white/100 hover:font-semibold">Sky</a></li>
-                  <li><a href="#" class="hover:text-white/100 hover:font-semibold">Fireweb</a></li>
+                  <li>
+                    <a
+                      href="https://fireweb.digiapps.com.co/"
+                      target="_blank"
+                      class="hover:text-white/100 hover:font-semibold">Fireweb</a></li>
                   <li><a href="#" class="hover:text-white/100 hover:font-semibold">DigiCare</a></li>
                   <br>
                 </ul>
@@ -198,9 +202,9 @@ onMounted((): void => {
   tl.from('#footer img', {
     y: 40,
     opacity: 0,
-    duration: 0.4,
+    duration: 0.5,
     ease: 'power2.out',
-    delay: -0.09,
+    delay: 0.0,
   }); // empieza antes de que termine el fondo
 
   // 3) Texto bajo el logo
@@ -218,7 +222,7 @@ onMounted((): void => {
     opacity: 0,
     duration: 0.9,
     ease: 'power2.out',
-    stagger: 0.0,
+    stagger: 0.1,
   }, '-=1.1');
 });
 
