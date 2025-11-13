@@ -18,9 +18,9 @@
       </div>
       <div class="container w-[95%] md:[80%] lg:w-[70%]
         flex flex-row items-center justify-between
-        mx-auto pt-16 pb">
+        mx-auto lg:pt-16 pt-12 pb">
         <h2 id="animated-heading"
-        class="text-3xl lg:text-5xl font-bold lg:font-bold
+        class="text-2xl lg:text-5xl font-bold lg:font-bold
         lg:font-bold text-left mb-4">
         We built a private cloud
         <br> that puts you in control,<br> with a fast, intuitive,<br> and hassle-free

@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-[#EDF5FF] pt-16 pb-24 overflow-hidden">
+  <section class="bg-[#EDF5FF] pt-0 lg:pt-16 pb-24 overflow-hidden">
     <div class="container flex flex-col md:flex-row
     justify-between items-center gap-10 md:gap-20 mx-auto w-[90%] md:w-[75%]">
       <!-- Mapa -->
@@ -28,7 +28,7 @@
           <!-- FORMULARIO -->
           <div
             ref="emailWrapper"
-            class="flex items-center rounded-full border border-[#0A77F3]
+            class="flex items-center mt-4 rounded-full border border-[#0A77F3]
                    transition-colors duration-300 focus-within:bg-white bg-transparent"
           >
             <label for="email-input" class="sr-only">Email</label>
@@ -36,16 +36,20 @@
               id="email-input"
               type="email"
               placeholder="Enter your email"
-              class="w-full font-semibold text-[#0A77F3] bg-transparent px-4 md:px-6 py-1 md:py-2
-                     focus:outline-none placeholder-[#71C4FF]
-                     placeholder:text-lg placeholder:font-light"
+              class="
+                w-full
+                bg-transparent
+                font-semibold text-[#0A77F3]
+                px-4 md:px-6 py-1 md:py-2
+                focus:outline-none placeholder-[#71C4FF]
+                placeholder:text-md placeholder:font-light"
             />
             <button
               @click="handleSubmit"
               class="
                 bg-[#0A77F3]
-                text-lg text-white font-semibold
-                px-8 py-2 md:py-3 rounded-full
+                lg:text-lg text-sm text-white font-semibold
+                lg:px-8 px-4 py-2 md:py-3 rounded-full
               ">
               Submit
             </button>
