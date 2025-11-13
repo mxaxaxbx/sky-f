@@ -1,17 +1,14 @@
 <template>
   <div>
     <!-- list -->
-    <div class="px-3 py-5 bg-white">
+    <div class="px-0 sm:px-3 py-2 sm:py-5 w-full">
+      <h1 class="text-ld font-semibold mb-4 ml-2 text-[#3d3d3d]">Could Drive</h1>
       <!-- title -->
-      <!-- <h2 class="font-bold"> Lista de docentes </h2> -->
-      <div class="border-t border-gray-400 my-2 mb-5"></div>
-      <!-- search box -->
+      <!-- search box
       <div class="flex items-center mb-5 relative w-full">
         <label for="search" class="text-[#a3a3a3] hidden"></label>
 
-        <!-- Contenedor relativo -->
         <div class="relative w-full">
-          <!-- Input -->
           <input
             v-model="find.query"
             @keyup="search"
@@ -29,14 +26,13 @@
             "
           />
 
-          <!-- Ícono dentro del input -->
           <img
             src="/icon/icon-search.svg"
             alt="Search Icon"
             class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
           />
         </div>
-      </div>
+      </div> -->
 
       <!-- loading -->
       <div v-if="loading" class="flex justify-center items-center">
@@ -49,7 +45,8 @@
       <!-- results -->
       <div
         class="
-          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6
+          grid grid-cols-1
+          md:grid-cols-2 lg:grid-cols-5 gap-4
           text-[#3d3d3d]
           ">
         <!-- results -->
@@ -57,7 +54,7 @@
           v-for="file in results.data"
           :key="file.id"
           @click="downloadFile(file)"
-          class="border border-[#7DBAFF] rounded-lg p-4
+          class="border border-[#7DBAFF] py-2 rounded-lg p-4
             hover:bg-[#E9F3FF] transition-colors duration-300"
         >
           <div class="flex items center justify-between">
@@ -65,7 +62,9 @@
               class="
                 flex items-center
                 space-x-2
+                text-xs
                 font-regular
+                w-80
                 ">
               <!-- icons -->
               <i
@@ -80,13 +79,13 @@
                 v-else-if="file.contentType === 'image/png'"
                 src="/icon/icon-png.svg"
                 alt="image file icon"
-                class="w-8"
+                class="w-6"
               />
               <img
                 v-else-if="file.contentType === 'image/jpeg'"
                 src="/icon/icon-img.svg"
                 alt="image file icon"
-                class="w-8"
+                class="w-6"
               />
               <i
                 v-else-if="file.contentType === 'image/jpg'"
@@ -157,7 +156,6 @@
 <script setup lang="ts">
 import {
   ref,
-  onMounted,
   computed,
   watch,
 } from 'vue';
@@ -181,22 +179,6 @@ const find = ref<PaginationI>({
 });
 const currentPage = ref(1);
 const debounceTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
-
-async function getData() {
-  loading.value = true;
-  try {
-    currentPage.value = Number(route.query.page) || 1;
-    await store.dispatch('files/filter', find.value);
-  } catch (err: any) {
-    const msg = err.response.data.error || 'Error al cargar los archivos';
-    store.commit('notifications/addNotification', {
-      message: msg,
-      type: 'error',
-    });
-  } finally {
-    loading.value = false;
-  }
-}
 
 function getPaginatedLink(action: string, page?: number) {
   const query = route.query.query || '';
@@ -246,17 +228,5 @@ async function downloadFile(file: FileI) {
     file.loading = false;
   }
 }
-
-onMounted(() => {
-  find.value.page = Math.max(route.query.page ? Number(route.query.page) : 1, 1);
-  find.value.query = route.query.query ? String(route.query.query) : '';
-  getData();
-});
-
-watch(route, () => {
-  find.value.page = Math.max(route.query.page ? Number(route.query.page) : 1, 1);
-  find.value.query = route.query.query ? String(route.query.query) : '';
-  getData();
-});
 
 </script>
