@@ -24,7 +24,11 @@
     </div>
     <!-- content -->
     <div
-      class="pt-14 min-h-screen z-40 font-alexandria"
+      class="
+        min-h-[96vh 6rem]
+        z-40
+        font-alexandria
+      "
       :class="{
         'blocker': showSidebar,
       }"
@@ -33,6 +37,7 @@
     </div>
     <!-- footer -->
     <footer id="footer"
+      v-if="isAuth"
       class="bg-[#0A77F3] text-white font-alexandria pt-8 px-6 pb-10 md:p-20 overflow-hidden">
         <div class="container w-[100%] md:w-[75%] mx-auto
         flex flex-col md:flex-row h-full md:h-auto">
