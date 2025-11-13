@@ -328,10 +328,10 @@
   </nav>
   <!-- Navbar Mobile & Tablet -->
   <nav class="fixed flex w-full items-center justify-between
-  px-4 sm:px-6 h-16 bg-white lg:hidden relative z-50">
+  px-4 sm:px-6 h-16 bg-white lg:hidden relative shadow-sm z-50">
     <!-- LOGO izquierda -->
     <router-link :to="isAuth ? '/app' : '/'" class="flex items-center">
-      <img src="dgsky-logo.svg" alt="logo" class="w-16 sm:w-20 pt-2">
+      <img src="/icon/icon-logoSky.svg" alt="logo" class="w-12 pt-2">
     </router-link>
 
     <!-- Botón hamburguesa derecha -->
