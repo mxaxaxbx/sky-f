@@ -3,7 +3,7 @@
     <div class="container mx-auto text-center  mt-0 lg:mt-8">
       <h2 class="text-5xl md:text-6xl lg:text-8xl
            text-[#0B77F3] font-bold mb-6 sm:leading-tight">
-  <span class="block animate-fadeInUp">Store. Share.</span>
+  <span class="block pt-16 animate-fadeInUp">Store. Share.</span>
   <span class="block opacity-0 animate-fadeInUp" style="animation-delay: 0.3s;">
     Access from Anywhere
   </span>

@@ -45,8 +45,8 @@
       <!-- results -->
       <div
         class="
-          grid grid-cols-1
-          md:grid-cols-2 lg:grid-cols-5 gap-4
+          grid grid-cols-2
+          sm:grid-cols-2 lg:grid-cols-5 gap-4
           text-[#3d3d3d]
           ">
         <!-- results -->
@@ -82,27 +82,39 @@
                 class="w-6"
               />
               <img
+                v-else-if="file.contentType === 'image/svg+xml'"
+                src="/icon/icon-svg.svg"
+                alt="image file icon"
+                class="w-6"
+              />
+              <img
                 v-else-if="file.contentType === 'image/jpeg'"
                 src="/icon/icon-img.svg"
                 alt="image file icon"
                 class="w-6"
               />
-              <i
+              <img
                 v-else-if="file.contentType === 'image/jpg'"
-                class="fas fa-file-image text-green-500 text-xl"
-              ></i>
-              <i
+                src="/icon/icon-img.svg"
+                alt="image file icon"
+                class="w-6"
+              />
+              <img
                 v-else-if="file.contentType === 'video/mp4'"
-                class="fas fa-file-video text-red-500 text-2xl"
-              ></i>
+                src="/icon/icon-video.svg"
+                alt="image file icon"
+                class="w-6"
+              />
               <i
                 v-else-if="file.contentType === 'application/zip'"
                 class="fas fa-file-archive text-yellow-500 text-2xl"
               ></i>
-              <i
+              <img
                 v-else-if="file.contentType === 'audio/mpeg'"
-                class="fas fa-file-audio text-yellow-500 text-2xl"
-              ></i>
+                src="/icon/icon-audio.svg"
+                alt="image file icon"
+                class="w-6"
+              />
               <i v-else class="fas fa-file text-gray-500 text-2xl"></i>
               <!-- title -->
               <!-- loading icon -->
@@ -110,7 +122,13 @@
                 v-if="file.loading"
                 class="fas fa-spinner fa-spin text-2xl text-gray-500"
               ></i>
-              <h3 class="font-semibold text-md">{{ file.name }}</h3>
+              <h3
+                class="
+                font-semibold text-xs
+                sm:text-md
+                w-28
+                text-ellipsis overflow-hidden whitespace-nowrap
+                text-left">{{ file.name }}</h3>
             </div>
           </div>
         </button>
@@ -118,12 +136,12 @@
       <!-- pages if data -->
       <div
         v-if="results.data.length > 0"
-        class="flex space-x-1 justify-center items-center mt-5"
+        class="flex space-x-1 justify-center text-xs items-center mt-5"
       >
         <!-- previous -->
         <router-link
           :to="getPaginatedLink('previous', Number(find.page))"
-          class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          class="bg-purple-500 hover:bg-purple-700 text-white font-light py-2 px-2 rounded-full"
         >
           <i class="fas fa-chevron-left"></i>
         </router-link>
@@ -134,7 +152,7 @@
             v-if="
               Math.abs(page - currentPage) < 2 || page === 1 || page === results.totalPages
             "
-            class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+            class="bg-purple-500 hover:bg-purple-700 text-white font-light py-2 px-2 rounded-full"
             :class="page === currentPage ? 'bg-purple-700' : 'bg-purple-500'"
           >
             {{ page }}
@@ -144,7 +162,7 @@
         <!-- next -->
         <router-link
           :to="getPaginatedLink('next', Number(find.page))"
-          class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          class="bg-purple-500 hover:bg-purple-700 text-white font-light py-2 px-2 rounded-full"
         >
           <i class="fas fa-chevron-right"></i>
         </router-link>
@@ -174,7 +192,7 @@ const results = computed<FilesResultI>(() => store.state.files.result);
 const loading = ref(false);
 const find = ref<PaginationI>({
   page: 1,
-  limit: 10,
+  limit: 20,
   query: '',
 });
 const currentPage = ref(1);

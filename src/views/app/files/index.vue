@@ -47,7 +47,7 @@
   <div class="
       flex flex-row items-start
       bg-white
-      pt-10 sm:pt-14
+      pt-14
       h-screen
       font-alexandria
     ">
@@ -200,7 +200,7 @@ const isDragging = ref(false); // Drag & Drop
 // TODO: move to the vuex store
 const find = ref<PaginationI>({
   page: 1,
-  limit: 10,
+  limit: 100,
   query: '',
 });
 

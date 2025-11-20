@@ -3,14 +3,14 @@
     'relative flex items-center justify-between',
     'bg-white',
     'font-alexandria',
-    'w-full h-16',
-    'py-2 px-8',
+    'w-full h-12',
+    'px-2',
     'border-b border-[#9DC9FA]',
     'transition-all duration-200 ease-in-out origin-center',
-    'hidden lg:flex',
+    'lg:flex',
     isAuth ? 'fixed' : '',
     isSticky || isAuth
-      ? 'top-0 left-0 right-0 px-6 max-w-full rounded-none'
+      ? 'top-0 left-0 right-0 px-4 my-2 h-16 max-w-full rounded-none'
       : 'w-[55%] max-w-6xl mx-auto rounded-full border-none',
     isRising && !isAuth
       ? 'mt-2'
@@ -26,7 +26,7 @@
         src="/icon/icon-logoSky.svg"
         alt="logo"
         class="
-          h-[25px] ml-8
+          h-[25px] ml-2 sm:ml-6
           cursor-pointer
           ">
     </router-link>
@@ -34,7 +34,11 @@
      <!-- search box -->
      <div
       v-if="isAuth"
-      class="absolute left-1/2 -translate-x-1/2 flex items-center w-[600px] mt-2 h-16">
+      class="
+        absolute left-1/2 -translate-x-1/2 flex items-center
+        w-[600px] h-16
+        hidden lg:flex
+        ">
         <label for="search" class="text-[#a3a3a3] hidden"></label>
 
         <!-- Contenedor relativo -->
@@ -59,7 +63,7 @@
           <img
             src="/icon/icon-search.svg"
             alt="Search Icon"
-            class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-6 pointer-events-none"
           />
         </div>
       </div>
@@ -97,8 +101,8 @@
       ></div>
     </div>
 
-    <!-- REGISTER + USER -->
-    <div class="flex items-center gap-4 ml-auto mr-[-16PX] opacity-0 animate-showButtons">
+    <!-- sing in -->
+    <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
       <a
         v-if="!isAuth"
         :href="usersLink"
@@ -129,8 +133,8 @@
                 bg-[#0B77F3]
                 rounded-full
                 text-white
-                h-8
-                w-8
+                h-8 w-8
+                mr-0 sm:mr-4
                 hover:ring-4 hover:ring-[#0B77F3]/50
                 focus:ring-4 focus:ring-[#0B77F3]/50
                 transition-all duration-300 ease-in-out
@@ -139,7 +143,7 @@
             <!-- User initials -->
             <span
               v-if="!user.profilePhoto && user.firstName && user.lastName"
-              class="font-thin text-sm uppercase"
+              class="font-ligth text-sm uppercase"
             >
               {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
             </span>
@@ -217,10 +221,12 @@
                 Manage your digi Account
               </a>
             </div>
-
-            <div class="flex flex-col items-start mx-8 mb-6">
+            <div class="flex flex-col items-center mx-8 mb-6">
               <!-- community -->
-              <h1 class="text-xs font-regular ml-4 text-[#3d3d3d] mb-2">Community</h1>
+              <h1
+                class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
+                ">
+                Community</h1>
 
               <a
                 href="https://discord.com/invite/UsGXbTkJSE"
@@ -250,9 +256,12 @@
                 />
               </a>
             </div>
-            <div class="flex flex-col items-start mx-8 mb-6">
+            <div class="flex flex-col items-center mx-8 mb-6">
               <!-- Support -->
-              <h1 class="text-xs font-regular ml-4 text-[#3d3d3d] mb-2">Support</h1>
+              <h1
+                class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
+                ">
+                Support</h1>
 
               <a
                 href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
@@ -327,156 +336,6 @@
     </div>
   </nav>
   <!-- Navbar Mobile & Tablet -->
-  <nav class="fixed flex w-full items-center justify-between
-  px-4 sm:px-6 h-16 bg-white lg:hidden relative shadow-sm z-50">
-    <!-- LOGO izquierda -->
-    <router-link :to="isAuth ? '/app' : '/'" class="flex items-center">
-      <img src="/icon/icon-logoSky.svg" alt="logo" class="w-12 pt-2">
-    </router-link>
-
-    <!-- Botón hamburguesa derecha -->
-    <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-      class="text-[#3D3D3D] mt-2 focus:outline-none hover:text-[#0A77F3] transition-colors"
-      :aria-label="isMobileMenuOpen ? 'Close menu' : 'Open menu'" :aria-expanded="isMobileMenuOpen">
-      <i class="fas fa-bars text-2xl sm:text-3xl"></i>
-    </button>
-
-    <!-- Menú desplegable -->
-    <transition name="slide-left">
-      <div
-        v-if="isMobileMenuOpen"
-        class="
-          menu-open fixed bg-white
-          absolute top-0 text-center left-0 w-full h-[calc(100vh+1rem)]
-          shadow-lg flex flex-col p-4 sm:p-6 gap-4 z-40 overflow-y-auto
-        "
-      >
-        <button
-          class="
-            absolute top-4 sm:top-6 right-4 sm:right-6
-            text-2xl sm:text-3xl text-[#3D3D3D] font-bold
-            hover:text-[#0A77F3] transition-colors focus:outline-none
-          "
-          @click="isMobileMenuOpen = false"
-          aria-label="Close menu"
-        >
-          <i class="fas fa-xmark"></i>
-        </button>
-        <!-- Icono de usuario -->
-        <div v-if="isAuth" class="mt-8 sm:mt-12">
-          <Dropdown
-            :content="dropdownContent"
-            :options="dropdownOptions"
-            :loading="loading"
-            @action="handleAction"
-          />
-        </div>
-        <div v-else class="bg-[#0A77F3] mt-12 sm:mt-16 rounded-full
-          w-20 h-20 sm:w-24 sm:h-24 flex justify-center items-center
-          mx-auto text-white text-3xl sm:text-4xl hover:bg-[#0a66d4] transition-colors">
-          <a :href="usersLink" aria-label="User Profile"><i class="py-6 fas fa-user"></i></a>
-        </div>
-        <h1 class="text-xl sm:text-2xl text-[#3D3D3D] font-bold mt-4">Hi, Welcome to Sky!</h1>
-
-        <!-- Botón Register -->
-        <a :href="usersLink" class="border border-[#0A77F3] text-[#0A77F3] font-semibold
-          h-10 py-2 w-[70%] sm:w-[60%] rounded-full mx-auto
-          flex items-center justify-center hover:bg-[#0A77F3]
-          hover:text-white transition-all mt-2 sm:mt-4">
-          Sign In
-        <img src="/icon/icon-signIn.svg"
-                  alt="icon"
-                  class="ml-2 w-[20px]"/>
-      </a>
-
-        <!-- Menu links -->
-        <div class="flex flex-col bg-[#EDF5FF]
-              text-left text-[#3D3D3D] rounded-3xl
-              mx-auto mt-6 sm:mt-8 w-[94%] sm:w-[90%] max-w-md">
-          <a
-            href="#features"
-            @click="isMobileMenuOpen = false"
-            class="
-              border-b-4 py-4 pl-8 sm:pl-10 w-full border-white
-              font-bold hover:bg-[#d6e9ff] transition-colors hover:text-[#0A77F3]
-            "
-          >
-            <i class="fa-solid fa-rectangle-list pr-4 text-lg sm:text-xl"></i>
-            Features</a>
-          <a
-            href="#plans"
-            @click="isMobileMenuOpen = false"
-            class="
-              border-b-4 py-4 pl-8 sm:pl-10 w-full border-white
-              font-bold hover:bg-[#d6e9ff] transition-colors hover:text-[#0A77F3]
-            "
-          >
-            <i class="fa-solid fa-tags pr-4 text-lg sm:text-xl"></i>Plans</a>
-          <a
-            href="#services"
-            @click="isMobileMenuOpen = false"
-            class="
-              py-4 pl-8 sm:pl-10 w-full font-bold hover:bg-[#d6e9ff]
-              transition-colors hover:text-[#0A77F3]
-            "
-          >
-            <i class="fa-solid fa-suitcase pr-4 text-lg sm:text-xl"></i>
-            Services</a>
-        </div>
-        <div class="w-[94%] sm:w-[90%] max-w-md mx-auto">
-          <p
-            class="text-left text-gray-400 text-sm sm:text-base pl-4 sm:pl-8 pt-6 pb-2"
-          >Community</p>
-          <div class="flex flex-col bg-[#EDF5FF]
-              text-left text-[#3D3D3D] rounded-full
-              mx-auto mt-0 w-full">
-            <a href="https://discord.com/invite/UsGXbTkJSE" @click="isMobileMenuOpen = false" class="flex justify-between items-center font-bold py-4
-            pl-8 sm:pl-10 w-full hover:bg-[#d6e9ff]
-            transition-colors hover:text-[#0A77F3]" target="_blank" rel="noopener noreferrer">
-              <span>
-                <i class="fa-brands fa-discord pr-4 text-lg sm:text-xl"></i>Discord
-              </span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-sm mr-6 sm:mr-10"></i>
-            </a>
-          </div>
-        </div>
-        <div class="w-[94%] sm:w-[90%] max-w-md mx-auto">
-          <p class="text-left text-sm sm:text-base text-gray-400 pl-4 sm:pl-8 pt-6 pb-2">Support</p>
-          <div class="flex flex-col bg-[#EDF5FF]
-              text-left text-[#3D3D3D] rounded-full
-              mx-auto mt-0 w-full">
-            <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
-              @click="isMobileMenuOpen = false"
-              class="
-                flex font-bold py-4 pl-8 sm:pl-10 w-full
-                hover:bg-[#d6e9ff] transition-colors hover:text-[#0A77F3]
-              "
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i class="fa-solid fa-envelope pr-4 text-lg sm:text-xl"></i>
-              <span class="text-sm sm:text-base">support@digiapps.com.co</span>
-            </a>
-          </div>
-        </div>
-        <div class="w-full text-gray-400
-        flex flex-col sm:flex-row justify-center mb-4 items-center
-        gap-2 sm:gap-4 mx-auto mt-auto pb-4">
-          <a href="https://www.digiapps.com.co/privacy-policy" target="_blank" rel="noopener noreferrer"
-            @click="isMobileMenuOpen = false" class="font-regular text-xs sm:text-sm mt-2 sm:mt-4
-            hover:text-gray-600 transition-colors">
-            Terms of Service</a>
-          <span class="hidden sm:inline mt-4">&bull;</span>
-          <a href="https://www.digiapps.com.co/privacy-policy" target="_blank" rel="noopener noreferrer"
-            @click="isMobileMenuOpen = false" class="font-regular text-xs sm:text-sm mt-2 sm:mt-4
-            hover:text-gray-600 transition-colors">
-            Privacy Policy
-          </a>
-        </div>
-      </div>
-    </transition>
-  </nav>
 </template>
 
 <script setup lang="ts">

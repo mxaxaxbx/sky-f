@@ -41,11 +41,16 @@ onUnmounted(() => {
       <div
         v-if="isOpen"
         class="
-          absolute
-          right-0
+          fixed inset-0
           bg-[#ffffff]
-          w-80
-          mt-2 pt-8 pb-4
+          w-screen h-screen
+          pt-10 mt-14
+          sm:absolute sm:inset-auto
+          sm:right-0
+          sm:pt-8 sm:pb-6
+          sm:mt-2
+          sm:h-auto sm:w-80
+          sm:right-0
           border-[0.5px] border-[#9DC9FA]
           rounded-lg
           shadow-lg z-50
