@@ -15,7 +15,7 @@
     isRising && !isAuth
       ? 'mt-2'
       : !isAuth ? 'mt-8' : '',
-    isSticky || isAuth ? 'w-full flex justify-between items-center relative mx-auto' : '',
+    isSticky || isAuth ? 'w-full flex justify-between items-center mx-auto' : '',
   ]">
     <!-- LOGO animado -->
     <router-link
@@ -42,9 +42,10 @@
         <label for="search" class="text-[#a3a3a3] hidden"></label>
 
         <!-- Contenedor relativo -->
-        <div class="relative w-full">
+        <form @submit.prevent="handleSearch" class="relative w-full">
           <!-- Input -->
           <input
+            v-model="pagination.query"
             type="text"
             placeholder="Search everything"
             class="
@@ -65,7 +66,8 @@
             alt="Search Icon"
             class="absolute left-3 top-1/2 -translate-y-1/2 w-6 pointer-events-none"
           />
-        </div>
+          {{ pagination }}
+        </form>
       </div>
     <div
       v-if="!isAuth"
@@ -350,26 +352,34 @@ import {
 import { useStore } from 'vuex';
 
 import { UserI } from '@/store/auth/state';
-import { OptionI } from '@/store/state';
+import { PaginationI } from '@/store/state';
+
+const store = useStore();
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
+const { VUE_APP_DG_USERS_APP } = process.env;
+let scrollHandler: (() => void) | null = null;
+let timeout: number | undefined;
+
 const isMobileMenuOpen = ref(false);
-
-watch(isMobileMenuOpen, (open) => {
-  if (open) {
-    document.documentElement.style.overflow = 'hidden'; // bloquea html
-    document.body.style.overflow = 'hidden'; // bloquea body
-  } else {
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
-  }
-});
-
 const isSticky = ref(false);
 const isRising = ref(false);
+const loading = ref<boolean>(false);
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}/auth/login?app=sky`);
 
-let scrollHandler: (() => void) | null = null;
+const isAuth = computed(() => store.getters['auth/isAuth']);
+const user = computed<UserI>(() => store.getters['auth/user']);
+const pagination = computed<PaginationI>(() => store.state.pagination);
+
+async function handleSearch() {
+  store.commit('setPaginationPage', 1);
+  await store.dispatch('files/filter', pagination.value);
+}
+
+function logout() {
+  store.dispatch('auth/logout');
+}
 
 onMounted(() => {
   scrollHandler = () => {
@@ -399,42 +409,31 @@ onUnmounted(() => {
   }
 });
 
-const store = useStore();
-
-const loading = ref<boolean>(false);
-
-const { VUE_APP_DG_USERS_APP } = process.env;
-
-const usersLink = ref(`${VUE_APP_DG_USERS_APP}/auth/login?app=sky`);
-
-const isAuth = computed(() => store.getters['auth/isAuth']);
-const user = computed<UserI>(() => store.getters['auth/user']);
-
-const dropdownContent = ref<string>(user.value ? `
-  <span>
-    ${user.value.firstName.charAt(0)}
-    ${user.value.lastName.charAt(0)}
-  </span>
-` : `
-  <i class="fas fa-user" aria-hidden="true"></i>
-  <span class="sr-only">User Profile</span>
-`);
-
-const dropdownOptions: OptionI[] = [
-  { content: 'cerrar sesión', action: 'logout' },
-];
-
-function handleAction(action: string) {
-  if (action === 'logout') {
-    store.dispatch('auth/logout');
+watch(isMobileMenuOpen, (open) => {
+  if (open) {
+    document.documentElement.style.overflow = 'hidden'; // bloquea html
+    document.body.style.overflow = 'hidden'; // bloquea body
+  } else {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
   }
-}
+});
 
-function logout() {
-  store.dispatch('auth/logout');
-}
+watch(
+  () => pagination.value,
+  () => {
+    // cancel previous timeout
+    if (timeout) clearTimeout(timeout);
 
+    // start new timeout
+    timeout = window.setTimeout(() => {
+      handleSearch();
+    }, 500);
+  },
+  { deep: true },
+);
 </script>
+
 <style scoped>
 .animate-fade-in-up {
   animation: fadeInBounce 0.7s ease-out both;

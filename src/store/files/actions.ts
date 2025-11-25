@@ -24,7 +24,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
         }
       });
     }
-    params.append('per_page', '20');
+
     const { data } = await storageClient.get(`/api/storage/listfiles?${params.toString()}`);
     context.commit('setResult', snakeToCamel(data));
   },

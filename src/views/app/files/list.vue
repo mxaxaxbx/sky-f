@@ -236,7 +236,7 @@ async function downloadFile(file: FileI) {
   try {
     await store.dispatch('files/download', file);
   } catch (err: any) {
-    const msg = err.response.data.error || 'Error al descargar el archivo';
+    const msg = err.response.data.error || 'Oops! Download didn’t go through. Try again?';
     store.commit('notifications/addNotification', {
       message: msg,
       type: 'error',
