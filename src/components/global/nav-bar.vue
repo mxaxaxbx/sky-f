@@ -22,56 +22,47 @@
       :to="isAuth ? '/app' : '/'"
       class="absolute left-1/2 -translate-x-1/2 animate-moveLogo"
     >
-      <img
-        src="/icon/icon-logoSky.svg"
-        alt="logo"
-        class="
+      <img src="/icon/icon-logoSky.svg" alt="logo" class="
           h-[25px] ml-2 sm:ml-6
           cursor-pointer
           ">
     </router-link>
     <!-- Centro -->
-     <!-- search box -->
-     <div
-      v-if="isAuth"
-      class="
+    <!-- search box -->
+    <div v-if="isAuth" class="
         absolute left-1/2 -translate-x-1/2 flex items-center
         w-[600px] h-16
         hidden lg:flex
         ">
-        <label for="search" class="text-[#a3a3a3] hidden"></label>
+      <label for="search" class="text-[#a3a3a3] hidden"></label>
 
-        <!-- Contenedor relativo -->
-        <form @submit.prevent="handleSearch" class="relative w-full">
-          <!-- Input -->
-          <input
-            v-model="pagination.query"
-            type="text"
-            placeholder="Search everything"
-            class="
-              w-full
-              border border-[#0B77F3]/50
-              rounded-full font-light
-              pl-12 pr-4 py-1
-              hover:border-[#0A77F3]
-              focus:ring-1 focus:ring-[#0A77F3]
-              focus:outline-none
-              transition-all duration-300
-            "
-          />
+      <!-- Contenedor relativo -->
+      <form @submit.prevent="handleSearch" class="relative w-full">
+        <!-- Input -->
+        <input
+          v-model="pagination.query"
+          @input="handleInput"
+          type="text"
+          placeholder="Search everything"
+          class="
+            w-full
+            border border-[#0B77F3]/50
+            rounded-full font-light
+            pl-12 pr-4 py-1
+            hover:border-[#0A77F3]
+            focus:ring-1 focus:ring-[#0A77F3]
+            focus:outline-none
+            transition-all duration-300
+          "
+        />
 
-          <!-- Ícono dentro del input -->
-          <img
-            src="/icon/icon-search.svg"
-            alt="Search Icon"
-            class="absolute left-3 top-1/2 -translate-y-1/2 w-6 pointer-events-none"
-          />
-          {{ pagination }}
-        </form>
-      </div>
-    <div
-      v-if="!isAuth"
-      class="absolute left-1/2 -translate-x-1/2 flex items-center">
+        <!-- Ícono dentro del input -->
+        <img src="/icon/icon-search.svg" alt="Search Icon"
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-6 pointer-events-none" />
+        {{ pagination }}
+      </form>
+    </div>
+    <div v-if="!isAuth" class="absolute left-1/2 -translate-x-1/2 flex items-center">
       <div
         class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up"
         style="animation-delay: 0.70s"
@@ -98,17 +89,12 @@
       </div>
 
       <div
-        class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up"
-        style="animation-delay: 0.70s"
-      ></div>
+        class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up" style="animation-delay: 0.70s"></div>
     </div>
 
     <!-- sing in -->
     <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
-      <a
-        v-if="!isAuth"
-        :href="usersLink"
-        class="
+      <a v-if="!isAuth" :href="usersLink" class="
           flex items-center justify-center
           block
           border border-[#0A77F3]
@@ -120,16 +106,12 @@
           transition-all duration-300 ease-in-out
           ">
         Sign In
-        <img src="/icon/icon-signIn.svg"
-                  alt="icon"
-                  class="ml-2 w-[20px]"/>
+        <img src="/icon/icon-signIn.svg" alt="icon" class="ml-2 w-[20px]" />
       </a>
 
       <Dropdown v-if="isAuth">
-          <template #trigger="{ toggle }">
-            <button
-              @click="toggle"
-              class="
+        <template #trigger="{ toggle }">
+          <button @click="toggle" class="
                 relative
                 flex items-center justify-center
                 bg-[#0B77F3]
@@ -140,8 +122,7 @@
                 hover:ring-4 hover:ring-[#0B77F3]/50
                 focus:ring-4 focus:ring-[#0B77F3]/50
                 transition-all duration-300 ease-in-out
-              "
-            >
+              ">
             <!-- User initials -->
             <span
               v-if="!user.profilePhoto && user.firstName && user.lastName"
@@ -151,23 +132,14 @@
             </span>
 
             <!-- Profile photo -->
-            <img
-              v-else-if="user.profilePhoto"
-              :src="user.profilePhoto"
-              alt="User profile photo"
-              class="h-8 rounded-full object-cover"
-            />
+            <img v-else-if="user.profilePhoto" :src="user.profilePhoto" alt="User profile photo"
+              class="h-8 rounded-full object-cover" />
 
             <!-- Fallback icon -->
-            <i
-              v-else
-              class="fas fa-user text-white text-sm"
-              aria-hidden="true"
-            ></i>
+            <i v-else class="fas fa-user text-white text-sm" aria-hidden="true"></i>
 
-              <!-- Optional status indicator -->
-              <span
-                class="
+            <!-- Optional status indicator -->
+            <span class="
                   absolute
                   bottom-0 right-[-2px]
                   block
@@ -175,41 +147,34 @@
                   rounded-full
                   bg-green-500
                   border-2 border-white
-                "
-              ></span>
-            </button>
-          </template>
+                "></span>
+          </button>
+        </template>
 
-          <template #content="{}">
-            <!-- Avatar, email, user name -->
-            <div class="flex flex-col items-center mb-10">
-              <div class="relative --w-16 --h-16">
-                <img
-                  :src="user.profilePhoto || '/img/user.svg'"
-                  alt="Avatar"
-                  class="
+        <template #content="{ }">
+          <!-- Avatar, email, user name -->
+          <div class="flex flex-col items-center mb-10">
+            <div class="relative --w-16 --h-16">
+              <img :src="user.profilePhoto || '/img/user.svg'" alt="Avatar" class="
                     rounded-full
                     w-20 h-20
                     border-2 border-[#9DC9FA]
-                    object-cover border"
-                />
-              </div>
+                    object-cover border" />
+            </div>
 
-              <h2 class="mt-4 text-lg font-bold text-[#3d3d3d]">¡Hi,
-                {{ user.firstName }} {{ user.lastName }}!
-              </h2>
+            <h2 class="mt-4 text-lg font-bold text-[#3d3d3d]">¡Hi,
+              {{ user.firstName }} {{ user.lastName }}!
+            </h2>
 
-              <!-- Email -->
-              <div class="text-center mt-0">
-                <p class="text-[#A3A3A3] text-xs font-thin">
-                  {{ user.email }}
-                </p>
-              </div>
+            <!-- Email -->
+            <div class="text-center mt-0">
+              <p class="text-[#A3A3A3] text-xs font-thin">
+                {{ user.email }}
+              </p>
+            </div>
 
-              <!-- Manage Account Button -->
-              <a
-                :href="`${usersLink}/app/users/edit-profile`"
-                class="
+            <!-- Manage Account Button -->
+            <a :href="`${usersLink}/app/users/edit-profile`" class="
                   bg-[#ffffff]
                   w-60
                   px-auto py-[10px] mt-6
@@ -217,23 +182,17 @@
                   text-[#0A77F3] text-xs font-medium text-center
                   hover:bg-[#0A77F3] hover:text-white
                   transition ease-in duration-150
-                "
-                target="_blank"
-              >
-                Manage your digi Account
-              </a>
-            </div>
-            <div class="flex flex-col items-center mx-8 mb-6">
-              <!-- community -->
-              <h1
-                class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
+                " target="_blank">
+              Manage your digi Account
+            </a>
+          </div>
+          <div class="flex flex-col items-center mx-8 mb-6">
+            <!-- community -->
+            <h1 class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
                 ">
-                Community</h1>
+              Community</h1>
 
-              <a
-                href="https://discord.com/invite/UsGXbTkJSE"
-                target="_blank"
-                class="
+            <a href="https://discord.com/invite/UsGXbTkJSE" target="_blank" class="
                   flex items-center justify-between
                   w-60 px-4 py-2
                   rounded-full border border-[#7DBAFF]
@@ -241,34 +200,21 @@
                   font-medium text-sm
                   transition-all duration-300
                   hover:border-[#0A77F3] hover:bg-[#0A77F3]/15
-                "
-              >
-                <div class="flex items-center gap-2">
-                  <img
-                    src="/icon/icon-discordd.svg"
-                    alt="Discord"
-                    class="h-4 mx-1"
-                  />
-                  <span>Discord</span>
-                </div>
-                <img
-                  src="/icon/icon-outPage.svg"
-                  alt="External link"
-                  class="w-[20px]"
-                />
-              </a>
-            </div>
-            <div class="flex flex-col items-center mx-8 mb-6">
-              <!-- Support -->
-              <h1
-                class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
                 ">
-                Support</h1>
+              <div class="flex items-center gap-2">
+                <img src="/icon/icon-discordd.svg" alt="Discord" class="h-4 mx-1" />
+                <span>Discord</span>
+              </div>
+              <img src="/icon/icon-outPage.svg" alt="External link" class="w-[20px]" />
+            </a>
+          </div>
+          <div class="flex flex-col items-center mx-8 mb-6">
+            <!-- Support -->
+            <h1 class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
+                ">
+              Support</h1>
 
-              <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
-                target="_blank"
-                class="
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co" target="_blank" class="
                   flex items-center justify-between
                   w-60 px-4 py-2
                   rounded-full border border-[#7DBAFF]
@@ -276,24 +222,17 @@
                   font-medium text-sm
                   transition-all duration-300
                   hover:border-[#0A77F3] hover:bg-[#0A77F3]/15
-                "
-              >
-                <div class="flex items-center gap-2">
-                  <img
-                    src="/icon/icon-mail.svg"
-                    alt="mail"
-                    class="h-4 mx-1"
-                  />
-                  <span>support@digiapps.com.co</span>
-                </div>
-              </a>
-            </div>
+                ">
+              <div class="flex items-center gap-2">
+                <img src="/icon/icon-mail.svg" alt="mail" class="h-4 mx-1" />
+                <span>support@digiapps.com.co</span>
+              </div>
+            </a>
+          </div>
 
-            <!-- Actions -->
-            <div class="flex flex-col items-center space-y-2 mt-12">
-              <button
-                @click="logout"
-                class="
+          <!-- Actions -->
+          <div class="flex flex-col items-center space-y-2 mt-12">
+            <button @click="logout" class="
                   flex items-center justify-around
                   bg-[#0A77F3]
                   w-44
@@ -303,38 +242,33 @@
                   hover:ring-4 hover:ring-[#0A77F3]/50
                   transition-all duration-300 ease-in-out
 
-                "
-              >
-                <span class="flex items-center space-x-2">
-                  <span>Sign out</span>
-                  <img src="/icon/icon-logOut.svg"
-                  alt="icon"
-                  class="ml-2 w-[20px]"/>
-                </span>
-              </button>
-            </div>
+                ">
+              <span class="flex items-center space-x-2">
+                <span>Sign out</span>
+                <img src="/icon/icon-logOut.svg" alt="icon" class="ml-2 w-[20px]" />
+              </span>
+            </button>
+          </div>
 
-            <!-- Footer -->
-            <div
-              class="flex justify-around mt-8 text-[10px] text-[#3d3d3d] px-16"
+          <!-- Footer -->
+          <div class="flex justify-around mt-8 text-[10px] text-[#3d3d3d] px-16">
+            <a
+              :href="`${usersLink}/privacy-policy`"
+              target="_blank" class="hover:underline hover:text-[#bebebe]"
             >
-              <a
+              Terms of Service
+            </a>
+            <span>•</span>
+            <a
               :href="`${usersLink}/privacy-policy`"
               target="_blank"
               class="hover:underline hover:text-[#bebebe]"
-              >
-                Terms of Service</a>
-                <span>•</span>
-              <a
-                :href="`${usersLink}/privacy-policy`"
-                target="_blank"
-                class="hover:underline hover:text-[#bebebe]"
-              >
-                Privacy Policy
-              </a>
-            </div>
-          </template>
-        </Dropdown>
+            >
+              Privacy Policy
+            </a>
+          </div>
+        </template>
+      </Dropdown>
     </div>
   </nav>
   <!-- Navbar Mobile & Tablet -->
@@ -354,9 +288,10 @@ import { useStore } from 'vuex';
 import { UserI } from '@/store/auth/state';
 import { PaginationI } from '@/store/state';
 
-const store = useStore();
-
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
+
+const store = useStore();
+let searchTimeout: number | undefined;
 
 const { VUE_APP_DG_USERS_APP } = process.env;
 let scrollHandler: (() => void) | null = null;
@@ -375,6 +310,15 @@ const pagination = computed<PaginationI>(() => store.state.pagination);
 async function handleSearch() {
   store.commit('setPaginationPage', 1);
   await store.dispatch('files/filter', pagination.value);
+}
+
+async function handleInput() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    handleSearch();
+  }, 500);
 }
 
 function logout() {

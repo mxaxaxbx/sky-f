@@ -18,7 +18,7 @@ export const mutations: MutationTree<FilesStateI> = {
       state.result.data = [...state.result.data, ...payload.data];
     } else {
       state.result.total = payload.total;
-      state.result.data = payload.data;
+      state.result.data = payload.data || [];
     }
   },
   setUploadProgress(state: FilesStateI, payload: number) {
