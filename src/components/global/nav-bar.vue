@@ -59,7 +59,6 @@
         <!-- Ícono dentro del input -->
         <img src="/icon/icon-search.svg" alt="Search Icon"
           class="absolute left-3 top-1/2 -translate-y-1/2 w-6 pointer-events-none" />
-        {{ pagination }}
       </form>
     </div>
     <div v-if="!isAuth" class="absolute left-1/2 -translate-x-1/2 flex items-center">
@@ -284,13 +283,16 @@ import {
   onUnmounted,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 
 import { UserI } from '@/store/auth/state';
 import { PaginationI } from '@/store/state';
+import router from '@/router';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
 const store = useStore();
+const route = useRoute();
 let searchTimeout: number | undefined;
 
 const { VUE_APP_DG_USERS_APP } = process.env;
@@ -309,6 +311,13 @@ const pagination = computed<PaginationI>(() => store.state.pagination);
 
 async function handleSearch() {
   store.commit('setPaginationPage', 1);
+  router.replace({
+    query: {
+      ...route.query,
+      page: '1',
+      query: pagination.value.query || '',
+    },
+  });
   await store.dispatch('files/filter', pagination.value);
 }
 
@@ -323,6 +332,17 @@ async function handleInput() {
 
 function logout() {
   store.dispatch('auth/logout');
+}
+
+async function checkURLQuery() {
+  // eslint-disable-next-line no-promise-executor-return
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const q = typeof route.query.query === 'string' ? route.query.query : '';
+  console.log('Setting query from URL:', q);
+  if (q) {
+    store.commit('setPaginationQuery', q);
+    handleSearch();
+  }
 }
 
 onMounted(() => {
@@ -345,6 +365,8 @@ onMounted(() => {
   };
 
   window.addEventListener('scroll', scrollHandler);
+
+  checkURLQuery();
 });
 
 onUnmounted(() => {

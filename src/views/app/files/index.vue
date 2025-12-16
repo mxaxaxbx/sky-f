@@ -162,7 +162,7 @@
         @dragover.prevent="onDragOver"
         @dragleave.prevent="onDragLeave"
         @drop.prevent="onDrop">
-        <DragDrop v-if="filesLength === 0" :loading="loading" />
+        <DragDrop v-if="filesLength === 0  && pagination.query === '' " :loading="loading" />
 
         <router-view v-else></router-view>
 
@@ -190,7 +190,7 @@ const store = useStore();
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
-// const filesLength = ref<number>(0);
+const pagination = computed<PaginationI>(() => store.state.pagination);
 
 const loading = ref(false);
 const file = ref<File | null>(null);

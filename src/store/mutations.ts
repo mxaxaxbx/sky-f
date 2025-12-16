@@ -1,6 +1,6 @@
 import { MutationTree } from 'vuex';
 
-import { RootStateI } from './state';
+import { PaginationI, RootStateI } from './state';
 
 const mutations: MutationTree<RootStateI> = {
   toggleSidebar(state) {
@@ -8,6 +8,9 @@ const mutations: MutationTree<RootStateI> = {
   },
   closeSidebar(state) {
     state.sidebar = false;
+  },
+  setPaginationQuery(state, payload: string) {
+    state.pagination.query = payload;
   },
 };
 
