@@ -20,7 +20,7 @@ export const state: RootStateI = {
   sidebar: false,
   pagination: {
     page: 1,
-    limit: 100,
+    limit: 75,
     query: '',
   },
 };

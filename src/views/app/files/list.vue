@@ -2,7 +2,7 @@
   <div>
     <!-- list -->
     <div class="px-0 sm:px-3 py-2 sm:py-5 w-full">
-      <h1 class="text-ld font-semibold mb-4 ml-2 text-[#3d3d3d]">Could Drive</h1>
+      <h1 class="text-ld font-semibold mb-4 ml-2 text-[var(--text)]">Could Drive</h1>
       <!-- title -->
       <!-- search box
       <div class="flex items-center mb-5 relative w-full">
@@ -133,40 +133,6 @@
           </div>
         </button>
       </div>
-      <!-- pages if data -->
-      <div
-        v-if="results.data.length > 0"
-        class="flex space-x-1 justify-center text-xs items-center mt-5"
-      >
-        <!-- previous -->
-        <router-link
-          :to="getPaginatedLink('previous', Number(find.page))"
-          class="bg-purple-500 hover:bg-purple-700 text-white font-light py-2 px-2 rounded-full"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </router-link>
-        <!-- pages only show 5 around the current page -->
-        <div v-for="page in results.totalPages" :key="page">
-          <router-link
-            :to="getPaginatedLink('page', page)"
-            v-if="
-              Math.abs(page - currentPage) < 2 || page === 1 || page === results.totalPages
-            "
-            class="bg-purple-500 hover:bg-purple-700 text-white font-light py-2 px-2 rounded-full"
-            :class="page === currentPage ? 'bg-purple-700' : 'bg-purple-500'"
-          >
-            {{ page }}
-          </router-link>
-
-        </div>
-        <!-- next -->
-        <router-link
-          :to="getPaginatedLink('next', Number(find.page))"
-          class="bg-purple-500 hover:bg-purple-700 text-white font-light py-2 px-2 rounded-full"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </router-link>
-      </div>
     </div>
   </div>
 </template>
@@ -175,7 +141,8 @@
 import {
   ref,
   computed,
-  watch,
+  onMounted,
+  onUnmounted,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -190,45 +157,6 @@ const router = useRouter();
 const results = computed<FilesResultI>(() => store.state.files.result);
 
 const loading = ref(false);
-const find = ref<PaginationI>({
-  page: 1,
-  limit: 20,
-  query: '',
-});
-const currentPage = ref(1);
-const debounceTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
-
-function getPaginatedLink(action: string, page?: number) {
-  const query = route.query.query || '';
-  switch (action) {
-    case 'previous':
-      return `/app/files?page=${Math.max(1, Number(find.value.page) - 1)}&query=${query}`;
-    case 'next':
-      return `/app/files?page=${Math.min(
-        results.value.totalPages,
-        Number(find.value.page) + 1,
-      )}&query=${query}`;
-    default:
-      return `/app/files?page=${page}&query=${query}`;
-  }
-}
-
-function search(ev: KeyboardEvent) {
-  ev.preventDefault();
-
-  if (debounceTimeout.value) {
-    clearTimeout(debounceTimeout.value);
-  }
-
-  debounceTimeout.value = setTimeout(() => {
-    router.push({
-      query: {
-        page: 1,
-        query: find.value.query,
-      },
-    });
-  }, 1000);
-}
 
 async function downloadFile(file: FileI) {
   // eslint-disable-next-line no-param-reassign
@@ -246,5 +174,45 @@ async function downloadFile(file: FileI) {
     file.loading = false;
   }
 }
+
+async function getMoreResults() {
+  const scrollTop = window.scrollY;
+  const windowHeight = window.innerHeight;
+  const fullHeight = document.documentElement.scrollHeight;
+
+  if (scrollTop + windowHeight >= fullHeight - 10) {
+    const page = typeof route.query.page === 'string' ? parseInt(route.query.page, 10) : 1;
+    const query = typeof route.query.query === 'string' ? route.query.query : '';
+
+    const currentPage = results.value.page;
+    const { totalPages } = results.value;
+
+    if (currentPage >= totalPages) {
+      return; // No more pages to load
+    }
+
+    await store.dispatch('files/filter', {
+      page: page + 1,
+      query,
+    });
+
+    router.replace({
+      query: {
+        ...route.query,
+        page: (page + 1).toString(),
+      },
+    });
+  }
+}
+
+onMounted(() => {
+  // when scrolling to bottom, load more results
+  window.addEventListener('scroll', getMoreResults);
+});
+
+onUnmounted(() => {
+  // TODO: validate pagination
+  window.removeEventListener('scroll', getMoreResults);
+});
 
 </script>

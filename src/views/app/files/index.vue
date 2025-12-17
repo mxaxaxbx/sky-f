@@ -46,16 +46,16 @@
 
   <div class="
       flex flex-row items-start
-      bg-white
+      bg-[var(--bg)]
       pt-14
-      h-screen
+      h-full
       font-alexandria
     ">
     <!--files sidebar-->
-    <div class="hidden sm:flex w-[300px] h-full bg-[#EDF5FF] pt-4">
+    <!-- <div class="hidden sm:flex w-[300px] h-full bg-[#EDF5FF] pt-4">
       <router-link to="/app/files" class="
         flex items-center
-        bg-[#ffffff]
+        bg-green-200
         h-8 w-full
         pl-8
         py-6
@@ -66,6 +66,91 @@
         <img src="/icon/icon-cloudDrive.svg" alt="icon" class="h-6 mr-3" />
         Cloud drive
       </router-link>
+    </div> -->
+
+    <div
+      class="
+        bg-[var(--bg)]
+        border-r border-[var(--border)]
+        h-screen
+        sticky left-0 top-4
+        w-[60px]
+        hover:w-48
+        pt-4 px-2
+        transition-all duration-900
+        z-10 group
+        hidden sm:block
+      "
+    >
+    <ul class="space-y-1 fixed text-[var(--text)]">
+        <li class="border w-full">
+          <router-link to="/app/files" v-slot="{ isExactActive }">
+            <a
+              :class="[
+                'flex items-center w-full px-2 py-2 text-sm rounded-md',
+                'transition-all duration-200 group',
+                'hover:bg-[var(--bg-secondary)]',
+                isExactActive
+                  ? 'opacity-100'
+                  : 'opacity-30 hover:opacity-100'
+              ]">
+              <img
+                src="/icon/icon-cloudDrive.svg"
+                alt="clouderive"
+                class="h-6" />
+              <span
+                class="
+                  ml-0 group-hover:ml-4
+                  w-0 group-hover:w-auto
+                  opacity-0 group-hover:opacity-100
+                  overflow-hidden whitespace-nowrap
+                  transition-all duration-300
+                ">
+                Cloud Drive
+              </span>
+            </a>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/app/prueba" v-slot="{ isExactActive }">
+            <a
+              :class="[
+                'flex items-center w-full px-2 py-2 text-sm rounded-md',
+                'transition-all duration-200 group',
+                'hover:bg-[var(--bg-secondary)]',
+                isExactActive
+                  ? 'opacity-100'
+                  : 'opacity-30 hover:opacity-100'
+              ]">
+              <img
+                src="/icon/icon-cloudDrive.svg"
+                alt="clouderive"
+                class="h-6" />
+              <span
+                class="
+                  ml-0 group-hover:ml-4
+                  w-0 group-hover:w-auto
+                  opacity-0 group-hover:opacity-100
+                  overflow-hidden whitespace-nowrap
+                  transition-all duration-300
+                ">
+                Cloud Drive
+              </span>
+            </a>
+          </router-link>
+        </li>
+      </ul>
+      <button
+          @click="toggleTheme"
+          class="
+          rounded-full fixed bottom-4 mx-3">
+          <img
+            :src="isLight
+            ? '/icon/icon-light.svg'
+            : '/icon/icon-dark.svg'"
+            alt="theme toggle"
+            class="w-5 h-5 opacity-70 hover:opacity-100 transition" />
+        </button>
     </div>
     <!--right side -->
     <div class="
@@ -106,15 +191,15 @@
       <label for="fileInput" class="
           hidden sm:flex items-center
           bg-[#0A77F3]
-          text-white text-md font-medium
-          py-2 px-4
+          text-white text-sm font-medium
+          py-1 px-3
           rounded-full
           cursor-pointer
           hover:ring-4 hover:ring-[#0B77F3]/50
           focus:ring-4 focus:ring-[#0B77F3]/50
           transition-all duration-300 ease-in-out
         " :class="{ 'opacity-50': loading }">
-        <img src="/icon/icon-upload.svg" alt="icon" class="h-6 mr-3" />
+        <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
         <span>Upload</span>
 
         <input
@@ -191,18 +276,12 @@ const store = useStore();
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
 const pagination = computed<PaginationI>(() => store.state.pagination);
+const isLight = computed(() => store.state.theme.theme === 'light');
 
 const loading = ref(false);
 const file = ref<File | null>(null);
 
 const isDragging = ref(false); // Drag & Drop
-
-// TODO: move to the vuex store
-const find = ref<PaginationI>({
-  page: 1,
-  limit: 100,
-  query: '',
-});
 
 // Lógica original de subida (sin cambios)
 async function uploadFile(ev: Event): Promise<void> {
@@ -269,7 +348,7 @@ async function getData() {
   loading.value = true;
   try {
     // currentPage.value = Number(route.query.page) || 1;
-    await store.dispatch('files/filter', find.value);
+    await store.dispatch('files/filter', pagination.value);
   } catch (err: any) {
     const msg = err.response.data.error || 'Error al cargar los archivos';
     store.commit('notifications/addNotification', {
@@ -280,6 +359,12 @@ async function getData() {
     loading.value = false;
   }
 }
+const toggleTheme = () => {
+  store.dispatch('theme/toggleTheme');
+  const newTheme = store.state.theme.theme;
+
+  document.documentElement.classList.toggle('light', newTheme === 'light');
+};
 
 onMounted(() => {
   // find.value.page = Math.max(route.query.page ? Number(route.query.page) : 1, 1);

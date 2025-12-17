@@ -2,21 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-.alexandria {
-    font-family: "Alexandria", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
+/* Tema base (dark) */
+:root {
+    --bg: #1d1d1d;
+    --bg-secondary: #252525;
+    --color-primary: #0A77F3;
+    --text: #ffffff;
+    --text-secondary: #A3A3A3;
+    --text-terceary: #dcdcdc;
+    --border: #3d3d3d;
+
+    --hover-border: #9CA3AF;
+    --hover-bg: #2a2a2a;
+  }
+
+  /* Tema claro */
+.light {
+  --bg: #f5f5f5;
+  --bg-secondary: #Fbfbfb;
+  --text: #1d1d1d;
+  --text-secondary: #A3A3A3;
+  --text-terceary: #3d3d3d;
+  --border: #DCDCDC;
+
+  --hover-border: #b9b9b9;
+  --hover-bg: #ffffff;
+}
+* {
+  transition:
+    background-color 0.8s ease,
+    color 0.8s ease,
+    border-color 0.8s ease,
+    fill 0.8s ease,
+    stroke 0.8s ease;
+}
+.bg-line {
+  --line-color: color-mix(in srgb, var(--border) 100%, transparent);
+
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--line-color),
+    transparent
+  );
+
+  background-size: 100% 100%;
+  opacity: 0.6;
+
+  transition:
+    opacity 0.9s ease,
+    background 0.9s ease,
+    background-size 0.9s ease;
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari y Opera */
-}
+/* Hover del grupo */
+.group:hover .bg-line {
+  --line-color: color-mix(in srgb, #F83B66 100%, transparent);
 
-.hide-scrollbar {
-    -ms-overflow-style: none;
-    /* IE y Edge */
-    scrollbar-width: none;
-    /* Firefox */
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--line-color),
+    transparent
+  );
+
+  background-size: 100% 100%;
+  opacity: 1; /* ← esta es la que da el efecto suave */
 }
