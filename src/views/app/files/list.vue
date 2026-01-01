@@ -47,15 +47,22 @@
         class="
           grid grid-cols-2
           sm:grid-cols-2 lg:grid-cols-5 gap-4
-          text-[#3d3d3d]
+          text-[var(--text)]
           ">
         <!-- results -->
         <button
           v-for="file in results.data"
           :key="file.id"
           @click="downloadFile(file)"
-          class="border border-[#7DBAFF] py-2 rounded-lg p-4
-            hover:bg-[#E9F3FF] transition-colors duration-300"
+          class="
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            py-2 p-4
+            rounded-lg
+            hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+            transition-colors duration-300
+            "
         >
           <div class="flex items center justify-between">
             <div
@@ -63,7 +70,6 @@
                 flex items-center
                 space-x-2
                 text-xs
-                font-regular
                 w-80
                 ">
               <!-- icons -->
@@ -147,7 +153,6 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import { PaginationI } from '@/store/state';
 import { FileI, FilesResultI } from '@/store/files/state';
 
 const store = useStore();
@@ -181,27 +186,28 @@ async function getMoreResults() {
   const fullHeight = document.documentElement.scrollHeight;
 
   if (scrollTop + windowHeight >= fullHeight - 10) {
-    const page = typeof route.query.page === 'string' ? parseInt(route.query.page, 10) : 1;
+    const { page } = results.value;
     const query = typeof route.query.query === 'string' ? route.query.query : '';
 
-    const currentPage = results.value.page;
     const { totalPages } = results.value;
+    console.log('Loading more results...', page, totalPages);
 
-    if (currentPage >= totalPages) {
+    if (loading.value) {
+      return; // Prevent multiple simultaneous loads
+    }
+
+    if (page >= totalPages) {
       return; // No more pages to load
     }
+
+    loading.value = true;
 
     await store.dispatch('files/filter', {
       page: page + 1,
       query,
     });
 
-    router.replace({
-      query: {
-        ...route.query,
-        page: (page + 1).toString(),
-      },
-    });
+    loading.value = false;
   }
 }
 

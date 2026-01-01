@@ -4,26 +4,23 @@ import { AxiosProgressEvent } from 'axios';
 import { storageClient } from '@/http-client';
 import { camelToSnake, snakeToCamel } from '@/utils';
 
-import { RootStateI, PaginationI } from '../state';
+import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
 
 export const actions: ActionTree<FilesStateI, RootStateI> = {
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: PaginationI | null,
+    payload: {
+      query: string;
+      page: number;
+    },
   ): Promise<void> {
     // convert the payload to url query params
-    const params = new URLSearchParams();
-    if (payload) {
-      Object.entries(payload).forEach(([key, value]) => {
-        if (value) {
-          params.append(key, value);
-        }
-        if (key === 'query') {
-          params.append('name', value);
-        }
-      });
-    }
+    let params = '';
+
+    Object.entries(payload).forEach(([key, value]) => {
+      params += `${key}=${value}&`;
+    });
 
     const { data } = await storageClient.get(`/api/storage/listfiles?${params.toString()}`);
     context.commit('setResult', snakeToCamel(data));

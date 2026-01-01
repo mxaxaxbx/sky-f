@@ -4,7 +4,7 @@
       flex items-center justify-center
       w-full h-full
       rounded-xl mt-6 mb-8
-      border-2 transition-colors duration-300
+      transition-colors duration-300
     "
     :class="[
       hasFiles
@@ -15,15 +15,15 @@
     <!-- Mostrar zona de carga solo si no hay archivos -->
     <div
       v-if="!hasFiles"
-      class="flex flex-col items-center border-2 border-dashed border-[#9DC9FA]">
+      class="flex flex-col items-center">
       <img
         src="/icon/icon-cloudUpload.svg"
         alt="icon"
         class="w-[250px] m-0 opacity-100" />
-      <h1 class="text-2xl text-center text-[#3d3d3d] font-bold mb-6">
+      <h1 class="text-2xl text-center text-[var(--text)] font-bold mb-6">
         Nothing in your private vault yet
       </h1>
-      <p class="text-md text-center text-[#a3a3a3] font-light mb-6">
+      <p class="text-md text-center text-[var(--text-terceary)] font-light mb-6">
         Drag and drop your files here
       </p>
       <label for="fileInput" class="
@@ -33,8 +33,8 @@
           py-2 px-8
           rounded-full
           cursor-pointer
-          hover:ring-4 hover:ring-[#0B77F3]/50
-          focus:ring-4 focus:ring-[#0B77F3]/50
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
           pointer-events-auto
         " :class="{ 'opacity-50': loading }">

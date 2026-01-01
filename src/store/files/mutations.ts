@@ -24,7 +24,4 @@ export const mutations: MutationTree<FilesStateI> = {
   setUploadProgress(state: FilesStateI, payload: number) {
     state.uploadProgress = payload;
   },
-  setPaginationPage(state: FilesStateI, payload: number) {
-    state.result.page = payload;
-  },
 };

@@ -12,8 +12,8 @@
     --text-terceary: #dcdcdc;
     --border: #3d3d3d;
 
-    --hover-border: #9CA3AF;
-    --hover-bg: #2a2a2a;
+    --hover-border: #0A77F3;
+    --hover-bg: #202F41;
   }
 
   /* Tema claro */
@@ -25,8 +25,8 @@
   --text-terceary: #3d3d3d;
   --border: #DCDCDC;
 
-  --hover-border: #b9b9b9;
-  --hover-bg: #ffffff;
+  --hover-border: #0A77F3;
+  --hover-bg: #E9F3FF;
 }
 * {
   transition:

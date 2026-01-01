@@ -47,7 +47,7 @@
   <div class="
       flex flex-row items-start
       bg-[var(--bg)]
-      pt-14
+      pt-10
       h-full
       font-alexandria
     ">
@@ -155,8 +155,8 @@
     <!--right side -->
     <div class="
         flex-1 flex flex-col items-start
-        h-full
-        px-0 sm:px-8 pt-0 sm:pt-6">
+        h-screen px-0  pt-0
+        sm:px-8 sm:pt-6">
       <!-- search box movil-->
       <div
         v-if="!isAuth"
@@ -195,8 +195,8 @@
           py-1 px-3
           rounded-full
           cursor-pointer
-          hover:ring-4 hover:ring-[#0B77F3]/50
-          focus:ring-4 focus:ring-[#0B77F3]/50
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
         " :class="{ 'opacity-50': loading }">
         <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
@@ -239,15 +239,17 @@
       </label>
 
       <div
-        class=" mt-2 w-full px-2"
+        class="
+          w-full h-full
+          mt-4 mb-20 mx-auto px-2 rounded-lg"
         :class="[
         isDragging ?
-        'border-2 rounded-lg border-dashed border-[#0A77F3] bg-[#F0F7FF]' : '',
+        'border-2 border-[var(--hover-border)] border-dashed bg-[var(--hover-bg)] ' : '',
       ]" @dragenter.prevent="onDragEnter"
         @dragover.prevent="onDragOver"
         @dragleave.prevent="onDragLeave"
         @drop.prevent="onDrop">
-        <DragDrop v-if="filesLength === 0  && pagination.query === '' " :loading="loading" />
+        <DragDrop v-if="filesLength === 0  && query === '' " :loading="loading" />
 
         <router-view v-else></router-view>
 
@@ -266,7 +268,6 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import { PaginationI } from '@/store/state';
 
 const DragDrop = defineAsyncComponent(() => import('@/components/app/dragdrop.vue'));
 
@@ -275,8 +276,8 @@ const store = useStore();
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
-const pagination = computed<PaginationI>(() => store.state.pagination);
 const isLight = computed(() => store.state.theme.theme === 'light');
+const query = ref<string>('');
 
 const loading = ref(false);
 const file = ref<File | null>(null);
@@ -347,8 +348,13 @@ async function onDrop(ev: DragEvent) {
 async function getData() {
   loading.value = true;
   try {
-    // currentPage.value = Number(route.query.page) || 1;
-    await store.dispatch('files/filter', pagination.value);
+    const q = typeof route.query.query === 'string' ? route.query.query : '';
+    const payload = {
+      query: q,
+      page: 1,
+    };
+    query.value = q;
+    await store.dispatch('files/filter', payload);
   } catch (err: any) {
     const msg = err.response.data.error || 'Error al cargar los archivos';
     store.commit('notifications/addNotification', {
