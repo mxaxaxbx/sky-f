@@ -19,7 +19,7 @@ jobs:
         env:
           VUE_APP_DG_USERS_APP: ${{ secrets.VUE_APP_DG_USERS_APP_DEV }}
           VUE_APP_DG_USERS_SVC: ${{ secrets.VUE_APP_DG_USERS_SVC_DEV }}
-          VUE_APP_URL_DG_STORAGE: ${{ secrets.VUE_APP_URL_DG_STORAGE_DEV }}
+          VUE_APP_DG_SKY_SVC: ${{ secrets.VUE_APP_DG_SKY_SVC_DEV }}
         run: |
           env="DEV"
           printenv | grep VUE_APP_ > .env
