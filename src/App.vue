@@ -8,31 +8,35 @@
       @keydown="toggleSidebar"
       ></div>
     <!-- menu -->
+    <Notifications />
+    <Navbar />
     <div
       class="
         w-full fixed
         z-40
       "
     >
-      <Notifications />
-      <Navbar />
-
       <!-- sidebar -->
-      <Sidebar />
+      <Sidebar v-if="isAuth" />
     </div>
 
     <!-- content -->
     <div
       class="overflow-y-auto transition-[padding] duration-300"
-      :class="showSidebar ? 'pl-64' : 'pl-10'"
-      >
+      :class="
+      !isAuth
+        ? 'pl-0'
+        : showSidebar
+          ? 'pl-64'
+          : 'pl-10'
+      ">
       <div class="flex-1 flex flex-col">
         <div class="min-h-screen">
           <router-view />
         </div>
         <!-- footer -->
         <footer
-          v-if="isAuth"
+        v-if="!isAuth"
           class="bg-[var(--bg)] group">
           <div class="w-full h-px bg-line"></div>
           <div
@@ -51,8 +55,8 @@
               >
                 <img
                   :src="isLight
-                  ? '/img/logo-digi-light.svg'
-                  : '/img/logo-digi.svg'"
+                  ? '/logo-digi-light.svg'
+                  : '/logo-digi.svg'"
                   alt="Logo"
                   class="
                   h-6 opacity-30 group-hover:opacity-100
@@ -184,6 +188,8 @@ const route = useRoute();
 
 const showSidebar = computed(() => store.state.sidebar);
 const isLight = computed(() => store.state.theme?.theme === 'light');
+
+const isAuth = computed(() => store.getters['auth/isAuth']);
 
 const year = ref(new Date().getUTCFullYear());
 

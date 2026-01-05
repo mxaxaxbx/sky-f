@@ -18,7 +18,7 @@
           style="animation-delay: 0.57s;">anytime, anywhere.</span>
       </p>
 <a
-  href="#storage-features"
+  href="/app"
   class="group relative inline-block rounded-full border border-[#0B77F3] mb-6
          bg-[#0B77F3] overflow-hidden transition-colors
          duration-300 animate-pulse-fade-in opacity-0"
