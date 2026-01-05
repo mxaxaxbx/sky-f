@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-[#EDF5FF] font-alexandria py-16 px-8">
+  <section class="bg-[var(--bg)] font-alexandria py-16 px-8">
     <div class="container mx-auto text-center  mt-0 lg:mt-8">
       <h2 class="text-5xl md:text-6xl lg:text-8xl
            text-[#0B77F3] font-bold mb-6 sm:leading-tight">

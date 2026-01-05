@@ -1,12 +1,12 @@
 <template>
-   <section class="bg-[#EDF5FF] font-alexandria py-2  pt-40 pb-8">
+   <section class="bg-[var(--bg)] font-alexandria py-2  pt-40 pb-8">
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
         <div class="absolute w-full lg:h-52 h-20
-          bg-gradient-to-r from-transparent to-[#EDF5FF]/100">
+          bg-slide">
         </div>
-        <div class="relative overflow-hidden w-full">
+        <div class="relative overflow-hidden w-full bg-slide">
         <div class="absolute w-full lg:h-46 h-20
-          bg-gradient-to-r from-transparent to-[#EDF5FF]/50">
+          bg-slide">
         </div>
         <object id="Welcome"
               aria-label="Welcome SVG"
@@ -34,8 +34,8 @@
       </div>
       <div
         class="container w-full lg:w-[75%]
-          flex flex-row items-center justify-between
-          mx-auto gap-4
+          flex flex-row items-center justify-center
+          mx-auto gap-8
           pt-16 pb-20 px-6 lg:px-12
           overflow-x-auto lg:overflow-x-visible
           hide-scrollbar"
@@ -44,9 +44,10 @@
           class="
             animated-card
             flex flex-col items-center justify-between
-            bg-[#ffffff]
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
             w-80 min-w-80 max-w-80 h-92
-            rounded-[56px]
+            rounded-lg
             pt-10 pb-10 gap-y-2
           "
         >
@@ -104,9 +105,10 @@
           class="
             animated-card
             flex flex-col items-center justify-between
-            bg-[#ffffff]
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
             w-80 min-w-80 max-w-80 h-92
-            rounded-[56px]
+            rounded-lg
             pt-10 pb-10 gap-y-2
           "
         >
@@ -164,9 +166,10 @@
           class="
             animated-card
             flex flex-col items-center justify-between
-            bg-[#ffffff]
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
             w-80 min-w-80 max-w-80 h-92
-            rounded-[56px]
+            rounded-lg
             pt-10 pb-10 gap-y-2
           "
         >

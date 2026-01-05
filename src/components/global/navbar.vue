@@ -1,12 +1,12 @@
 <template>
   <nav
     class="
-      font-alexandria
+      fixed z-50
+      font-sans text-[var--(text)]
       bg-[var(--bg)]
-      text-[var--(text)]
-      w-full h-12
-      px-2 sm:px-4 pt-1.5
       border-b border-[var(--border)]
+      w-full h-12
+      px-2 sm:px-4
     ">
     <div class="flex items-center justify-between h-full">
       <div class="flex space-x-8">
@@ -64,13 +64,15 @@
           class="absolute left-3 top-1/2 -translate-y-1/2 h-4 pointer-events-none" />
       </form>
     </div>
-    <div v-if="!isAuth" class="absolute left-1/2 -translate-x-1/2 flex items-center">
-      <div
+
+<!--menu navbar traditional-->
+    <!-- <div v-if="!isAuth" class="absolute left-1/2 -translate-x-1/2 flex items-center"> -->
+      <!-- <div
         class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up"
         style="animation-delay: 0.70s"
-      ></div>
+      ></div> -->
 
-      <div class="flex items-center gap-16 text-gray-500 font-semibold text-md">
+      <!-- <div class="flex items-center gap-16 text-gray-500 font-semibold text-md">
         <a
           href="#features"
           class="nav-link animate-fade-in-up"
@@ -88,11 +90,11 @@
           class="nav-link animate-fade-in-up"
           style="animation-delay: 1.0s"
         >Services</a>
-      </div>
+      </div> -->
 
-      <div
+      <!-- <div
         class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up" style="animation-delay: 0.70s"></div>
-    </div>
+    </div> -->
 
     <!-- sing in -->
     <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
@@ -101,8 +103,7 @@
           block
           border border-[#0A77F3]
           text-sm text-[#0A77F3] font-regular
-          h-8
-          px-6 py-2
+          pl-4 pr-3 py-1
           rounded-full
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]

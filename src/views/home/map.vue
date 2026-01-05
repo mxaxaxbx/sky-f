@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-[#EDF5FF] pt-0 lg:pt-16 pb-24 overflow-hidden">
+  <section class="bg-[var(--bg)] pt-0 lg:pt-16 pb-24 overflow-hidden">
     <div class="container flex flex-col md:flex-row
     justify-between items-center gap-10 md:gap-20 mx-auto w-[90%] md:w-[75%]">
       <!-- Mapa -->

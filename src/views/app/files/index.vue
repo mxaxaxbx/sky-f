@@ -48,115 +48,14 @@
       flex flex-row items-start
       bg-[var(--bg)]
       pt-10
-      h-full
+      h-screen
       font-alexandria
     ">
-    <!--files sidebar-->
-    <!-- <div class="hidden sm:flex w-[300px] h-full bg-[#EDF5FF] pt-4">
-      <router-link to="/app/files" class="
-        flex items-center
-        bg-green-200
-        h-8 w-full
-        pl-8
-        py-6
-        text-lg font-semibold text-[#3d3d3d] font-Alexandria
-        border-l-4 border-white
-        hover:border-l-4 hover:border-[#0A77F3]
-        ">
-        <img src="/icon/icon-cloudDrive.svg" alt="icon" class="h-6 mr-3" />
-        Cloud drive
-      </router-link>
-    </div> -->
-
-    <div
-      class="
-        bg-[var(--bg)]
-        border-r border-[var(--border)]
-        h-screen
-        sticky left-0 top-4
-        w-[60px]
-        hover:w-48
-        pt-4 px-2
-        transition-all duration-900
-        z-10 group
-        hidden sm:block
-      "
-    >
-    <ul class="space-y-1 fixed text-[var(--text)]">
-        <li class="border w-full">
-          <router-link to="/app/files" v-slot="{ isExactActive }">
-            <a
-              :class="[
-                'flex items-center w-full px-2 py-2 text-sm rounded-md',
-                'transition-all duration-200 group',
-                'hover:bg-[var(--bg-secondary)]',
-                isExactActive
-                  ? 'opacity-100'
-                  : 'opacity-30 hover:opacity-100'
-              ]">
-              <img
-                src="/icon/icon-cloudDrive.svg"
-                alt="clouderive"
-                class="h-6" />
-              <span
-                class="
-                  ml-0 group-hover:ml-4
-                  w-0 group-hover:w-auto
-                  opacity-0 group-hover:opacity-100
-                  overflow-hidden whitespace-nowrap
-                  transition-all duration-300
-                ">
-                Cloud Drive
-              </span>
-            </a>
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/app/prueba" v-slot="{ isExactActive }">
-            <a
-              :class="[
-                'flex items-center w-full px-2 py-2 text-sm rounded-md',
-                'transition-all duration-200 group',
-                'hover:bg-[var(--bg-secondary)]',
-                isExactActive
-                  ? 'opacity-100'
-                  : 'opacity-30 hover:opacity-100'
-              ]">
-              <img
-                src="/icon/icon-cloudDrive.svg"
-                alt="clouderive"
-                class="h-6" />
-              <span
-                class="
-                  ml-0 group-hover:ml-4
-                  w-0 group-hover:w-auto
-                  opacity-0 group-hover:opacity-100
-                  overflow-hidden whitespace-nowrap
-                  transition-all duration-300
-                ">
-                Cloud Drive
-              </span>
-            </a>
-          </router-link>
-        </li>
-      </ul>
-      <button
-          @click="toggleTheme"
-          class="
-          rounded-full fixed bottom-4 mx-3">
-          <img
-            :src="isLight
-            ? '/icon/icon-light.svg'
-            : '/icon/icon-dark.svg'"
-            alt="theme toggle"
-            class="w-5 h-5 opacity-70 hover:opacity-100 transition" />
-        </button>
-    </div>
     <!--right side -->
     <div class="
-        flex-1 flex flex-col items-start
-        h-screen px-0  pt-0
-        sm:px-8 sm:pt-6">
+      flex flex-col items-start
+      px-0  pt-0
+      sm:px-8 sm:pt-6">
       <!-- search box movil-->
       <div
         v-if="!isAuth"

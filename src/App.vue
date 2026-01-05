@@ -1,251 +1,214 @@
 <template>
-  <div class="bg-[#EDF5FF]">
-    <Notifications />
-    <!-- Dark overlay -->
+  <div class="bg-[var(--bg)] min-h-screen">
+    <!-- Dark overlay (mobile only) -->
     <div
       v-if="showSidebar"
-      class="fixed inset-0 bg-black opacity-50 z-30"
+      class="fixed inset-0 bg-black opacity-50 z-30 lg:hidden"
       @click="toggleSidebar"
       @keydown="toggleSidebar"
-    ></div>
+      ></div>
     <!-- menu -->
     <div
-      v-click-outside="clickOutside"
       class="
         w-full fixed
-        z-50
-        -mt-2
-        mb-8
+        z-40
       "
     >
-      <NavBar/>
+      <Notifications />
+      <Navbar />
+
       <!-- sidebar -->
       <Sidebar />
     </div>
+
     <!-- content -->
     <div
-      class="
-        min-h-[96vh 6rem]
-        z-40
-        font-alexandria
-      "
-      :class="{
-        'blocker': showSidebar,
-      }"
-    >
-      <router-view />
-    </div>
-    <!-- footer -->
-    <footer id="footer"
-      v-if="isAuth"
-      class="bg-[#0A77F3] text-white font-alexandria pt-8 px-6 pb-10 md:p-20 overflow-hidden">
-        <div class="container w-[100%] md:w-[75%] mx-auto
-        flex flex-col md:flex-row h-full md:h-auto">
-          <!--Logo-->
-          <div
-            class="flex-1 flex flex-col items-center text-center pt-8 md:pt-4
-              order-2 md:order-none md:items-start md:text-left gap-2">
-            <img src="/dgsky-logo-white.svg" alt="sky logo" class="w-24 mb-4">
-            <p class="text-md md:text-lg font-bold md:font-semibold">
-              A digital experience from Digi Apps.
-            </p>
-            <p class="text-md md:text-md font-light">Simple. Safe. Always with you.</p>
-            <p class="text-xs font-light mt-16">
-              &copy; 2024 sky. All rights reserved.</p>
-          </div>
-        <div class="flex-1 pt-8 px-1 flex flex-col
-        md:flex-row md:gap-24 mb-20 md:mb-1 md:mx-auto">
-          <!--Products-->
-            <div class="flex-1 footer-col border-t border-b border-white/20 md:border-white/0">
-              <button class="w-full flex justify-between items-center text-left md:hidden"
-                @click="toggleFooter('products')">
-                <h3 class="text-lg my-4 font-bold">Products</h3>
-                <span class="text-xl font-bold">
-                  {{ openFooter.includes('products') ? '-' : '+' }}
-                </span>
-              </button>
-             <h3 class="hidden md:block text-md font-bold mb-4">Products</h3>
-
-            <ul class="overflow-hidden transition-all duration-300 ease-in-out
-                      space-y-4 text-white/70 text-sm pl-4 md:pl-1
-                      md:max-h-none md:opacity-100 md:overflow-visible md:transition-none"
-                :class="openFooter.includes('products')
-                  ? 'max-h-100 opacity-100'
-                  : 'max-h-0 opacity-0'">
-                  <li><a href="#" class="hover:text-white/100 hover:font-semibold">Sky</a></li>
-                  <li>
-                    <a
-                      href="https://fireweb.digiapps.com.co/"
-                      target="_blank"
-                      class="hover:text-white/100 hover:font-semibold">Fireweb</a></li>
-                  <li><a href="#" class="hover:text-white/100 hover:font-semibold">DigiCare</a></li>
-                  <br>
-                </ul>
-            </div>
-          <!-- Help -->
-          <div class="flex-1 footer-col border-b border-white/20 md:border-white/0">
-              <button class="w-full flex justify-between items-center text-left md:hidden"
-                @click="toggleFooter('help')">
-                <h3 class="text-lg my-4 font-bold">Help</h3>
-                <span class="text-xl font-bold">
-                  {{ openFooter.includes('help') ? '-' : '+' }}
-                </span>
-              </button>
-             <h3 class="hidden md:block text-md font-bold mb-4">Help</h3>
-
-            <ul class="overflow-hidden transition-all duration-300 ease-in-out
-                      space-y-4 text-white/70 text-sm pl-4 md:pl-1
-                      md:max-h-none md:opacity-100 md:overflow-visible md:transition-none"
-                :class="openFooter.includes('help')
-                  ? 'max-h-100 opacity-100'
-                  : 'max-h-0 opacity-0'">
-                  <li>
-                    <a href="#"
-                      class="hover:text-white/100 hover:font-semibold">Help Center
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#"
-                      class="hover:text-white/100 hover:font-semibold">Contact Us
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#"
-                      class="hover:text-white/100 hover:font-semibold">
-                      Vulnerability Reward Programme
-                    </a>
-                  </li>
-                  <br>
-                </ul>
-          </div>
-          <!-- Legal -->
-          <div class="flex-1 footer-col border-b border-white/20 md:border-white/0">
-              <button class="w-full flex justify-between items-center text-left md:hidden"
-                @click="toggleFooter('legal')">
-                <h3 class="text-lg my-4 font-bold">Legal</h3>
-                <span class="text-xl font-bold">
-                  {{ openFooter.includes('legal') ? '-' : '+' }}
-                </span>
-              </button>
-             <h3 class="hidden md:block text-md font-bold mb-4">Legal</h3>
-
-            <ul class="overflow-hidden transition-all duration-300 ease-in-out
-                      space-y-4 text-white/70 text-sm pl-4 md:pl-1
-                      md:max-h-none md:opacity-100 md:overflow-visible md:transition-none"
-                :class="openFooter.includes('legal')
-                  ? 'max-h-100 opacity-100'
-                  : 'max-h-0 opacity-0'">
-              <li>
-                <a href="#"
-                  class="hover:text-white/100 hover:font-semibold">Terms of Service</a></li>
-              <li>
-                <a href="#"
-                  class="hover:text-white/100 hover:font-semibold">Privacy Policy</a></li>
-              <li>
-                <a href="#"
-                  class="hover:text-white/100 hover:font-semibold">Transparency Report</a></li>
-              <li>
-                <a href="#"
-                  class="hover:text-white/100 hover:font-semibold">Copyright Notice</a></li>
-              <li>
-                <a href="#"
-                  class="hover:text-white/100 hover:font-semibold">Submission</a></li>
-            <br>
-            </ul>
-          </div>
+      class="overflow-y-auto transition-[padding] duration-300"
+      :class="showSidebar ? 'pl-64' : 'pl-10'"
+      >
+      <div class="flex-1 flex flex-col">
+        <div class="min-h-screen">
+          <router-view />
         </div>
+        <!-- footer -->
+        <footer
+          v-if="isAuth"
+          class="bg-[var(--bg)] group">
+          <div class="w-full h-px bg-line"></div>
+          <div
+            class="
+            container mx-auto px-24 text-center">
+            <div
+              class="
+                flex justify-between
+                w-full
+                py-16
+                mb-8
+              ">
+              <router-link
+                :to="isAuth ? '/app' : '/'"
+                class=""
+              >
+                <img
+                  :src="isLight
+                  ? '/img/logo-digi-light.svg'
+                  : '/img/logo-digi.svg'"
+                  alt="Logo"
+                  class="
+                  h-6 opacity-30 group-hover:opacity-100
+                  courser-pointer"
+                />
+              </router-link>
+              <div
+                class="
+                  flex space-x-20 mr-20 opacity-30
+                  group-hover:opacity-100 transition-all duration-500 ease-in-out
+                ">
+              <div class="text-left">
+                <h3 class="text-sm text-[var(--text)] font-regular mb-4">Products</h3>
+                <ul
+                  class="
+                    space-y-2
+                    text-xs text-[var(--text)] font-light
+                    pl-1
+                  ">
+                  <li><a
+                    href="#"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">
+                      Sky</a></li>
+                  <li><a
+                    href="#"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">Fireweb</a></li>
+                  <li><a
+                    href="#"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">DigiCare</a></li>
+                </ul>
+              </div>
+              <div class="text-left">
+                <h3 class="text-sm text-[var(--text)] font-regular mb-4">Contact Us</h3>
+                <ul
+                  class="
+                    space-y-2
+                    text-xs text-[var(--text)] font-light
+                    pl-1
+                  ">
+                  <li><a
+                    href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
+                    target="_blank"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">
+                      Help Center</a></li>
+                  <li><a
+                    href="https://discord.gg/UsGXbTkJSE"
+                    target="_blank"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">Discord</a></li>
+                </ul>
+              </div>
+              <div class="text-left">
+                <h3 class="text-sm text-[var(--text)] font-regular mb-4">Legal</h3>
+                <ul
+                  class="
+                    space-y-2
+                    text-xs text-[var(--text)] font-light
+                    pl-1
+                  ">
+                  <li><a
+                    :href="`${digiSystemslink}/privacy-policy`"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">
+                      Privacy Policy</a></li>
+                </ul>
+              </div>
+            </div>
+            </div>
+            <div
+              class="
+                flex justify-between items-center
+                border-t border-[var(--border)]
+                pt-8
+                pb-20
+              ">
+            <p class="text-xs text-[var(--text-secondary)] font-light">&copy;
+              {{ currentYear }} digi systems All rights reserved.</p>
+              <button
+              @click="toggleTheme"
+              class="
+              rounded-full">
+              <img
+                :src="isLight
+                ? '/icon/icon-light.svg'
+                : '/icon/icon-dark.svg'"
+                alt="theme toggle"
+                class="w-5 h-5 opacity-70 hover:opacity-100 transition" />
+            </button>
+            </div>
+          </div>
+        </footer>
       </div>
-    </footer>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {
-  defineAsyncComponent,
   computed,
-  onMounted,
+  watch,
+  defineAsyncComponent,
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRoute } from 'vue-router';
 
-const openFooter = ref<string[]>([]);
-
-function toggleFooter(item: string) {
-  if (openFooter.value.includes(item)) {
-    // si ya está abierto, lo quitamos
-    openFooter.value = openFooter.value.filter((i) => i !== item);
-  } else {
-    // si no está abierto, lo agregamos
-    openFooter.value.push(item);
-  }
-}
-onMounted((): void => {
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Estado inicial del fondo (cerrado)
-  gsap.set('#footer', { clipPath: 'inset(100% 0% 0% 0%)' });
-
-  // Línea de tiempo
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '#footer',
-      start: 'top 90%',
-      toggleActions: 'play none none reverse',
-    },
-  });
-
-  // 1) Despliegue del fondo
-  tl.to('#footer', {
-    clipPath: 'inset(0% 0% 0% 0%)',
-    duration: 1.2,
-    ease: 'power3.out',
-  });
-
-  // 2) Logo
-  tl.from('#footer img', {
-    y: 40,
-    opacity: 0,
-    duration: 0.5,
-    ease: 'power2.out',
-    delay: 0.0,
-  }); // empieza antes de que termine el fondo
-
-  // 3) Texto bajo el logo
-  tl.from('#footer .flex-1.flex.flex-col p', {
-    y: 20,
-    opacity: 0,
-    duration: 0.9,
-    ease: 'power2.out',
-    stagger: 0.04,
-  });
-
-  // 4) Mapa de sitio (tres columnas)
-  tl.from('#footer .footer-col .mx-auto.pt-8 > div', {
-    y: 30,
-    opacity: 0,
-    duration: 0.9,
-    ease: 'power2.out',
-    stagger: 0.1,
-  }, '-=1.1');
-});
-
-const NavBar = defineAsyncComponent(() => import('./components/global/nav-bar.vue'));
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Notifications = defineAsyncComponent(() => import('@/components/global/notifications.vue'));
+const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
 
 const store = useStore();
+const route = useRoute();
 
 const showSidebar = computed(() => store.state.sidebar);
+const isLight = computed(() => store.state.theme?.theme === 'light');
 
-function clickOutside() {
+const year = ref(new Date().getUTCFullYear());
+
+const clickOutside = () => {
   if (showSidebar.value) store.commit('toggleSidebar');
-}
+};
 
-function toggleSidebar() {
+const toggleTheme = () => {
+  store.dispatch('theme/toggleTheme');
+  const newTheme = store.state.theme.theme;
+
+  document.documentElement.classList.toggle('light', newTheme === 'light');
+};
+
+const toggleSidebar = () => {
   store.commit('toggleSidebar');
-}
+};
+
+watch(
+  // on url change close sidebar
+  () => route.path,
+  () => {
+    if (showSidebar.value) store.commit('toggleSidebar');
+  },
+);
 
 </script>
 
@@ -257,6 +220,6 @@ function toggleSidebar() {
   width: 100%;
   height: 100%;
   /* background-color: rgba(0, 0, 0, 0.9); /* Change the alpha value for darkness */
-  /* z-index: 20; Ensure it's above the sidebar */
+  z-index: 20; /* Ensure it's above the sidebar */
 }
 </style>

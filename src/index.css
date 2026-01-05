@@ -69,3 +69,23 @@
   background-size: 100% 100%;
   opacity: 1; /* ← esta es la que da el efecto suave */
 }
+
+.bg-slide {
+  --fade: 600px;
+
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--fade),
+    black calc(100% - var(--fade)),
+    transparent
+  );
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--fade),
+    black calc(100% - var(--fade)),
+    transparent
+  );
+}
