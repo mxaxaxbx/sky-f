@@ -41,17 +41,21 @@
           <div class="w-full h-px bg-line"></div>
           <div
             class="
-            container mx-auto px-24 text-center">
+            container mx-auto px-12 text-center
+
+            sm:px-24">
             <div
               class="
-                flex justify-between
+                flex flex-col
+                justify-between
                 w-full
-                py-16
-                mb-8
+                py-16 mb-8
+
+                sm:flex-row sm:items-start
               ">
               <router-link
                 :to="isAuth ? '/app' : '/'"
-                class=""
+                class="mb-10 sm:mb-0"
               >
                 <img
                   :src="isLight
@@ -59,14 +63,21 @@
                   : '/logo-digi.svg'"
                   alt="Logo"
                   class="
-                  h-6 opacity-30 group-hover:opacity-100
+                  h-6 opacity-30
+                  group-hover:opacity-100
                   courser-pointer"
                 />
               </router-link>
               <div
                 class="
-                  flex space-x-20 mr-20 opacity-30
-                  group-hover:opacity-100 transition-all duration-500 ease-in-out
+                  flex space-x-12
+                  mr-0
+                  opacity-30
+                  group-hover:opacity-100
+                  transition-all duration-500 ease-in-out
+
+                  sm:mr-20 sm:mx-0
+                  sm:space-x-20
                 ">
               <div class="text-left">
                 <h3 class="text-sm text-[var(--text)] font-regular mb-4">Products</h3>
