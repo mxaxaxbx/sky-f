@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[var(--bg)] min-h-screen">
+  <div class="bg-[var(--bg)] min-h-full">
     <!-- Dark overlay (mobile only) -->
     <div
       v-if="showSidebar"
@@ -59,8 +59,8 @@
               >
                 <img
                   :src="isLight
-                  ? '/logo-digi-light.svg'
-                  : '/logo-digi.svg'"
+                  ? '/img/logo-digi-light.svg'
+                  : '/img/logo-digi.svg'"
                   alt="Logo"
                   class="
                   h-6 opacity-30

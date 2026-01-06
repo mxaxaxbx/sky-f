@@ -17,11 +17,11 @@
           >
           <img
             :src="isLight
-            ? '/logo-sky.svg'
-            : '/logo-Sky-light.svg'"
+            ? '/img/logo-sky.svg'
+            : '/img/logo-sky-light.svg'"
             alt="logosky"
             class="
-              h-[25px]
+              h-5
               courser-pointer"
               />
         </router-link>
@@ -119,17 +119,20 @@
 
       <Dropdown v-if="isAuth">
         <template #trigger="{ toggle }">
-          <button @click="toggle" class="
-                relative flex items-center justify-center
-                bg-[#0B77F3]
-                h-6 w-6
-                mr-0
-                rounded-full
-                text-white
-                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                transition-all duration-300 ease-in-out
-              ">
+          <button
+            @click="toggle"
+            class="
+              relative flex items-center justify-center
+              bg-[#0B77F3]
+              h-6 w-6
+              mr-0
+              rounded-full
+              text-white
+
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              transition-all duration-300 ease-in-out
+            ">
             <!-- User initials -->
             <span
               v-if="!user.profilePhoto && user.firstName && user.lastName"
@@ -162,11 +165,14 @@
           <!-- Avatar, email, user name -->
           <div class="flex flex-col items-center mb-10">
             <div class="relative --w-16 --h-16">
-              <img :src="user.profilePhoto || '/img/user.svg'" alt="Avatar" class="
-                    rounded-full
-                    w-20 h-20
-                    border-2 border-[#9DC9FA]
-                    object-cover border" />
+              <img :src="user.profilePhoto || '/img/user.svg'"
+                alt="Avatar"
+                class="
+                  rounded-full
+                  w-20 h-20
+                  border-2 border-[#9DC9FA]
+                  object-cover border
+                "/>
             </div>
 
             <h2 class="mt-4 text-lg font-semibold text-[var(--text)]">¡Hi,
@@ -200,8 +206,8 @@
           <div class="flex flex-col items-center mx-8 mb-6">
             <!-- community -->
             <h1 class="text-xs font-regular ml-5 sm:ml-8 text-[#3d3d3d] mb-2 self-start
-                ">
-              Community</h1>
+                ">Community
+            </h1>
 
             <a href="https://discord.com/invite/UsGXbTkJSE"
               target="_blank"
@@ -220,17 +226,19 @@
                 transition-colors duration-300
               ">
               <div class="flex items-center gap-2">
-                <img src="/icon/icon-discordd.svg" alt="Discord" class="h-5 mx-1" />
+                <img src="/icon/icon-discordd.svg"
+                alt="Discord"
+                class="h-4 mx-1" />
                 <span>Discord</span>
               </div>
-              <img src="/icon/icon-outPage.svg" alt="External link" class="w-[20px]" />
+              <img src="/icon/icon-outPage.svg" alt="External link" class="h-4" />
             </a>
           </div>
           <div class="flex flex-col items-center mx-8 mb-6">
             <!-- Support -->
             <h1 class="text-xs font-regular ml-5 sm:ml-8 text-[#3d3d3d] mb-2 self-start
-                ">
-              Support</h1>
+                ">Support
+            </h1>
 
             <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
               target="_blank"
@@ -249,7 +257,7 @@
                 transition-colors duration-300
               ">
               <div class="flex items-center gap-2">
-                <img src="/icon/icon-mail.svg" alt="mail" class="h-5 mx-1" />
+                <img src="/icon/icon-mail.svg" alt="mail" class="h-4 mx-1" />
                 <span>support@digiapps.com.co</span>
               </div>
             </a>
@@ -257,21 +265,22 @@
 
           <!-- Actions -->
           <div class="flex flex-col items-center space-y-2 mt-12">
-            <button @click="logout" class="
-                  flex items-center justify-around
-                  bg-[#0A77F3]
-                  w-36
-                  rounded-full
-                  py-1
-                  text-sm text-white font-regular
-                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  transition-all duration-300 ease-in-out
+            <button @click="logout"
+              class="
+                flex items-center justify-around
+                bg-[#0A77F3]
+                w-36
+                rounded-full
+                py-1
+                text-sm text-white font-regular
 
-                ">
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                transition-all duration-300 ease-in-out
+              ">
               <span class="flex items-center space-x-2">
                 <span>Sign out</span>
-                <img src="/icon/icon-logOut.svg" alt="icon" class="ml-2 w-[20px]" />
+                <img src="/icon/icon-logOut.svg" alt="icon" class="ml-2 h-4" />
               </span>
             </button>
           </div>
