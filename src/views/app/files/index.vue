@@ -66,37 +66,44 @@
           class="text-[#a3a3a3]"></label>
 
         <!-- Contenedor relativo -->
-        <div class="relative w-full">
+        <form @submit.prevent="handleSearch" class="relative w-full">
           <!-- Input -->
           <input
+            v-model="query"
+            @input="handleInput"
             type="text"
             placeholder="Search everything"
             class="
               w-full
-              border border-[#0B77F3]/50
-              rounded-full font-light text-xs
               pl-8 pr-4 py-1
-              hover:border-[#0A77F3]
-              focus:ring-1 focus:ring-[#0A77F3]
+              bg-[var(--bg-secondary)]
+              border border-[#0B77F3]/50
+              rounded-full
+              font-light text-[var(--text)] text-xs
+
+              hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
+              hover:border-[var(--hover-border)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
               focus:outline-none
               transition-all duration-300
-            " />
+            "/>
 
           <!-- Ícono dentro del input -->
           <img src="/icon/icon-search.svg" alt="Search Icon"
             class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
-        </div>
+        </form>
       </div>
       <label for="fileInput" class="
           hidden sm:flex items-center
-          bg-[#0A77F3]
+          bg-[var(--color-primary)]
           text-white text-sm font-medium
           py-1 px-3
           rounded-full
-          cursor-pointer
+
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
+          cursor-pointer
         " :class="{ 'opacity-50': loading }">
         <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
         <span>Upload</span>
@@ -160,28 +167,53 @@
 <script setup lang="ts">
 import {
   ref,
-  computed,
-  defineAsyncComponent,
-  onMounted,
   watch,
+  defineAsyncComponent,
+  computed,
+  onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const DragDrop = defineAsyncComponent(() => import('@/components/app/dragdrop.vue'));
 
 const route = useRoute();
+const router = useRouter();
 const store = useStore();
+let searchTimeout: number | undefined;
+let timeout: number | undefined;
+
+const query = ref<string>('');
+const loading = ref(false);
+const file = ref<File | null>(null);
+const isDragging = ref(false); // Drag & Drop
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
 const isLight = computed(() => store.state.theme.theme === 'light');
-const query = ref<string>('');
 
-const loading = ref(false);
-const file = ref<File | null>(null);
+async function handleSearch() {
+  const payload = {
+    page: 1,
+    query: query.value,
+  };
 
-const isDragging = ref(false); // Drag & Drop
+  await store.dispatch('files/filter', payload);
+  router.replace({
+    query: {
+      ...payload,
+    },
+  });
+}
+
+async function handleInput() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    handleSearch();
+  }, 500);
+}
 
 // Lógica original de subida (sin cambios)
 async function uploadFile(ev: Event): Promise<void> {
@@ -277,10 +309,14 @@ onMounted(() => {
   getData();
 });
 
-watch(route, () => {
-  // find.value.page = Math.max(route.query.page ? Number(route.query.page) : 1, 1);
-  // find.value.query = route.query.query ? String(route.query.query) : '';
-  getData();
-});
+watch(
+  () => query.value,
+  () => {
+    if (timeout) clearTimeout(timeout);
 
+    timeout = window.setTimeout(() => {
+      handleSearch();
+    }, 500);
+  },
+);
 </script>

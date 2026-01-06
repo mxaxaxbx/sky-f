@@ -17,7 +17,7 @@
       "
     >
       <!-- sidebar -->
-      <Sidebar v-if="isAuth" />
+      <Sidebar v-if="isAuth"/>
     </div>
 
     <!-- content -->
@@ -27,8 +27,8 @@
       !isAuth
         ? 'pl-0'
         : showSidebar
-          ? 'pl-64'
-          : 'pl-10'
+          ? 'sm:pl-64 pl-0'
+          : 'sm:pl-10 pl-0'
       ">
       <div class="flex-1 flex flex-col">
         <div class="min-h-screen">

@@ -41,6 +41,7 @@
         transition-[width] duration-300 ease-out
 
         lg:shadow-none
+        hidden md:block
       "
       :class="showSidebar ? 'w-64' : 'w-12 mr-6'"
     >

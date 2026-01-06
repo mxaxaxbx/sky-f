@@ -2,11 +2,11 @@
   <nav
     class="
       fixed z-50
-      font-sans text-[var--(text)]
+      font-alexandria font-sans text-[var--(text)]
       bg-[var(--bg)]
       border-b border-[var(--border)]
-      w-full h-12
-      px-2 sm:px-4
+      w-full h-10
+      px-2  sm:px-4
     ">
     <div class="flex items-center justify-between h-full">
       <div class="flex space-x-8">
@@ -30,8 +30,8 @@
     <!-- search box -->
     <div v-if="isAuth" class="
         absolute left-1/2 -translate-x-1/2 flex items-center
-        w-[600px]
-        hidden lg:flex
+        md:w-80 lg:w-[600px]
+        hidden sm:flex
         text-xs
         ">
       <label for="search" class="text-[#a3a3a3] hidden"></label>
@@ -51,6 +51,7 @@
             border border-[#0B77F3]/50
             rounded-full
             font-light text-[var(--text)]
+
             hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
             hover:border-[var(--hover-border)]
             focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
@@ -98,19 +99,22 @@
 
     <!-- sing in -->
     <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
-      <a v-if="!isAuth" :href="usersLink" class="
-          flex items-center justify-center
-          block
-          border border-[#0A77F3]
-          text-sm text-[#0A77F3] font-regular
-          pl-4 pr-3 py-1
+      <a v-if="!isAuth" :href="usersLink"
+        class="
+          flex items-center
+          bg-[var(--bg-secondary)]
+          border border-[var(--color-primary)]
+          text-[var(--color-primary)] text-sm font-regular
+          pl-3 pr-2 py-0.5
           rounded-full
+
+          hover:bg-[var(--hover-bg)]
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
           ">
         Sign In
-        <img src="/icon/icon-signIn.svg" alt="icon" class="ml-2 w-[20px]" />
+        <img src="/icon/icon-signIn.svg" alt="icon" class="ml-2 h-4" />
       </a>
 
       <Dropdown v-if="isAuth">
@@ -179,33 +183,44 @@
             <!-- Manage Account Button -->
             <a :href="`${usersLink}/app/users/edit-profile`" class="
                   bg-[var(--bg-secondary)]
-                  w-48
-                  px-auto py-1 mt-6
-                  border border-[#0A77F3]/50 rounded-full
-                  text-[#0A77F3] text-xs font-medium text-center
-                  hover:bg-[#0A77F3] hover:text-white
-                  transition ease-in duration-150
+                  border border-[var(--color-primary)]
+                  rounded-full
+                  w-48 px-auto py-1 mt-6
+                  text-[var(--color-primary)] text-xs text-center font-medium
+
+                  hover:bg-[var(--hover-bg)]
+                  hover:text-[var(--text)]
+                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  transition-all duration-300 ease-in-out
                 " target="_blank">
               Manage your digi Account
             </a>
           </div>
           <div class="flex flex-col items-center mx-8 mb-6">
             <!-- community -->
-            <h1 class="text-xs font-regular ml-10 sm:ml-8 text-[#3d3d3d] mb-2 self-start
+            <h1 class="text-xs font-regular ml-5 sm:ml-8 text-[#3d3d3d] mb-2 self-start
                 ">
               Community</h1>
 
-            <a href="https://discord.com/invite/UsGXbTkJSE" target="_blank" class="
-                  flex items-center justify-between
-                  w-52 px-2 py-1
-                  rounded-full border border-[var(--border)]
-                  bg-[var(--bg-secondary)] text-[#868686]
-                  font-regular text-xs
-                  transition-all duration-300
-                  hover:border-[var(--hover-border)] hover:bg-[var(--hover-bg)]
-                ">
+            <a href="https://discord.com/invite/UsGXbTkJSE"
+              target="_blank"
+              class="
+                flex items-center justify-between
+                w-72 px-2 py-2
+                bg-[var(--bg-secondary)]
+                border border-[var(--border)]
+                rounded-full
+                text-[#868686] font-regular text-sm
+
+                sm:w-52 sm:text-xs sm:py-1
+
+                hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]
+                hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+                transition-colors duration-300
+              ">
               <div class="flex items-center gap-2">
-                <img src="/icon/icon-discordd.svg" alt="Discord" class="h-3 mx-1" />
+                <img src="/icon/icon-discordd.svg" alt="Discord" class="h-5 mx-1" />
                 <span>Discord</span>
               </div>
               <img src="/icon/icon-outPage.svg" alt="External link" class="w-[20px]" />
@@ -213,21 +228,28 @@
           </div>
           <div class="flex flex-col items-center mx-8 mb-6">
             <!-- Support -->
-            <h1 class="text-xs font-regular ml-10 sm:ml-4 text-[#3d3d3d] mb-2 self-start
+            <h1 class="text-xs font-regular ml-5 sm:ml-8 text-[#3d3d3d] mb-2 self-start
                 ">
               Support</h1>
 
-            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co" target="_blank" class="
-                  flex items-center justify-between
-                  w-52 px-2 py-1
-                  rounded-full border border-[var(--border)]
-                  bg-[var(--bg-secondary)] text-[#868686]
-                  font-regular text-xs
-                  transition-all duration-300
-                  hover:border-[var(--hover-border)] hover:bg-[var(--hover-bg)]
-                ">
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
+              target="_blank"
+              class="
+                flex items-center justify-between
+                w-72 px-2 py-2
+                bg-[var(--bg-secondary)]
+                border border-[var(--border)]
+                rounded-full
+                text-[#868686] font-regular text-sm
+
+                sm:w-52 sm:text-xs sm:py-1
+
+                hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]
+                hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+                transition-colors duration-300
+              ">
               <div class="flex items-center gap-2">
-                <img src="/icon/icon-mail.svg" alt="mail" class="h-3 mx-1" />
+                <img src="/icon/icon-mail.svg" alt="mail" class="h-5 mx-1" />
                 <span>support@digiapps.com.co</span>
               </div>
             </a>
