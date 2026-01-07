@@ -1,45 +1,69 @@
 <template>
-  <section class="bg-[var(--bg)] font-alexandria py-16 px-8">
+  <section class="bg-[var(--bg)] font-alexandria px-8 sm:py-14 px-8">
     <div class="container mx-auto text-center  mt-0 lg:mt-8">
-      <h2 class="text-5xl md:text-6xl lg:text-8xl
-           text-[#0B77F3] font-bold mb-6 sm:leading-tight">
-  <span class="block pt-16 animate-fadeInUp">Store. Share.</span>
-  <span class="block opacity-0 animate-fadeInUp" style="animation-delay: 0.3s;">
-    Access from Anywhere
-  </span>
-</h2>
-      <p class="text-md md:text-md lg:text-lg font-semibold text-[#5E5E5E] mb-10">
-        <span
-          class="block opacity-0 animate-fadeInUp"
-          style="animation-delay: 0.5s;">Keep your ideas, memories,
-        and projects safe and accessible</span>
-        <span
-          class="block opacity-0 animate-fadeInUp"
-          style="animation-delay: 0.57s;">anytime, anywhere.</span>
-      </p>
-<a
-  href="/app"
-  class="group relative inline-block rounded-full border border-[#0B77F3] mb-6
-         bg-[#0B77F3] overflow-hidden transition-colors
-         duration-300 animate-pulse-fade-in opacity-0"
-  style="animation-delay: 1s;"
->
-  <!-- Texto -->
-  <span
-    class="relative z-10 block pl-10 py-3 text-lg font-semibold
-    text-white transition-colors duration-300
-           group-hover:text-[#0A77F3]"
-  >
-    Get Started
-    <i class="fas fa-arrow-right pl-2 pr-8"></i>
-  </span>
+      <h2
+        class="
+          text-5xl text-[#0B77F3] font-bold my-8
 
-  <!-- Barrido blanco -->
-  <span
-    class="absolute inset-0 bg-white z-0 rounded-full transition-transform duration-300 ease-in-out
-           transform -translate-x-full group-hover:translate-x-0"
-  ></span>
-</a>
+          sm:leading-tight
+          md:text-8xl
+        ">
+        <span class="block pt-16 animate-fadeInUp">Store. Share.</span>
+        <span class="block opacity-0 animate-fadeInUp"
+          style="animation-delay: 0.3s;">
+          Access from Anywhere
+        </span>
+      </h2>
+      <p class="
+        text-md font-base
+        text-[var(--text-secondary)] font-sans
+        my-8
+
+        md:text-md
+        ">
+        <span
+          class="block opacity-0 animate-fadeInUp"
+          style="animation-delay: 0.5s;
+          ">Keep your ideas, memories,
+            and projects safe and accessible anytime, anywhere.</span>
+      </p>
+      <a
+        href="/app"
+        class="
+          group relative inline-block
+          bg-[var(--color-primary)]
+          border border-[var(--color-primary)]
+          rounded-full my-8
+          overflow-hidden
+
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          transition-colors duration-300 animate-pulse-fade-in opacity-0"
+        style="animation-delay: 1s;">
+        <!-- Texto -->
+        <span
+          class="relative z-10 block pl-4 py-1 text-md font-regular
+          text-white transition-colors duration-300
+          group-hover:text-[#0A77F3]
+          "
+        >
+          Get Started
+          <i class="fas fa-arrow-right pl-1 pr-4"></i>
+        </span>
+
+        <!-- Barrido blanco -->
+        <span
+          class="
+            absolute inset-0 z-0
+            bg-[var(--hover-bg)]
+            rounded-full
+
+            transition-transform duration-300 ease-in-out
+            transform -translate-x-full
+            group-hover:translate-x-0
+          ">
+        </span>
+      </a>
     </div>
     <div
       class="relative w-full h-full
@@ -52,23 +76,24 @@
         aria-label="Icons SVG"
         type="image/svg+xml"
         data="iconos.svg"
-        class="absolute w-80 md:w-80 lg:w-[450px] h-auto z-30"
+        class="absolute w-80 md:w-80 lg:w-[500px] h-auto z-30"
       ></object>
       <object
         id="network"
         aria-label="Network SVG"
         type="image/svg+xml"
         data="red.svg"
-        class="absolute w-80 md:w-80 lg:w-[450px] h-auto z-20"
+        class="absolute w-80 md:w-80 lg:w-[500px] h-auto z-20"
       ></object>
       <object
-        id="cloud"
-        aria-label="Cloud SVG"
-        type="image/svg+xml"
-        data="nube.svg"
-        class="absolute w-80 md:w-80 lg:w-[450px] h-auto z-10"
-      ></object>
-      <div
+  :key="isLight"
+  id="network"
+  type="image/svg+xml"
+  :data="isLight ? '/nube-dark.svg' : '/nube-light.svg'"
+  aria-label="Decorative animated cloud background"
+  class="absolute w-80 md:w-82 lg:w-[500px] h-auto z-10"
+/>
+            <div
         id="wrapper"
         class="translate-y-16 lg:translate-y-20 pl-6 lg:pl-2 w-80 md:w-80 lg:w-[450px] h-12 z-0"
         ref="wrapper"
@@ -80,11 +105,21 @@
 </template>
 
 <script setup>
-import { onMounted, ref, onBeforeUnmount } from 'vue';
+import {
+  onMounted,
+  ref,
+  computed,
+  watch,
+  onBeforeUnmount,
+} from 'vue';
+
+import { useStore } from 'vuex';
 import gsap from 'gsap';
 import { debounce } from 'lodash-es';
 
+const store = useStore();
 const canvas = ref(null);
+const isLight = computed(() => store.state.theme.theme === 'light');
 
 onMounted(() => {
   const canvasEl = canvas.value;
@@ -201,6 +236,14 @@ const animateSVG = (id, strokeColor, duration, step) => {
 onMounted(() => {
   animateSVG('network', '#ffffff', 0.7, 0.3);
   animateSVG('Icons', '#71C4FF', 1, 0.8);
+});
+
+watch(isLight, () => {
+  // pequeño delay para dejar que el nuevo SVG cargue
+  setTimeout(() => {
+    animateSVG('network', '#ffffff', 0.7, 0.3);
+    animateSVG('Icons', '#71C4FF', 1, 0.8);
+  }, 50);
 });
 
 </script>

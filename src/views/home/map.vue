@@ -1,71 +1,35 @@
 <template>
-  <section class="bg-[var(--bg)] pt-0 lg:pt-16 pb-24 overflow-hidden">
-    <div class="container flex flex-col md:flex-row
-    justify-between items-center gap-10 md:gap-20 mx-auto w-[90%] md:w-[75%]">
+  <section class="bg-[var(--bg)] py-0 lg:py-10 mb-20 overflow-hidden">
+    <div
+      class="
+        container
+        flex flex-col
+        items-center justify-center
+        mx-auto gap-8 px-2
+
+        sm:gap-20 md:flex-row
+      ">
       <!-- Mapa -->
       <object
         id="Icons"
         aria-label="Icons SVG"
         type="image/svg+xml"
         data="dgsky-mapa.svg"
-        class="w-full md:w-80 lg:w-[800px] h-auto z-30"
+        class="w-full md:w-80 lg:w-[600px] h-auto z-30"
       ></object>
 
       <!-- Texto + formulario -->
       <div class="w-[90%] md:w-auto">
-        <h2 class="text-4xl md:text-5xl text-left text-[#3D3D3D] font-bold mb-6 md:mb-10">
+        <h2 class="text-4xl text-left text-[var(--text-secondary)]
+          font-bold mb-6 md:mb-10 md:text-5xl">
           Trusted by Thousands <br /> Worldwide
         </h2>
 
-        <p class="text-base md:text-md text-left text-[#797979] font-semibold">
+        <p class="text-base md:text-md text-left text-[var(--text-terceary)] font-regular">
           Create your account and start storing your files with total peace of mind. <br />
           Access them anytime, anywhere, and share them effortlessly with the people <br />
           you trust the most.
         </p>
-
-        <!-- WRAPPER -->
-        <div class="w-full mt-8 md:mt-10 flex flex-col justify-center">
-          <!-- FORMULARIO -->
-          <div
-            ref="emailWrapper"
-            class="flex items-center mt-4 rounded-full border border-[#0A77F3]
-                   transition-colors duration-300 focus-within:bg-white bg-transparent"
-          >
-            <label for="email-input" class="sr-only">Email</label>
-            <input
-              id="email-input"
-              type="email"
-              placeholder="Enter your email"
-              class="
-                w-full
-                bg-transparent
-                font-semibold text-[#0A77F3]
-                px-4 md:px-6 py-1 md:py-2
-                focus:outline-none placeholder-[#71C4FF]
-                placeholder:text-md placeholder:font-light"
-            />
-            <button
-              @click="handleSubmit"
-              class="
-                bg-[#0A77F3]
-                lg:text-lg text-sm text-white font-semibold
-                lg:px-8 px-4 py-2 md:py-3 rounded-full
-              ">
-              Submit
-            </button>
-          </div>
-
-          <!-- ALERTA -->
-          <p
-            :class="[ // eslint-disable-next-line
-              'min-h-[1.5rem] ml-2 md:ml-8 mt-4 text-left text-sm font-semibold transition-all duration-300',
-              message ? 'opacity-100 visible ' : 'opacity-0 invisible',
-              isError ? 'text-red-500' : 'text-green-600'
-            ]"
-          >
-            {{ message || '‎' }}
-          </p>
-        </div>
       </div>
     </div>
   </section>

@@ -187,19 +187,20 @@
             </div>
 
             <!-- Manage Account Button -->
-            <a :href="`${usersLink}/app/users/edit-profile`" class="
-                  bg-[var(--bg-secondary)]
-                  border border-[var(--color-primary)]
-                  rounded-full
-                  w-48 px-auto py-1 mt-6
-                  text-[var(--color-primary)] text-xs text-center font-medium
+            <a :href="`${usersLink}/app/users/edit-profile`"
+              class="
+                bg-[var(--bg-secondary)]
+                border border-[var(--color-primary)]
+                rounded-full
+                w-48 px-auto py-1 mt-6
+                text-[var(--color-primary)] text-xs text-center font-medium
 
-                  hover:bg-[var(--hover-bg)]
-                  hover:text-[var(--text)]
-                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  transition-all duration-300 ease-in-out
-                " target="_blank">
+                hover:bg-[var(--hover-bg)]
+                hover:text-[var(--text)]
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                transition-all duration-300 ease-in-out"
+              target="_blank">
               Manage your digi Account
             </a>
           </div>

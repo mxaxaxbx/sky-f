@@ -1,45 +1,55 @@
 <template>
    <section class="bg-[var(--bg)] font-alexandria py-2  pt-40 pb-8">
+      <!-- Animación SVG bienvenida -->
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
-        <div class="absolute w-full lg:h-52 h-20
-          bg-slide">
-        </div>
+
+        <div class="absolute w-full lg:h-52 h-20 bg-slide"> </div>
         <div class="relative overflow-hidden w-full bg-slide">
-        <div class="absolute w-full lg:h-46 h-20
-          bg-slide">
+          <div class="absolute w-full lg:h-46 h-20 bg-slide"></div>
+
+          <object
+            id="Welcome"
+            aria-label="Welcome SVG"
+            type="image/svg+xml"
+            data="Welcome.svg"
+            class="w-auto lg:h-52 h-20 animate-slide-in-left">
+          </object>
         </div>
-        <object id="Welcome"
-              aria-label="Welcome SVG"
-              type="image/svg+xml"
-              data="Welcome.svg"
-              class="w-auto lg:h-52 h-20
-              animate-slide-in-left"></object>
       </div>
-      </div>
-      <div class="container w-[95%] md:[80%] lg:w-[70%]
-        flex flex-row items-center justify-between
-        mx-auto lg:pt-16 pt-12 pb">
-        <h2 id="animated-heading"
-        class="text-2xl lg:text-5xl font-bold lg:font-bold
-        lg:font-bold text-left mb-4">
-        We built a private cloud
-        <br> that puts you in control,<br> with a fast, intuitive,<br> and hassle-free
-  <span class="text-[#0B77F3] pl-2 lg:pl-0">Experience.</span>
-</h2>
+
+      <!-- Texto principal -->
+      <div
+        class="
+          container
+          flex flex-row items-center justify-center
+          mx-auto my-8 px-2 gap-4 sm:gap-20
+        ">
+        <h2
+          id="animated-heading"
+          class="
+            text-2xl text-left mb-4 font-semibold lg:text-5xl">
+            We built a private cloud
+          <br> that puts you in control,<br> with a fast, intuitive,<br> and hassle-free
+          <span class="text-[var(--color-primary)] pl-2 lg:pl-0">Experience.</span>
+        </h2>
+
+        <!--data rain-->
         <div id="wrapper2"
             class="opacity-50 hidden md:block"
             ref="wrapper2">
             <canvas ref="canvas2" class="block"></canvas>
         </div>
       </div>
+
+      <!-- Tarjetas de características -->
       <div
-        class="container w-full lg:w-[75%]
-          flex flex-row items-center justify-center
-          mx-auto gap-8
-          pt-16 pb-20 px-6 lg:px-12
-          overflow-x-auto lg:overflow-x-visible
-          hide-scrollbar"
-      >
+        class="
+          container w-full
+          flex flex-col items-center justify-center
+          mx-auto gap-4 my-12
+
+          sm:flex-row
+          ">
         <div
           class="
             animated-card
@@ -229,12 +239,27 @@ import {
   onBeforeUnmount,
   defineAsyncComponent,
   nextTick,
+  computed,
+  watch,
 } from 'vue';
+
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import { useStore } from 'vuex';
+
+const store = useStore();
 
 gsap.registerPlugin(ScrollTrigger);
+
+const isLight = computed(() => store.state.theme.theme === 'light');
+
+const getHeadingColors = () => ({
+  from: isLight.value ? '#0A77F3' : '#0A77F3',
+  to: getComputedStyle(document.documentElement)
+    .getPropertyValue('--text-secondary')
+    .trim(),
+});
 
 onMounted(() => {
   /* -------------------------
@@ -258,7 +283,6 @@ onMounted(() => {
       });
     });
   }
-
   /* ------------------------------------------
      Animación letra-por-letra reversible (heading)
      ------------------------------------------ */
@@ -285,16 +309,20 @@ onMounted(() => {
       }
     });
 
-    gsap.set(animatedSpans, { color: '#9DC9FA' });
+    const from = isLight.value ? '#9DC9FA' : '#9DC9FA';
+    const to = getComputedStyle(document.documentElement)
+      .getPropertyValue('--text-secondary')
+      .trim();
+    gsap.set(animatedSpans, { color: from });
 
     gsap.to(animatedSpans, {
-      color: '#3d3d3d',
+      color: to,
       stagger: 1,
       ease: 'none',
       scrollTrigger: {
         trigger: heading,
-        start: 'top 90%',
-        end: 'bottom 50%',
+        start: 'top 50%',
+        end: 'bottom 40%',
         scrub: true,
       },
     });
@@ -640,5 +668,15 @@ onMounted(() => { // animación welcome con aceleración inicial
   });
 
   observer.observe(svgObject);
+});
+
+watch(isLight, () => {
+  const heading = document.getElementById('animated-heading');
+  if (!heading) return;
+
+  const spans = heading.querySelectorAll('span');
+
+  const { from } = getHeadingColors();
+  gsap.set(spans, { color: from });
 });
 </script>
