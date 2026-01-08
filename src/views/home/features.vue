@@ -1,5 +1,5 @@
 <template>
-   <section class="bg-[var(--bg)] font-alexandria py-2  pt-40 pb-8">
+   <section class="bg-[var(--bg)] font-alexandria font-sans py-2  pt-40 pb-8">
       <!-- Animación SVG bienvenida -->
       <div class="reltive w-full h-full flex items-left justify-left pt-12">
 
@@ -50,30 +50,37 @@
 
           sm:flex-row
           ">
+
+        <!-- seguridad -->
         <div
           class="
+            group
             animated-card
-            flex flex-col items-center justify-between
+            flex flex-col
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            w-80 min-w-80 max-w-80 h-92
+            h-96 px-6 pt-6
             rounded-lg
-            pt-10 pb-10 gap-y-2
-          "
-        >
-        <h3
-          class="
-            text-[#0A77F3] text-3xl font-bold
-            mt-2
-          "
-        >
-          Secure Storage
-        </h3>
+
+            hover:border-[var(--color-primary)]
+            hover:bg-[var(--hover-bg)]
+            hover:shadow-[0_0_10px_5px_rgba(10,119,243,0.2)]
+            transition-all duration-300
+          ">
+          <div class="flex flex-col gap-6">
+            <h3 class="
+              text-[var(--text)] text-xl font-semibold
+              ">Secure Storage
+            </h3>
+            <p class="text-[var(--text-terceary)] text-sm font-light leading-tight">
+              Store your files securely with<br />end-to-end encryption.
+            </p>
+          </div>
         <!-- seguridad -->
         <div
           ref="lockContainer"
-          class="w-64 h-64
-            relative flex items-center justify-center
+          class="relative flex items-center justify-center
+            mt-8 w-64 h-64 opacity-50 group-hover:opacity-100
           ">
           <!-- Base del candado -->
           <object
@@ -81,8 +88,7 @@
             aria-label="lockBase SVG"
             type="image/svg+xml"
             data="lock-base.svg"
-            class="absolute z-50 left-1/2 top-1/2
-            -translate-x-1/2 -translate-y-1/2 w-full h-full
+            class="absolute z-50
             ">
           </object>
           <!-- Círculo izquierdo -->
@@ -106,131 +112,141 @@
             alt="outer"
             class="absolute z-40"
           />
+          </div>
         </div>
-          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
-            Store your files securely with<br />end-to-end encryption.
-          </p>
-        </div>
-        <div
-          class="
-            animated-card
-            flex flex-col items-center justify-between
-            bg-[var(--bg-secondary)]
-            border border-[var(--border)]
-            w-80 min-w-80 max-w-80 h-92
-            rounded-lg
-            pt-10 pb-10 gap-y-2
-          "
-        >
-        <h3
-          class="
-            text-[#0A77F3] text-3xl font-bold
-            mt-2
-          "
-        >
-          Unlimited Access
-        </h3>
-       <!-- Aqui va la nueva animacion -->
-        <div
-          ref="planetContainer"
-          class="w-64 h-64
-            relative flex items-center justify-center
-          ">
-          <!-- Base del candado -->
-          <object
-            id="planetBase"
-            aria-label="planetBase SVG"
-            type="image/svg+xml"
-            data="sun.svg"
-            class="absolute z-50 left-1/2 top-1/2
-            -translate-x-1/2 -translate-y-1/2 w-full h-full
-            ">
-          </object>
-          <!-- Círculo izquierdo -->
-          <img
-            ref="orbit1"
-            src="/orbit1.svg"
-            alt="orbit1"
-            class="absolute z-20"
-          />
-          <!-- Círculo del medio -->
-          <img
-            ref="orbit2"
-            src="/orbit2.svg"
-            alt="orbit2"
-            class="absolute z-30"
-          />
-          <!-- Círculo derecho -->
-          <img
-            ref="orbit3"
-            src="/orbit3.svg"
-            alt="orbit3"
-            class="absolute z-40"
-          />
-        </div>
-          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
-            Collaborate instantly with your<br />friends and colleagues.
-          </p>
-        </div>
-        <div
-          class="
-            animated-card
-            flex flex-col items-center justify-between
-            bg-[var(--bg-secondary)]
-            border border-[var(--border)]
-            w-80 min-w-80 max-w-80 h-92
-            rounded-lg
-            pt-10 pb-10 gap-y-2
-          "
-        >
-        <h3
-          class="
-            text-[#0A77F3] text-3xl font-bold
-            mt-2
-          "
-        >
-          Organize Files
-        </h3>
-    <div class="w-64 h-64 relative flex" ref="organiceContainer">
-    <!-- Base -->
-    <img
-      src="Organice.svg"
-      alt="Organice"
-      class="absolute z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
-    />
 
-    <!-- Hotspots -->
-    <img
-      src="dgsky-organice1.svg"
-      alt=""
-      class="js-hotspot absolute h-[20px] z-50"
-      style="left: 165px; top: 110px;"
-    />
-    <img
-      src="dgsky-organice2.svg"
-      alt=""
-      class="js-hotspot absolute h-[20px] z-50"
-      style="left: 75px; top: 50px;"
-    />
-    <img
-      src="dgsky-organice3.svg"
-      alt=""
-      class="js-hotspot absolute h-[20px] z-50"
-      style="left: 130px; top: 225px;"
-    />
-    <img
-      src="dgsky-organice4.svg"
-      alt=""
-      class="js-hotspot absolute h-[20px] z-50"
-      style="left: -5px; top: 156px;"
-    />
-  </div>
-          <p class="text-[#797979] text-lg font-semibold leading-tight text-left">
-            Keep your files organized with<br />folders and tags for easy access.
-          </p>
+        <!-- Organize Files -->
+          <div
+            class="
+              group
+              animated-card
+              flex flex-col
+              bg-[var(--bg-secondary)]
+              border border-[var(--border)]
+              h-96 px-6 pt-6
+              rounded-lg
+
+              hover:border-[var(--color-primary)]
+              hover:bg-[var(--hover-bg)]
+              hover:shadow-[0_0_10px_5px_rgba(10,119,243,0.2)]
+              transition-all duration-300
+            ">
+            <div class="flex flex-col gap-6">
+            <h3 class="
+              text-[var(--text)] text-xl font-semibold
+              "> Organize Files
+            </h3>
+            <p class="text-[var(--text-terceary)] text-sm font-light leading-tight">
+              Keep your files organized with<br />folders and tags for easy access.
+            </p>
+          </div>
+          <div
+            ref="organiceContainer"
+            class="relative flex mt-8 w-64 h-64 opacity-50
+              group-hover:opacity-100 transition-opacity duration-300
+            ">
+            <!-- Base -->
+            <img
+              src="Organice.svg"
+              alt="Organice"
+              class="absolute z-50"
+            />
+
+            <!-- Hotspots -->
+            <img
+              src="dgsky-organice1.svg"
+              alt=""
+              class="js-hotspot absolute h-5 z-50"
+              style="left: 154px; top: 110px;"
+            />
+            <img
+              src="dgsky-organice2.svg"
+              alt=""
+              class="js-hotspot absolute h-5 z-50"
+              style="left: 95px; top: 40px;"
+            />
+            <img
+              src="dgsky-organice3.svg"
+              alt=""
+              class="js-hotspot absolute h-5 z-50"
+              style="left: 125px; top: 212px;"
+            />
+            <img
+              src="dgsky-organice4.svg"
+              alt=""
+              class="js-hotspot absolute h-[20px] z-50"
+              style="left: -5px; top: 156px;"
+            />
+          </div>
         </div>
-      </div>
-    </section>
+
+        <!-- Unlimited Access -->
+        <div
+          class="
+            group
+            animated-card
+            flex flex-col
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            pt-6 h-96 overflow-hidden
+            rounded-lg
+
+            hover:border-[var(--color-primary)]
+            hover:bg-[var(--hover-bg)]
+            hover:shadow-[0_0_10px_5px_rgba(10,119,243,0.2)]
+            transition-all duration-300
+          ">
+          <div class="flex flex-col gap-6 mx-6">
+            <h3 class="
+              text-[var(--text)] text-xl font-semibold
+              ">Unlimited Access
+            </h3>
+            <p class="text-[var(--text-terceary)] text-sm font-light">
+              Collaborate instantly with your<br />friends and colleagues.
+            </p>
+          </div>
+       <!-- Aqui va la nueva animacion -->
+        <div class="relative flex w-96">
+          <div
+            ref="planetContainer"
+            class="w-96 h-96 -top-8 left-16
+              absolute flex items-center justify-center
+              opacity-50 group-hover:opacity-100 transition-opacity duration-300
+            ">
+            <!-- Base del candado -->
+            <object
+              id="planetBase"
+              aria-label="planetBase SVG"
+              type="image/svg+xml"
+              data="sun.svg"
+              class="absolute h-54 z-50">
+            </object>
+            <!-- Círculo izquierdo -->
+            <img
+              ref="orbit1"
+              src="/orbit1.svg"
+              alt="orbit1"
+              class="absolute h-54 z-20"
+            />
+            <!-- Círculo del medio -->
+            <img
+              ref="orbit2"
+              src="/orbit2.svg"
+              alt="orbit2"
+              class="absolute h-54 z-30"
+            />
+            <!-- Círculo derecho -->
+            <img
+              ref="orbit3"
+              src="/orbit3.svg"
+              alt="orbit3"
+              class="absolute h-54 z-40"
+            />
+            </div>
+        </div>
+        </div>
+    </div>
+  </section>
 </template>
 <script setup>
 import {
