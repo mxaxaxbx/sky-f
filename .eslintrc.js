@@ -18,5 +18,6 @@ module.exports = {
     'vuejs-accessibility/label-has-for': 'off',
     'import/prefer-default-export': 'off',
     'linebreak-style': 'off',
+    'max-len': ['warn', { code: 210 }],
   },
 };
