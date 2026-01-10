@@ -73,53 +73,77 @@
                 w-80
                 ">
               <!-- icons -->
-              <i
+              <img
                 v-if="file.contentType === 'application/pdf'"
-                class="fas fa-file-pdf"
-              ></i>
-              <i
-                v-else-if="file.contentType === 'application/msword'"
-                class="fas fa-file-word"
-              ></i>
+                src="/icon/icon-pdf.svg"
+                alt="image file icon"
+                class="w-8"
+              />
+              <img
+                v-else-if="
+                  file.contentType === 'application/msword' ||
+                  file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                "
+                src="/icon/icon-doc.svg"
+                alt="Word file icon"
+                class="w-8"
+              />
+              <img
+                v-else-if="
+                  file.contentType === 'application/vnd.ms-excel' ||
+                  file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                "
+                src="/icon/icon-excel.svg"
+                alt="Word file icon"
+                class="w-8"
+              />
               <img
                 v-else-if="file.contentType === 'image/png'"
                 src="/icon/icon-png.svg"
                 alt="image file icon"
-                class="w-6"
+                class="w-8"
+              />
+              <img
+                v-else-if="file.contentType === 'image/gif'"
+                src="/icon/icon-png.svg"
+                alt="image file icon"
+                class="w-8"
               />
               <img
                 v-else-if="file.contentType === 'image/svg+xml'"
                 src="/icon/icon-svg.svg"
                 alt="image file icon"
-                class="w-6"
+                class="w-8"
               />
               <img
                 v-else-if="file.contentType === 'image/jpeg'"
                 src="/icon/icon-img.svg"
                 alt="image file icon"
-                class="w-6"
+                class="w-8"
               />
               <img
                 v-else-if="file.contentType === 'image/jpg'"
                 src="/icon/icon-img.svg"
                 alt="image file icon"
-                class="w-6"
+                class="w-8"
               />
               <img
                 v-else-if="file.contentType === 'video/mp4'"
                 src="/icon/icon-video.svg"
                 alt="image file icon"
-                class="w-6"
+                class="w-8"
               />
-              <i
+              <img
                 v-else-if="file.contentType === 'application/zip'"
-                class="fas fa-file-archive text-yellow-500 text-2xl"
-              ></i>
+                src="/icon/icon-zip.svg"
+                alt="image file icon"
+                class="w-8"
+              />
               <img
                 v-else-if="file.contentType === 'audio/mpeg'"
                 src="/icon/icon-audio.svg"
                 alt="image file icon"
-                class="w-6"
+                class="w-8"
               />
               <i v-else class="fas fa-file text-gray-500 text-2xl"></i>
               <!-- title -->

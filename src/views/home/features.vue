@@ -62,9 +62,10 @@
             flex flex-col
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            h-96 px-6 pt-6
+            h-96 px-6 w-80 sm:w-72 pt-6
             rounded-lg
             cursor-pointer
+            overflow-hidden
 
             hover:border-[var(--color-primary)]
             hover:bg-[var(--hover-bg)]
@@ -84,6 +85,7 @@
           <div
             class="relative flex items-center justify-center
               mt-6 w-64 h-64 opacity-50 group-hover:opacity-100
+              transition-all duration-300
             ">
             <!-- Base del candado -->
             <div class="flex items-center justify-center px-auto">
@@ -126,23 +128,28 @@
 
         <!-- Organize Files -->
           <div
-            ref="organiceContainer"
+            ref="cloudRef"
+            @mouseenter="isHover = true"
+            @mouseleave="isHover = false"
+            @focus="isHover = true"
+            @blur="isHover = false"
             class="
               group
               animated-card
               flex flex-col
               bg-[var(--bg-secondary)]
               border border-[var(--border)]
-              h-96 px-6 pt-6
+              h-96 w-80 sm:w-72 pt-6
               rounded-lg
               cursor-pointer
+              overflow-hidden
 
               hover:border-[var(--color-primary)]
               hover:bg-[var(--hover-bg)]
               hover:shadow-[0_0_10px_5px_rgba(10,119,243,0.2)]
               transition-all duration-300
             ">
-            <div class="flex flex-col gap-6">
+            <div class="flex flex-col gap-6 mx-6">
             <h3 class="
               text-[var(--text)] text-xl font-semibold
               "> Organize Files
@@ -152,41 +159,45 @@
             </p>
           </div>
           <div
-            class="relative flex mt-6 w-64 h-64 opacity-50
-              group-hover:opacity-100 transition-opacity duration-300
-            ">
-            <!-- Base -->
-            <img
-              src="Organice.svg"
-              alt="Organice"
-              class="absolute z-50"
-            />
+            class="
+              icon-cloud
+              relative flex mt-8
+              transition-all duration-300
+              ">
+            <div
+              v-for="(icon, index) in icons"
+              :key="index"
+              ref="iconRefs"
+              class="icon-item absolute flex flex-col gap-2"
+              :data-type="icon.type"
+              >
+              <!-- Audio -->
+              <svg v-if="icon.type === 'audio'" width="45" height="45" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path id="bg-path" d="M0 16C0 7.16344 7.16344 0 16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50H16C7.16344 50 0 42.8366 0 34V16Z" fill="var(--bg)"/>
+                <path id="line-path" d="M34 49V50H16V49H34ZM49 34V16C49 7.84502 42.4923 1.21 34.3867 1.00488L34 1H16C7.84502 1 1.21 7.50774 1.00488 15.6133L1 16V34C1 42.2843 7.71573 49 16 49V50L15.5869 49.9951C6.94127 49.776 0 42.6984 0 34V16C0 7.30155 6.94127 0.22398 15.5869 0.00488281L16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50V49C42.2843 49 49 42.2843 49 34Z" fill="var(--border)"/>
+                <path id="line-path" d="M30.7773 12C34.7661 12 38 15.2339 38 19.2227V30.7773C38 34.7661 34.7661 38 30.7773 38H19.2227C15.2339 38 12 34.7661 12 30.7773V19.2227C12 15.2339 15.2339 12 19.2227 12H30.7773ZM21.5605 19.3828V26.2441C21.3199 26.0971 21.0693 25.9866 20.8086 25.9131C20.5478 25.8395 20.2636 25.8027 19.9561 25.8027C19.0735 25.8027 18.318 26.1168 17.6895 26.7451C17.0609 27.3737 16.7461 28.13 16.7461 29.0127C16.7461 29.8953 17.0609 30.6507 17.6895 31.2793C18.318 31.9078 19.0734 32.2227 19.9561 32.2227C20.8387 32.2226 21.5941 31.9078 22.2227 31.2793C22.8512 30.6507 23.166 29.8953 23.166 29.0127V22.5928L29.5859 21.3291V24.6387C29.3452 24.4916 29.0938 24.3812 28.833 24.3076C28.5723 24.2341 28.2879 24.1973 27.9805 24.1973C27.0979 24.1973 26.3424 24.5121 25.7139 25.1406C25.0853 25.7692 24.7706 26.5246 24.7705 27.4072C24.7705 28.2899 25.0853 29.0462 25.7139 29.6748C26.3424 30.3032 27.098 30.6171 27.9805 30.6172C28.8632 30.6172 29.6194 30.3034 30.248 29.6748C30.8766 29.0462 31.1904 28.2899 31.1904 27.4072V17.7783L21.5605 19.3828Z" fill="var(--border)"/>
+              </svg>
+              <!-- Documents -->
+              <svg v-else-if="icon.type === 'doc'" width="45" height="45" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path id="bg-path" d="M0 16C0 7.16344 7.16344 0 16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50H16C7.16344 50 0 42.8366 0 34V16Z" fill="var(--bg)"/>
+                <path id="line-path" d="M34 49V50H16V49H34ZM49 34V16C49 7.84502 42.4923 1.21 34.3867 1.00488L34 1H16C7.84502 1 1.21 7.50774 1.00488 15.6133L1 16V34C1 42.2843 7.71573 49 16 49V50L15.5869 49.9951C6.94127 49.776 0 42.6984 0 34V16C0 7.30155 6.94127 0.22398 15.5869 0.00488281L16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50V49C42.2843 49 49 42.2843 49 34Z" fill="var(--border)"/>
+                <path id="line-path" d="M27.8906 12C29.97 12.0002 31.9234 12.9961 33.1465 14.6777L35.1572 17.4414C35.9648 18.5522 36.4004 19.8903 36.4004 21.2637V31.5C36.4004 35.0897 33.4901 37.9998 29.9004 38H19.5C15.9102 38 13 35.0898 13 31.5V18.5C13 14.9101 15.9101 12 19.5 12H27.8906ZM19.5 14.5996C17.3461 14.5996 15.5996 16.3461 15.5996 18.5V31.5C15.5996 33.6539 17.3461 35.4004 19.5 35.4004H29.9004C32.0541 35.4002 33.7998 33.6538 33.7998 31.5V23.7002H29.9004C27.7465 23.7002 26 21.9537 26 19.7998V14.5996H19.5ZM28.5996 19.7998C28.5996 20.5178 29.1824 21.0996 29.9004 21.0996H33.7939C33.7616 20.3334 33.5062 19.5919 33.0537 18.9697L31.0439 16.2061C30.4513 15.3913 29.5728 14.8452 28.5996 14.665V19.7998Z" fill="var(--border)"/>
+              </svg>
 
-            <!-- Hotspots -->
-            <img
-              src="dgsky-organice1.svg"
-              alt=""
-              class="js-hotspot absolute h-5 z-50"
-              style="left: 154px; top: 110px;"
-            />
-            <img
-              src="dgsky-organice2.svg"
-              alt=""
-              class="js-hotspot absolute h-5 z-50"
-              style="left: 95px; top: 40px;"
-            />
-            <img
-              src="dgsky-organice3.svg"
-              alt=""
-              class="js-hotspot absolute h-5 z-50"
-              style="left: 125px; top: 212px;"
-            />
-            <img
-              src="dgsky-organice4.svg"
-              alt=""
-              class="js-hotspot absolute h-[20px] z-50"
-              style="left: -5px; top: 156px;"
-            />
+              <!-- Images -->
+              <svg v-else-if="icon.type === 'image'" width="45" height="45" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path id="bg-path" d="M0 16C0 7.16344 7.16344 0 16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50H16C7.16344 50 0 42.8366 0 34V16Z" fill="var(--bg)"/>
+                <path id="line-path" d="M34 49V50H16V49H34ZM49 34V16C49 7.84502 42.4923 1.21 34.3867 1.00488L34 1H16C7.84502 1 1.21 7.50774 1.00488 15.6133L1 16V34C1 42.2843 7.71573 49 16 49V50L15.5869 49.9951C6.94127 49.776 0 42.6984 0 34V16C0 7.30155 6.94127 0.22398 15.5869 0.00488281L16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50V49C42.2843 49 49 42.2843 49 34Z" fill="var(--border)"/>
+                <path id="line-path" d="M30.7773 12C34.7661 12 38 15.2339 38 19.2227V30.7773C38 34.7661 34.7661 38 30.7773 38H19.2227C15.2339 38 12 34.7661 12 30.7773V19.2227C12 15.2339 15.2339 12 19.2227 12H30.7773ZM28.4775 22.9336C28.1895 22.5307 27.5899 22.5308 27.3018 22.9336L22.8555 29.1572L20.5371 25.8447C20.2497 25.4343 19.6412 25.4345 19.3535 25.8447L15.6855 31.085C15.3505 31.5636 15.693 32.2227 16.2773 32.2227H33.709C34.2955 32.2218 34.6363 31.5577 34.2959 31.0801L28.4775 22.9336ZM19 17C17.8954 17 17 17.8954 17 19C17 20.1046 17.8954 21 19 21C20.1046 21 21 20.1046 21 19C21 17.8954 20.1046 17 19 17Z" fill="var(--border)"/>
+              </svg>
+
+              <!-- Videos -->
+              <svg v-else-if="icon.type === 'video'" width="45" height="45" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path id="bg-path" d="M0 16C0 7.16344 7.16344 0 16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50H16C7.16344 50 0 42.8366 0 34V16Z" fill="var(--bg)"/>
+                <path id="line-path" d="M34 49V50H16V49H34ZM49 34V16C49 7.84502 42.4923 1.21 34.3867 1.00488L34 1H16C7.84502 1 1.21 7.50774 1.00488 15.6133L1 16V34C1 42.2843 7.71573 49 16 49V50L15.5869 49.9951C6.94127 49.776 0 42.6984 0 34V16C0 7.30155 6.94127 0.22398 15.5869 0.00488281L16 0H34C42.8366 0 50 7.16344 50 16V34C50 42.8366 42.8366 50 34 50V49C42.2843 49 49 42.2843 49 34Z" fill="var(--border)"/>
+                <path id="line-path" d="M30.7773 12C31.2723 12 31.7557 12.0497 32.2227 12.1445V14.8887H35.1113V13.4443C36.8654 14.7621 38 16.86 38 19.2227V30.7773C38 33.1398 36.8651 35.2369 35.1113 36.5547V35.1113H32.2227V37.8545C31.7556 37.9494 31.2724 38 30.7773 38H19.2227C18.7276 38 18.2444 37.9494 17.7773 37.8545V35.1113H14.8887V36.5547C13.1349 35.2369 12 33.1398 12 30.7773V19.2227C12 16.86 13.1346 14.7621 14.8887 13.4443V14.8887H17.7773V12.1445C18.2443 12.0497 18.7277 12 19.2227 12H30.7773ZM14.8887 32.2227H17.7773V29.333H14.8887V32.2227ZM32.2227 32.2227H35.1113V29.333H32.2227V32.2227ZM14.8887 26.4443H17.7773V23.5557H14.8887V26.4443ZM32.2227 26.4443H35.1113V23.5557H32.2227V26.4443ZM14.8887 20.667H17.7773V17.7773H14.8887V20.667ZM32.2227 20.667H35.1113V17.7773H32.2227V20.667Z" fill="var(--border)"/>
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -204,7 +215,7 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             pt-6 h-96 overflow-hidden
-            rounded-lg
+            rounded-lg w-80 sm:w-auto
             cursor-pointer
 
             hover:border-[var(--color-primary)]
@@ -212,13 +223,13 @@
             hover:shadow-[0_0_10px_5px_rgba(10,119,243,0.2)]
             transition-all duration-300
           ">
-          <div class="flex flex-col gap-6 mx-6">
+          <div class="flex flex-col gap-6 mx-6 w-full">
             <h3 class="
               text-[var(--text)] text-xl font-semibold
               ">Unlimited Access
             </h3>
-            <p class="text-[var(--text-terceary)] text-sm font-light">
-              Collaborate instantly with your<br />friends and colleagues.
+            <p class="text-[var(--text-terceary)] w-48 text-sm font-light">
+              Collaborate instantly with your friends and colleagues.
             </p>
             <div class="mt-auto mb-4 jutify-self-end">
               <span
@@ -254,7 +265,7 @@
               </span>
             </div>
           </div>
-       <!-- Aqui va la nueva animacion -->
+       <!-- solar system -->
         <div class="relative flex w-56">
           <div
             class="w-96 h-96 top-4 left-8
@@ -267,7 +278,7 @@
               viewBox="0 0 800 800"
               class="overflow-visible rotate-20"
               >
-              <!-- Órbitas + planetas -->
+              <!-- Órbitas planetas -->
               <g v-for="(planet, i) in planets" :key="i" transform="rotate(-4  400 400)">
               <!-- Órbita elíptica -->
               <ellipse
@@ -318,6 +329,7 @@ import {
   reactive,
   onMounted,
   ref,
+  nextTick,
   onBeforeUnmount,
   defineAsyncComponent,
   computed,
@@ -554,56 +566,6 @@ onBeforeUnmount(() => {
   ScrollTrigger.getAll().forEach((st) => st.kill());
 });
 
-// Clase adaptada directamente de organice (hay que cambiarlo para que se vea mas cool)
-class MagneticCta {
-  constructor(element) {
-    this.element = element;
-
-    element.addEventListener('mousemove', (ev) => {
-      element.classList.add('is-active');
-      this.mousemoveFn(ev);
-    });
-
-    element.addEventListener('mouseleave', () => {
-      element.classList.remove('is-active');
-      this.mouseleaveFn();
-    });
-  }
-
-  mousemoveFn(ev) {
-    const rect = this.element.getBoundingClientRect();
-    const x = ev.clientX - rect.left - this.element.offsetWidth / 8;
-    const y = ev.clientY - rect.top - this.element.offsetHeight / 8;
-
-    const strength = 3;
-
-    gsap.to(this.element, {
-      x: x / strength,
-      y: y / strength,
-      ease: 'power3.out',
-      duration: 0.3,
-    });
-  }
-
-  mouseleaveFn() {
-    gsap.to(this.element, {
-      x: 0,
-      y: 0,
-      ease: 'power3.out',
-      duration: 0.5,
-    });
-  }
-}
-
-onMounted(() => {
-  const hotspots = document.querySelectorAll('.js-hotspot');
-
-  hotspots.forEach((el) => {
-    const magneticCta = new MagneticCta(el);
-  });
-});
-// end magnetic
-
 // animation segurity (hay que mejorarla)
 const dialInner = ref(null);
 const dialMidder = ref(null);
@@ -805,7 +767,189 @@ onMounted(() => {
   animate();
 });
 
+const cloudRef = ref(null);
+const iconRefs = ref([]);
+const isHover = ref(false);
+
+const icons = ref([]);
+
+const baseIcons = [
+  { type: 'audio' },
+  { type: 'video' },
+  { type: 'doc' },
+  { type: 'image' },
+];
+
+/* --------------------------
+   UTILS
+---------------------------*/
+function shuffle(array) {
+  return array
+    .map((value) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+}
+
+/* --------------------------
+   ORGANIZADO POR TIPO
+---------------------------*/
+function organizePositions() {
+  const cloud = cloudRef.value;
+  if (!cloud) return;
+
+  const gapX = 52;
+  const gapY = 52;
+  const startX = -10;
+  const startY = 25;
+
+  const order = ['audio', 'video', 'doc', 'image'];
+
+  const groups = {
+    audio: [],
+    video: [],
+    doc: [],
+    image: [],
+  };
+
+  icons.value.forEach((icon, i) => {
+    groups[icon.type].push(i);
+  });
+
+  order.forEach((type, row) => {
+    groups[type].forEach((iconIndex, col) => {
+      const el = iconRefs.value[iconIndex];
+      if (!el) return;
+
+      const xPos = startX + col * gapX;
+      const yPos = startY + row * gapY;
+
+      el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    });
+  });
+}
+
+/* --------------------------
+   FLOW ANIMATION (hover)
+---------------------------*/
+let rafId = null;
+
+const speeds = ref([-0.08, -0.12, -0.16, -0.1]);
+const hoverMultiplier = ref(1);
+
+function animateFlow() {
+  const cloud = cloudRef.value;
+  if (!cloud) return;
+
+  const rowsRightEdge = [-Infinity, -Infinity, -Infinity, -Infinity];
+  const gapX = 10; // MISMO gap que organizePositions
+
+  // 1️⃣ calcular borde derecho por fila
+  iconRefs.value.forEach((node, i) => {
+    const el = node;
+    if (!el) return;
+
+    const type = icons.value[i]?.type;
+
+    const rowMap = {
+      audio: 0,
+      video: 1,
+      doc: 2,
+      image: 3,
+    };
+
+    const row = rowMap[type] ?? 0;
+
+    const transform = el.style.transform || 'translate(0px, 0px)';
+    const match = transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+    if (!match) return;
+
+    const x = parseFloat(match[1]);
+    const { width } = el.getBoundingClientRect();
+    const rightEdge = x + width;
+
+    if (rightEdge > rowsRightEdge[row]) {
+      rowsRightEdge[row] = rightEdge;
+    }
+  });
+
+  // 2️⃣ mover + loop
+  iconRefs.value.forEach((node, i) => {
+    const el = node;
+    if (!el) return;
+
+    const type = icons.value[i]?.type;
+
+    const rowMap = {
+      audio: 0,
+      video: 1,
+      doc: 2,
+      image: 3,
+    };
+
+    const row = rowMap[type] ?? 0;
+    const speed = speeds.value[row] * hoverMultiplier.value;
+
+    const transform = el.style.transform || 'translate(0px, 0px)';
+    const match = transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+    if (!match) return;
+
+    let x = parseFloat(match[1]);
+    const y = parseFloat(match[2]);
+    const { width } = el.getBoundingClientRect();
+
+    x += speed;
+
+    if (x + width < 0) {
+      x = rowsRightEdge[row] + gapX;
+    }
+
+    el.style.transform = `translate(${x}px, ${y}px)`;
+  });
+
+  rafId = requestAnimationFrame(animateFlow);
+}
+
+/* --------------------------
+   INIT
+---------------------------*/
+onMounted(async () => {
+  const repeated = Array.from({ length: 8 }, () => baseIcons).flat();
+  icons.value = shuffle(repeated);
+
+  await nextTick();
+  organizePositions();
+});
+
+/* --------------------------
+   HOVER
+---------------------------*/
+watch(isHover, async (val) => {
+  await nextTick();
+
+  if (val) {
+    hoverMultiplier.value = 2.5;
+
+    if (!rafId) {
+      rafId = requestAnimationFrame(animateFlow);
+    }
+  } else {
+    hoverMultiplier.value = 1;
+
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+});
+
+/* --------------------------
+   CLEANUP
+---------------------------*/
+onBeforeUnmount(() => {
+  if (rafId) cancelAnimationFrame(rafId);
+});
 </script>
+
 <style scoped>
   .group:hover .arrow-move {
     animation: arrowMove 1s ease-in-out;
@@ -854,4 +998,11 @@ onMounted(() => {
 .group:hover #lock-shackle {
   transform: translateY(3.8px);
 }
+.group:hover #bg-path {
+  fill: var(--bg-path);
+}
+.group:hover #line-path {
+  fill: var(--color-primary);
+}
+
 </style>
