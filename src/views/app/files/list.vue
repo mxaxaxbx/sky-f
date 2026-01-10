@@ -2,7 +2,7 @@
   <div>
     <!-- list -->
     <div class="px-0 sm:px-3 py-2 sm:py-5 w-full">
-      <h1 class="text-ld font-semibold mb-4 ml-2 text-[var(--text)]">Could Drive</h1>
+      <h1 class="text-lg mt-8 sm:mt-0 font-semibold mb-4 ml-2 text-[var(--text)]">Could Drive</h1>
       <!-- title -->
       <!-- search box
       <div class="flex items-center mb-5 relative w-full">
@@ -98,6 +98,15 @@
                 class="w-8"
               />
               <img
+                v-else-if="
+                  file.contentType === 'application/vnd.ms-powerpoint' ||
+                  file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                "
+                src="/icon/icon-ppt.svg"
+                alt="PowerPoint file icon"
+                class="w-8"
+              />
+              <img
                 v-else-if="file.contentType === 'image/png'"
                 src="/icon/icon-png.svg"
                 alt="image file icon"
@@ -145,7 +154,12 @@
                 alt="image file icon"
                 class="w-8"
               />
-              <i v-else class="fas fa-file text-gray-500 text-2xl"></i>
+              <img
+                v-else
+                src="/icon/icon-file.svg"
+                alt="image file icon"
+                class="w-8"
+                />
               <!-- title -->
               <!-- loading icon -->
               <i

@@ -46,11 +46,7 @@
       :class="showSidebar ? 'w-64' : 'w-12 mr-6'"
     >
         <div class="flex flex-col h-full pt-12 pb-4">
-          <button
-            @click="toggleSidebar"
-            class="w-full h-10 flex items-center transition-all duration-200"
-            :class="showSidebar ? 'justify-between px-3' : 'justify-center'"
-          >
+          <div class="flex px-3 items-center justify-between">
             <!-- Texto -->
             <span
               v-show="showSidebar"
@@ -59,6 +55,11 @@
               Menu
             </span>
 
+          <button
+            @click="toggleSidebar"
+            class="h-10 flex items-center transition-all duration-200"
+            :class="showSidebar ? 'justify-between px-3' : 'justify-center'"
+          >
             <!-- Ícono wrapper -->
             <div class="w-6 h-6 flex items-center justify-center">
               <img
@@ -70,6 +71,7 @@
               />
             </div>
           </button>
+          </div>
             <!-- Authenticated Menu -->
             <div v-if="isAuth" class="px-2 py-1.5 mt-1">
               <ul class="space-y-2 font-semibold text-[#7f7f7f]">

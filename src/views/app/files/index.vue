@@ -4,7 +4,7 @@
   <!-- uploading file indicator -->
   <div v-if="loading" class="
       fixed
-      bottom-4 right-4 z-50
+      bottom-4 left-4 sm-right-4 z-50
       p-2
       rounded-lg
       border border-[#0A77F3]
@@ -59,8 +59,8 @@
       <!-- search box movil-->
       <div
         v-if="!isAuth"
-        class="flex items-center justify-center
-          w-full h-10 mt-6 px-2 block sm:hidden">
+        class="fixed top-10 flex items-center justify-center
+        w-full h-10 px-2 bg-[var(--bg)] sm:hidden">
         <label
           for="search"
           class="text-[#a3a3a3]"></label>
@@ -120,7 +120,7 @@
 
       <!--uploap movil-->
       <label for="fileInput" class="
-          fixed bottom-3 left-3 sm:hidden
+          fixed bottom-3 right-3 sm:hidden
           flex items-center
           bg-[#0A77F3]
           text-white text-md font-medium
@@ -146,8 +146,8 @@
 
       <div
         class="
-          w-full h-full
-          mt-4 mb-20 mx-auto px-2 rounded-lg"
+          w-full min-h-[calc(100vh-8rem)]
+          mx-auto px-2 mt-4 rounded-lg"
         :class="[
         isDragging ?
         'border-2 border-[var(--hover-border)] border-dashed bg-[var(--hover-bg)] ' : '',
