@@ -1,8 +1,8 @@
 <template>
   <div>
     <!-- list -->
-    <div class="px-0 sm:px-3 py-2 sm:py-5 w-full">
-      <h1 class="text-lg mt-8 sm:mt-0 font-semibold mb-4 ml-2 text-[var(--text)]">Could Drive</h1>
+    <div class="w-full pb-4 pt-0 px-0 mt-20 sm:mt-0 sm:pt-2 sm:px-3">
+      <h1 class="text-lg mt-8 sm:mt-0 font-semibold mb-4 ml-2 text-[var(--text)] hidden sm:block">Could Drive</h1>
       <!-- title -->
       <!-- search box
       <div class="flex items-center mb-5 relative w-full">

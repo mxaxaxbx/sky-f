@@ -59,8 +59,13 @@
       <!-- search box movil-->
       <div
         v-if="!isAuth"
-        class="fixed top-10 flex items-center justify-center
-        w-full h-10 px-2 bg-[var(--bg)] sm:hidden">
+        class="
+          fixed top-10
+          flex flex-col justify-center
+          w-full px-2 pt-4
+          bg-[var(--bg)]
+
+          sm:hidden ">
         <label
           for="search"
           class="text-[#a3a3a3]"></label>
@@ -92,6 +97,8 @@
           <img src="/icon/icon-search.svg" alt="Search Icon"
             class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
         </form>
+        <h1 class="text-left text-lg mt-4 mb-1 font-semibold ml-2 text-[var(--text)]
+        ">Could Drive</h1>
       </div>
       <label for="fileInput" class="
           hidden sm:flex items-center
