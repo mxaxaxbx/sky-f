@@ -713,7 +713,7 @@ const planets = reactive([
     speed: 0.01,
     size: 3,
     opacity: 0.8,
-    color: '#2473CE',
+    color: computed(() => (isLight.value ? '#0077FF' : '#E9F3FF')),
   },
   {
     rx: 120,
@@ -722,7 +722,7 @@ const planets = reactive([
     speed: 0.009,
     size: 4,
     opacity: 0.7,
-    color: '#AAD2FF',
+    color: computed(() => (isLight.value ? '#3A93FF' : '#004CA8')),
   },
   {
     rx: 180,
@@ -731,7 +731,7 @@ const planets = reactive([
     speed: 0.004,
     size: 5,
     opacity: 0.6,
-    color: '#0052AF',
+    color: computed(() => (isLight.value ? '#005ECE' : '#84BCFF')),
   },
   {
     rx: 250,
@@ -740,7 +740,7 @@ const planets = reactive([
     speed: 0.002,
     size: 8,
     opacity: 0.5,
-    color: '#64A8F5',
+    color: computed(() => (isLight.value ? '#9FCBFF' : '#3792FF')),
   },
   {
     rx: 310,
@@ -749,7 +749,7 @@ const planets = reactive([
     speed: 0.001,
     size: 2,
     opacity: 0.4,
-    color: '#A9D0FF',
+    color: computed(() => (isLight.value ? '#0074FF' : '#E9F3FF')),
   },
 ]);
 
