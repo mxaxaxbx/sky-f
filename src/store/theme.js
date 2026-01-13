@@ -13,12 +13,15 @@ export default {
   },
 
   actions: {
-    toggleTheme({ commit, state }) {
+    toggleTheme({ commit, state, dispatch }) {
       const newTheme = state.theme === 'dark' ? 'light' : 'dark';
       commit('setTheme', newTheme);
+      dispatch('initTheme');
     },
     initTheme({ state }) {
-      document.documentElement.classList.toggle('light', state.theme === 'light');
+      const root = document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(state.theme);
     },
   },
 };

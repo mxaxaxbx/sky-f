@@ -26,9 +26,13 @@
         <h2
           id="animated-heading"
           class="
-            text-2xl text-left mb-4 font-semibold lg:text-5xl">
-            We built a private cloud
-          <br> that puts you in control,<br> with a fast, intuitive,<br> and hassle-free
+            text-2xl text-left mb-4 font-semibold
+
+            md:text-3xl lg:text-5xl">
+            We built a private cloud<br>
+            that puts you in control,<br>
+            with a fast, intuitive,<br>
+            and hassle-free
           <span class="text-[var(--color-primary)] pl-2 lg:pl-0">Experience.</span>
         </h2>
 
@@ -57,10 +61,10 @@
           class="
             group
             animated-card
-            flex flex-col
+            flex flex-col items-center
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            h-96 px-6 w-80 sm:w-72 pt-6
+            h-96 w-80 sm:w-72 pt-6
             rounded-lg
             cursor-pointer
             overflow-hidden
@@ -70,7 +74,7 @@
             hover:shadow-[0_0_10px_5px_rgba(10,119,243,0.2)]
             transition-all duration-300
           ">
-          <div class="flex flex-col gap-6">
+          <div class="flex flex-col gap-6 w-full px-6">
             <h3 class="
               text-[var(--text)] text-xl font-semibold
               ">Secure Storage

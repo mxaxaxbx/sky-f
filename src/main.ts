@@ -9,9 +9,12 @@ import checkPerm from './directives/perm';
 
 import './index.css';
 
-createApp(App)
-  .use(store)
-  .use(router)
-  .use(clickOutside)
-  .use(checkPerm)
-  .mount('#app');
+const app = createApp(App);
+
+app.use(store);
+app.use(router);
+app.use(clickOutside);
+app.use(checkPerm);
+
+store.dispatch('theme/initTheme');
+app.mount('#app');

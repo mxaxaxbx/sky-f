@@ -135,8 +135,9 @@
           py-2 px-2
           rounded-full
           cursor-pointer
-          hover:ring-4 hover:ring-[#0B77F3]/50
-          focus:ring-4 focus:ring-[#0B77F3]/50
+
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
         " :class="{ 'opacity-50': loading }">
         <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
