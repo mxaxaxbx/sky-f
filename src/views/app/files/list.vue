@@ -3,36 +3,6 @@
     <!-- list -->
     <div class="w-full pb-4 pt-0 px-0 mt-20 sm:mt-0 sm:pt-2 sm:px-3">
       <h1 class="text-lg mt-8 sm:mt-0 font-semibold mb-4 ml-2 text-[var(--text)] hidden sm:block">Could Drive</h1>
-      <!-- title -->
-      <!-- search box
-      <div class="flex items-center mb-5 relative w-full">
-        <label for="search" class="text-[#a3a3a3] hidden"></label>
-
-        <div class="relative w-full">
-          <input
-            v-model="find.query"
-            @keyup="search"
-            type="text"
-            placeholder="Search everything"
-            class="
-              w-full
-              border border-[#0B77F3]/50
-              rounded-full font-light
-              pl-12 pr-4 p-2
-              hover:border-[#0A77F3]
-              focus:ring-1 focus:ring-[#0A77F3]
-              focus:outline-none
-              transition-all duration-300
-            "
-          />
-
-          <img
-            src="/icon/icon-search.svg"
-            alt="Search Icon"
-            class="absolute left-3 top-1/2 -translate-y-1/2 w-6pointer-events-none"
-          />
-        </div>
-      </div> -->
 
       <!-- loading -->
       <div v-if="loading" class="flex justify-center items-center">
@@ -58,7 +28,7 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             py-2 p-4
-            rounded-lg
+            rounded-lg min-w-0 overflow-hidden
             hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]
             hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
             transition-colors duration-300
@@ -70,7 +40,7 @@
                 flex items-center
                 space-x-2
                 text-xs
-                w-80
+                min-w-0 w-full overflow-hidden
                 ">
               <!-- icons -->
               <img
@@ -168,11 +138,10 @@
               ></i>
               <h3
                 class="
-                font-semibold text-xs
+                font-semibold text-xs text-left h-4
+                block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap
                 sm:text-md
-                w-28
-                text-ellipsis overflow-hidden whitespace-nowrap
-                text-left">{{ file.name }}</h3>
+                ">{{ file.name }}</h3>
             </div>
           </div>
         </button>

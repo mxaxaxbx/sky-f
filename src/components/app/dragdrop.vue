@@ -2,8 +2,8 @@
   <div
     class="
       flex items-center justify-center
-      w-full h-full
-      rounded-xl mt-6 mb-8
+      w-full h-full mx-auto my-auto
+      rounded-xl mb-8
       transition-colors duration-300
     "
     :class="[
@@ -20,10 +20,10 @@
         src="/icon/icon-cloudUpload.svg"
         alt="icon"
         class="w-[250px] m-0 opacity-100" />
-      <h1 class="text-2xl text-center text-[var(--text)] font-bold mb-6">
+      <h1 class="text-xl sm:2xl text-center text-[var(--text)] font-bold mb-6">
         Nothing in your private vault yet
       </h1>
-      <p class="text-md text-center text-[var(--text-terceary)] font-light mb-6">
+      <p class="text-md sm:text-sm text-center text-[var(--text-terceary)] font-light mb-6">
         Drag and drop your files here
       </p>
       <label for="fileInput" class="

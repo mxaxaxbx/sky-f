@@ -17,7 +17,7 @@
       "
     >
       <!-- sidebar -->
-      <Sidebar v-if="isAuth"/>
+      <Sidebar v-if="showSidebar" />
     </div>
 
     <!-- content -->
@@ -26,7 +26,7 @@
       :class="
       !isAuth
         ? 'pl-0'
-        : showSidebar
+        : store.state.sidebar
           ? 'sm:pl-64 pl-0'
           : 'sm:pl-10 pl-0'
       ">
@@ -197,11 +197,11 @@ const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue
 const store = useStore();
 const route = useRoute();
 
-const showSidebar = computed(() => store.state.sidebar);
-const isLight = computed(() => store.state.theme?.theme === 'light');
-
 const isAuth = computed(() => store.getters['auth/isAuth']);
-
+const showSidebar = computed(
+  () => isAuth.value && route.name !== 'home',
+);
+const isLight = computed(() => store.state.theme?.theme === 'light');
 const year = ref(new Date().getUTCFullYear());
 
 const clickOutside = () => {
@@ -218,14 +218,6 @@ const toggleTheme = () => {
 const toggleSidebar = () => {
   store.commit('toggleSidebar');
 };
-
-watch(
-  // on url change close sidebar
-  () => route.path,
-  () => {
-    if (showSidebar.value) store.commit('toggleSidebar');
-  },
-);
 
 </script>
 

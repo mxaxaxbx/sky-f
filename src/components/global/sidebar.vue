@@ -224,13 +224,21 @@ function handleNavClick() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Close sidebar on route change (mobile only) - but not during project changes
-watch(() => route.path, () => {
-  // Only auto-close on mobile to preserve desktop UX
-  if (windowWidth.value < 1024 && !isProjectDropdownActive.value) {
-    closeSidebar();
-  }
-});
+let firstLoad = true;
+
+watch(
+  () => route.path,
+  () => {
+    if (firstLoad) {
+      firstLoad = false;
+      return;
+    }
+
+    if (windowWidth.value < 1024 && store.state.sidebar) {
+      store.commit('closeSidebar');
+    }
+  },
+);
 
 // Handle escape key (mobile only)
 function handleEscape(event: KeyboardEvent) {

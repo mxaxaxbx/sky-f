@@ -10,5 +10,5 @@ export interface OptionI {
 
 export const state: RootStateI = {
   version: '0.0.1',
-  sidebar: true,
+  sidebar: JSON.parse(localStorage.getItem('sidebar') || 'true'),
 };

@@ -54,7 +54,7 @@
     <!--right side -->
     <div class="
       flex flex-col items-start
-      px-0  pt-0
+      px-0  pt-0 w-full h-full
       sm:px-8 sm:pt-6">
       <!-- search box movil-->
       <div
@@ -135,7 +135,6 @@
           py-2 px-2
           rounded-full
           cursor-pointer
-
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
