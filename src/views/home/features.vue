@@ -870,7 +870,7 @@ onBeforeUnmount(() => {
   }
 
   @keyframes arrowMove {
-    0% {
+    1% {
       transform: rotate(0deg) translate(0, 0);
       opacity: 1;
     }
