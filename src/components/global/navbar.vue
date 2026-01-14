@@ -165,14 +165,26 @@
           <!-- Avatar, email, user name -->
           <div class="flex flex-col items-center mb-10">
             <div class="relative --w-16 --h-16">
-              <img :src="user.profilePhoto || '/img/user.svg'"
-                alt="Avatar"
-                class="
-                  rounded-full
-                  w-20 h-20
-                  border-2 border-[#9DC9FA]
-                  object-cover border
-                "/>
+              <!-- Avatar con foto o fallback -->
+              <img
+                v-if="user && (user.profilePhoto || user.photoURL)"
+                :src="user.profilePhoto || user.photoURL"
+                alt="User avatar"
+                class="rounded-full w-20 h-20 border-2 border-[#9DC9FA] object-cover"
+                @error="onImageError"
+              />
+              <span
+                v-else-if="user && user.firstName && user.lastName"
+                class="flex items-center justify-center w-20 h-20 rounded-full bg-[var(--color-primary)] text-white font-regular text-2xl uppercase"
+              >
+                {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+              </span>
+              <img
+                v-else
+                src="/img/user.svg"
+                alt="Default avatar"
+                class="rounded-full w-20 h-20 border-2 border-[#9DC9FA] object-cover"
+              />
             </div>
 
             <h2 class="mt-4 text-lg font-semibold text-[var(--text)]">¡Hi,
@@ -346,6 +358,11 @@ const query = ref<string>('');
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const user = computed<UserI>(() => store.getters['auth/user']);
 const isLight = computed(() => store.state.theme.theme === 'light');
+
+function onImageError(event: Event) {
+  const target = event.target as HTMLImageElement;
+  target.src = '/img/user.svg'; // ✅ Reemplaza imagen rota con SVG
+}
 
 async function handleSearch() {
   const payload = {
