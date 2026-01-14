@@ -175,7 +175,7 @@
               />
               <span
                 v-else-if="user && user.firstName && user.lastName"
-                class="flex items-center justify-center w-20 h-20 rounded-full bg-[var(--color-primary)] text-white font-regular text-2xl uppercase"
+                class="flex items-center justify-center w-20 h-20 rounded-full bg-[var(--color-primary)] text-white font-regular text-4xl uppercase"
               >
                 {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
               </span>
