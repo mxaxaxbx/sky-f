@@ -15,15 +15,15 @@
     <!-- Mostrar zona de carga solo si no hay archivos -->
     <div
       v-if="!hasFiles"
-      class="flex flex-col items-center">
+      class="flex flex-col items-center mt-16 sm:mt-2">
       <img
         src="/icon/icon-cloudUpload.svg"
         alt="icon"
-        class="w-[250px] m-0 opacity-100" />
-      <h1 class="text-xl sm:2xl text-center text-[var(--text)] font-bold mb-6">
+        class="w-48 sm:w-[300px] m-0 opacity-100" />
+      <h1 class="text-xl sm:text-3xl text-center text-[var(--text)] font-semibold mb-4">
         Nothing in your private vault yet
       </h1>
-      <p class="text-md sm:text-sm text-center text-[var(--text-terceary)] font-light mb-6">
+      <p class="text-sm sm:text-lg text-center text-[var(--text-terceary)] font-light mb-6">
         Drag and drop your files here
       </p>
       <label for="fileInput" class="
