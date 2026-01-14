@@ -20,18 +20,8 @@ export const actions: ActionTree<AuthStateI, RootStateI> = {
   },
   async getUserDetails(context: ActionContext<AuthStateI, RootStateI>) {
     const { data } = await usersClient.get('/api/auth/userdetailsv2');
-
-    const userWithPhoto = {
-      ...data,
-      profilePhoto: data.picture || data.avatar || null,
-      firstName: data.firstName || '',
-      lastName: data.lastName || '',
-    };
-
-    console.log('Usuario con foto asignada:', userWithPhoto); // 🔍 Depuración
-    context.commit('setUser', userWithPhoto);
+    context.commit('setUser', data);
   },
-
   async getUserPermissions(context: ActionContext<AuthStateI, RootStateI>) {
     if (context.state.projects.length === 0) {
       const { VUE_APP_DG_USERS_APP } = process.env;
