@@ -105,7 +105,7 @@
                     class="
                       opacity-50 hover:opacity-100
                       transition-all duration-300 ease-in-out
-                      ">DigiCare</a></li>
+                      ">Care</a></li>
                 </ul>
               </div>
               <div class="text-left">
