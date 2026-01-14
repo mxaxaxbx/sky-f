@@ -3,7 +3,7 @@
     class="
       flex items-center justify-center
       w-full h-full mx-auto my-auto
-      rounded-xl mb-8
+      rounded-xl mb-8 z-50
       transition-colors duration-300
     "
     :class="[

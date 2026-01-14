@@ -3,7 +3,7 @@
     <!-- Dark overlay (mobile only) -->
     <div
       v-if="showSidebar"
-      class="fixed inset-0 bg-black opacity-50 z-30 lg:hidden"
+      class="fixed inset-0 bg-black opacity-50 z-30 hidden"
       @click="toggleSidebar"
       @keydown="toggleSidebar"
       ></div>

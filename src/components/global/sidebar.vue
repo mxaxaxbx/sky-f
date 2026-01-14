@@ -1,22 +1,6 @@
 <template>
   <Teleport to="body">
     <!-- Backdrop overlay -->
-    <Transition
-      name="backdrop"
-      enter-active-class="transition-opacity duration-300 ease-out"
-      leave-active-class="transition-opacity duration-200 ease-in"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <button
-        v-if="showSidebar"
-        class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-        @click="closeSidebar"
-      ></button>
-    </Transition>
-
     <!-- Sidebar -->
     <Transition
       name="sidebar"
@@ -41,7 +25,7 @@
         transition-[width] duration-300 ease-out
 
         lg:shadow-none
-        hidden md:block
+        hidden sm:block
       "
       :class="showSidebar ? 'w-64' : 'w-12 mr-6'"
     >
@@ -163,6 +147,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Computed properties with proper typing
+const isMobile = computed(() => windowWidth.value < 640);
 const permissions = computed<PermissionI[]>(() => store.getters['auth/permissions']);
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const isAuth = computed(() => store.getters['auth/isAuth']);
@@ -224,21 +209,11 @@ function handleNavClick() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-let firstLoad = true;
-
-watch(
-  () => route.path,
-  () => {
-    if (firstLoad) {
-      firstLoad = false;
-      return;
-    }
-
-    if (windowWidth.value < 1024 && store.state.sidebar) {
-      store.commit('closeSidebar');
-    }
-  },
-);
+watch(windowWidth, (w) => {
+  if (w < 640 && store.state.sidebar) {
+    store.commit('closeSidebar');
+  }
+});
 
 // Handle escape key (mobile only)
 function handleEscape(event: KeyboardEvent) {
