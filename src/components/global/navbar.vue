@@ -167,8 +167,8 @@
             <div class="relative --w-16 --h-16">
               <!-- Avatar con foto o fallback -->
               <img
-                v-if="user && (user.profilePhoto || user.photoURL)"
-                :src="user.profilePhoto || user.photoURL"
+                v-if="user && user.profilePhoto"
+                :src="user.profilePhoto"
                 alt="User avatar"
                 class="rounded-full w-20 h-20 border-2 border-[#9DC9FA] object-cover"
                 @error="onImageError"
@@ -361,7 +361,7 @@ const isLight = computed(() => store.state.theme.theme === 'light');
 
 function onImageError(event: Event) {
   const target = event.target as HTMLImageElement;
-  target.src = '/img/user.svg'; // ✅ Reemplaza imagen rota con SVG
+  target.src = '/img/user.svg';
 }
 
 async function handleSearch() {
