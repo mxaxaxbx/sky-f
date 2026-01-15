@@ -36,7 +36,7 @@
         </div>
         <!-- footer -->
         <footer
-        v-if="!isAuth"
+        v-if="!showSidebar"
           class="bg-[var(--bg)] group">
           <div class="w-full h-px bg-line"></div>
           <div
@@ -53,10 +53,11 @@
 
                 sm:flex-row sm:items-start
               ">
-              <router-link
-                :to="isAuth ? '/app' : '/'"
+              <a
+                :href="`${usersLink}`"
+                target="_blank"
                 class="mb-10 sm:mb-0"
-              >
+                >
                 <img
                   :src="isLight
                   ? '/img/logo-digi-light.svg'
@@ -67,7 +68,7 @@
                   group-hover:opacity-100
                   courser-pointer"
                 />
-              </router-link>
+              </a>
               <div
                 class="
                   flex space-x-12
@@ -87,15 +88,16 @@
                     text-xs text-[var(--text)] font-light
                     pl-1
                   ">
-                  <li><a
-                    href="#"
+                  <li><router-link
+                    :to="isAuth ? '/app' : '/'"
                     class="
                       opacity-50 hover:opacity-100
                       transition-all duration-300 ease-in-out
                       ">
-                      Sky</a></li>
+                      Sky</router-link></li>
                   <li><a
-                    href="#"
+                    href="https://fireweb.digiapps.com.co/"
+                    target="_blank"
                     class="
                       opacity-50 hover:opacity-100
                       transition-all duration-300 ease-in-out
@@ -142,7 +144,8 @@
                     pl-1
                   ">
                   <li><a
-                    :href="`${digiSystemslink}/privacy-policy`"
+                    :href="`${usersLink}/privacy-policy`"
+                    target="_blank"
                     class="
                       opacity-50 hover:opacity-100
                       transition-all duration-300 ease-in-out
@@ -197,12 +200,15 @@ const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue
 const store = useStore();
 const route = useRoute();
 
+const { VUE_APP_DG_USERS_APP } = process.env;
+
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const showSidebar = computed(
   () => isAuth.value && route.name !== 'home',
 );
 const isLight = computed(() => store.state.theme?.theme === 'light');
 const year = ref(new Date().getUTCFullYear());
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 
 const clickOutside = () => {
   if (showSidebar.value) store.commit('toggleSidebar');

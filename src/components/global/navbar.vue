@@ -323,7 +323,7 @@ const isMobileMenuOpen = ref(false);
 const isSticky = ref(false);
 const isRising = ref(false);
 const loading = ref<boolean>(false);
-const usersLink = ref(`${VUE_APP_DG_USERS_APP}/auth/provider?app=sky`);
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 const query = ref<string>('');
 
 const isAuth = computed(() => store.getters['auth/isAuth']);
