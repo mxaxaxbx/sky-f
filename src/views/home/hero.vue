@@ -28,7 +28,7 @@
             and projects safe and accessible anytime, anywhere.</span>
       </p>
       <a
-        href="/app"
+        :href="`${usersLink}/auth/provider?app=sky`"
         class="
           group relative inline-block
           bg-[var(--color-primary)]
@@ -86,13 +86,13 @@
         class="absolute w-80 md:w-80 lg:w-[500px] h-auto z-20"
       ></object>
       <object
-  :key="isLight"
-  id="network"
-  type="image/svg+xml"
-  :data="isLight ? '/nube-dark.svg' : '/nube-light.svg'"
-  aria-label="Decorative animated cloud background"
-  class="absolute w-80 md:w-82 lg:w-[500px] h-auto z-10"
-/>
+        :key="isLight"
+        id="network"
+        type="image/svg+xml"
+        :data="isLight ? '/nube-dark.svg' : '/nube-light.svg'"
+        aria-label="Decorative animated cloud background"
+        class="absolute w-80 md:w-82 lg:w-[500px] h-auto z-10"
+      />
             <div
         id="wrapper"
         class="translate-y-16 lg:translate-y-20 pl-6 lg:pl-2 w-80 md:w-80 lg:w-[450px] h-12 z-0"
@@ -117,9 +117,12 @@ import { useStore } from 'vuex';
 import gsap from 'gsap';
 import { debounce } from 'lodash-es';
 
+const { VUE_APP_DG_USERS_APP } = process.env;
+
 const store = useStore();
 const canvas = ref(null);
 const isLight = computed(() => store.state.theme.theme === 'light');
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 
 onMounted(() => {
   const canvasEl = canvas.value;

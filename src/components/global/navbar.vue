@@ -68,7 +68,7 @@
 
       <!-- sing in -->
       <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
-        <a v-if="!isAuth" :href="usersLink"
+        <a v-if="!isAuth" :href="`${usersLink}/auth/provider?app=sky`"
           class="
             flex items-center justify-center
             bg-[var(--bg-secondary)]
