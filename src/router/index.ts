@@ -1,4 +1,10 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import {
+  createRouter,
+  createWebHistory,
+  RouteRecordRaw,
+  RouteLocationNormalized,
+  NavigationGuardNext,
+} from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -76,13 +82,13 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   // Set title
   if (to.meta.title) {
     document.title = `${to.meta.title} - sky`;
   }
 
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
+  if (to.matched.some((record: RouteRecordRaw) => record.meta?.requiresAuth)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
     if (!localStorage.getItem('token')) {
