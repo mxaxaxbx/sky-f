@@ -12,7 +12,11 @@
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "sourceMap": true,
+    "allowJs": true,
     "baseUrl": ".",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "isolatedModules": true,
     "types": [
       "webpack-env"
     ],
