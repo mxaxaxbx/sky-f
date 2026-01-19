@@ -1,0 +1,51 @@
+name: Deploy AZURE static web app
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+
+      -
+        name: Setup .env file
+        env:
+          VUE_APP_DG_USERS_APP: ${{ secrets.VUE_APP_DG_USERS_APP_P }}
+          VUE_APP_DG_USERS_SVC: ${{ secrets.VUE_APP_DG_USERS_SVC_P }}
+          VUE_APP_DG_SKY_SVC: ${{ secrets.VUE_APP_DG_SKY_SVC_P }}
+        run: |
+          printenv | grep VUE_APP_ > .env
+
+      -
+        name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'
+
+      -
+        name: Install dependencies
+        run: npm install
+
+      -
+        name: Lint
+        run: npm run lint
+
+      - 
+        name: build
+        run: npm run build
+
+      -
+        name: Build And Deploy
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "dist"
