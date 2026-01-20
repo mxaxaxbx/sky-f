@@ -3,7 +3,6 @@ import {
   createWebHistory,
   RouteRecordRaw,
   RouteLocationNormalized,
-  NavigationGuardNext,
 } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
@@ -82,23 +81,24 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-  // Set title
+router.beforeEach((to: RouteLocationNormalized) => {
   if (to.meta.title) {
     document.title = `${to.meta.title} - sky`;
   }
 
-  if (to.matched.some((record: RouteRecordRaw) => record.meta?.requiresAuth)) {
-    // this route requires auth, check if logged in
-    // if not, redirect to login page.
+  if (
+    to.matched.some(
+      (record: RouteRecordRaw) => record.meta?.requiresAuth,
+    )
+  ) {
     if (!localStorage.getItem('token')) {
       const { VUE_APP_DG_USERS_APP } = process.env;
       window.location.href = `${VUE_APP_DG_USERS_APP}/auth/provider?app=sky`;
-    } else {
-      next();
+      return false;
     }
   }
-  next();
+
+  return true;
 });
 
 export default router;
