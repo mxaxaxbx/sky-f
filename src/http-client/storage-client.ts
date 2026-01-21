@@ -48,14 +48,6 @@ baseHttpClient.interceptors.request.use((config) => {
     modifiedConfig.headers.Authorization = `DGTK ${token}`;
   }
 
-  const project = localStorage.getItem('project');
-  if (project) {
-    const { value } = decode(project) as any;
-    // get the project id. Could be 'ID' or 'id'
-    const projectId = value.ID || value.id;
-    modifiedConfig.headers['Dg-Businessid'] = projectId;
-  }
-
   return modifiedConfig;
 });
 
