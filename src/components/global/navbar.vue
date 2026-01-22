@@ -105,7 +105,7 @@
             <!-- User initials -->
             <span
               v-if="!user.profilePhoto && user.firstName && user.lastName"
-              class="font-light text-xs uppercase">
+              class="font-light text-sm uppercase">
               {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
             </span>
 
