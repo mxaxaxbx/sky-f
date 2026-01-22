@@ -37,6 +37,31 @@ function customErrorHandler(error: any) {
       console.error('Unknown error', error);
   }
 
+  console.log('error.response.data?.code', error.response.data?.code);
+
+  switch (error.response.data?.code) {
+    case 'SUBS-VAL-004': {
+      console.warn('No active subscription found', error.response.data);
+      const token = localStorage.getItem('token');
+      const { VUE_APP_DG_SUBS } = process.env;
+      const url = `${VUE_APP_DG_SUBS}/auth/confirmsession?token=${token}&redirect=/app/services/sky`;
+      console.warn(`Redirecting to subscription page: ${url}`);
+      window.location.href = url;
+      break;
+    }
+    case 'SUBS-VAL-005': {
+      console.warn('subscription expired', error.response.data);
+      const token = localStorage.getItem('token');
+      const { VUE_APP_DG_SUBS } = process.env;
+      const url = `${VUE_APP_DG_SUBS}/auth/confirmsession?token=${token}&redirect=/app/services/sky`;
+      console.warn(`Redirecting to subscription page: ${url}`);
+      window.location.href = url;
+      break;
+    }
+    default:
+      console.error('Error code:', error.response.data?.code);
+  }
+
   return error;
 }
 
