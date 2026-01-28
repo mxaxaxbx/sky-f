@@ -376,14 +376,21 @@ let rafId = null;
 // Welcome animation
 onMounted(() => {
   const svgObject = document.getElementById('Welcome');
-
   if (!svgObject) return;
 
+  let started = false;
+
   const startAnimation = () => {
-    const svg = svgObject.contentDocument.querySelector('svg');
+    if (started) return;
+    started = true;
+
+    const doc = svgObject.contentDocument;
+    if (!doc) return;
+
+    const svg = doc.querySelector('svg');
     if (!svg) return;
 
-    // Primera animación rápida (aceleración)
+    // Primera animación rápida
     gsap.fromTo(
       svg,
       { x: '0%' },
@@ -392,7 +399,7 @@ onMounted(() => {
         duration: 1.5,
         ease: 'power2.out',
         onComplete: () => {
-          // Luego animación infinita lenta
+          // Animación infinita lenta
           gsap.fromTo(
             svg,
             { x: '-10%' },
@@ -408,21 +415,41 @@ onMounted(() => {
     );
   };
 
-  const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        if (svgObject.contentDocument?.readyState === 'complete') {
-          startAnimation();
-        } else {
-          svgObject.addEventListener('load', startAnimation, { once: true });
+  const initSvg = () => {
+    if (svgObject.contentDocument?.readyState === 'complete') {
+      startAnimation();
+    } else {
+      svgObject.addEventListener('load', startAnimation, { once: true });
+    }
+  };
+
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          initSvg();
+          obs.unobserve(svgObject);
         }
-        obs.unobserve(svgObject);
-      }
-    });
-  });
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px',
+    },
+  );
 
   observer.observe(svgObject);
+
+  // 🔥 Fallback: por si ya está visible al cargar
+  setTimeout(() => {
+    const rect = svgObject.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      initSvg();
+      observer.unobserve(svgObject);
+    }
+  }, 100);
 });
+
 // end Welcome animation
 
 // data rain 2

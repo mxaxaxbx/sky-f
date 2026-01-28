@@ -59,6 +59,10 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     }
     const DG_STORAGE = process.env.VUE_APP_DG_SKY_SVC;
     const link = `${DG_STORAGE}/api/storage/getfile/${payload.id}?token=${token}`;
-    window.open(link, '_blank');
+    const linkel = document.createElement('a');
+    linkel.href = link;
+    linkel.target = '_blank';
+    linkel.click();
+    linkel.remove();
   },
 };
