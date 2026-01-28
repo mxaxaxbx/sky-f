@@ -2,7 +2,7 @@
   <nav
     class="
       fixed z-50
-      font-alexandria font-sans text-[var--(text)]
+      font-alexandria font-sans
       bg-[var(--bg)]
       border-b border-[var(--border)]
       w-full h-10
@@ -26,96 +26,65 @@
               />
         </router-link>
       </div>
-    <!-- Centro -->
-    <!-- search box -->
-    <div v-if="isAuth" class="
-        absolute left-1/2 -translate-x-1/2 flex items-center
-        md:w-80 lg:w-[600px]
-        hidden sm:flex
-        text-xs
-        ">
-      <label for="search" class="text-[#a3a3a3] hidden"></label>
 
-      <!-- Contenedor relativo -->
-      <form @submit.prevent="handleSearch" class="relative w-full">
-        <!-- Input -->
-        <input
-          v-model="query"
-          @input="handleInput"
-          type="text"
-          placeholder="Search everything"
-          class="
-            w-full
-            pl-10 pr-4 py-1
-            bg-[var(--bg-secondary)]
-            border border-[#0B77F3]/50
-            rounded-full
-            font-light text-[var(--text)]
-
-            hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
-            hover:border-[var(--hover-border)]
-            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-            focus:outline-none
-            transition-all duration-300
-          "
-        />
-
-        <!-- Ícono dentro del input -->
-        <img src="/icon/icon-search.svg" alt="Search Icon"
-          class="absolute left-3 top-1/2 -translate-y-1/2 h-4 pointer-events-none" />
-      </form>
-    </div>
-
-<!--menu navbar traditional-->
-    <!-- <div v-if="!isAuth" class="absolute left-1/2 -translate-x-1/2 flex items-center"> -->
-      <!-- <div
-        class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up"
-        style="animation-delay: 0.70s"
-      ></div> -->
-
-      <!-- <div class="flex items-center gap-16 text-gray-500 font-semibold text-md">
-        <a
-          href="#features"
-          class="nav-link animate-fade-in-up"
-          style="animation-delay: 0.80s"
-        >Features</a>
-
-        <a
-          href="#plans"
-          class="nav-link animate-fade-in-up"
-          style="animation-delay: 0.90s"
-        >Plans</a>
-
-        <a
-          href="#services"
-          class="nav-link animate-fade-in-up"
-          style="animation-delay: 1.0s"
-        >Services</a>
-      </div> -->
-
-      <!-- <div
-        class="w-px h-6 bg-blue-300 mx-16 animate-fade-in-up" style="animation-delay: 0.70s"></div>
-    </div> -->
-
-    <!-- sing in -->
-    <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
-      <a v-if="!isAuth" :href="usersLink"
+      <!-- search box -->
+      <div v-if="isAuth"
         class="
-          flex items-center
-          bg-[var(--bg-secondary)]
-          border border-[var(--color-primary)]
-          text-[var(--color-primary)] text-sm font-regular
-          pl-3 pr-2 py-0.5
-          rounded-full
+          absolute left-1/2 -translate-x-1/2 flex items-center
+          md:w-80 lg:w-[600px]
+          hidden sm:flex
+          text-xs
+        ">
+        <label for="search" class="text-[#a3a3a3] hidden"></label>
 
-          hover:bg-[var(--hover-bg)]
-          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          transition-all duration-300 ease-in-out
+        <!-- Contenedor relativo -->
+        <form @submit.prevent="handleSearch" class="relative w-full">
+          <!-- Input -->
+          <input
+            v-model="query"
+            @input="handleInput"
+            type="text"
+            placeholder="Search everything"
+            class="
+              w-full
+              pl-10 pr-4 py-1
+              bg-[var(--bg-secondary)]
+              border border-[#0B77F3]/50
+              rounded-full
+              font-light text-[var(--text)]
+
+              hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
+              hover:border-[var(--hover-border)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300
+            "/>
+
+            <!-- Ícono dentro del input -->
+            <img src="/icon/icon-search.svg" alt="Search Icon"
+              class="absolute left-3 top-1/2 -translate-y-1/2 h-4 pointer-events-none" />
+         </form>
+      </div>
+
+      <!-- sing in -->
+      <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
+        <a v-if="!isAuth" :href="`${usersLink}/auth/provider?app=sky`"
+          class="
+            flex items-center justify-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--color-primary)]
+            text-[var(--color-primary)] text-sm font-regular
+            pl-3 pr-2
+            rounded-full
+
+            hover:bg-[var(--hover-bg)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
           ">
-        Sign In
-        <img src="/icon/icon-signIn.svg" alt="icon" class="ml-2 h-4" />
-      </a>
+          Sign In
+          <img src="/icon/icon-signIn.svg" alt="icon" class="ml-1 h-4" />
+        </a>
 
       <Dropdown v-if="isAuth">
         <template #trigger="{ toggle }">
@@ -136,8 +105,7 @@
             <!-- User initials -->
             <span
               v-if="!user.profilePhoto && user.firstName && user.lastName"
-              class="font-light text-xs uppercase"
-            >
+              class="font-light text-sm uppercase">
               {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
             </span>
 
@@ -149,15 +117,17 @@
             <i v-else class="fas fa-user text-white text-sm" aria-hidden="true"></i>
 
             <!-- Optional status indicator -->
-            <span class="
-                  absolute
-                  bottom-[-1.5px] right-[-3.5px]
-                  block
-                  h-[10px] w-[10px]
-                  rounded-full
-                  bg-green-500
-                  border-2 border-[var(--bg)]
-                "></span>
+            <span
+              class="
+                absolute
+                bottom-[-1.5px] right-[-3.5px]
+                block
+                h-[10px] w-[10px]
+                rounded-full
+                bg-green-500
+                border-2 border-[var(--bg)]
+                ">
+            </span>
           </button>
         </template>
 
@@ -175,8 +145,12 @@
               />
               <span
                 v-else-if="user && user.firstName && user.lastName"
-                class="flex items-center justify-center w-20 h-20 rounded-full bg-[var(--color-primary)] text-white font-regular text-4xl uppercase"
-              >
+                class="
+                  flex items-center justify-center
+                  w-20 h-20
+                  rounded-full bg-[var(--color-primary)]
+                  text-white font-regular text-4xl uppercase
+                ">
                 {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
               </span>
               <img
@@ -212,7 +186,7 @@
                 hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                 focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                 transition-all duration-300 ease-in-out"
-              target="_blank">
+              >
               Manage your digi Account
             </a>
           </div>
@@ -309,9 +283,8 @@
             <span>•</span>
             <a
               :href="`${usersLink}/privacy-policy`"
-              target="_blank"
-              class="hover:underline hover:text-[#bebebe]"
-            >
+              target="_blank" class="hover:underline hover:text-[#bebebe]
+              ">
               Privacy Policy
             </a>
           </div>
@@ -320,7 +293,6 @@
     </div>
   </div>
   </nav>
-  <!-- Navbar Mobile & Tablet -->
 </template>
 
 <script setup lang="ts">
@@ -339,7 +311,6 @@ import router from '@/router';
 import { UserI } from '@/store/auth/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
-
 const store = useStore();
 const route = useRoute();
 let searchTimeout: number | undefined;
@@ -352,7 +323,7 @@ const isMobileMenuOpen = ref(false);
 const isSticky = ref(false);
 const isRising = ref(false);
 const loading = ref<boolean>(false);
-const usersLink = ref(`${VUE_APP_DG_USERS_APP}/auth/provider?app=sky`);
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 const query = ref<string>('');
 
 const isAuth = computed(() => store.getters['auth/isAuth']);
