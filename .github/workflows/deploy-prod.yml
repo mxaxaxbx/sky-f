@@ -20,6 +20,7 @@ jobs:
           VUE_APP_DG_USERS_APP: ${{ secrets.VUE_APP_DG_USERS_APP_P }}
           VUE_APP_DG_USERS_SVC: ${{ secrets.VUE_APP_DG_USERS_SVC_P }}
           VUE_APP_DG_SKY_SVC: ${{ secrets.VUE_APP_DG_SKY_SVC_P }}
+          VUE_APP_DG_SUBS: ${{ secrets.VUE_APP_DG_SUBS_P }}
         run: |
           printenv | grep VUE_APP_ > .env
 
