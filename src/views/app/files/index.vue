@@ -2,13 +2,16 @@
   <!-- actions -->
   <!-- upload progress bar -->
   <!-- uploading file indicator -->
-  <div v-if="loading" class="
+  <div
+    v-if="loading"
+    class="
       fixed
       bottom-4 left-4 sm-right-4 z-50
       p-2
       rounded-lg
       border border-[#0A77F3]
-      ">
+    "
+  >
     <div class="relative">
       <div class="flex items-center justify-between">
         <div>
@@ -58,7 +61,6 @@
       sm:px-8 sm:pt-6">
       <!-- search box movil-->
       <div
-        v-if="!isAuth"
         class="
           fixed top-10
           flex flex-col justify-center
@@ -197,7 +199,6 @@ const isDragging = ref(false); // Drag & Drop
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
-const isLight = computed(() => store.state.theme.theme === 'light');
 
 async function handleSearch() {
   const payload = {
@@ -222,6 +223,27 @@ async function handleInput() {
   }, 500);
 }
 
+async function getData() {
+  loading.value = true;
+  try {
+    const q = typeof route.query.query === 'string' ? route.query.query : '';
+    const payload = {
+      query: q,
+      page: 1,
+    };
+    query.value = q;
+    await store.dispatch('files/filter', payload);
+  } catch (err: any) {
+    const msg = err.response.data.error || 'Error al cargar los archivos';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 // Lógica original de subida (sin cambios)
 async function uploadFile(ev: Event): Promise<void> {
   loading.value = true;
@@ -236,10 +258,6 @@ async function uploadFile(ev: Event): Promise<void> {
     formData.append('file', file.value);
 
     await store.dispatch('files/upload', formData);
-    store.commit('notifications/addNotification', {
-      type: 'success',
-      message: 'Archivo subido correctamente',
-    });
   } catch (error: any) {
     console.error(error);
     const msg = error.response?.data?.error || 'Error al subir el archivo';
@@ -282,33 +300,6 @@ async function onDrop(ev: DragEvent) {
 
   await uploadFile(fakeEvent);
 }
-
-async function getData() {
-  loading.value = true;
-  try {
-    const q = typeof route.query.query === 'string' ? route.query.query : '';
-    const payload = {
-      query: q,
-      page: 1,
-    };
-    query.value = q;
-    await store.dispatch('files/filter', payload);
-  } catch (err: any) {
-    const msg = err.response.data.error || 'Error al cargar los archivos';
-    store.commit('notifications/addNotification', {
-      message: msg,
-      type: 'error',
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-const toggleTheme = () => {
-  store.dispatch('theme/toggleTheme');
-  const newTheme = store.state.theme.theme;
-
-  document.documentElement.classList.toggle('light', newTheme === 'light');
-};
 
 onMounted(() => {
   // find.value.page = Math.max(route.query.page ? Number(route.query.page) : 1, 1);

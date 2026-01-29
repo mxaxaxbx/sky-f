@@ -42,12 +42,34 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
             ? Math.round((progressEvent.loaded) / progressEvent.total)
             : 0;
           context.commit('setUploadProgress', progress);
+          console.log('progress', progress);
+          if (progress === 1) {
+            context.commit(
+              'notifications/addNotification',
+              {
+                type: 'success',
+                message: 'Archivo subido correctamente',
+              },
+              { root: true },
+            );
+            // get url queries
+            let q = '';
+            let p = 1;
+            if (document.location.search) {
+              const urlParams = new URLSearchParams(document.location.search);
+              q = urlParams.get('query') || '';
+              p = parseInt(urlParams.get('page') || '1', 10);
+            }
+            context.dispatch('filter', {
+              query: q,
+              page: p,
+            });
+          }
         },
       },
     );
     // eslint-disable-next-line no-promise-executor-return
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    context.dispatch('filter', null);
   },
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
