@@ -3,7 +3,7 @@
   <!-- upload progress bar -->
   <!-- uploading file indicator -->
   <div
-    v-if="loading"
+    v-if="uploading"
     class="
       fixed
       bottom-4 left-4 sm-right-4 z-50
@@ -23,10 +23,15 @@
               text-[#0A77F3]
               bg-white
             ">
-            Subiendo archivo
+            {{ uploadQueue.length > 1 ? 'Subiendo archivos' : 'Subiendo archivo' }}
           </span>
           <span class="text-xs font-semibold inline-block text-[#0A77F3]">
-            {{ file?.name }}
+            <span v-if="uploadQueue.length > 1">
+              {{ uploadQueue.length }} archivos
+            </span>
+            <span v-else>
+              {{ file?.name }}
+            </span>
           </span>
         </div>
         <div class="text-right">
@@ -113,7 +118,7 @@
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
           cursor-pointer
-        " :class="{ 'opacity-50': loading }">
+        "           :class="{ 'opacity-50': uploading }">
         <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
         <span>Upload</span>
 
@@ -123,8 +128,8 @@
           class="hidden"
           ref="fileInput"
           @change="uploadFile"
-          :multiple="false"
-          :disabled="loading" />
+          :multiple="true"
+          :disabled="uploading" />
       </label>
 
       <!--uploap movil-->
@@ -140,7 +145,7 @@
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
-        " :class="{ 'opacity-50': loading }">
+        " :class="{ 'opacity-50': uploading }">
         <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
 
         <input
@@ -149,8 +154,8 @@
           class="hidden"
           ref="fileInput"
           @change="uploadFile"
-          :multiple="false"
-          :disabled="loading" />
+          :multiple="true"
+          :disabled="uploading" />
       </label>
 
       <div
@@ -194,7 +199,9 @@ let timeout: number | undefined;
 
 const query = ref<string>('');
 const loading = ref(false);
+const uploading = ref(false);
 const file = ref<File | null>(null);
+const uploadQueue = ref<File[]>([]);
 const isDragging = ref(false); // Drag & Drop
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
@@ -233,8 +240,9 @@ async function getData() {
     };
     query.value = q;
     await store.dispatch('files/filter', payload);
-  } catch (err: any) {
-    const msg = err.response.data.error || 'Error al cargar los archivos';
+  } catch (err: unknown) {
+    const errorResponse = err as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al cargar los archivos';
     store.commit('notifications/addNotification', {
       message: msg,
       type: 'error',
@@ -244,29 +252,45 @@ async function getData() {
   }
 }
 
-// Lógica original de subida (sin cambios)
+// Upload multiple files in a single request
 async function uploadFile(ev: Event): Promise<void> {
-  loading.value = true;
-  try {
-    const target = ev.target as HTMLInputElement;
-    if (!target.files) {
-      return;
-    }
+  const target = ev.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) {
+    return;
+  }
 
-    [file.value] = target.files;
+  // Convert FileList to array
+  const filesArray = Array.from(target.files);
+  uploadQueue.value = filesArray;
+  uploading.value = true;
+  // Show first file name for display purposes
+  [file.value] = filesArray;
+
+  try {
     const formData = new FormData();
-    formData.append('file', file.value);
+    // Append all files to FormData (most backends accept multiple files with same field name)
+    filesArray.forEach((fileItem) => {
+      formData.append('file', fileItem);
+    });
 
     await store.dispatch('files/upload', formData);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error);
-    const msg = error.response?.data?.error || 'Error al subir el archivo';
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al subir los archivos';
     store.commit('notifications/addNotification', {
       type: 'error',
       message: msg,
     });
   } finally {
-    loading.value = false;
+    uploading.value = false;
+    file.value = null;
+    uploadQueue.value = [];
+
+    // Reset file input
+    if (target) {
+      target.value = '';
+    }
   }
 }
 
@@ -291,11 +315,11 @@ async function onDrop(ev: DragEvent) {
 
   if (!ev.dataTransfer || !ev.dataTransfer.files.length) return;
 
-  const droppedFile = ev.dataTransfer.files[0];
-  if (!droppedFile) return;
+  const droppedFiles = Array.from(ev.dataTransfer.files);
+  if (droppedFiles.length === 0) return;
 
   const fakeEvent = {
-    target: { files: [droppedFile] },
+    target: { files: ev.dataTransfer.files },
   } as unknown as Event;
 
   await uploadFile(fakeEvent);
@@ -315,6 +339,17 @@ watch(
     timeout = window.setTimeout(() => {
       handleSearch();
     }, 500);
+  },
+);
+
+// Reset progress when individual file upload completes
+watch(
+  () => progress.value,
+  (newProgress) => {
+    if (newProgress === 1 && uploading.value && file.value) {
+      // Progress is handled in uploadFile function for multiple files
+      // This watch is kept for single file compatibility
+    }
   },
 );
 </script>

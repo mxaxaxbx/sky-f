@@ -2,7 +2,7 @@ import { ActionTree, ActionContext } from 'vuex';
 import { AxiosProgressEvent } from 'axios';
 
 import { storageClient } from '@/http-client';
-import { camelToSnake, snakeToCamel } from '@/utils';
+import { snakeToCamel } from '@/utils';
 
 import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
@@ -44,11 +44,16 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           context.commit('setUploadProgress', progress);
           console.log('progress', progress);
           if (progress === 1) {
+            // Check if multiple files were uploaded by counting FormData entries
+            const fileCount = Array.from(payload.entries()).filter(([key]) => key === 'file').length;
+            const message = fileCount > 1
+              ? `${fileCount} archivos subidos correctamente`
+              : 'Archivo subido correctamente';
             context.commit(
               'notifications/addNotification',
               {
                 type: 'success',
-                message: 'Archivo subido correctamente',
+                message,
               },
               { root: true },
             );
