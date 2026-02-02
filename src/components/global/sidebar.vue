@@ -39,11 +39,11 @@
               Menu
             </span>
 
-          <button
-            @click="toggleSidebar"
-            class="h-10 flex items-center transition-all duration-200"
-            :class="showSidebar ? 'justify-between px-3' : 'justify-center'"
-          >
+            <button
+              @click="toggleSidebar"
+              class="h-10 flex items-center transition-all duration-200"
+              :class="showSidebar ? 'justify-between px-3' : 'justify-center'
+              ">
             <!-- Ícono wrapper -->
             <div class="w-6 h-6 flex items-center justify-center">
               <img
@@ -70,7 +70,9 @@
                       transition-all duration-200
                       text-sm font-regular
                       rounded-lg
-                      hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--hover-border)]
                       hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
                     "
                     :class="showSidebar

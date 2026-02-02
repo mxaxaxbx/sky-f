@@ -407,7 +407,7 @@ onMounted(() => {
               x: '-100%',
               duration: 130,
               ease: 'linear',
-              repeat: -1,
+              repeat: 1,
             },
           );
         },

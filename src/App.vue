@@ -17,7 +17,7 @@
       "
     >
       <!-- sidebar -->
-      <Sidebar v-if="showSidebar" />
+      <Sidebar v-if="isAuth && showSidebar" />
     </div>
 
     <!-- content -->
@@ -107,7 +107,17 @@
                     class="
                       opacity-50 hover:opacity-100
                       transition-all duration-300 ease-in-out
-                      ">Care</a></li>
+                      ">Care
+                    </a>
+                  </li>
+                  <li><a
+                    href="#"
+                    class="
+                      opacity-50 hover:opacity-100
+                      transition-all duration-300 ease-in-out
+                      ">Utils
+                    </a>
+                  </li>
                 </ul>
               </div>
               <div class="text-left">
