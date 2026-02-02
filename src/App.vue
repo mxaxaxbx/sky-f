@@ -17,19 +17,20 @@
       "
     >
       <!-- sidebar -->
-      <Sidebar v-if="isAuth && showSidebar" />
+      <Sidebar v-if="showSidebar && !isHome" />
     </div>
 
     <!-- content -->
     <div
-      class="overflow-y-auto transition-[padding] duration-300"
-      :class="
-      !isAuth
-        ? 'pl-0'
-        : store.state.sidebar
-          ? 'sm:pl-64 pl-0'
-          : 'sm:pl-10 pl-0'
-      ">
+  class="overflow-y-auto transition-[padding] duration-300"
+  :class="
+    !isAuth || isHome
+      ? 'pl-0'
+      : store.state.sidebar
+        ? 'sm:pl-64'
+        : 'sm:pl-10'
+  "
+>
       <div class="flex-1 flex flex-col">
         <div class="min-h-screen">
           <router-view />
@@ -212,6 +213,7 @@ const route = useRoute();
 
 const { VUE_APP_DG_USERS_APP } = process.env;
 
+const isHome = computed(() => route.name === 'home');
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const showSidebar = computed(
   () => isAuth.value && route.name !== 'home',
