@@ -57,7 +57,7 @@
           </button>
           </div>
             <!-- Authenticated Menu -->
-            <div v-if="isAuth" class="px-2 py-1.5 mt-1">
+            <div v-if="isAuth" class="px-1 py-1.5 mt-1">
               <ul class="space-y-2 font-semibold text-[#7f7f7f]">
                 <!-- Add more authenticated menu items here -->
                 <li>
@@ -69,15 +69,16 @@
                       flex items-center
                       transition-all duration-200
                       text-sm font-regular
-                      rounded-lg
+                      rounded-xl
 
                       hover:bg-[var(--hover-bg)]
+                      hover:text-[var(--text)]
                       hover:border-[var(--hover-border)]
                       hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
                     "
                     :class="showSidebar
-                      ? 'justify-start px-3 py-1.5'
-                      : 'justify-center py-1'"
+                      ? 'justify-start px-2 py-1.5'
+                      : 'justify-center py-1.5'"
                     active-class="
                       bg-[var(--bg-secondary)] text-[var(--text-terceary)]
                       border border-[var(--border)]
