@@ -27,8 +27,8 @@
           class="
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            py-2 p-4
-            rounded-lg min-w-0 overflow-hidden
+            py-2 px-2
+            rounded-2xl min-w-0 overflow-hidden
             hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]
             hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
             transition-colors duration-300
@@ -77,13 +77,7 @@
                 class="w-8"
               />
               <img
-                v-else-if="file.contentType === 'image/png'"
-                src="/icon/icon-png.svg"
-                alt="image file icon"
-                class="w-8"
-              />
-              <img
-                v-else-if="file.contentType === 'image/gif'"
+                v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
                 src="/icon/icon-png.svg"
                 alt="image file icon"
                 class="w-8"
@@ -95,19 +89,13 @@
                 class="w-8"
               />
               <img
-                v-else-if="file.contentType === 'image/jpeg'"
+                v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
                 src="/icon/icon-img.svg"
                 alt="image file icon"
                 class="w-8"
               />
               <img
-                v-else-if="file.contentType === 'image/jpg'"
-                src="/icon/icon-img.svg"
-                alt="image file icon"
-                class="w-8"
-              />
-              <img
-                v-else-if="file.contentType === 'video/mp4'"
+                v-else-if="/^video\//.test(file.contentType)"
                 src="/icon/icon-video.svg"
                 alt="image file icon"
                 class="w-8"
@@ -119,7 +107,7 @@
                 class="w-8"
               />
               <img
-                v-else-if="file.contentType === 'audio/mpeg'"
+                v-else-if="/^audio\//.test(file.contentType)"
                 src="/icon/icon-audio.svg"
                 alt="image file icon"
                 class="w-8"

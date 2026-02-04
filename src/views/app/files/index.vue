@@ -8,7 +8,7 @@
       fixed
       bottom-4 left-4 sm-right-4 z-50
       p-2
-      rounded-lg
+      rounded-2xl
       border border-[#0A77F3]
     "
   >
@@ -161,7 +161,7 @@
       <div
         class="
           w-full min-h-[calc(100vh-8rem)]
-          mx-auto px-2 mt-4 rounded-lg"
+          mx-auto px-2 mt-4 rounded-2xl"
         :class="[
         isDragging ?
         'border-2 border-[var(--hover-border)] border-dashed bg-[var(--hover-bg)] ' : '',

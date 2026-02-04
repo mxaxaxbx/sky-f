@@ -3,7 +3,7 @@
     <div
       v-for="(notification, index) in notifications"
       :key="index"
-      class="mt-2 rounded-lg px-5 py-2 z-999 border shadow mb-2 text-[#3d3d3d]"
+      class="mt-2 rounded-2xl px-2 py-1 z-999 border shadow mb-2 text-[#3d3d3d]"
       :class="{
         'border-red-500 bg-red-100': notification.type === 'error',
         'border-green-500 bg-green-100': notification.type === 'success',

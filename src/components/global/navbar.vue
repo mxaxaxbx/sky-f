@@ -92,7 +92,7 @@
             @click="toggle"
             class="
               relative flex items-center justify-center
-              bg-[#0B77F3]
+              bg-[var(--color-primary)]
               h-6 w-6
               mr-0
               rounded-full
@@ -255,7 +255,7 @@
             <button @click="logout"
               class="
                 flex items-center justify-around
-                bg-[#0A77F3]
+                bg-[var(--color-primary)]
                 w-36
                 rounded-full
                 py-1

@@ -47,7 +47,7 @@ onUnmounted(() => {
           bg-[var(--bg)]
 
           border border-[var(--border)]
-          rounded-lg
+          rounded-2xl
           shadow-lg z-50
 
           sm:absolute sm:inset-auto
