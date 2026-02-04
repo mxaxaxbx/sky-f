@@ -49,7 +49,9 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       });
     });
 
-    console.log('uploadFiles', context.state.uploadFiles);
+    const { data } = await storageClient.post('/api/storage/generate-upload-url', snakeToCamel(context.state.uploadFiles));
+
+    console.log('data', data);
   },
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
