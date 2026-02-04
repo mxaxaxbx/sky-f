@@ -1,13 +1,15 @@
 export interface FileI {
   id: string;
-  contentType: string;
-  createdAt: number;
   name: string;
   size: number;
-  updatedAt: number;
-  url: string;
+  contentType: string;
   userId: string;
-  loading?: boolean;
+  r2Key: string;
+  r2Url: string;
+  uploadCompleted: boolean;
+  error: string;
+  created: number;
+  updated: number;
 }
 
 export interface FilesResultI {
@@ -21,6 +23,7 @@ export interface FilesResultI {
 export interface FilesStateI {
   result: FilesResultI;
   uploadProgress: number;
+  uploadFiles: FileI[];
 }
 
 export const state: FilesStateI = {
@@ -32,4 +35,5 @@ export const state: FilesStateI = {
     totalPages: 0,
   },
   uploadProgress: 0,
+  uploadFiles: [],
 };

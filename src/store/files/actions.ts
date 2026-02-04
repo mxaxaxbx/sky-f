@@ -29,52 +29,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
   ): Promise<void> {
-    storageClient.post(
-      '/api/storage/upload',
-      payload,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-          // eslint-disable-next-line no-unsafe-optional-chaining
-          const progress = progressEvent.total
-            ? Math.round((progressEvent.loaded) / progressEvent.total)
-            : 0;
-          context.commit('setUploadProgress', progress);
-          console.log('progress', progress);
-          if (progress === 1) {
-            // Check if multiple files were uploaded by counting FormData entries
-            const fileCount = Array.from(payload.entries()).filter(([key]) => key === 'file').length;
-            const message = fileCount > 1
-              ? `${fileCount} archivos subidos correctamente`
-              : 'Archivo subido correctamente';
-            context.commit(
-              'notifications/addNotification',
-              {
-                type: 'success',
-                message,
-              },
-              { root: true },
-            );
-            // get url queries
-            let q = '';
-            let p = 1;
-            if (document.location.search) {
-              const urlParams = new URLSearchParams(document.location.search);
-              q = urlParams.get('query') || '';
-              p = parseInt(urlParams.get('page') || '1', 10);
-            }
-            context.dispatch('filter', {
-              query: q,
-              page: p,
-            });
-          }
-        },
-      },
-    );
-    // eslint-disable-next-line no-promise-executor-return
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log('upload', payload);
   },
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
