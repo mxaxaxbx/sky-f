@@ -1,9 +1,9 @@
 export interface FileI {
-  id: string;
+  id: string | number;
   name: string;
   size: number;
   contentType: string;
-  userId: string;
+  userId: string | number;
   r2Key: string;
   r2Url: string;
   uploadCompleted: boolean;

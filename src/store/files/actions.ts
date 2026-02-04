@@ -29,7 +29,27 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
   ): Promise<void> {
-    console.log('upload', payload);
+    // get the files from the payload
+    const files = payload.getAll('file');
+
+    files.forEach((file: FormDataEntryValue) => {
+      const fileObj = file as File;
+      context.state.uploadFiles.push({
+        id: 0,
+        name: fileObj.name,
+        size: fileObj.size,
+        contentType: fileObj.type,
+        userId: 0,
+        r2Key: '',
+        r2Url: '',
+        uploadCompleted: false,
+        error: '',
+        created: 0,
+        updated: 0,
+      });
+    });
+
+    console.log('uploadFiles', context.state.uploadFiles);
   },
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
