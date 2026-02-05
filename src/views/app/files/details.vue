@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full pb-4 pt-0 px-0 mt-20 sm:mt-0 sm:pt-2 sm:px-3">
+  <div class=" container w-full p-2">
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <i class="fas fa-spinner fa-spin text-4xl text-[var(--color-primary)]"></i>
@@ -13,34 +13,41 @@
         class="
           flex items-center gap-2
           mb-6
-          text-[var(--text-secondary)]
-          hover:text-[var(--color-primary)]
-          transition-colors duration-300
+          text-[var(--text-terceary)]
+          hover:text-[var(--text)]
+          transition-colors duration-200
         "
       >
         <i class="fas fa-arrow-left"></i>
-        <span class="text-sm font-medium">Volver</span>
+        <span class="text-md font-regular">back</span>
       </button>
 
       <!-- Main card -->
       <div
         class="
-          bg-[var(--bg-secondary)]
+          bg-[var(--bg-secondary)] w-full
           border border-[var(--border)]
           rounded-2xl
-          p-6 sm:p-8
           shadow-lg
         "
       >
         <!-- Header section -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 pb-6 border-b border-[var(--border)]">
+        <div
+          class="
+            flex flex-col items-start
+            gap-4 p-4
+            border-b border-[var(--border)]
+
+            sm:flex-row
+            sm:items-center
+            ">
           <!-- File icon -->
           <div class="flex-shrink-0">
             <img
               v-if="file.contentType === 'application/pdf'"
               src="/icon/icon-pdf.svg"
               alt="PDF file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="
@@ -49,7 +56,7 @@
               "
               src="/icon/icon-doc.svg"
               alt="Word file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="
@@ -58,7 +65,7 @@
               "
               src="/icon/icon-excel.svg"
               alt="Excel file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="
@@ -67,49 +74,49 @@
               "
               src="/icon/icon-ppt.svg"
               alt="PowerPoint file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
               src="/icon/icon-png.svg"
               alt="Image file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="file.contentType === 'image/svg+xml'"
               src="/icon/icon-svg.svg"
               alt="SVG file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              cclass="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
               src="/icon/icon-img.svg"
               alt="Image file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="/^video\//.test(file.contentType)"
               src="/icon/icon-video.svg"
               alt="Video file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="file.contentType === 'application/zip'"
               src="/icon/icon-zip.svg"
               alt="ZIP file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="/^audio\//.test(file.contentType)"
               src="/icon/icon-audio.svg"
               alt="Audio file icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else
               src="/icon/icon-file.svg"
               alt="File icon"
-              class="w-16 h-16 sm:w-20 sm:h-20"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
           </div>
 
@@ -137,9 +144,9 @@
                   bg-[var(--color-primary)]
                   border border-[var(--color-primary)]
                   text-white
-                  px-3 py-1
+                  px-2 py-0.5
                   rounded-full
-                  text-xs font-regular
+                  text-xs
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   transition-all duration-300
@@ -148,14 +155,19 @@
                   overflow-hidden
                 "
               >
-                <img
-                  alt="do"
-                  :src="downloading
-                    ? '/icon/icon_download.svg'
-                    : '/icon/icon_download.svg'"
-                    class="h-4"
-                />
-                <span class="relative z-10">
+              <i
+                v-if="downloading"
+                class="fas fa-spinner fa-spin h-5 w-5 text-white z-10"
+              ></i>
+
+              <!-- icono normal -->
+              <img
+                v-else
+                src="/icon/icon_download.svg"
+                alt="download"
+                class="h-4 w-4 z-10"
+              />
+                <span class="relative z-10 font-light">
                   {{ downloading ? 'Descargando...' : 'Descargar' }}
                 </span>
                 <span
@@ -193,183 +205,74 @@
         </div>
 
         <!-- File information grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div
+          class="
+            grid grid-cols-1
+            gap-6 p-4
+
+            sm:grid-cols-2
+          "
+        >
           <!-- File size -->
           <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-              hover:border-[var(--hover-border)]
-              transition-colors duration-300
-            "
+            class="px-3 py-2"
           >
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-weight text-[var(--color-primary)]"></i>
-              <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
-                Tamaño
+            <div class="flex-col items-center justify-between gap-2">
+              <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
+                Size:
               </h3>
+              <p class="text-xl font-light text-[var(--text)]">
+                {{ formatFileSize(file.size) }}
+              </p>
             </div>
-            <p class="text-lg font-semibold text-[var(--text)]">
-              {{ formatFileSize(file.size) }}
-            </p>
           </div>
 
           <!-- Content type -->
           <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-              hover:border-[var(--hover-border)]
-              transition-colors duration-300
-            "
+            class="px-3 py-2"
           >
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-file-alt text-[var(--color-primary)]"></i>
-              <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
-                Tipo de archivo
+          <div class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
+                Type:
               </h3>
             </div>
-            <p class="text-lg font-semibold text-[var(--text)]">
+            <p class="text-xl font-light text-[var(--text)]">
               {{ file.contentType }}
             </p>
           </div>
 
           <!-- Created date -->
           <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-              hover:border-[var(--hover-border)]
-              transition-colors duration-300
-            "
+            class="px-3 py-2"
           >
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-calendar-plus text-[var(--color-primary)]"></i>
-              <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
-                Fecha de creación
+          <div class="flex-col items-center justify-between gap-2">
+              <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
+                Creation date:
               </h3>
             </div>
-            <p class="text-lg font-semibold text-[var(--text)]">
+            <p class="text-xl font-light text-[var(--text)]">
               {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
             </p>
-            <p class="text-xs text-[var(--text-terceary)] mt-1">
+            <p class="text-sm font-light text-[var(--text-terceary)]">
               {{ moment(file.created * 1000).fromNow() }}
             </p>
           </div>
 
           <!-- Updated date -->
           <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-              hover:border-[var(--hover-border)]
-              transition-colors duration-300
-            "
+            class="px-3 py-2"
           >
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-calendar-check text-[var(--color-primary)]"></i>
-              <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
-                Última actualización
+          <div class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
+              Last modification:
               </h3>
             </div>
-            <p class="text-lg font-semibold text-[var(--text)]">
+            <p class="text-xl font-light text-[var(--text)]">
               {{ moment(file.updated * 1000).format('DD/MM/YYYY HH:mm') }}
             </p>
-            <p class="text-xs text-[var(--text-terceary)] mt-1">
+            <p class="text-sm font-light text-[var(--text-terceary)]">
               {{ moment(file.updated * 1000).fromNow() }}
             </p>
-          </div>
-
-          <!-- File ID -->
-          <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-              hover:border-[var(--hover-border)]
-              transition-colors duration-300
-            "
-          >
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-hashtag text-[var(--color-primary)]"></i>
-              <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
-                ID del archivo
-              </h3>
-            </div>
-            <p class="text-lg font-semibold text-[var(--text)]">
-              {{ file.id }}
-            </p>
-          </div>
-
-          <!-- User ID -->
-          <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-              hover:border-[var(--hover-border)]
-              transition-colors duration-300
-            "
-          >
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-user text-[var(--color-primary)]"></i>
-              <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
-                ID de usuario
-              </h3>
-            </div>
-            <p class="text-lg font-semibold text-[var(--text)]">
-              {{ file.userId }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Storage information -->
-        <div
-          v-if="file.r2Key"
-          class="
-            mt-6 pt-6
-            border-t border-[var(--border)]
-          "
-        >
-          <h3 class="text-sm font-semibold text-[var(--text-secondary)] mb-4">
-            Información de almacenamiento
-          </h3>
-          <div
-            class="
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-xl
-              p-4
-            "
-          >
-            <div class="space-y-2">
-              <div>
-                <p class="text-xs text-[var(--text-terceary)] mb-1">
-                  R2 Key
-                </p>
-                <p
-                  class="
-                    text-sm text-[var(--text)]
-                    font-mono
-                    break-all
-                    bg-[var(--bg-secondary)]
-                    p-2 rounded
-                  "
-                >
-                  {{ file.r2Key }}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

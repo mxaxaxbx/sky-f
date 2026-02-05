@@ -179,11 +179,10 @@
 
                       hover:bg-[var(--hover-bg)]
                       hover:border-[var(--color-primary)]
-                      hover:text-[var(--text)]
                       transition-colors duration-300
                     "
                   >
-                    <img src="/icon/icon_download.svg" alt="download" class="h-4 mr-3"
+                    <img src="/icon/icon_download_2.svg" alt="download" class="h-4 mr-3"
                     />
                     <span>Download</span>
                   </button>
@@ -196,11 +195,10 @@
 
                       hover:bg-[var(--hover-bg)]
                       hover:border-[var(--color-primary)]
-                      hover:text-[var(--text)]
                       transition-colors duration-300
                     "
                   >
-                  <img src="/icon/icon_download.svg" alt="download" class="h-4 mr-3"
+                  <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3"
                   />
                     <span>Details</span>
                   </router-link>
