@@ -68,7 +68,6 @@ const loading = ref(false);
 const file = ref<File | null>(null);
 const hasFiles = computed(() => !!file.value); // Nuevo: indica si ya hay archivo
 
-// 🟦 Lógica original de subida (sin cambios)
 async function uploadFile(ev: Event): Promise<void> {
   loading.value = true;
   try {
@@ -95,6 +94,11 @@ async function uploadFile(ev: Event): Promise<void> {
     });
   } finally {
     loading.value = false;
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    file.value = null;
   }
 }
 

@@ -114,4 +114,19 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context.commit('setFile', snakeToCamel(data));
   },
 
+  async getDownloadUrl(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
+    const { url } = snakeToCamel(data);
+
+    const ael = document.createElement('a');
+    ael.href = url;
+    // TODO: pending file name
+    // ael.target = '_blank';
+    ael.click();
+    ael.remove();
+  },
+
 };

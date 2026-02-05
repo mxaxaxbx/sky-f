@@ -107,7 +107,9 @@
         <h1 class="text-left text-lg mt-4 mb-1 font-semibold ml-2 text-[var(--text)]
         ">Could Drive</h1>
       </div>
-      <label for="fileInput" class="
+      <label
+        for="fileInputBtn"
+        class="
           hidden sm:flex items-center
           bg-[var(--color-primary)]
           text-white text-sm font-medium
@@ -118,22 +120,25 @@
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
           cursor-pointer
-        "           :class="{ 'opacity-50': uploading }">
+        "
+      >
         <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
         <span>Upload</span>
 
         <input
-          id="fileInput"
+          id="fileInputBtn2"
           type="file"
           class="hidden"
-          ref="fileInput"
+          ref="fileInputBtn2"
           @change="uploadFile"
           :multiple="true"
-          :disabled="uploading" />
+        />
       </label>
 
       <!--uploap movil-->
-      <label for="fileInput" class="
+      <label
+        for="fileInputBtn"
+        class="
           fixed bottom-3 right-3 sm:hidden
           flex items-center
           bg-[#0A77F3]
@@ -145,17 +150,18 @@
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
-        " :class="{ 'opacity-50': uploading }">
+        "
+      >
         <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
 
         <input
-          id="fileInput"
+          id="fileInputBtn"
           type="file"
           class="hidden"
-          ref="fileInput"
+          ref="fileInputBtn"
           @change="uploadFile"
           :multiple="true"
-          :disabled="uploading" />
+        />
       </label>
 
       <div
@@ -283,14 +289,15 @@ async function uploadFile(ev: Event): Promise<void> {
       message: msg,
     });
   } finally {
-    uploading.value = false;
-    file.value = null;
-    uploadQueue.value = [];
-
-    // Reset file input
-    if (target) {
-      target.value = '';
+    const fileInput = document.getElementById('fileInputBtn') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
     }
+    const fileInput2 = document.getElementById('fileInputBtn2') as HTMLInputElement;
+    if (fileInput2) {
+      fileInput2.value = '';
+    }
+    file.value = null;
   }
 }
 

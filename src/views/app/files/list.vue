@@ -159,7 +159,10 @@
               <template #content="{ }">
                 <div class="bg-red-500 flex flex-col gap-2">
                   <!-- download -->
-                  <button class="flex items-center justify-start">
+                  <button
+                    @click="downloadFile(file)"
+                    class="flex items-center justify-start"
+                  >
                     <i class="fas fa-download"></i>
                     <span>Download</span>
                   </button>
@@ -233,6 +236,10 @@ async function getMoreResults() {
 
     loading.value = false;
   }
+}
+
+async function downloadFile(file: FileI) {
+  await store.dispatch('files/getDownloadUrl', file);
 }
 
 onMounted(() => {
