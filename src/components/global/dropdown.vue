@@ -10,7 +10,7 @@ import {
 const props = defineProps({
   width: {
     type: String,
-    default: 'w-80', // Default Tailwind width class
+    default: 'sm:w-80', // Default Tailwind width class
   },
 });
 
