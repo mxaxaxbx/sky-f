@@ -15,10 +15,14 @@
       <!-- results -->
       <div
         class="
-          grid grid-cols-2
-          sm:grid-cols-2 lg:grid-cols-5 gap-4
+          grid grid-cols-1 gap-2
           text-[var(--text)]
-          ">
+
+          sm:grid-cols-2 sm:gap-4
+          md:grid-cols-4
+          lg:grid-cols-5
+        "
+      >
         <!-- results -->
         <div
           v-for="file in results.data"
@@ -26,6 +30,7 @@
           class="
             group
             flex items-center justify-between
+            w-full
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             rounded-2xl min-w-0
@@ -38,7 +43,7 @@
         >
           <router-link
             :to="`/app/files/details/${file.id}`"
-            class="block"
+            class="flex-1 min-w-0"
           >
             <div class="flex items center justify-between m-1">
               <div
@@ -53,7 +58,7 @@
                   v-if="file.contentType === 'application/pdf'"
                   src="/icon/icon-pdf.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="
@@ -62,7 +67,7 @@
                   "
                   src="/icon/icon-doc.svg"
                   alt="Word file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="
@@ -71,7 +76,7 @@
                   "
                   src="/icon/icon-excel.svg"
                   alt="Word file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="
@@ -80,60 +85,53 @@
                   "
                   src="/icon/icon-ppt.svg"
                   alt="PowerPoint file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
                   src="/icon/icon-png.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="file.contentType === 'image/svg+xml'"
                   src="/icon/icon-svg.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
                   src="/icon/icon-img.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="/^video\//.test(file.contentType)"
                   src="/icon/icon-video.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="file.contentType === 'application/zip'"
                   src="/icon/icon-zip.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else-if="/^audio\//.test(file.contentType)"
                   src="/icon/icon-audio.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                 />
                 <img
                   v-else
                   src="/icon/icon-file.svg"
                   alt="image file icon"
-                  class="w-10"
+                  class="h-10 w-10"
                   />
                 <!-- title and date -->
-                <div class="mr-6 ">
-                  <h3
-                    class="
-                      font-semibold text-xs text-left
-                      block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap
-                      sm:text-sm
-
-                    "
-                  >
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-xs sm:text-sm truncate text-left">
                     {{ file.name }}
                   </h3>
                   <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
@@ -146,7 +144,7 @@
           <!-- options -->
           <div
             class="
-              flex items-center justify-center z-10
+              flex items-center justify-center
               border-l border-[var(--border)]
               h-full w-6
 
@@ -154,7 +152,7 @@
               transition-colors duration-300
             "
           >
-            <Dropdown width="sm:w-36 sm:pt-0 sm:pb-0 sm:mt-1">
+            <Dropdown :classes="['bg-[var(--bg-secondary)]','border border-[var(--border)]', 'rounded-2xl', 'absolute', 'z-10','-right-0','top-8','w-40', 'sm:-right-2']">
               <template #trigger="{ toggle }">
                 <button
                   @click="toggle"
@@ -171,15 +169,19 @@
               </template>
 
               <template #content="{ }">
-                <div class="flex flex-col gap-2 px-1 py-1 font-light text-sm text-[#868686]">
+                <div class="flex flex-col gap-0.5 px-1.5 py-1 font-light text-sm text-[#868686]">
                   <!-- download -->
                   <button
                     @click="downloadFile(file)"
                     class="
-                    flex items-center justify-start
-                    rounded-xl p-1
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
 
-                    hover:bg-[var(--hover-bg)]"
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
+                      hover:text-[var(--text)]
+                      transition-colors duration-300
+                    "
                   >
                     <img src="/icon/icon_download.svg" alt="download" class="h-4 mr-3"
                     />
@@ -188,7 +190,15 @@
                   <!-- details -->
                   <router-link
                     :to="`/app/files/details/${file.id}`"
-                    class="flex items-center justify-start"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
+                      hover:text-[var(--text)]
+                      transition-colors duration-300
+                    "
                   >
                   <img src="/icon/icon_download.svg" alt="download" class="h-4 mr-3"
                   />

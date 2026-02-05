@@ -127,31 +127,6 @@
             </h1>
             <div class="flex flex-wrap items-center gap-4">
               <!-- Upload status badge -->
-              <div
-                class="
-                  inline-flex items-center gap-2
-                  px-3 py-1
-                  rounded-full text-xs font-medium
-                  transition-colors duration-300
-                "
-                :class="
-                  file.uploadCompleted
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                    : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                "
-              >
-                <i
-                  :class="
-                    file.uploadCompleted
-                      ? 'fas fa-check-circle'
-                      : 'fas fa-clock'
-                  "
-                ></i>
-                <span>
-                  {{ file.uploadCompleted ? 'Completado' : 'En proceso' }}
-                </span>
-              </div>
-
               <!-- Download button -->
               <button
                 @click="downloadFile"
@@ -162,9 +137,9 @@
                   bg-[var(--color-primary)]
                   border border-[var(--color-primary)]
                   text-white
-                  px-4 py-2
+                  px-3 py-1
                   rounded-full
-                  text-sm font-medium
+                  text-xs font-regular
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   transition-all duration-300
@@ -173,13 +148,13 @@
                   overflow-hidden
                 "
               >
-                <i
-                  :class="
-                    downloading
-                      ? 'fas fa-spinner fa-spin'
-                      : 'fas fa-download'
-                  "
-                ></i>
+                <img
+                  alt="do"
+                  :src="downloading
+                    ? '/icon/icon_download.svg'
+                    : '/icon/icon_download.svg'"
+                    class="h-4"
+                />
                 <span class="relative z-10">
                   {{ downloading ? 'Descargando...' : 'Descargar' }}
                 </span>

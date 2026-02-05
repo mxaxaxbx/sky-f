@@ -67,12 +67,14 @@
       <!-- search box movil-->
       <div
         class="
-          fixed top-10
+          fixed top-10 z-20
           flex flex-col justify-center
           w-full px-2 pt-4
           bg-[var(--bg)]
 
-          sm:hidden ">
+          sm:hidden
+        "
+      >
         <label
           for="search"
           class="text-[#a3a3a3]"></label>
@@ -139,7 +141,7 @@
       <label
         for="fileInputBtn"
         class="
-          fixed bottom-3 right-3 sm:hidden
+          fixed z-50 bottom-3 right-3 sm:hidden
           flex items-center
           bg-[#0A77F3]
           text-white text-md font-medium
