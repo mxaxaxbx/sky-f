@@ -123,8 +123,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
     const ael = document.createElement('a');
     ael.href = url;
-    // TODO: pending file name
-    // ael.target = '_blank';
+    ael.download = payload.name;
     ael.click();
     ael.remove();
   },
