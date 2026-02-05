@@ -5,10 +5,10 @@
       :key="index"
       class="mt-2 rounded-2xl px-2 py-1 z-999 border shadow mb-2 text-[#3d3d3d]"
       :class="{
-        'border-[#FF2121] bg-[#FF2121]/20': notification.type === 'error',
-        'border-[#00B44B] bg-[#00B44B]/20': notification.type === 'success',
-        'border-[#009DFF] bg-[#009DFF]/20': notification.type === 'info',
-        'border-[#FFA600] bg-[#FFA600]/20': notification.type === 'warning',
+        'border-[var(--error-border)] bg-[var(--error-bg)]': notification.type === 'error',
+        'border-[var(--success-border)] bg-[var(--success-bg)]': notification.type === 'success',
+        'border-[var(--info-border)] bg-[var(--info-bg)]': notification.type === 'info',
+        'border-[var(--warning-border)] bg-[var(--warning-bg)]': notification.type === 'warning',
         'border-[#3d3d3d] bg-white': notification.type === 'default',
       }"
     >
@@ -22,14 +22,14 @@
             />
           </div>
           <div>
-            <p class="font-semibold text-normal">{{ notification.title }}</p>
-            <p class="font-light text-sm">{{ notification.message }}</p>
+            <p class="font-semibold text-normal text-[var(--text)]">{{ notification.title }}</p>
+            <p class="font-light text-sm text-[var(--text)]">{{ notification.message }}</p>
           </div>
         </div>
         <div>
           <button
             @click="removeNotification(notification.id)"
-            class="text-[#3d3d3d]"
+            class="text-[var(--text)]"
           >
             <i class="fas fa-times" />
           </button>
