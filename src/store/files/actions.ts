@@ -118,14 +118,20 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
-    const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
-    const { url } = snakeToCamel(data);
+    const { data } = await storageClient.get(
+      `/api/storage/get-download-url/${payload.id}`,
+    );
+    const { url } = data;
 
-    const ael = document.createElement('a');
-    ael.href = url;
-    ael.download = payload.name;
-    ael.click();
-    ael.remove();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = payload.name; // fallback only
+    a.style.display = 'none';
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    a.remove();
   },
 
 };
