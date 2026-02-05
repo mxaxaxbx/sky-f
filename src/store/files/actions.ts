@@ -2,7 +2,7 @@ import { ActionTree, ActionContext } from 'vuex';
 import { AxiosProgressEvent } from 'axios';
 
 import { storageClient } from '@/http-client';
-import { snakeToCamel } from '@/utils';
+import { snakeToCamel, camelToSnake } from '@/utils';
 
 import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
@@ -49,9 +49,37 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       });
     });
 
-    const { data } = await storageClient.post('/api/storage/generate-upload-url', snakeToCamel(context.state.uploadFiles));
+    const { data } = await storageClient.post('/api/storage/generate-upload-url', camelToSnake(context.state.uploadFiles));
 
-    console.log('data', data);
+    const dataArray: FileI[] = snakeToCamel(data);
+
+    const completedFiles: FileI[] = [];
+
+    dataArray.forEach(async (item: FileI) => {
+      if (item.r2Url) {
+        // get file from formdata payload by name
+        const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+        if (file) {
+          try {
+            const response = await fetch(item.r2Url, {
+              method: 'PUT',
+              body: file,
+            });
+            console.log('response', response);
+            if (response.ok) {
+              completedFiles.push(item);
+            }
+          } catch (error: unknown) {
+            // eslint-disable-next-line no-param-reassign
+            (item as FileI).error = error as string;
+            console.error(error);
+          }
+        }
+      }
+
+      const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
+      console.log('confirmedData', confirmedData);
+    });
   },
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
