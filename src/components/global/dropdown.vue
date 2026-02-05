@@ -2,8 +2,17 @@
 import {
   ref,
   onUnmounted,
+  computed,
+  defineProps,
   defineEmits,
 } from 'vue';
+
+const props = defineProps({
+  width: {
+    type: String,
+    default: 'w-80', // Default Tailwind width class
+  },
+});
 
 const emit = defineEmits(['close']);
 
@@ -40,26 +49,23 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        class="
-          fixed inset-0
-          w-screen h-screen
-          pt-10 mt-10
-          bg-[var(--bg)]
-
-          border border-[var(--border)]
-          rounded-2xl
-          shadow-lg z-50
-
-          sm:absolute sm:inset-auto
-          sm:right-0
-          sm:pt-8 sm:pb-6
-          sm:mt-2
-          sm:h-auto sm:w-80
-          sm:right-0
-          -translate-y-1
-
-          overflow-hidden
-      ">
+        :class="[
+          'fixed inset-0',
+          'w-screen h-screen',
+          'pt-10 mt-10',
+          'bg-[var(--bg)]',
+          'border border-[var(--border)]',
+          'rounded-2xl',
+          'shadow-lg z-50',
+          'sm:absolute sm:inset-auto',
+          'sm:right-0',
+          'sm:pt-8 sm:pb-6',
+          'sm:mt-2',
+          'sm:h-auto',
+          props.width,
+          '-translate-y-1',
+          'overflow-hidden',
+        ]">
         <slot name="content" :close="close" />
       </div>
     </transition>

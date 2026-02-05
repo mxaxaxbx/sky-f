@@ -8,6 +8,7 @@ import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
 
 export const actions: ActionTree<FilesStateI, RootStateI> = {
+
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: {
@@ -25,6 +26,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     const { data } = await storageClient.get(`/api/storage/listfiles?${params.toString()}`);
     context.commit('setResult', snakeToCamel(data));
   },
+
   async upload(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
@@ -79,8 +81,14 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
       const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
       console.log('confirmedData', confirmedData);
+      // TODO: validate current page and query through route query params
+      context.dispatch('filter', {
+        query: '',
+        page: 1,
+      });
     });
   },
+
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
@@ -97,4 +105,13 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     linkel.click();
     linkel.remove();
   },
+
+  async getFileDetails(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: string,
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/storage/filedetails/${payload}`);
+    context.commit('setFile', snakeToCamel(data));
+  },
+
 };

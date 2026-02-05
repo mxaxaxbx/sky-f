@@ -24,6 +24,7 @@ export interface FilesStateI {
   result: FilesResultI;
   uploadProgress: number;
   uploadFiles: FileI[];
+  file: FileI;
 }
 
 export const state: FilesStateI = {
@@ -36,4 +37,17 @@ export const state: FilesStateI = {
   },
   uploadProgress: 0,
   uploadFiles: [],
+  file: {
+    id: 0,
+    name: '',
+    size: 0,
+    contentType: '',
+    userId: 0,
+    r2Key: '',
+    r2Url: '',
+    uploadCompleted: false,
+    error: '',
+    created: 0,
+    updated: 0,
+  },
 };
