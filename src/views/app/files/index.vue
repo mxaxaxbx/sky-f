@@ -2,56 +2,6 @@
   <!-- actions -->
   <!-- upload progress bar -->
   <!-- uploading file indicator -->
-  <div
-    v-if="uploading"
-    class="
-      fixed
-      bottom-4 left-4 sm-right-4 z-50
-      p-2
-      rounded-2xl
-      border border-[#0A77F3]
-    "
-  >
-    <div class="relative">
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="
-              text-xs font-semibold uppercase
-              inline-block
-              py-1 px-2 mb-2
-              rounded-full
-              text-[#0A77F3]
-              bg-white
-            ">
-            {{ uploadQueue.length > 1 ? 'Subiendo archivos' : 'Subiendo archivo' }}
-          </span>
-          <span class="text-xs font-semibold inline-block text-[#0A77F3]">
-            <span v-if="uploadQueue.length > 1">
-              {{ uploadQueue.length }} archivos
-            </span>
-            <span v-else>
-              {{ file?.name }}
-            </span>
-          </span>
-        </div>
-        <div class="text-right">
-          <span class="text-xs font-semibold inline-block mb-2 text-[#0A77F3]">
-            {{ Math.round(100 * progress) }}%
-          </span>
-        </div>
-      </div>
-      <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-[#7DBAFF]">
-        <div :style="{ width: `${Math.round(100 * progress)}%` }" class="
-            shadow-none
-            flex flex-col
-            text-center whitespace-nowrap text-white
-            justify-center
-            bg-[#0A77F3]
-          "></div>
-      </div>
-    </div>
-  </div>
-
   <div class="
       flex flex-row items-start
       bg-[var(--bg)]
