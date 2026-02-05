@@ -66,6 +66,7 @@
       sm:px-8 sm:pt-6">
       <!-- search box movil-->
       <div
+        v-if="!hideBar"
         class="
           fixed top-10 z-20
           flex flex-col justify-center
@@ -110,6 +111,7 @@
         ">Could Drive</h1>
       </div>
       <label
+        v-if="!hideBar"
         for="fileInputBtn"
         class="
           hidden sm:flex items-center
@@ -216,6 +218,7 @@ const fileInputBtn2 = ref<HTMLInputElement | null>(null);
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
+const hideBar = computed(() => route.path.includes('/details'));
 
 async function handleSearch() {
   const payload = {
