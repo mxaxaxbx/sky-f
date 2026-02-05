@@ -70,6 +70,14 @@ const routes: Array<RouteRecordRaw> = [
               title: 'Archivos',
             },
           },
+          {
+            path: 'details/:id',
+            name: 'app-files-details',
+            component: () => import('../views/app/files/details.vue'),
+            meta: {
+              title: 'Detalles del archivo',
+            },
+          },
         ],
       },
     ],

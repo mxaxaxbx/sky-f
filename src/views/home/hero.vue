@@ -28,7 +28,7 @@
             and projects safe and accessible anytime, anywhere.</span>
       </p>
       <a
-        :href="`${usersLink}/auth/provider?app=sky`"
+        href="/app"
         class="
           group relative inline-block
           bg-[var(--color-primary)]
