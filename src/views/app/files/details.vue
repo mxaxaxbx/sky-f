@@ -86,7 +86,7 @@
               v-else-if="file.contentType === 'image/svg+xml'"
               src="/icon/icon-svg.svg"
               alt="SVG file icon"
-              cclass="w-16 h-16 sm:w-40 sm:h-40"
+              class="w-16 h-16 sm:w-40 sm:h-40"
             />
             <img
               v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
