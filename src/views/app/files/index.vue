@@ -211,6 +211,8 @@ const uploading = ref(false);
 const file = ref<File | null>(null);
 const uploadQueue = ref<File[]>([]);
 const isDragging = ref(false); // Drag & Drop
+const fileInputBtn = ref<HTMLInputElement | null>(null);
+const fileInputBtn2 = ref<HTMLInputElement | null>(null);
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
@@ -291,15 +293,17 @@ async function uploadFile(ev: Event): Promise<void> {
       message: msg,
     });
   } finally {
-    const fileInput = document.getElementById('fileInputBtn') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
+    // Clean both file inputs
+    if (fileInputBtn.value) {
+      fileInputBtn.value.value = '';
     }
-    const fileInput2 = document.getElementById('fileInputBtn2') as HTMLInputElement;
-    if (fileInput2) {
-      fileInput2.value = '';
+    if (fileInputBtn2.value) {
+      fileInputBtn2.value.value = '';
     }
+    // Reset state
     file.value = null;
+    uploadQueue.value = [];
+    uploading.value = false;
   }
 }
 

@@ -1,5 +1,4 @@
 import { ActionTree, ActionContext } from 'vuex';
-import { AxiosProgressEvent } from 'axios';
 
 import { storageClient } from '@/http-client';
 import { snakeToCamel, camelToSnake } from '@/utils';
@@ -31,62 +30,70 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
   ): Promise<void> {
-    // get the files from the payload
-    const files = payload.getAll('file');
+    // Clear previous upload files and reset progress
+    context.commit('clearUploadFiles');
 
-    files.forEach((file: FormDataEntryValue) => {
-      const fileObj = file as File;
-      context.state.uploadFiles.push({
-        id: 0,
-        name: fileObj.name,
-        size: fileObj.size,
-        contentType: fileObj.type,
-        userId: 0,
-        r2Key: '',
-        r2Url: '',
-        uploadCompleted: false,
-        error: '',
-        created: 0,
-        updated: 0,
+    try {
+      // get the files from the payload
+      const files = payload.getAll('file');
+
+      files.forEach((file: FormDataEntryValue) => {
+        const fileObj = file as File;
+        context.state.uploadFiles.push({
+          id: 0,
+          name: fileObj.name,
+          size: fileObj.size,
+          contentType: fileObj.type,
+          userId: 0,
+          r2Key: '',
+          r2Url: '',
+          uploadCompleted: false,
+          error: '',
+          created: 0,
+          updated: 0,
+        });
       });
-    });
 
-    const { data } = await storageClient.post('/api/storage/generate-upload-url', camelToSnake(context.state.uploadFiles));
+      const { data } = await storageClient.post('/api/storage/generate-upload-url', camelToSnake(context.state.uploadFiles));
 
-    const dataArray: FileI[] = snakeToCamel(data);
+      const dataArray: FileI[] = snakeToCamel(data);
 
-    const completedFiles: FileI[] = [];
+      const completedFiles: FileI[] = [];
 
-    dataArray.forEach(async (item: FileI) => {
-      if (item.r2Url) {
-        // get file from formdata payload by name
-        const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
-        if (file) {
-          try {
-            const response = await fetch(item.r2Url, {
-              method: 'PUT',
-              body: file,
-            });
-            console.log('response', response);
-            if (response.ok) {
-              completedFiles.push(item);
+      dataArray.forEach(async (item: FileI) => {
+        if (item.r2Url) {
+          // get file from formdata payload by name
+          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+          if (file) {
+            try {
+              const response = await fetch(item.r2Url, {
+                method: 'PUT',
+                body: file,
+              });
+              console.log('response', response);
+              if (response.ok) {
+                completedFiles.push(item);
+              }
+            } catch (error: unknown) {
+              // eslint-disable-next-line no-param-reassign
+              (item as FileI).error = error as string;
+              console.error(error);
             }
-          } catch (error: unknown) {
-            // eslint-disable-next-line no-param-reassign
-            (item as FileI).error = error as string;
-            console.error(error);
           }
         }
-      }
 
-      const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
-      console.log('confirmedData', confirmedData);
-      // TODO: validate current page and query through route query params
-      context.dispatch('filter', {
-        query: '',
-        page: 1,
+        const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
+        console.log('confirmedData', confirmedData);
+        // TODO: validate current page and query through route query params
+        context.dispatch('filter', {
+          query: '',
+          page: 1,
+        });
       });
-    });
+    } finally {
+      // Always clear upload files and reset progress after upload completes or fails
+      context.commit('clearUploadFiles');
+    }
   },
 
   async download(

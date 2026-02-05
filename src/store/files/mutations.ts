@@ -32,4 +32,9 @@ export const mutations: MutationTree<FilesStateI> = {
     state.file = payload;
   },
 
+  clearUploadFiles(state: FilesStateI) {
+    state.uploadFiles = [];
+    state.uploadProgress = 0;
+  },
+
 };
