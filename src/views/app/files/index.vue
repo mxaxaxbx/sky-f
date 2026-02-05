@@ -8,7 +8,7 @@
       fixed
       bottom-4 left-4 sm-right-4 z-50
       p-2
-      rounded-lg
+      rounded-2xl
       border border-[#0A77F3]
     "
   >
@@ -66,13 +66,16 @@
       sm:px-8 sm:pt-6">
       <!-- search box movil-->
       <div
+        v-if="!hideBar"
         class="
-          fixed top-10
+          fixed top-10 z-20
           flex flex-col justify-center
           w-full px-2 pt-4
           bg-[var(--bg)]
 
-          sm:hidden ">
+          sm:hidden
+        "
+      >
         <label
           for="search"
           class="text-[#a3a3a3]"></label>
@@ -107,7 +110,10 @@
         <h1 class="text-left text-lg mt-4 mb-1 font-semibold ml-2 text-[var(--text)]
         ">Could Drive</h1>
       </div>
-      <label for="fileInput" class="
+      <label
+        v-if="!hideBar"
+        for="fileInputBtn"
+        class="
           hidden sm:flex items-center
           bg-[var(--color-primary)]
           text-white text-sm font-medium
@@ -118,23 +124,26 @@
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
           cursor-pointer
-        "           :class="{ 'opacity-50': uploading }">
+        "
+      >
         <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
         <span>Upload</span>
 
         <input
-          id="fileInput"
+          id="fileInputBtn2"
           type="file"
           class="hidden"
-          ref="fileInput"
+          ref="fileInputBtn2"
           @change="uploadFile"
           :multiple="true"
-          :disabled="uploading" />
+        />
       </label>
 
       <!--uploap movil-->
-      <label for="fileInput" class="
-          fixed bottom-3 right-3 sm:hidden
+      <label
+        for="fileInputBtn"
+        class="
+          fixed z-50 bottom-3 right-3 sm:hidden
           flex items-center
           bg-[#0A77F3]
           text-white text-md font-medium
@@ -145,23 +154,24 @@
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
-        " :class="{ 'opacity-50': uploading }">
+        "
+      >
         <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
 
         <input
-          id="fileInput"
+          id="fileInputBtn"
           type="file"
           class="hidden"
-          ref="fileInput"
+          ref="fileInputBtn"
           @change="uploadFile"
           :multiple="true"
-          :disabled="uploading" />
+        />
       </label>
 
       <div
         class="
           w-full min-h-[calc(100vh-8rem)]
-          mx-auto px-2 mt-4 rounded-lg"
+          mx-auto px-2 mt-4 rounded-2xl"
         :class="[
         isDragging ?
         'border-2 border-[var(--hover-border)] border-dashed bg-[var(--hover-bg)] ' : '',
@@ -203,9 +213,12 @@ const uploading = ref(false);
 const file = ref<File | null>(null);
 const uploadQueue = ref<File[]>([]);
 const isDragging = ref(false); // Drag & Drop
+const fileInputBtn = ref<HTMLInputElement | null>(null);
+const fileInputBtn2 = ref<HTMLInputElement | null>(null);
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
+const hideBar = computed(() => route.path.includes('/details'));
 
 async function handleSearch() {
   const payload = {
@@ -283,14 +296,17 @@ async function uploadFile(ev: Event): Promise<void> {
       message: msg,
     });
   } finally {
-    uploading.value = false;
+    // Clean both file inputs
+    if (fileInputBtn.value) {
+      fileInputBtn.value.value = '';
+    }
+    if (fileInputBtn2.value) {
+      fileInputBtn2.value.value = '';
+    }
+    // Reset state
     file.value = null;
     uploadQueue.value = [];
-
-    // Reset file input
-    if (target) {
-      target.value = '';
-    }
+    uploading.value = false;
   }
 }
 

@@ -3,9 +3,11 @@ import { MutationTree } from 'vuex';
 import {
   FilesStateI,
   FilesResultI,
+  FileI,
 } from './state';
 
 export const mutations: MutationTree<FilesStateI> = {
+
   setResult(state: FilesStateI, payload: FilesResultI) {
     state.result.page = payload.page;
     state.result.perPage = payload.perPage;
@@ -21,7 +23,18 @@ export const mutations: MutationTree<FilesStateI> = {
       state.result.data = payload.data || [];
     }
   },
+
   setUploadProgress(state: FilesStateI, payload: number) {
     state.uploadProgress = payload;
   },
+
+  setFile(state: FilesStateI, payload: FileI) {
+    state.file = payload;
+  },
+
+  clearUploadFiles(state: FilesStateI) {
+    state.uploadFiles = [];
+    state.uploadProgress = 0;
+  },
+
 };

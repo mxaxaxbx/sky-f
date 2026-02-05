@@ -1,41 +1,72 @@
-const camelToSnake = (obj: any) => {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj; // return unchanged if obj is not an object or is null
+import { toRaw } from 'vue';
+
+const camelToSnake = (value: any): any => {
+  if (Array.isArray(value)) {
+    return value.map(camelToSnake);
   }
 
-  const newObj: any = {};
-  Object.keys(obj).forEach((key) => {
-    const newKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-    newObj[newKey] = obj[key];
-    // also convert inner objects
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      newObj[newKey] = camelToSnake(obj[key]);
+  if (value !== null && typeof value === 'object') {
+    const newObj: any = {};
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, val] of Object.entries(value)) {
+      const newKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+      newObj[newKey] = camelToSnake(val);
     }
-  });
-  return newObj;
+    return newObj;
+  }
+
+  return value;
 };
 
-const snakeToCamel = (obj: any) => {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj; // return unchanged if obj is not an object or is null
+const normalize = (value: any): any => {
+  const raw = toRaw(value);
+
+  // object with numeric keys → array
+  if (
+    raw
+    && typeof raw === 'object'
+    && !Array.isArray(raw)
+    && Object.keys(raw).every((k) => !Number.isNaN(Number(k)))
+  ) {
+    return Object.values(raw).map(normalize);
   }
 
-  const newObj: any = {};
-  Object.keys(obj).forEach((key) => {
-    const newKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-    // if the value is an array, recursively convert each object in the array
-    if (Array.isArray(obj[key])) {
-      newObj[newKey] = obj[key].map((item: any) => snakeToCamel(item));
-      return;
+  // real array
+  if (Array.isArray(raw)) {
+    return raw.map(normalize);
+  }
+
+  // plain object
+  if (raw && typeof raw === 'object') {
+    const obj: any = {};
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [k, v] of Object.entries(raw)) {
+      obj[k] = normalize(v);
     }
-    // if the value is an object, recursively convert it
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      newObj[newKey] = snakeToCamel(obj[key]);
-      return;
+    return obj;
+  }
+
+  return raw;
+};
+
+const snakeToCamel = (value: any): any => {
+  const normalized = normalize(value);
+
+  if (Array.isArray(normalized)) {
+    return normalized.map(snakeToCamel);
+  }
+
+  if (normalized && typeof normalized === 'object') {
+    const obj: any = {};
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, val] of Object.entries(normalized)) {
+      const newKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+      obj[newKey] = snakeToCamel(val);
     }
-    newObj[newKey] = obj[key];
-  });
-  return newObj;
+    return obj;
+  }
+
+  return normalized;
 };
 
 export {

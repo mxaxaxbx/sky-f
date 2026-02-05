@@ -65,7 +65,7 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             h-96 w-80 sm:w-72 pt-6
-            rounded-lg
+            rounded-2xl
             cursor-pointer
             overflow-hidden
 
@@ -143,7 +143,7 @@
               bg-[var(--bg-secondary)]
               border border-[var(--border)]
               h-96 w-80 sm:w-72 pt-6
-              rounded-lg
+              rounded-2xl
               cursor-pointer
               overflow-hidden
 
@@ -219,7 +219,7 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             pt-6 h-96 overflow-hidden
-            rounded-lg w-80 sm:w-auto
+            rounded-2xl w-80 sm:w-auto
             cursor-pointer
 
             hover:border-[var(--color-primary)]
@@ -407,7 +407,7 @@ onMounted(() => {
               x: '-100%',
               duration: 130,
               ease: 'linear',
-              repeat: -1,
+              repeat: 1,
             },
           );
         },

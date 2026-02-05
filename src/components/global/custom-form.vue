@@ -23,7 +23,7 @@
             bg-gray-50
             border border-gray-300
             text-gray-900 text-sm
-            rounded-lg
+            rounded-2xl
             focus:border-blue-500
             block w-full
             p-2.5
@@ -55,7 +55,7 @@
             bg-gray-50
             border border-gray-300
             text-gray-900 text-sm
-            rounded-lg
+            rounded-2xl
             focus:border-blue-500
             block w-full
             p-2.5
@@ -93,7 +93,7 @@
             flex items-center justify-between
             border border-gray-300
             text-gray-900 text-sm
-            rounded-lg
+            rounded-2xl
             focus:border-blue-500
             block w-full
             p-2.5
@@ -205,7 +205,7 @@
             bg-gray-50
             border border-gray-300
             text-gray-900 text-sm
-            rounded-lg
+            rounded-2xl
             focus:border-blue-500
             block w-full
             p-2.5
@@ -241,7 +241,7 @@
             bg-gray-50
             border border-gray-300
             text-gray-900 text-sm
-            rounded-lg
+            rounded-2xl
             focus:border-blue-500
             block w-full
             p-2.5
@@ -277,7 +277,7 @@
             bg-gray-50
             border border-gray-300
             text-gray-900 text-sm
-            rounded-lg
+            rounded-2xl
             focus:border-blue-500
             block w-full
             p-2.5
@@ -300,7 +300,7 @@
           text-white
           font-bold
           py-2 px-4
-          rounded-lg
+          rounded-2xl
           focus:border-purple-500
         "
         :class="{ 'cursor-not-allowed opacity-50': props.loading }"

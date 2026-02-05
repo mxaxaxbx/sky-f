@@ -68,6 +68,16 @@ function customErrorHandler(error: any) {
       window.location.href = url;
       break;
     }
+    case 'FW-PM-020': {
+      console.log('no capacities for current active plan', error.response.data);
+      const token = localStorage.getItem('token');
+      const { VUE_APP_DG_SUBS } = process.env;
+      const alert = 'No capacities for current active plan. Please upgrade your plan to continue.';
+      const url = `${VUE_APP_DG_SUBS}/auth/confirmsession?token=${token}&redirect=/app/services/sky?alert=${alert}`;
+      console.warn(`Redirecting to subscription page: ${url}`);
+      window.location.href = url;
+      break;
+    }
     default:
       console.error('Error code:', error.response.data?.code);
   }

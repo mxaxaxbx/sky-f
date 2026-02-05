@@ -46,7 +46,7 @@
           class="hidden"
           ref="fileInput"
           @change="uploadFile"
-          :multiple="false"
+          :multiple="true"
           :disabled="loading"
         />
       </label>
@@ -67,8 +67,8 @@ const loading = ref(false);
 
 const file = ref<File | null>(null);
 const hasFiles = computed(() => !!file.value); // Nuevo: indica si ya hay archivo
+const fileInput = ref<HTMLInputElement | null>(null);
 
-// 🟦 Lógica original de subida (sin cambios)
 async function uploadFile(ev: Event): Promise<void> {
   loading.value = true;
   try {
@@ -95,6 +95,10 @@ async function uploadFile(ev: Event): Promise<void> {
     });
   } finally {
     loading.value = false;
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
+    file.value = null;
   }
 }
 

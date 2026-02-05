@@ -1,13 +1,13 @@
 import { ActionTree, ActionContext } from 'vuex';
-import { AxiosProgressEvent } from 'axios';
 
 import { storageClient } from '@/http-client';
-import { snakeToCamel } from '@/utils';
+import { snakeToCamel, camelToSnake } from '@/utils';
 
 import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
 
 export const actions: ActionTree<FilesStateI, RootStateI> = {
+
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: {
@@ -25,57 +25,77 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     const { data } = await storageClient.get(`/api/storage/listfiles?${params.toString()}`);
     context.commit('setResult', snakeToCamel(data));
   },
+
   async upload(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
   ): Promise<void> {
-    storageClient.post(
-      '/api/storage/upload',
-      payload,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-          // eslint-disable-next-line no-unsafe-optional-chaining
-          const progress = progressEvent.total
-            ? Math.round((progressEvent.loaded) / progressEvent.total)
-            : 0;
-          context.commit('setUploadProgress', progress);
-          console.log('progress', progress);
-          if (progress === 1) {
-            // Check if multiple files were uploaded by counting FormData entries
-            const fileCount = Array.from(payload.entries()).filter(([key]) => key === 'file').length;
-            const message = fileCount > 1
-              ? `${fileCount} archivos subidos correctamente`
-              : 'Archivo subido correctamente';
-            context.commit(
-              'notifications/addNotification',
-              {
-                type: 'success',
-                message,
-              },
-              { root: true },
-            );
-            // get url queries
-            let q = '';
-            let p = 1;
-            if (document.location.search) {
-              const urlParams = new URLSearchParams(document.location.search);
-              q = urlParams.get('query') || '';
-              p = parseInt(urlParams.get('page') || '1', 10);
+    // Clear previous upload files and reset progress
+    context.commit('clearUploadFiles');
+
+    try {
+      // get the files from the payload
+      const files = payload.getAll('file');
+
+      files.forEach((file: FormDataEntryValue) => {
+        const fileObj = file as File;
+        context.state.uploadFiles.push({
+          id: 0,
+          name: fileObj.name,
+          size: fileObj.size,
+          contentType: fileObj.type,
+          userId: 0,
+          r2Key: '',
+          r2Url: '',
+          uploadCompleted: false,
+          error: '',
+          created: 0,
+          updated: 0,
+        });
+      });
+
+      const { data } = await storageClient.post('/api/storage/generate-upload-url', camelToSnake(context.state.uploadFiles));
+
+      const dataArray: FileI[] = snakeToCamel(data);
+
+      const completedFiles: FileI[] = [];
+
+      dataArray.forEach(async (item: FileI) => {
+        if (item.r2Url) {
+          // get file from formdata payload by name
+          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+          if (file) {
+            try {
+              const response = await fetch(item.r2Url, {
+                method: 'PUT',
+                body: file,
+              });
+              console.log('response', response);
+              if (response.ok) {
+                completedFiles.push(item);
+              }
+            } catch (error: unknown) {
+              // eslint-disable-next-line no-param-reassign
+              (item as FileI).error = error as string;
+              console.error(error);
             }
-            context.dispatch('filter', {
-              query: q,
-              page: p,
-            });
           }
-        },
-      },
-    );
-    // eslint-disable-next-line no-promise-executor-return
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
+        console.log('confirmedData', confirmedData);
+        // TODO: validate current page and query through route query params
+        context.dispatch('filter', {
+          query: '',
+          page: 1,
+        });
+      });
+    } finally {
+      // Always clear upload files and reset progress after upload completes or fails
+      context.commit('clearUploadFiles');
+    }
   },
+
   async download(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
@@ -92,4 +112,33 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     linkel.click();
     linkel.remove();
   },
+
+  async getFileDetails(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: string,
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/storage/filedetails/${payload}`);
+    context.commit('setFile', snakeToCamel(data));
+  },
+
+  async getDownloadUrl(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
+    const { data } = await storageClient.get(
+      `/api/storage/get-download-url/${payload.id}`,
+    );
+    const { url } = data;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = payload.name; // fallback only
+    a.style.display = 'none';
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    a.remove();
+  },
+
 };
