@@ -122,16 +122,30 @@
 
           <!-- File name and actions -->
           <div class="flex-1 min-w-0">
-            <h1
-              class="
-                text-xl sm:text-2xl font-semibold
-                text-[var(--text)]
-                mb-2
-                break-words
-              "
-            >
-              {{ file.name }}
-            </h1>
+            <div class="flex items-start gap-2">
+              <button class="order-2 peer w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer">
+                <img
+                  src="/icon/icon-edit.svg"
+                  alt="edit"
+                  class="peer opacity-50 hover:opacity-100 cursor-pointer"
+                />
+              </button>
+
+              <h1
+                class="
+                order-1
+                  text-xl sm:text-2xl font-semibold
+                  text-[var(--text)]
+                  mb-2
+                  break-words
+                  peer-hover:underline
+                  peer-hover:decoration-1
+                  underline-offset-4
+                "
+              >
+                {{ file.name }}
+              </h1>
+            </div>
             <div class="flex flex-wrap items-center gap-4">
               <!-- Upload status badge -->
               <!-- Download button -->
@@ -173,7 +187,7 @@
                 <span
                   class="
                     absolute inset-0 z-0
-                    bg-[var(--hover-bg)]
+                    bg-[#202F41]/50
                     rounded-full
                     transition-transform duration-300 ease-in-out
                     transform -translate-x-full
@@ -181,6 +195,25 @@
                   "
                 ></span>
               </button>
+              <button
+                @click="copyLink(file)"
+                class="
+                  inline-flex items-center gap-2
+                  bg-[var(--bg-secondary)]
+                  border border-[var(--color-primary)]
+                  text-[var(--text-terceary)]
+                  px-2 py-0.5
+                  rounded-full
+                  text-xs
+                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  transition-all duration-300
+                "
+                  >
+                    <img src="/icon/icon-link.svg" alt="download" class="h-4 w-4"
+                    />
+                    {{ copied ? 'Copied!' : 'Copy link' }}
+                  </button>
             </div>
           </div>
         </div>
@@ -305,6 +338,7 @@ const route = useRoute();
 const file = computed<FileI>(() => store.state.files.file);
 const loading = ref(false);
 const downloading = ref(false);
+const copied = ref(false);
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -316,6 +350,17 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
 }
 
+const copyLink = async (f: FileI) => {
+  const url = await store.dispatch('files/getDownloadUrl', f);
+  await navigator.clipboard.writeText(url);
+
+  copied.value = true;
+
+  setTimeout(() => {
+    copied.value = false;
+  }, 2000);
+};
+
 async function downloadFile() {
   if (!file.value.uploadCompleted) {
     return;
@@ -323,7 +368,7 @@ async function downloadFile() {
 
   downloading.value = true;
   try {
-    await store.dispatch('files/getDownloadUrl', file.value);
+    await store.dispatch('files/downloadFile', file.value);
   } catch (error) {
     console.error(error);
     store.commit('notifications/addNotification', {
