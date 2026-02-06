@@ -136,7 +136,7 @@
                     {{ file.name }}
                   </h3>
                   <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                    {{ moment(file.created).format('DD/MM/YYYY HH:mm') }}
+                    {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
                   </p>
                 </div>
               </div>
@@ -153,7 +153,7 @@
               transition-colors duration-300
             "
           >
-            <Dropdown :classes="['bg-[var(--bg-secondary)]','border border-[var(--border)]', 'rounded-2xl', 'absolute', 'z-10','-right-0','top-8','w-40', 'sm:-right-2']">
+            <Dropdown :classes="['bg-[var(--bg-secondary)]','border border-[var(--border)]', 'rounded-2xl', 'absolute', 'z-10','-right-0','top-8','w-48', 'sm:-right-2']">
               <template #trigger="{ toggle }">
                 <button
                   @click="toggle"
@@ -187,6 +187,24 @@
                     />
                     <span>Download</span>
                   </button>
+
+                  <!--share link-->
+                  <button
+                    @click="copyLink"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
+                      transition-all duration-300
+                    "
+                  >
+                    <img src="/icon/icon-link.svg" alt="download" class="h-4 mr-3"
+                    />
+                    {{ copied ? 'Copied!' : 'Copy link' }}
+                  </button>
+
                   <!-- details -->
                   <router-link
                     :to="`/app/files/details/${file.id}`"
@@ -236,6 +254,7 @@ const router = useRouter();
 const results = computed<FilesResultI>(() => store.state.files.result);
 
 const loading = ref(false);
+const copied = ref(false);
 
 async function getMoreResults() {
   const scrollTop = window.scrollY;
@@ -267,6 +286,16 @@ async function getMoreResults() {
     loading.value = false;
   }
 }
+
+const copyLink = async () => {
+  await navigator.clipboard.writeText(window.location.href);
+
+  copied.value = true;
+
+  setTimeout(() => {
+    copied.value = false;
+  }, 2000);
+};
 
 async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
