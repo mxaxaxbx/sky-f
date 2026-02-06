@@ -269,7 +269,7 @@ async function getMoreResults() {
 }
 
 async function downloadFile(file: FileI) {
-  await store.dispatch('files/getDownloadUrl', file);
+  await store.dispatch('files/downloadFile', file);
 }
 
 onMounted(() => {

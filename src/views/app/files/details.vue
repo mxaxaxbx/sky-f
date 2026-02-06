@@ -323,7 +323,7 @@ async function downloadFile() {
 
   downloading.value = true;
   try {
-    await store.dispatch('files/getDownloadUrl', file.value);
+    await store.dispatch('files/downloadFile', file.value);
   } catch (error) {
     console.error(error);
     store.commit('notifications/addNotification', {

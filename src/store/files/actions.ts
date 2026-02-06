@@ -121,7 +121,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context.commit('setFile', snakeToCamel(data));
   },
 
-  async getDownloadUrl(
+  async downloadFile(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
