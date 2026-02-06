@@ -322,7 +322,7 @@ let timeout: number | undefined;
 const isMobileMenuOpen = ref(false);
 const isSticky = ref(false);
 const isRising = ref(false);
-const loading = ref<boolean>(false);
+
 const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 const query = ref<string>('');
 
@@ -347,6 +347,10 @@ async function handleSearch() {
       ...payload,
     },
   });
+  // if current route is not /app/files, redirect to /app/files
+  if (route.path !== '/app/files') {
+    router.push('/app/files');
+  }
 }
 
 async function handleInput() {
