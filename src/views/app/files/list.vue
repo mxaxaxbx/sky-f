@@ -190,7 +190,7 @@
 
                   <!--share link-->
                   <button
-                    @click="copyLink"
+                    @click="copyLink(file)"
                     class="
                       flex items-center justify-start
                       rounded-xl px-2 py-1 border border-transparent
@@ -287,8 +287,9 @@ async function getMoreResults() {
   }
 }
 
-const copyLink = async () => {
-  await navigator.clipboard.writeText(window.location.href);
+const copyLink = async (file: FileI) => {
+  const url = await store.dispatch('files/getDownloadUrl', file);
+  await navigator.clipboard.writeText(url);
 
   copied.value = true;
 

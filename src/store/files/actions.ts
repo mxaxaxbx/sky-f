@@ -141,4 +141,13 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     a.remove();
   },
 
+  async getDownloadUrl(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
+    const { url } = data;
+    return url;
+  },
+
 };

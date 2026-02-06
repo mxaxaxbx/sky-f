@@ -196,7 +196,7 @@
                 ></span>
               </button>
               <button
-                @click="copyLink"
+                @click="copyLink(file)"
                 class="
                   inline-flex items-center gap-2
                   bg-[var(--bg-secondary)]
@@ -350,8 +350,9 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
 }
 
-const copyLink = async () => {
-  await navigator.clipboard.writeText(window.location.href);
+const copyLink = async (f: FileI) => {
+  const url = await store.dispatch('files/getDownloadUrl', f);
+  await navigator.clipboard.writeText(url);
 
   copied.value = true;
 
