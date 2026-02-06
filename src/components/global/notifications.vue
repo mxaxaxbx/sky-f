@@ -1,5 +1,14 @@
 <template>
-  <div class="fixed top-0 px-5 right-0 w-96 z-[99999]">
+  <div
+    class="
+      fixed
+      top-9
+      px-5
+      right-0
+      z-50
+      w-auto
+    "
+  >
     <div
       v-for="(notification, index) in notifications"
       :key="index"
@@ -29,7 +38,7 @@
         <div>
           <button
             @click="removeNotification(notification.id)"
-            class="text-[var(--text)]"
+            class="text-[var(--text)] ml-2"
           >
             <i class="fas fa-times" />
           </button>
