@@ -136,7 +136,7 @@
                     {{ file.name }}
                   </h3>
                   <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                    {{ moment(file.created).format('DD/MM/YYYY HH:mm') }}
+                    {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
                   </p>
                 </div>
               </div>
