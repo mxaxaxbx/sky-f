@@ -125,20 +125,35 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
+    const blobUrl = await context.dispatch('getBlobUrl', {
+      name: payload.name,
+      userId: payload.userId,
+    });
+    console.log('blobUrl', blobUrl);
+    if (blobUrl) {
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = payload.name;
+      a.target = '_blank';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      a.remove();
+      return;
+    }
+
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
     );
     const { url } = data;
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = payload.name; // fallback only
-    a.style.display = 'none';
-
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    a.remove();
+    await context.dispatch('generateBlobAndSaveInCache', {
+      url,
+      name: payload.name,
+      download: true,
+      userId: payload.userId,
+    });
   },
 
   async getDownloadUrl(
@@ -147,7 +162,56 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   ): Promise<void> {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
-    return url;
+
+    context.dispatch('generateBlobAndSaveInCache', {
+      url,
+      name: payload.name,
+      download: false,
+    });
+
+    // return url;
+  },
+
+  async generateBlobAndSaveInCache(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: {
+      url: string,
+      name: string,
+      download: boolean,
+      userId: number,
+    },
+  ): Promise<void> {
+    const blob = await fetch(payload.url).then((res) => res.blob());
+    const blobUrl = URL.createObjectURL(blob);
+
+    sessionStorage.setItem(`${payload.userId}-${payload.name}`, blobUrl);
+
+    if (payload.download) {
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = payload.name;
+      a.target = '_blank';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      a.remove();
+    }
+  },
+
+  async getBlobUrl(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: {
+      name: string,
+      userId: number,
+    },
+  ): Promise<string | null> {
+    // check if the blob url is still valid
+    const blobUrl = sessionStorage.getItem(`${payload.userId}-${payload.name}`);
+    if (blobUrl) {
+      return blobUrl;
+    }
+    return null;
   },
 
 };
