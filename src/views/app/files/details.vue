@@ -171,7 +171,7 @@
               >
               <i
                 v-if="downloading"
-                class="fas fa-spinner fa-spin h-5 w-5 text-white z-10"
+                class="fas fa-spinner fa-spin text-white z-10"
               ></i>
 
               <!-- icono normal -->
@@ -284,7 +284,7 @@
               </h3>
             </div>
             <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
+              {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm a') }}
             </p>
             <p class="text-sm font-light text-[var(--text-terceary)]">
               {{ moment(file.created * 1000).fromNow() }}
@@ -301,7 +301,7 @@
               </h3>
             </div>
             <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(file.updated * 1000).format('DD/MM/YYYY HH:mm') }}
+              {{ moment(file.updated * 1000).format('DD/MM/YYYY HH:mm a') }}
             </p>
             <p class="text-sm font-light text-[var(--text-terceary)]">
               {{ moment(file.updated * 1000).fromNow() }}

@@ -136,7 +136,7 @@
                     {{ file.name }}
                   </h3>
                   <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                    {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
+                    {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
                   </p>
                 </div>
               </div>
@@ -255,6 +255,16 @@ const results = computed<FilesResultI>(() => store.state.files.result);
 
 const loading = ref(false);
 const copied = ref(false);
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
+}
 
 async function getMoreResults() {
   const scrollTop = window.scrollY;
