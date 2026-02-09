@@ -123,7 +123,7 @@
           <!-- File name and actions -->
           <div class="flex-1 min-w-0">
             <div class="flex items-start gap-2">
-              <button class="order-2 peer w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer">
+              <button class="order-2 peer shrink-0 w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer">
                 <img
                   src="/icon/icon-edit.svg"
                   alt="edit"

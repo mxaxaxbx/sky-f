@@ -42,7 +42,7 @@
             <button
               @click="toggleSidebar"
               class="h-10 flex items-center transition-all duration-200"
-              :class="showSidebar ? 'justify-between px-3' : 'justify-center'
+              :class="showSidebar ? 'justify-between' : 'justify-center'
               ">
             <!-- Ícono wrapper -->
             <div class="w-6 h-6 flex items-center justify-center">
@@ -147,7 +147,7 @@
               </div>
               <span
                 v-show="showSidebar" class="ml-3 whitespace-nowrap font-semibold">
-                Upgrade Plan
+                Upgrade Your Plan
               </span>
             </a>
             <!-- chnage theme -->
