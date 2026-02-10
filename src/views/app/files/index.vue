@@ -230,7 +230,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
-  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
+  scrollTarget = window;
 
   lastScroll = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
 
@@ -241,6 +241,7 @@ onBeforeUnmount(() => {
   scrollTarget.removeEventListener('scroll', handleScroll);
 });
 // end show fab
+
 async function handleSearch() {
   const payload = {
     page: 1,
