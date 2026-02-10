@@ -186,7 +186,7 @@ const handleSearch = (event) => {
 const handleScroll = () => {
   const current = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
   const threshold = 10;
-  const offset = 100;
+  const offset = 50;
 
   if (current <= offset) {
     showFab.value = true;
