@@ -1,5 +1,5 @@
 <template>
-  <div class=" container w-full p-2">
+  <div class=" container w-full">
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <i class="fas fa-spinner fa-spin text-4xl text-[var(--color-primary)]"></i>
@@ -12,7 +12,7 @@
         @click="$router.back()"
         class="
           flex items-center gap-2
-          mb-6
+          mb-4 ml-2 sm:mb-6 ml:0
           text-[var(--text-terceary)]
           hover:text-[var(--text)]
           transition-colors duration-200
@@ -146,7 +146,7 @@
                 {{ file.name }}
               </h1>
             </div>
-            <div class="flex flex-wrap items-center gap-4">
+            <div class="flex flex-wrap items-center gap-4 mt-2">
               <!-- Upload status badge -->
               <!-- Download button -->
               <button
@@ -241,9 +241,9 @@
         <div
           class="
             grid grid-cols-1
-            gap-6 p-4
+            gap-3 p-4
 
-            sm:grid-cols-2
+            sm:grid-cols-2 sm:gap-6
           "
         >
           <!-- File size -->

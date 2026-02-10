@@ -117,7 +117,7 @@
       <!--uploap movil-->
       <Transition name="fab">
         <label
-          v-show="showFab"
+          v-show="showFab && !hideBar"
           for="fileInputBtn"
           :class="showSidebar ? 'hidden' : 'inline'"
           class="
