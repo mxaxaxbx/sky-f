@@ -169,16 +169,23 @@ const isDragging = ref(false); // Drag & Drop
 const fileInputBtn = ref<HTMLInputElement | null>(null);
 const fileInputBtn2 = ref<HTMLInputElement | null>(null);
 const showFab = ref(true); // Show FAB on mobile
+const search = ref('');
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
 const hideBar = computed(() => route.path.includes('/details'));
 
 let lastScroll = 0;
+let scrollTarget = window;
+
+// Show FAB on mobile
+const handleSearch = (event) => {
+  search.value = event.target.value;
+};
 
 const handleScroll = () => {
-  const current = window.scrollY;
-  const threshold = 10; // Minimum scroll distance to trigger show/hide
+  const current = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
+  const threshold = 10;
   const offset = 100;
 
   if (current <= offset) {
@@ -193,26 +200,17 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
+
+  lastScroll = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
+
+  scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll);
+  scrollTarget.removeEventListener('scroll', handleScroll);
 });
-
-async function handleSearch() {
-  const payload = {
-    page: 1,
-    query: query.value,
-  };
-
-  await store.dispatch('files/filter', payload);
-  router.replace({
-    query: {
-      ...payload,
-    },
-  });
-}
+// end show fab
 
 async function handleInput() {
   if (searchTimeout) {
