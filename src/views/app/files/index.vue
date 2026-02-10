@@ -213,10 +213,6 @@ let lastScroll = 0;
 let scrollTarget = window;
 
 // Show FAB on mobile
-const handleSearch = (event) => {
-  search.value = event.target.value;
-};
-
 const handleScroll = () => {
   const current = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
   const threshold = 10;
@@ -245,6 +241,19 @@ onBeforeUnmount(() => {
   scrollTarget.removeEventListener('scroll', handleScroll);
 });
 // end show fab
+async function handleSearch() {
+  const payload = {
+    page: 1,
+    query: query.value,
+  };
+
+  await store.dispatch('files/filter', payload);
+  router.replace({
+    query: {
+      ...payload,
+    },
+  });
+}
 
 async function handleInput() {
   if (searchTimeout) {
