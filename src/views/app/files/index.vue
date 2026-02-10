@@ -122,7 +122,7 @@
           :class="showSidebar ? 'hidden' : 'inline'"
           class="
             fixed bottom-3 right-3 sm:hidden z-10
-            flex items-center
+            flex items-center border
             bg-[#0A77F3]
             text-white text-md font-medium
             shadow-sm
