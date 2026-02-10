@@ -42,7 +42,7 @@
               />
             </div>
           </button>
-          <span class="text-[var(--text)]"
+          <span class="text-[var(--text)] font-semibold"
             :class="showSidebar ? 'inline' : 'hidden'">Menu</span>
           <label
           for="search"
