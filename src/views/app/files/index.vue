@@ -9,7 +9,6 @@
       h-screen
       font-alexandria
     ">
-    <!--right side -->
     <div class="
       flex flex-col items-start
       px-0  pt-0 w-full h-full
@@ -90,33 +89,36 @@
       </label>
 
       <!--uploap movil-->
-      <label
-        for="fileInputBtn"
-        class="
-          fixed z-50 bottom-3 right-3 sm:hidden
-          flex items-center
-          bg-[#0A77F3]
-          text-white text-md font-medium
-          shadow-sm
-          py-2 px-2
-          rounded-full
-          cursor-pointer
-          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          transition-all duration-300 ease-in-out
-        "
-      >
-        <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
+      <Transition name="fab">
+        <label
+          v-show="showFab"
+          for="fileInputBtn"
+          class="
+            fixed z-50 bottom-3 right-3 sm:hidden
+            flex items-center
+            bg-[#0A77F3]
+            text-white text-md font-medium
+            shadow-sm
+            py-2 px-2
+            rounded-full
+            cursor-pointer
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
+          "
+        >
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
 
-        <input
-          id="fileInputBtn"
-          type="file"
-          class="hidden"
-          ref="fileInputBtn"
-          @change="uploadFile"
-          :multiple="true"
-        />
-      </label>
+          <input
+            id="fileInputBtn"
+            type="file"
+            class="hidden"
+            ref="fileInputBtn"
+            @change="uploadFile"
+            :multiple="true"
+          />
+        </label>
+      </Transition>
 
       <div
         class="
@@ -145,6 +147,7 @@ import {
   defineAsyncComponent,
   computed,
   onMounted,
+  onBeforeUnmount,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -165,10 +168,37 @@ const uploadQueue = ref<File[]>([]);
 const isDragging = ref(false); // Drag & Drop
 const fileInputBtn = ref<HTMLInputElement | null>(null);
 const fileInputBtn2 = ref<HTMLInputElement | null>(null);
+const showFab = ref(true); // Show FAB on mobile
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
 const hideBar = computed(() => route.path.includes('/details'));
+
+let lastScroll = 0;
+
+const handleScroll = () => {
+  const current = window.scrollY;
+  const threshold = 10; // Minimum scroll distance to trigger show/hide
+  const offset = 100;
+
+  if (current <= offset) {
+    showFab.value = true;
+  } else if (current > lastScroll + threshold) {
+    showFab.value = false;
+  } else if (current < lastScroll - threshold) {
+    showFab.value = true;
+  }
+
+  lastScroll = current;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true });
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 
 async function handleSearch() {
   const payload = {
@@ -319,3 +349,16 @@ watch(
   },
 );
 </script>
+
+<style scoped>
+  .fab-enter-active,
+  .fab-leave-active {
+    transition: all 0.3s ease;
+  }
+
+  .fab-enter-from,
+  .fab-leave-to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+</style>
