@@ -122,7 +122,7 @@
           :class="showSidebar ? 'hidden' : 'inline'"
           class="
             fixed bottom-3 right-3 sm:hidden z-10
-            flex items-center border
+            flex items-center
             bg-[#0A77F3]
             text-white text-md font-medium
             shadow-sm
@@ -230,7 +230,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
-  scrollTarget = window;
+  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
 
   lastScroll = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
 
