@@ -17,20 +17,43 @@
       <div
         v-if="!hideBar"
         class="
-          fixed top-10 z-20
+          fixed top-10
           flex flex-col justify-center
-          w-full px-2 pt-4
-          bg-[var(--bg)]
+          w-full px-2 pt-2
+          bg-[var(--bg)] z-50
 
           sm:hidden
         "
       >
-        <label
+        <div class="flex flex-row items-center w-full mb-2">
+          <button
+            @click="toggleSidebar"
+            class="h-10 flex items-center transition-all duration-200"
+            :class="showSidebar ? 'justify-start w-full' : 'justify-center'"
+          >
+            <!-- Ícono wrapper -->
+            <div class="w-6 h-6 flex items-center justify-center">
+              <img
+              :src="showSidebar
+                ? '/icon/icon-close.svg'
+                : '/icon/icon-open.svg'"
+              :alt="showSidebar ? 'close' : 'open'"
+              class="w-6 h-6 opacity-50 hover:opacity-100 transition"
+              />
+            </div>
+          </button>
+          <span class="text-[var(--text)]"
+            :class="showSidebar ? 'inline' : 'hidden'">Menu</span>
+          <label
           for="search"
-          class="text-[#a3a3a3]"></label>
+          class="text-[#a3a3a3]">
+        </label>
 
         <!-- Contenedor relativo -->
-        <form @submit.prevent="handleSearch" class="relative w-full">
+        <form @submit.prevent="handleSearch"
+          :class="showSidebar ? 'opacity-0' : 'opacity-100'
+            "
+          class="relative w-full ml-2">
           <!-- Input -->
           <input
             v-model="query"
@@ -56,7 +79,10 @@
           <img src="/icon/icon-search.svg" alt="Search Icon"
             class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
         </form>
-        <h1 class="text-left text-lg mt-4 mb-1 font-semibold ml-2 text-[var(--text)]
+        </div>
+        <h1
+          :class="showSidebar ? 'hidden' : 'inline'"
+          class="text-left text-lg mb-2 font-semibold ml-2 text-[var(--text)]
         ">Could Drive</h1>
       </div>
       <label
@@ -93,8 +119,9 @@
         <label
           v-show="showFab"
           for="fileInputBtn"
+          :class="showSidebar ? 'hidden' : 'inline'"
           class="
-            fixed z-50 bottom-3 right-3 sm:hidden
+            fixed bottom-3 right-3 sm:hidden z-10
             flex items-center
             bg-[#0A77F3]
             text-white text-md font-medium
@@ -174,6 +201,13 @@ const search = ref('');
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
 const hideBar = computed(() => route.path.includes('/details'));
+const showSidebarState = computed<boolean>(() => store.state.sidebar);
+// Show sidebar based on state (can be toggled on all screen sizes)
+const showSidebar = computed(() => showSidebarState.value);
+
+const toggleSidebar = () => {
+  store.commit('toggleSidebar');
+};
 
 let lastScroll = 0;
 let scrollTarget = window;
