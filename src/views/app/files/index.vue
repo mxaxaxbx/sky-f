@@ -129,6 +129,7 @@
             py-2 px-2
             rounded-full
             cursor-pointer
+
             hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
             focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
             transition-all duration-300 ease-in-out
@@ -289,6 +290,7 @@ async function getData() {
 
 // Upload multiple files in a single request
 async function uploadFile(ev: Event): Promise<void> {
+  console.log('UPLOAD TRIGGERED');
   const target = ev.target as HTMLInputElement;
   if (!target.files || target.files.length === 0) {
     return;
