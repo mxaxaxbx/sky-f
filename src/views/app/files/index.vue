@@ -9,7 +9,6 @@
       h-screen
       font-alexandria
     ">
-    <!--right side -->
     <div class="
       flex flex-col items-start
       px-0  pt-0 w-full h-full
@@ -18,20 +17,43 @@
       <div
         v-if="!hideBar"
         class="
-          fixed top-10 z-20
+          fixed top-10
           flex flex-col justify-center
-          w-full px-2 pt-4
-          bg-[var(--bg)]
+          w-full px-2 pt-2
+          bg-[var(--bg)] z-40
 
           sm:hidden
         "
       >
-        <label
+        <div class="flex flex-row items-center w-full mb-2">
+          <button
+            @click="toggleSidebar"
+            class="h-10 flex items-center transition-all duration-200"
+            :class="showSidebar ? 'justify-start w-full' : 'justify-center'"
+          >
+            <!-- Ícono wrapper -->
+            <div class="w-6 h-6 flex items-center justify-center">
+              <img
+              :src="showSidebar
+                ? '/icon/icon-close.svg'
+                : '/icon/icon-open.svg'"
+              :alt="showSidebar ? 'close' : 'open'"
+              class="w-6 h-6 opacity-50 hover:opacity-100 transition"
+              />
+            </div>
+          </button>
+          <span class="text-[var(--text)] font-semibold"
+            :class="showSidebar ? 'inline' : 'hidden'">Menu</span>
+          <label
           for="search"
-          class="text-[#a3a3a3]"></label>
+          class="text-[#a3a3a3]">
+        </label>
 
         <!-- Contenedor relativo -->
-        <form @submit.prevent="handleSearch" class="relative w-full">
+        <form @submit.prevent="handleSearch"
+          :class="showSidebar ? 'opacity-0' : 'opacity-100'
+            "
+          class="relative w-full ml-2">
           <!-- Input -->
           <input
             v-model="query"
@@ -57,7 +79,10 @@
           <img src="/icon/icon-search.svg" alt="Search Icon"
             class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
         </form>
-        <h1 class="text-left text-lg mt-4 mb-1 font-semibold ml-2 text-[var(--text)]
+        </div>
+        <h1
+          :class="showSidebar ? 'hidden' : 'inline'"
+          class="text-left text-lg mb-2 font-semibold ml-2 text-[var(--text)]
         ">Could Drive</h1>
       </div>
       <label
@@ -90,33 +115,38 @@
       </label>
 
       <!--uploap movil-->
-      <label
-        for="fileInputBtn"
-        class="
-          fixed z-50 bottom-3 right-3 sm:hidden
-          flex items-center
-          bg-[#0A77F3]
-          text-white text-md font-medium
-          shadow-sm
-          py-2 px-2
-          rounded-full
-          cursor-pointer
-          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          transition-all duration-300 ease-in-out
-        "
-      >
-        <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
+      <Transition name="fab">
+        <label
+          v-show="showFab && !hideBar"
+          for="fileInputBtn"
+          :class="showSidebar ? 'hidden' : 'inline'"
+          class="
+            fixed bottom-3 right-3 sm:hidden z-10
+            flex items-center
+            bg-[#0A77F3]
+            text-white text-md font-medium
+            shadow-sm
+            py-2 px-2
+            rounded-full
+            cursor-pointer
 
-        <input
-          id="fileInputBtn"
-          type="file"
-          class="hidden"
-          ref="fileInputBtn"
-          @change="uploadFile"
-          :multiple="true"
-        />
-      </label>
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
+          "
+        >
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
+
+          <input
+            id="fileInputBtn"
+            type="file"
+            class="hidden"
+            ref="fileInputBtn"
+            @change="uploadFile"
+            :multiple="true"
+          />
+        </label>
+      </Transition>
 
       <div
         class="
@@ -145,6 +175,7 @@ import {
   defineAsyncComponent,
   computed,
   onMounted,
+  onBeforeUnmount,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -165,10 +196,52 @@ const uploadQueue = ref<File[]>([]);
 const isDragging = ref(false); // Drag & Drop
 const fileInputBtn = ref<HTMLInputElement | null>(null);
 const fileInputBtn2 = ref<HTMLInputElement | null>(null);
+const showFab = ref(true); // Show FAB on mobile
+const search = ref('');
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
 const hideBar = computed(() => route.path.includes('/details'));
+const showSidebarState = computed<boolean>(() => store.state.sidebar);
+// Show sidebar based on state (can be toggled on all screen sizes)
+const showSidebar = computed(() => showSidebarState.value);
+
+const toggleSidebar = () => {
+  store.commit('toggleSidebar');
+};
+
+let lastScroll = 0;
+let scrollTarget = window;
+
+// Show FAB on mobile
+const handleScroll = () => {
+  const current = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
+  const threshold = 10;
+  const offset = 50;
+
+  if (current <= offset) {
+    showFab.value = true;
+  } else if (current > lastScroll + threshold) {
+    showFab.value = false;
+  } else if (current < lastScroll - threshold) {
+    showFab.value = true;
+  }
+
+  lastScroll = current;
+};
+
+onMounted(() => {
+  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
+
+  lastScroll = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
+
+  scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
+});
+
+onBeforeUnmount(() => {
+  scrollTarget.removeEventListener('scroll', handleScroll);
+});
+// end show fab
 
 async function handleSearch() {
   const payload = {
@@ -217,6 +290,7 @@ async function getData() {
 
 // Upload multiple files in a single request
 async function uploadFile(ev: Event): Promise<void> {
+  console.log('UPLOAD TRIGGERED');
   const target = ev.target as HTMLInputElement;
   if (!target.files || target.files.length === 0) {
     return;
@@ -319,3 +393,16 @@ watch(
   },
 );
 </script>
+
+<style scoped>
+  .fab-enter-active,
+  .fab-leave-active {
+    transition: all 0.3s ease;
+  }
+
+  .fab-enter-from,
+  .fab-leave-to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+</style>

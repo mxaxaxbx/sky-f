@@ -17,7 +17,7 @@ const props = defineProps({
       'bg-[var(--bg)]',
       'border border-[var(--border)]',
       'rounded-2xl',
-      'shadow-sm z-50',
+      'shadow-sm z-9999',
       'sm:absolute sm:inset-auto',
       'sm:right-0',
       'sm:pt-8 sm:pb-6',

@@ -136,7 +136,7 @@
                     {{ file.name }}
                   </h3>
                   <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                    {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
+                    {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
                   </p>
                 </div>
               </div>
@@ -153,10 +153,20 @@
               transition-colors duration-300
             "
           >
-            <Dropdown :classes="['bg-[var(--bg-secondary)]','border border-[var(--border)]', 'rounded-2xl', 'absolute', 'z-10','-right-0','top-8','w-48', 'sm:-right-2']">
+            <Dropdown
+              :classes="[
+                'bg-[var(--bg-secondary)]',
+                'border border-[var(--border)]',
+                'rounded-2xl',
+                'absolute','-right-0', 'z-20',
+                dropdownPosition,
+                'w-48',
+                'sm:-right-2'
+              ]"
+            >
               <template #trigger="{ toggle }">
                 <button
-                  @click="toggle"
+                  @click="toggleDropdown(toggle, $event)"
                   class="
                     text-[var(--text-terceary)]
                     w-6 h-10
@@ -237,6 +247,7 @@ import {
   computed,
   onMounted,
   onUnmounted,
+  nextTick,
   defineAsyncComponent,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -255,6 +266,17 @@ const results = computed<FilesResultI>(() => store.state.files.result);
 
 const loading = ref(false);
 const copied = ref(false);
+const dropdownPosition = ref('top-8');
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
+}
 
 async function getMoreResults() {
   const scrollTop = window.scrollY;
@@ -287,6 +309,23 @@ async function getMoreResults() {
   }
 }
 
+// toggle dropdown position based on click position
+const toggleDropdown = async (toggle) => {
+  toggle();
+
+  await nextTick();
+
+  const middle = window.innerHeight / 2;
+  const y = window.event?.clientY || 0;
+
+  if (y > middle) {
+    dropdownPosition.value = 'bottom-8';
+  } else {
+    dropdownPosition.value = 'top-8';
+  }
+};
+
+// copy link to clipboard
 const copyLink = async (file: FileI) => {
   const url = await store.dispatch('files/getDownloadUrl', file);
   await navigator.clipboard.writeText(url);

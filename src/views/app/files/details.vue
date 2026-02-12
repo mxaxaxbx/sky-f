@@ -1,5 +1,5 @@
 <template>
-  <div class=" container w-full p-2">
+  <div class=" container w-full">
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <i class="fas fa-spinner fa-spin text-4xl text-[var(--color-primary)]"></i>
@@ -12,7 +12,7 @@
         @click="$router.back()"
         class="
           flex items-center gap-2
-          mb-6
+          mb-4 ml-2 sm:mb-6 ml:0
           text-[var(--text-terceary)]
           hover:text-[var(--text)]
           transition-colors duration-200
@@ -123,7 +123,7 @@
           <!-- File name and actions -->
           <div class="flex-1 min-w-0">
             <div class="flex items-start gap-2">
-              <button class="order-2 peer w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer">
+              <button class="order-2 peer shrink-0 w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer">
                 <img
                   src="/icon/icon-edit.svg"
                   alt="edit"
@@ -146,7 +146,7 @@
                 {{ file.name }}
               </h1>
             </div>
-            <div class="flex flex-wrap items-center gap-4">
+            <div class="flex flex-wrap items-center gap-4 mt-2">
               <!-- Upload status badge -->
               <!-- Download button -->
               <button
@@ -171,7 +171,7 @@
               >
               <i
                 v-if="downloading"
-                class="fas fa-spinner fa-spin h-5 w-5 text-white z-10"
+                class="fas fa-spinner fa-spin text-white z-10"
               ></i>
 
               <!-- icono normal -->
@@ -241,9 +241,9 @@
         <div
           class="
             grid grid-cols-1
-            gap-6 p-4
+            gap-3 p-4
 
-            sm:grid-cols-2
+            sm:grid-cols-2 sm:gap-6
           "
         >
           <!-- File size -->
@@ -284,7 +284,7 @@
               </h3>
             </div>
             <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm') }}
+              {{ moment(file.created * 1000).format('DD/MM/YYYY HH:mm a') }}
             </p>
             <p class="text-sm font-light text-[var(--text-terceary)]">
               {{ moment(file.created * 1000).fromNow() }}
@@ -301,7 +301,7 @@
               </h3>
             </div>
             <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(file.updated * 1000).format('DD/MM/YYYY HH:mm') }}
+              {{ moment(file.updated * 1000).format('DD/MM/YYYY HH:mm a') }}
             </p>
             <p class="text-sm font-light text-[var(--text-terceary)]">
               {{ moment(file.updated * 1000).fromNow() }}

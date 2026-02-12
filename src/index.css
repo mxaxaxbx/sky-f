@@ -119,3 +119,19 @@
     transparent
   );
 }
+/* ancho */
+::-webkit-scrollbar {
+  width: 2px;
+}
+
+/* fondo */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* barra */
+::-webkit-scrollbar-thumb {
+  background: #0A77F3;
+  border-radius: 999px;
+}
+
