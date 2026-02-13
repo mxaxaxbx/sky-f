@@ -15,4 +15,12 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     context.commit('setTrashFolder', snakeToCamel(data));
   },
 
+  async createFolder(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    folderName: string,
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/folders/create-folder', camelToSnake({ folderName }));
+    context.commit('setFolder', snakeToCamel(data));
+  },
+
 };
