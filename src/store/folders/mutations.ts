@@ -11,4 +11,8 @@ export const mutations: MutationTree<FoldersStateI> = {
     state.trashFolder = payload;
   },
 
+  setFolder(state: FoldersStateI, payload: FolderI) {
+    state.folder = payload;
+  },
+
 };
