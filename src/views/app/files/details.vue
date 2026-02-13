@@ -1,5 +1,5 @@
 <template>
-  <div class=" container w-full">
+  <div class=" container w-full font-sans">
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <i class="fas fa-spinner fa-spin text-4xl text-[var(--color-primary)]"></i>
@@ -155,7 +155,7 @@
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-[var(--text-terceary)] text-xs
+                  text-[var(--text-terceary)] text-xs font-medium
                   pl-2 pr-2.5 py-0.5
                   rounded-full
 
@@ -176,7 +176,7 @@
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-[var(--text-terceary)]
+                  text-[var(--text-terceary)] font-medium
                   text-xs
                   pl-2 pr-2.5 py-0.5
                   rounded-full
@@ -200,7 +200,7 @@
                   inline-flex items-center gap-1
                   bg-[var(--color-primary)]
                   border border-[var(--color-primary)]
-                  text-white text-xs
+                  text-white text-xs font-medium
                   pl-2 pr-2.5 py-0.5
                   rounded-full
 
@@ -219,7 +219,7 @@
                   src="/icon/icon_download.svg"
                   alt="download" class="h-4 w-4 z-10"
                 />
-                <span class="relative z-10 font-light">
+                <span class="relative z-10">
                   {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
