@@ -86,6 +86,7 @@
         ">Could Drive</h1>
       </div>
 
+      <!-- actions desktop-->
       <div class="flex items-center w-full gap-2">
         <label
           v-if="!hideBar"
@@ -95,7 +96,7 @@
             bg-[var(--color-primary)]
             border border-[var(--color-primary)]
             text-white text-sm font-medium
-            px-3 py-0.5
+            px-2 py-0.5
             rounded-full
 
             sm:flex
@@ -126,7 +127,7 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             text-[var(--text-terceary)] text-sm font-medium
-            pl-3 pr-2.5 py-0.5
+            pl-2 pr-2.5 py-0.5
             grayscale
             rounded-full
 
@@ -210,7 +211,7 @@
           <img
             src="/icon/icon-folder.svg"
             alt="icon"
-            class="h-5 absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none"
+            class="h-5 mt-[1px] absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none"
           />
           <input
             v-model="folderName"
@@ -225,6 +226,8 @@
               rounded-full
 
               placeholder:text-[var(--text-terceary)]
+              placeholder:font-light
+              placeholder:text-sm
 
               hover:border-[var(--color-primary)]
               hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]

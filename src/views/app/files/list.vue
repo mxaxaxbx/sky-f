@@ -181,9 +181,10 @@
 
               <template #content="{ }">
                 <div class="flex flex-col gap-0.5 px-1.5 py-1 font-light text-sm text-[#868686]">
-                  <!-- download -->
-                  <button
-                    @click="downloadFile(file)"
+
+                  <!-- info file -->
+                  <router-link
+                    :to="`/app/files/details/${file.id}`"
                     class="
                       flex items-center justify-start
                       rounded-xl px-2 py-1 border border-transparent
@@ -193,10 +194,27 @@
                       transition-colors duration-300
                     "
                   >
-                    <img src="/icon/icon_download_2.svg" alt="download" class="h-4 mr-3"
+                    <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3"
                     />
-                    <span>Download</span>
-                  </button>
+                    <span>info</span>
+                  </router-link>
+
+                  <!-- preview file -->
+                  <router-link
+                    :to="`/app/files/details/${file.id}`"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
+                      transition-colors duration-300
+                    "
+                  >
+                    <img src="/icon/icon-preview.svg" alt="preview" class="h-4 mr-3"
+                    />
+                    <span>Preview</span>
+                  </router-link>
 
                   <!--share link-->
                   <button
@@ -215,22 +233,25 @@
                     {{ copied ? 'Copied!' : 'Copy link' }}
                   </button>
 
-                  <!-- details -->
-                  <router-link
-                    :to="`/app/files/details/${file.id}`"
+                  <!-- download -->
+                  <button
+                    @click="downloadFile(file)"
                     class="
                       flex items-center justify-start
                       rounded-xl px-2 py-1 border border-transparent
+                      text-[var(--color-primary)]
+                      grayscale
 
                       hover:bg-[var(--hover-bg)]
                       hover:border-[var(--color-primary)]
+                      hover:grayscale-0
                       transition-colors duration-300
                     "
                   >
-                  <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3"
-                  />
-                    <span>Details</span>
-                  </router-link>
+                    <img src="/icon/icon_download_2.svg" alt="download" class="h-4 mr-3"
+                    />
+                    <span>Download</span>
+                  </button>
                 </div>
               </template>
             </Dropdown>
