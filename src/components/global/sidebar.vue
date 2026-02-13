@@ -17,7 +17,7 @@
       @click.stop
       class="
         fixed top-0 left-0 h-full pt-10 ml-1
-        bg-[var(--bg)] backdrop-blur-md
+        bg-[var(--bg)]
         sm:border-r sm:border-[var(--border)]
         shadow-md shadow-gray-900/10
         overflow-hidden
@@ -67,25 +67,33 @@
                     class="
                       w-full group
                       flex items-center
-                      transition-all duration-200
                       text-sm font-regular
-                      rounded-xl
+                      rounded-xl opacity-70
+                      border border-transparent
+                      grayscale
 
                       hover:bg-[var(--hover-bg)]
+                      hover:grayscale-0 transition
+                      hover:opacity-100
                       hover:text-[var(--text)]
                       hover:border-[var(--hover-border)]
                       hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+                      transition-all duration-200
                     "
                     :class="showSidebar
                       ? 'justify-start px-2 py-1.5'
                       : 'justify-center py-1.5'"
                     active-class="
-                      bg-[var(--bg-secondary)] text-[var(--text-terceary)]
-                      border border-[var(--border)]
+                      bg-[var(--bg-seconary)] text-[var(--text-terceary)] !opacity-100
+                      !border-[var(--border)] hover:!border-[var(--color-primary)] grayscale-0 transition
                     ">
                     <div class="w-6 h-6 flex items-center justify-center">
                       <img
-                        src="/icon/icon-cloudDrive.svg"
+                        :src="getIcon(
+                          '/app/files',
+                          '/icon/icon-cloudDrive.svg',
+                          '/icon/icon-cloudDrive-active.svg'
+                        )"
                         alt="report"
                         class="w-6 h-6"
                       />
@@ -99,26 +107,45 @@
                 <!-- trash folder -->
                 <li v-if="trashFolder.id !== 0">
                   <router-link
-                    :to="`/app/files/folder/${trashFolder.id}`"
+                    to="/app/trash"
                     @click="handleNavClick"
                     class="
-                      w-full
-                      group
+                      w-full group
                       flex items-center
-                      transition-all duration-200
                       text-sm font-regular
-                      rounded-xl
-                      hover:bg-[var(--hover-bg)] hover:text-[var(--text)] hover:border-[var(--hover-border)]
+                      rounded-xl opacity-70
+                      border border-transparent
+                      grayscale
+
+                      hover:opacity-100
+                      hover:grayscale-0
+                      hover:bg-[var(--hover-bg)]
+                      hover:text-[var(--text)]
+                      hover:border-[var(--hover-border)]
                       hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+                      transition-all duration-200
                     "
-                    :class="showSidebar ? 'justify-start px-2 py-1.5' : 'justify-center py-1.5'"
-                  >
+                    :class="showSidebar
+                      ? 'justify-start px-2 py-1.5'
+                      : 'justify-center py-1.5'"
+                    active-class="
+                      bg-[var(--bg-seconary)] text-[var(--text-terceary)] !opacity-100 grayscale-0
+                      !border-[var(--border)] hover:!border-[var(--color-primary)]
+                    ">
                     <div class="w-6 h-6 flex items-center justify-center">
-                      <i class="fa-solid fa-trash"></i>
+                      <img
+                        :src="getIcon(
+                          '/app/trash',
+                          '/icon/icon-trash.svg',
+                          '/icon/icon-trash-active.svg'
+                        )"
+                        alt="report"
+                        class="w-6 h-6"
+                      />
                     </div>
                     <span
                       v-show="showSidebar" class="ml-3 whitespace-nowrap">
-                      Trash
+                      Rubbish bin
                     </span>
                   </router-link>
                 </li>
@@ -209,12 +236,14 @@ import {
   onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 
 import { PermissionI } from '@/store/auth/state';
 
 const token = localStorage.getItem('token');
 
 const store = useStore();
+const route = useRoute();
 
 // Track when user is interacting with project dropdown
 const isProjectDropdownActive = ref(false);
@@ -243,6 +272,10 @@ const isLight = computed(() => store.state.theme?.theme === 'light');
 // Show sidebar based on state (can be toggled on all screen sizes)
 const showSidebar = computed(() => showSidebarState.value);
 const trashFolder = computed(() => store.state.folders.trashFolder);
+
+function getIcon(path: string, icon: string, activeIcon: string) {
+  return route.path.startsWith(path) ? activeIcon : icon;
+}
 
 const toggleTheme = () => {
   store.dispatch('theme/toggleTheme');
@@ -331,6 +364,10 @@ onBeforeUnmount(() => {
       opacity: 1;
     }
   }
+
+.router-active svg {
+  fill: var(--color-primary) !important;
+}
 /* Custom scrollbar for the navigation */
 nav::-webkit-scrollbar {
   width: 4px;

@@ -146,43 +146,81 @@
                 {{ file.name }}
               </h1>
             </div>
-            <div class="flex flex-wrap items-center gap-4 mt-2">
-              <!-- Upload status badge -->
+            <div class="flex flex-wrap items-center gap-2 mt-2">
+
+              <!--preview buttom-->
+              <button
+                @click="openFile(file)"
+                class="
+                  inline-flex items-center gap-1
+                  bg-[var(--bg-secondary)]
+                  border border-[var(--color-primary)]
+                  text-[var(--text-terceary)] text-xs
+                  pl-2 pr-2.5 py-0.5
+                  rounded-full
+
+                  hover:bg-[var(--hover-bg)]
+                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  transition-all duration-300
+                "
+              >
+                <img src="/icon/icon_details.svg" alt="download" class="h-4 w-4"/>
+                Preview
+              </button>
+
+              <!-- Copy link button -->
+              <button
+                @click="copyLink(file)"
+                class="
+                  inline-flex items-center gap-1
+                  bg-[var(--bg-secondary)]
+                  border border-[var(--color-primary)]
+                  text-[var(--text-terceary)]
+                  text-xs
+                  pl-2 pr-2.5 py-0.5
+                  rounded-full
+
+                  hover:bg-[var(--hover-bg)]
+                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  transition-all duration-300
+                "
+              >
+                <img src="/icon/icon-link.svg" alt="download" class="h-4 w-4"/>
+                  {{ copied ? 'Copied!' : 'Copy link' }}
+              </button>
+
               <!-- Download button -->
               <button
                 @click="downloadFile"
                 :disabled="!file.uploadCompleted || downloading"
                 class="
                   group relative
-                  inline-flex items-center gap-2
+                  inline-flex items-center gap-1
                   bg-[var(--color-primary)]
                   border border-[var(--color-primary)]
-                  text-white
-                  px-2 py-0.5
+                  text-white text-xs
+                  pl-2 pr-2.5 py-0.5
                   rounded-full
-                  text-xs
+
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   transition-all duration-300
+
                   disabled:opacity-50 disabled:cursor-not-allowed
                   disabled:hover:shadow-none
                   overflow-hidden
                 "
               >
-              <i
-                v-if="downloading"
-                class="fas fa-spinner fa-spin text-white z-10"
-              ></i>
-
-              <!-- icono normal -->
-              <img
-                v-else
-                src="/icon/icon_download.svg"
-                alt="download"
-                class="h-4 w-4 z-10"
-              />
+                <i v-if="downloading" class="fas fa-spinner fa-spin text-white z-10"></i>
+                <img
+                  v-else
+                  src="/icon/icon_download.svg"
+                  alt="download" class="h-4 w-4 z-10"
+                />
                 <span class="relative z-10 font-light">
-                  {{ downloading ? 'Descargando...' : 'Descargar' }}
+                  {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
                   class="
@@ -193,27 +231,9 @@
                     transform -translate-x-full
                     group-hover:translate-x-0
                   "
-                ></span>
+                >
+                </span>
               </button>
-              <button
-                @click="copyLink(file)"
-                class="
-                  inline-flex items-center gap-2
-                  bg-[var(--bg-secondary)]
-                  border border-[var(--color-primary)]
-                  text-[var(--text-terceary)]
-                  px-2 py-0.5
-                  rounded-full
-                  text-xs
-                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  transition-all duration-300
-                "
-                  >
-                    <img src="/icon/icon-link.svg" alt="download" class="h-4 w-4"
-                    />
-                    {{ copied ? 'Copied!' : 'Copy link' }}
-                  </button>
             </div>
           </div>
         </div>
@@ -349,6 +369,10 @@ function formatFileSize(bytes: number): string {
 
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
 }
+
+const openFile = (currentFile: FileI) => {
+  window.open(currentFile.url, '_blank');
+};
 
 const copyLink = async (f: FileI) => {
   const url = await store.dispatch('files/getDownloadUrl', f);
