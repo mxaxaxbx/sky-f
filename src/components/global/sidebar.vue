@@ -113,11 +113,7 @@
                     :class="showSidebar ? 'justify-start px-2 py-1.5' : 'justify-center py-1.5'"
                   >
                     <div class="w-6 h-6 flex items-center justify-center">
-                      <img
-                        src="/icon/icon-trash.svg"
-                        alt="trash"
-                        class="w-6 h-6"
-                      />
+                      <i class="fa-solid fa-trash"></i>
                     </div>
                     <span
                       v-show="showSidebar" class="ml-3 whitespace-nowrap">
