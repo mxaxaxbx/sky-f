@@ -37,7 +37,7 @@
         </div>
         <!-- footer -->
         <footer
-        v-if="!showSidebar"
+          v-if="!showSidebar"
           class="bg-[var(--bg)] group">
           <div class="w-full h-px bg-line"></div>
           <div
@@ -215,10 +215,9 @@ const { VUE_APP_DG_USERS_APP } = process.env;
 
 const isHome = computed(() => route.name === 'home');
 const isAuth = computed(() => store.getters['auth/isAuth']);
-const showSidebar = computed(
-  () => isAuth.value && route.name !== 'home',
-);
+const showSidebar = computed(() => isAuth.value && route.name !== 'home');
 const isLight = computed(() => store.state.theme?.theme === 'light');
+
 const year = ref(new Date().getUTCFullYear());
 const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 

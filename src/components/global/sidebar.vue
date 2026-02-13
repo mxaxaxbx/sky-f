@@ -27,10 +27,10 @@
         lg:shadow-none
         sm:block sm:pt-0 sm:ml-0
       "
-      :class="showSidebar ? 'w-full pr-2 sm:w-64' : 'w-0 mr-6 -ml-2 sm:w-12'"
+      :class="showSidebar ? 'w-full pr-2 sm:pr-0 sm:w-64' : 'w-0 mr-6 -ml-2 sm:w-12'"
     >
         <div class="flex flex-col h-full pt-12 pb-4">
-          <div class="flex px-3 items-center justify-between">
+          <div class="flex px-2 items-center justify-between">
             <!-- Texto -->
             <span
               v-show="showSidebar"
@@ -42,7 +42,7 @@
             <button
               @click="toggleSidebar"
               class="h-10 flex items-center transition-all duration-200 hidden sm:flex"
-              :class="showSidebar ? 'justify-between' : 'justify-center'
+              :class="showSidebar ? 'justify-center' : 'justify-center mx-auto'
               ">
             <!-- Ícono wrapper -->
             <div class="w-6 h-6 flex items-center justify-center">
@@ -59,6 +59,7 @@
             <!-- Authenticated Menu -->
             <div v-if="isAuth" class="px-1 py-1.5 mt-1">
               <ul class="space-y-2 font-semibold text-[#7f7f7f]">
+                <!-- Add more authenticated menu items here -->
                 <li>
                   <router-link
                     to="/app/files"
@@ -180,8 +181,8 @@
               @click="toggleTheme"
               class="flex items-center rounded-xl w-10 h-10"
               :class="showSidebar
-                ? 'justify-end px-2 py-1.5 ml-2'
-                : 'justify-center py-1.5'
+                ? 'justify-center px-2 py-1.5'
+                : 'justify-center px-2 py-1.5'
               "
               >
               <img
