@@ -7,7 +7,7 @@
       bg-[var(--bg)]
       pt-10
       h-screen
-      font-alexandria
+      font-alexandria font-sans
     ">
     <div class="
       flex flex-col items-start
@@ -86,36 +86,65 @@
         ">Could Drive</h1>
       </div>
 
-      <label
-        v-if="!hideBar"
-        for="fileInputBtn"
-        class="
-          hidden sm:flex items-center
-          bg-[var(--color-primary)]
-          text-white text-sm font-medium
-          py-1 px-3
-          rounded-full
+      <div class="flex items-center w-full gap-2">
+        <label
+          v-if="!hideBar"
+          for="fileInputBtn"
+          class="
+            hidden items-center
+            bg-[var(--color-primary)]
+            border border-[var(--color-primary)]
+            text-white text-sm font-medium
+            px-3 py-0.5
+            rounded-full
 
-          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          transition-all duration-300 ease-in-out
-          cursor-pointer
-        "
-      >
-        <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
-        <span>Upload</span>
+            sm:flex
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
+          <span>Upload</span>
 
-        <input
-          id="fileInputBtn2"
-          type="file"
-          class="hidden"
-          ref="fileInputBtn2"
-          @change="uploadFile"
-          :multiple="true"
-        />
-      </label>
+          <input
+            id="fileInputBtn2"
+            type="file"
+            class="hidden"
+            ref="fileInputBtn2"
+            @change="uploadFile"
+            :multiple="true"
+          />
+        </label>
 
-      <button @click="createFolderModal = true">Create folder</button>
+        <button
+          v-if="!hideBar"
+          @click="createFolderModal = true"
+          class="
+            hidden items-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            text-[var(--text-terceary)] text-sm font-medium
+            pl-3 pr-2.5 py-0.5
+            grayscale
+            rounded-full
+
+            sm:flex
+            hover:grayscale-0
+            hover:text-[var(--text)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+          New folder
+        </button>
+      </div>
 
       <!--uploap movil-->
       <Transition name="fab">
@@ -172,27 +201,36 @@
 
   <Modal v-model="createFolderModal">
     <template #header>
-      Create new folder
+      New folder
     </template>
     <template #content>
-      <div class="mb-6">
+      <div class="my-4">
         <form @submit.prevent="createFolder" id="create-folder-form">
-          <label for="folder-name">Folder name:</label>
+          <label for="folder-name"></label>
+          <img
+            src="/icon/icon-folder.svg"
+            alt="icon"
+            class="h-5 absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
           <input
             v-model="folderName"
             type="text"
+            placeholder="Folder name"
             id="folder-name"
             class="
               w-full border
               border-[var(--border)] bg-[var(--bg)]
               text-sm text-[var(--text)]
-              px-3 py-1 rounded-full
-              placeholder:text-[var(--text-secondary)]
+              my-2 pl-8 py-1
+              rounded-full
+
+              placeholder:text-[var(--text-terceary)]
 
               hover:border-[var(--color-primary)]
-              hover:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
               focus:border-[var(--color-primary)]
-              focus:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
               focus:outline-none
               transition-all duration-300 ease-in-out
             "
@@ -227,13 +265,16 @@
           rounded-full
           px-3
 
-          hover:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
-          hover:bg-[var(--hover-bg)]
+          hover:border-[var(--color-primary)]
+          hover:bg-[var(--color-primary)]
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
           focus:border-[var(--color-primary)]
-          focus:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:outline-none
           transition-all duration-300 ease-in-out
-        ">
+        "
+      >
         Create
       </button>
     </template>
