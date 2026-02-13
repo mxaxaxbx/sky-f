@@ -85,6 +85,7 @@
           class="text-left text-lg mb-2 font-semibold ml-2 text-[var(--text)]
         ">Could Drive</h1>
       </div>
+
       <label
         v-if="!hideBar"
         for="fileInputBtn"
@@ -113,6 +114,8 @@
           :multiple="true"
         />
       </label>
+
+      <button @click="createFolderModal = true">Create folder</button>
 
       <!--uploap movil-->
       <Transition name="fab">
@@ -166,6 +169,75 @@
       </div>
     </div>
   </div>
+
+  <Modal v-model="createFolderModal">
+    <template #header>
+      Create new folder
+    </template>
+    <template #content>
+      <div class="mb-6">
+        <form @submit.prevent="createFolder" id="create-folder-form">
+          <label for="folder-name">Folder name:</label>
+          <input
+            v-model="folderName"
+            type="text"
+            id="folder-name"
+            class="
+              w-full border
+              border-[var(--border)] bg-[var(--bg)]
+              text-sm text-[var(--text)]
+              px-3 py-1 rounded-full
+              placeholder:text-[var(--text-secondary)]
+
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+              focus:border-[var(--color-primary)]
+              focus:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+              focus:outline-none
+              transition-all duration-300 ease-in-out
+            "
+            name="folder-name"
+          />
+        </form>
+      </div>
+    </template>
+    <template #footer>
+      <button
+        type="button"
+        @click="createFolderModal = false"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
+        ">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="create-folder-form"
+        class="
+          text-[var(--text)] text-sm
+          border border-[var(--color-primary)]
+          bg-[var(--bg)]
+          rounded-full
+          px-3
+
+          hover:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+          hover:bg-[var(--hover-bg)]
+          focus:border-[var(--color-primary)]
+          focus:shadow-[0_0_2px_2px_rgba(255,36,44,0.5)]
+          focus:outline-none
+          transition-all duration-300 ease-in-out
+        ">
+        Create
+      </button>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -181,10 +253,12 @@ import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
 const DragDrop = defineAsyncComponent(() => import('@/components/app/dragdrop.vue'));
+const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
+
 let searchTimeout: number | undefined;
 let timeout: number | undefined;
 
@@ -197,7 +271,8 @@ const isDragging = ref(false); // Drag & Drop
 const fileInputBtn = ref<HTMLInputElement | null>(null);
 const fileInputBtn2 = ref<HTMLInputElement | null>(null);
 const showFab = ref(true); // Show FAB on mobile
-const search = ref('');
+const createFolderModal = ref(false);
+const folderName = ref('');
 
 const progress = computed<number>(() => store.state.files.uploadProgress);
 const filesLength = computed<number>(() => store.state.files.result.data.length);
