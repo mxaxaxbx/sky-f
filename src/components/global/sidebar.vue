@@ -42,7 +42,7 @@
             <button
               @click="toggleSidebar"
               class="h-10 flex items-center transition-all duration-200 hidden sm:flex"
-              :class="showSidebar ? 'justify-between' : 'justify-center mx-auto'
+              :class="showSidebar ? 'justify-center' : 'justify-center mx-auto'
               ">
             <!-- Ícono wrapper -->
             <div class="w-6 h-6 flex items-center justify-center">
@@ -59,6 +59,7 @@
             <!-- Authenticated Menu -->
             <div v-if="isAuth" class="px-1 py-1.5 mt-1">
               <ul class="space-y-2 font-semibold text-[#7f7f7f]">
+                <!-- Add more authenticated menu items here -->
                 <li>
                   <router-link
                     to="/app/files"
@@ -92,36 +93,6 @@
                     <span
                       v-show="showSidebar" class="ml-3 whitespace-nowrap">
                       Cloud Drive
-                    </span>
-                  </router-link>
-                </li>
-                <!-- trash folder -->
-                <li v-if="trashFolder.id !== 0">
-                  <router-link
-                    :to="`/app/files/folder/${trashFolder.id}`"
-                    @click="handleNavClick"
-                    class="
-                      w-full
-                      group
-                      flex items-center
-                      transition-all duration-200
-                      text-sm font-regular
-                      rounded-xl
-                      hover:bg-[var(--hover-bg)] hover:text-[var(--text)] hover:border-[var(--hover-border)]
-                      hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
-                    "
-                    :class="showSidebar ? 'justify-start px-2 py-1.5' : 'justify-center py-1.5'"
-                  >
-                    <div class="w-6 h-6 flex items-center justify-center">
-                      <img
-                        src="/icon/icon-trash.svg"
-                        alt="trash"
-                        class="w-6 h-6"
-                      />
-                    </div>
-                    <span
-                      v-show="showSidebar" class="ml-3 whitespace-nowrap">
-                      Trash
                     </span>
                   </router-link>
                 </li>
