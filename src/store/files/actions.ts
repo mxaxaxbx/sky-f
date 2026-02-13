@@ -49,6 +49,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           r2Url: '',
           uploadCompleted: false,
           error: '',
+          folderId: null,
           created: 0,
           updated: 0,
         });
@@ -61,6 +62,10 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       const completedFiles: FileI[] = [];
 
       dataArray.forEach(async (item: FileI) => {
+        if (item.id === 0) {
+          throw new Error('File not found');
+        }
+
         if (item.r2Url) {
           // get file from formdata payload by name
           const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);

@@ -8,6 +8,7 @@ export interface FileI {
   r2Url: string;
   uploadCompleted: boolean;
   error: string;
+  folderId: null | number;
   created: number;
   updated: number;
 }
@@ -47,6 +48,7 @@ export const state: FilesStateI = {
     r2Url: '',
     uploadCompleted: false,
     error: '',
+    folderId: null,
     created: 0,
     updated: 0,
   },

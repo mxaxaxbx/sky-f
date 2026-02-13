@@ -59,7 +59,6 @@
             <!-- Authenticated Menu -->
             <div v-if="isAuth" class="px-1 py-1.5 mt-1">
               <ul class="space-y-2 font-semibold text-[#7f7f7f]">
-                <!-- Add more authenticated menu items here -->
                 <li>
                   <router-link
                     to="/app/files"
@@ -93,6 +92,36 @@
                     <span
                       v-show="showSidebar" class="ml-3 whitespace-nowrap">
                       Cloud Drive
+                    </span>
+                  </router-link>
+                </li>
+                <!-- trash folder -->
+                <li v-if="trashFolder.id !== 0">
+                  <router-link
+                    :to="`/app/files/folder/${trashFolder.id}`"
+                    @click="handleNavClick"
+                    class="
+                      w-full
+                      group
+                      flex items-center
+                      transition-all duration-200
+                      text-sm font-regular
+                      rounded-xl
+                      hover:bg-[var(--hover-bg)] hover:text-[var(--text)] hover:border-[var(--hover-border)]
+                      hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+                    "
+                    :class="showSidebar ? 'justify-start px-2 py-1.5' : 'justify-center py-1.5'"
+                  >
+                    <div class="w-6 h-6 flex items-center justify-center">
+                      <img
+                        src="/icon/icon-trash.svg"
+                        alt="trash"
+                        class="w-6 h-6"
+                      />
+                    </div>
+                    <span
+                      v-show="showSidebar" class="ml-3 whitespace-nowrap">
+                      Trash
                     </span>
                   </router-link>
                 </li>
@@ -180,17 +209,15 @@ import {
   watch,
   ref,
   onBeforeUnmount,
+  onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
 
 import { PermissionI } from '@/store/auth/state';
-// import { BusinessI } from '@/store/state';
 
 const token = localStorage.getItem('token');
 
 const store = useStore();
-const route = useRoute();
 
 // Track when user is interacting with project dropdown
 const isProjectDropdownActive = ref(false);
@@ -209,7 +236,6 @@ if (typeof window !== 'undefined') {
 }
 
 // Computed properties with proper typing
-const isMobile = computed(() => windowWidth.value < 640);
 const permissions = computed<PermissionI[]>(() => store.getters['auth/permissions']);
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const isAuth = computed(() => store.getters['auth/isAuth']);
@@ -219,29 +245,7 @@ const isLight = computed(() => store.state.theme?.theme === 'light');
 
 // Show sidebar based on state (can be toggled on all screen sizes)
 const showSidebar = computed(() => showSidebarState.value);
-
-function changeProject(ev: Event) {
-  store.dispatch('auth/changeProject', (ev.target as HTMLSelectElement).value);
-}
-
-function onProjectFocus() {
-  console.log('Project dropdown focused');
-  isProjectDropdownActive.value = true;
-}
-
-function onProjectBlur() {
-  console.log('Project dropdown blurred');
-  // Add a small delay to allow for selection
-  setTimeout(() => {
-    isProjectDropdownActive.value = false;
-  }, 150);
-}
-
-function validatePermissions(perm: string): boolean {
-  const [resource, name] = perm.split('/');
-  const exists = permissions.value.some((p) => p.resourceName === resource && p.name === name);
-  return exists;
-}
+const trashFolder = computed(() => store.state.folders.trashFolder);
 
 const toggleTheme = () => {
   store.dispatch('theme/toggleTheme');
@@ -289,6 +293,14 @@ if (typeof window !== 'undefined') {
   document.addEventListener('keydown', handleEscape);
 }
 
+async function getTrashFolder() {
+  await store.dispatch('folders/getTrashFolder');
+}
+
+onMounted(() => {
+  getTrashFolder();
+});
+
 // Cleanup event listeners
 onBeforeUnmount(() => {
   if (typeof window !== 'undefined') {
@@ -296,6 +308,7 @@ onBeforeUnmount(() => {
     document.removeEventListener('keydown', handleEscape);
   }
 });
+
 </script>
 
 <style scoped>
