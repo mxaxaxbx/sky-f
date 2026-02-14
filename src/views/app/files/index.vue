@@ -330,7 +330,7 @@ const toggleSidebar = () => {
 };
 
 let lastScroll = 0;
-let scrollTarget = window;
+let scrollTarget: Window | Element = window;
 
 // Show FAB on mobile
 const handleScroll = () => {
@@ -348,19 +348,6 @@ const handleScroll = () => {
 
   lastScroll = current;
 };
-
-onMounted(() => {
-  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
-
-  lastScroll = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
-
-  scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
-});
-
-onBeforeUnmount(() => {
-  scrollTarget.removeEventListener('scroll', handleScroll);
-});
-// end show fab
 
 async function handleSearch() {
   const payload = {
@@ -398,6 +385,36 @@ async function getData() {
   } catch (err: unknown) {
     const errorResponse = err as { response?: { data?: { error?: string } } };
     const msg = errorResponse?.response?.data?.error || 'Error al cargar los archivos';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function createFolder() {
+  // test folder name
+  if (!folderName.value) {
+    store.commit('notifications/addNotification', {
+      message: 'Folder name is required',
+      type: 'error',
+    });
+    return;
+  }
+  // strip folder name
+  const strippedFolderName = folderName.value.trim();
+  loading.value = true;
+  try {
+    await store.dispatch('folders/createFolder', strippedFolderName);
+    createFolderModal.value = false;
+    folderName.value = '';
+    getData();
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
     store.commit('notifications/addNotification', {
       message: msg,
       type: 'error',
@@ -485,9 +502,16 @@ async function onDrop(ev: DragEvent) {
 }
 
 onMounted(() => {
-  // find.value.page = Math.max(route.query.page ? Number(route.query.page) : 1, 1);
-  // find.value.query = route.query.query ? String(route.query.query) : '';
   getData();
+  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
+
+  lastScroll = scrollTarget === window ? window.scrollY : (scrollTarget as Element).scrollTop;
+
+  scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
+});
+
+onBeforeUnmount(() => {
+  scrollTarget.removeEventListener('scroll', handleScroll);
 });
 
 watch(
