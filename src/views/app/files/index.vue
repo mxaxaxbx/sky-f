@@ -1,18 +1,20 @@
 <template>
-  <!-- actions -->
-  <!-- upload progress bar -->
-  <!-- uploading file indicator -->
-  <div class="
+  <div
+    class="
       flex flex-row items-start
       bg-[var(--bg)]
       pt-10
       h-screen
       font-alexandria font-sans
-    ">
-    <div class="
-      flex flex-col items-start
-      px-0  pt-0 w-full h-full
-      sm:px-8 sm:pt-6">
+    "
+  >
+    <div
+      class="
+        flex flex-col items-start
+        px-0  pt-0 w-full h-full
+        sm:px-8 sm:pt-6
+      "
+    >
       <!-- search box movil-->
       <div
         v-if="!hideBar"
@@ -181,22 +183,8 @@
         </label>
       </Transition>
 
-      <div
-        class="
-          w-full min-h-[calc(100vh-8rem)]
-          mx-auto px-2 mt-4 rounded-2xl"
-        :class="[
-        isDragging ?
-        'border-2 border-[var(--hover-border)] border-dashed bg-[var(--hover-bg)] ' : '',
-      ]" @dragenter.prevent="onDragEnter"
-        @dragover.prevent="onDragOver"
-        @dragleave.prevent="onDragLeave"
-        @drop.prevent="onDrop">
-        <DragDrop v-if="filesLength === 0  && query === '' " :loading="loading" />
+      <router-view></router-view>
 
-        <router-view v-else></router-view>
-
-      </div>
     </div>
   </div>
 
@@ -349,51 +337,6 @@ const handleScroll = () => {
   lastScroll = current;
 };
 
-async function handleSearch() {
-  const payload = {
-    page: 1,
-    query: query.value,
-  };
-
-  await store.dispatch('files/filter', payload);
-  router.replace({
-    query: {
-      ...payload,
-    },
-  });
-}
-
-async function handleInput() {
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
-  }
-  searchTimeout = setTimeout(() => {
-    handleSearch();
-  }, 500);
-}
-
-async function getData() {
-  loading.value = true;
-  try {
-    const q = typeof route.query.query === 'string' ? route.query.query : '';
-    const payload = {
-      query: q,
-      page: 1,
-    };
-    query.value = q;
-    await store.dispatch('files/filter', payload);
-  } catch (err: unknown) {
-    const errorResponse = err as { response?: { data?: { error?: string } } };
-    const msg = errorResponse?.response?.data?.error || 'Error al cargar los archivos';
-    store.commit('notifications/addNotification', {
-      message: msg,
-      type: 'error',
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-
 async function createFolder() {
   // test folder name
   if (!folderName.value) {
@@ -410,7 +353,6 @@ async function createFolder() {
     await store.dispatch('folders/createFolder', strippedFolderName);
     createFolderModal.value = false;
     folderName.value = '';
-    getData();
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
@@ -470,39 +412,7 @@ async function uploadFile(ev: Event): Promise<void> {
   }
 }
 
-function onDragEnter(ev: DragEvent) {
-  ev.preventDefault();
-  isDragging.value = true;
-}
-
-function onDragOver(ev: DragEvent) {
-  ev.preventDefault();
-  isDragging.value = true;
-}
-
-function onDragLeave(ev: DragEvent) {
-  ev.preventDefault();
-  isDragging.value = false;
-}
-
-async function onDrop(ev: DragEvent) {
-  ev.preventDefault();
-  isDragging.value = false;
-
-  if (!ev.dataTransfer || !ev.dataTransfer.files.length) return;
-
-  const droppedFiles = Array.from(ev.dataTransfer.files);
-  if (droppedFiles.length === 0) return;
-
-  const fakeEvent = {
-    target: { files: ev.dataTransfer.files },
-  } as unknown as Event;
-
-  await uploadFile(fakeEvent);
-}
-
 onMounted(() => {
-  getData();
   scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
 
   lastScroll = scrollTarget === window ? window.scrollY : (scrollTarget as Element).scrollTop;
@@ -513,17 +423,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   scrollTarget.removeEventListener('scroll', handleScroll);
 });
-
-watch(
-  () => query.value,
-  () => {
-    if (timeout) clearTimeout(timeout);
-
-    timeout = window.setTimeout(() => {
-      handleSearch();
-    }, 500);
-  },
-);
 
 // Reset progress when individual file upload completes
 watch(

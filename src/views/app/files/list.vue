@@ -8,10 +8,12 @@
       <div v-if="loading" class="flex justify-center items-center">
         <i class="fas fa-spinner fa-spin text-2xl"></i>
       </div>
+
       <!-- if not results -->
       <div v-else-if="!results.data.length" class="flex justify-center items-center">
         <p class="text-gray-500">No hay resultados</p>
       </div>
+
       <!-- results -->
       <div
         class="
@@ -24,9 +26,11 @@
           xl:grid-cols-6
         "
       >
+        <!-- folders -->
+
         <!-- results -->
         <div
-          v-for="file in results.data"
+          v-for="file in fileResults.data"
           :key="file.id"
           class="
             group
@@ -276,14 +280,15 @@ import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { FileI, FilesResultI } from '@/store/files/state';
+import { FolderI, FoldersResultI } from '@/store/folders/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
 const store = useStore();
 const route = useRoute();
-const router = useRouter();
 
-const results = computed<FilesResultI>(() => store.state.files.result);
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 
 const loading = ref(false);
 const copied = ref(false);
@@ -297,37 +302,6 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
-}
-
-async function getMoreResults() {
-  const scrollTop = window.scrollY;
-  const windowHeight = window.innerHeight;
-  const fullHeight = document.documentElement.scrollHeight;
-
-  if (scrollTop + windowHeight >= fullHeight - 10) {
-    const { page } = results.value;
-    const query = typeof route.query.query === 'string' ? route.query.query : '';
-
-    const { totalPages } = results.value;
-    console.log('Loading more results...', page, totalPages);
-
-    if (loading.value) {
-      return; // Prevent multiple simultaneous loads
-    }
-
-    if (page >= totalPages) {
-      return; // No more pages to load
-    }
-
-    loading.value = true;
-
-    await store.dispatch('files/filter', {
-      page: page + 1,
-      query,
-    });
-
-    loading.value = false;
-  }
 }
 
 // toggle dropdown position based on click position
@@ -362,14 +336,30 @@ async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
 }
 
+async function getFolders() {
+  await store.dispatch('folders/filter', {
+    query: '',
+    page: 1,
+  });
+}
+
+async function getFiles() {
+  await store.dispatch('files/filter', {
+    query: '',
+    page: 1,
+  });
+}
+
 onMounted(() => {
+  getFolders();
+  getFiles();
   // when scrolling to bottom, load more results
-  window.addEventListener('scroll', getMoreResults);
+  // window.addEventListener('scroll', getMoreResults);
 });
 
 onUnmounted(() => {
   // TODO: validate pagination
-  window.removeEventListener('scroll', getMoreResults);
+  // window.removeEventListener('scroll', getMoreResults);
 });
 
 </script>
