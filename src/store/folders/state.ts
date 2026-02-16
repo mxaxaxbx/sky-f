@@ -8,9 +8,18 @@ export interface FolderI {
   updated: number;
 }
 
+export interface FoldersResultI {
+  data: FolderI[];
+  page: number;
+  perPage: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface FoldersStateI {
   trashFolder: FolderI;
   folder: FolderI;
+  result: FoldersResultI;
 }
 
 export const state: FoldersStateI = {
@@ -31,5 +40,12 @@ export const state: FoldersStateI = {
     isTrash: false,
     created: 0,
     updated: 0,
+  },
+  result: {
+    data: [],
+    page: 1,
+    perPage: 0,
+    total: 0,
+    totalPages: 0,
   },
 };

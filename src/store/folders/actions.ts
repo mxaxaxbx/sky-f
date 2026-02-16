@@ -23,4 +23,22 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     context.commit('setFolder', snakeToCamel(data));
   },
 
+  async filter(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: {
+      query: string;
+      page: number;
+    },
+  ): Promise<void> {
+    // convert the payload to url query params
+    let params = '';
+
+    Object.entries(payload).forEach(([key, value]) => {
+      params += `${key}=${value}&`;
+    });
+
+    const { data } = await storageClient.get(`/api/folders/list-folders?${params.toString()}`);
+    context.commit('setResult', snakeToCamel(data));
+  },
+
 };
