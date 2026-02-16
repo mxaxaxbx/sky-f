@@ -160,12 +160,13 @@
                   rounded-full
 
                   hover:bg-[var(--hover-bg)]
+                  hover:text-[var(--text)]
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   transition-all duration-300
                 "
               >
-                <img src="/icon/icon_details.svg" alt="download" class="h-4 w-4"/>
+                <img src="/icon/icon-preview.svg" alt="download" class="h-4 w-4"/>
                 Preview
               </button>
 
@@ -182,6 +183,7 @@
                   rounded-full
 
                   hover:bg-[var(--hover-bg)]
+                  hover:text-[var(--text)]
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   transition-all duration-300
