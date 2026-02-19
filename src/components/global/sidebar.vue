@@ -145,7 +145,7 @@
                     </div>
                     <span
                       v-show="showSidebar" class="ml-3 whitespace-nowrap">
-                      Rubbish bin
+                      Event Horizon
                     </span>
                   </router-link>
                 </li>
