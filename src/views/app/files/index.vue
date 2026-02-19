@@ -12,7 +12,7 @@
       class="
         flex flex-col items-start
         px-0  pt-0 w-full h-full
-        sm:px-8 sm:pt-6
+        sm:pt-6
       "
     >
       <!-- search box movil-->
@@ -89,7 +89,7 @@
       </div>
 
       <!-- actions desktop-->
-      <div class="flex items-center w-full gap-2">
+      <div class="flex items-center w-full gap-2 px-8">
         <label
           v-if="!hideBar"
           for="fileInputBtn"
