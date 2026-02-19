@@ -69,6 +69,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
         if (item.r2Url) {
           // get file from formdata payload by name
           const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+          console.log('file->', file);
           if (file) {
             try {
               const response = await fetch(item.r2Url, {
