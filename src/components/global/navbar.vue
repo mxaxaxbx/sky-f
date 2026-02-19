@@ -347,10 +347,13 @@ async function handleSearch() {
       ...payload,
     },
   });
-  // if current route is not /app/files, redirect to /app/files
-  if (route.path !== '/app/files') {
-    router.push('/app/files');
-  }
+
+  router.push({
+    path: '/app/search',
+    query: {
+      ...payload,
+    },
+  });
 }
 
 async function handleInput() {
