@@ -76,6 +76,7 @@ const routes: Array<RouteRecordRaw> = [
           },
         ],
       },
+      // search
       {
         path: 'search',
         name: 'app-search',
@@ -84,6 +85,26 @@ const routes: Array<RouteRecordRaw> = [
           title: 'Buscar',
           requiresAuth: true,
         },
+      },
+      // folders
+      {
+        path: 'folders',
+        name: 'app-folders',
+        component: () => import('../views/app/folders/index.vue'),
+        meta: {
+          title: 'Carpetas',
+          requiresAuth: true,
+        },
+        children: [
+          {
+            path: ':id',
+            name: 'app-folders-content',
+            component: () => import('../views/app/folders/content.vue'),
+            meta: {
+              title: 'Contenido de la carpeta',
+            },
+          },
+        ],
       },
     ],
   },
