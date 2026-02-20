@@ -1,5 +1,11 @@
 <template>
-  <h1 class="text-lg mt-8 sm:mt-0 font-semibold mb-4 ml-2 text-[var(--text)] hidden sm:block">Could Drive</h1>
+  <h1
+    class="
+      text-xl text-[var(--text)] font-semibold
+      mx-2 my-2 px-12 font-alexandria
+
+      sm:mt-6
+      hidden sm:block">Could Drive</h1>
 
   <!-- loading -->
   <div v-if="loading" class="flex justify-center items-center">
@@ -12,100 +18,189 @@
   </div>
 
   <!-- folders -->
-  <div class="w-full my-4">
-    <h3 class="font-semibold text-xs sm:text-sm truncate text-left"> Folders </h3>
-    <div class="flex flex-wrap gap-2">
+  <div class="w-full border-b border-[var(--border)] mt-20 py-0 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+    <h3
+      class="
+        font-regular text-sm text-[var(--text-terceary)]
+        truncate text-left
+        mb-1 px-3 gap-2
+        sm:text-lg sm:mb-0 sm:font-semibold
+        flex items-center
+      "
+    >
+      <span>Folders</span>
+      <button
+        type="button"
+        @click="showFolders = !showFolders"
+        class="text-sm border border-transparent rounded-full
+          hover:border-[var(--color-primary)]
+          hover:bg-[var(--hover-bg)]
+          hover:text-[var(--text)] h-6 w-6
+          transition-all duration-300"
+        :class="showFolders ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
+      >
+        <i class="fa-solid fa-angles-down"></i>
+      </button>
+    </h3>
+    <Transition name="accordion">
       <div
-        v-for="folder in folderResults.data"
-        :key="folder.id"
+        v-show="showFolders"
         class="
-          w-64
-          border border-[var(--border)]
-          rounded-2xl p-2
-          flex items-center justify-between
+          grid grid-cols-1 gap-2 mx-0
+          text-[var(--text)] my-4
+
+          sm:grid-cols-2 sm:gap-4 sm:mx-4 sm:my-4
+          md:grid-cols-3
+          lg:grid-cols-4
+          xl:grid-cols-6
         "
       >
-        <router-link
-          :to="`/app/folders/${folder.id}`"
+        <div
+          v-for="folder in folderResults.data"
+          :key="folder.id"
           class="
-            flex items-center
-            space-x-2
-            min-w-0 w-full overflow-hidden
-          "
-        >
-          <i class="fas fa-folder"></i>
-          <h3 class="font-semibold text-xs sm:text-sm truncate text-left">
-            {{ folder.name }}
-          </h3>
-        </router-link>
-        <Dropdown
-          :classes="[
-            'bg-[var(--bg-secondary)]',
-            'border border-[var(--border)]',
-            'rounded-2xl',
-            'absolute','-right-0', 'z-20',
-            dropdownPosition,
-            'w-48',
-            'sm:-right-2'
-          ]"
-        >
-          <template #trigger="{ toggle }">
-            <button
-              @click="toggleDropdown(toggle, $event)"
-              class="text-[var(--text-terceary)] w-6 h-10">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-          </template>
-          <template #content="{ }">
-            <div class="flex flex-col gap-0.5 px-1.5 py-1 font-light text-sm text-[#868686]">
-              <router-link
-                :to="`/app/folders/details/${folder.id}`"
-                class="
-                  flex items-center justify-start
-                  rounded-xl
-                  px-2 py-1
-                  border border-transparent
-                  hover:bg-[var(--hover-bg)] hover:border-[var(--color-primary)]
-                  transition-colors duration-30
-                "
-              >
-                <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3" />
-                <span>info</span>
-              </router-link>
+              group
+              flex items-center justify-between
+              w-full
+              bg-[var(--bg-secondary)]
+              border border-[var(--border)]
+              rounded-2xl min-w-0
+
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--hover-border)]
+              hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+              transition-colors duration-300
+            "
+          >
+          <router-link
+            :to="`/app/folders/${folder.id}`"
+            class="flex-1 min-w-0"
+          >
+            <div class="flex items center justify-between p-1">
+              <div
+                  class="
+                    flex items-center
+                    space-x-2
+                    min-w-0 w-full overflow-hidden
+                  "
+                >
+                <img src="/icon/icon-folder.svg" alt="folder" class="h-8"/>
+
+                <!-- title and date -->
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-xs sm:text-sm truncate text-left">
+                    {{ folder.name }}
+                  </h3>
+                </div>
+              </div>
             </div>
-          </template>
-        </Dropdown>
+          </router-link>
+          <div
+            class="
+              flex items-center justify-center
+              border-l border-[var(--border)]
+              w-6 py-2
+
+              group-hover:border-[var(--color-primary)]
+              transition-colors duration-300
+            "
+          >
+              <Dropdown
+                :classes="[
+                  'bg-[var(--bg-secondary)]',
+                  'border border-[var(--border)]',
+                  'rounded-2xl',
+                  'absolute','-right-0', 'z-20',
+                  dropdownPosition,
+                  'w-48',
+                  'sm:-right-2'
+                ]"
+              >
+                <template #trigger="{ toggle }">
+                  <button
+                    @click="toggleDropdown(toggle, $event)"
+                    class="
+                      text-[var(--text-terceary)]
+                      w-6 h-auto
+
+                      hover:text-[var(--text)]
+                      transition-colors duration-300
+                    "
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </template>
+
+                <template #content="{ }">
+                  <div class="flex flex-col gap-0.5 px-1 py-1 font-light text-sm text-[#868686]">
+                    <router-link
+                      :to="`/app/folders/details/${folder.id}`"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3" />
+                      <span>info</span>
+                    </router-link>
+                  </div>
+                </template>
+              </Dropdown>
+          </div>
+        </div>
       </div>
-    </div>
+    </Transition>
   </div>
 
   <!-- results -->
-  <div class="w-full my-4">
-    <h3 class="font-semibold text-xs sm:text-sm truncate text-left"> Files </h3>
-    <div class="flex flex-wrap gap-2">
+  <div class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+    <h3
+      class="
+        font-regular text-sm text-[var(--text-terceary)]
+        truncate text-left
+        mb-1 px-3
+
+        sm:text-lg sm:mb-4 sm:font-semibold
+      "
+    >Your Files </h3>
+    <div
+      class="
+        grid grid-cols-1 gap-2 mx-0
+        text-[var(--text)]
+
+        sm:grid-cols-2 sm:gap-4 sm:mx-4
+        md:grid-cols-3
+        lg:grid-cols-4
+        xl:grid-cols-6
+      "
+    >
       <div
         v-for="file in fileResults.data"
         :key="file.id"
         class="
-          flex flex-wrap space-x-2
-        "
-      >
-        <div
-          class="
-            w-64
-            border border-[var(--border)]
-            rounded-2xl
+            group
             flex items-center justify-between
+            w-full
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            rounded-2xl min-w-0
+
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+            transition-colors duration-300
           "
         >
+        <div class="flex w-full h-auto items-center justify-between relative">
           <router-link
             :to="`/app/files/details/${file.id}`"
-            class="
-              flex items-center
-              space-x-2
-              min-w-0 w-full overflow-hidden
-            "
+            class="flex-1 min-w-0"
           >
+          <div class="flex items center justify-between p-1">
             <div
               class="
                 flex items-center
@@ -190,8 +285,8 @@
                 class="h-10 w-10"
               />
               <!-- title and date -->
-              <div class="">
-                <h3 class="font-semibold text-xs sm:text-sm truncate text-left">
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
                   {{ file.name }}
                 </h3>
                 <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
@@ -199,13 +294,14 @@
                 </p>
               </div>
             </div>
+          </div>
           </router-link>
           <!-- options -->
           <div
             class="
               flex items-center justify-center
               border-l border-[var(--border)]
-              h-full w-6
+              w-6 py-1
 
               group-hover:border-[var(--color-primary)]
               transition-colors duration-300
@@ -238,7 +334,7 @@
               </template>
 
               <template #content="{ }">
-                <div class="flex flex-col gap-0.5 px-1.5 py-1 font-light text-sm text-[#868686]">
+                <div class="flex flex-col gap-0.5 px-1 py-1 font-light text-sm text-[#868686]">
 
                   <!-- info file -->
                   <router-link
@@ -347,6 +443,7 @@ const folderResults = computed<FoldersResultI>(() => store.state.folders.result)
 const loading = ref(false);
 const copied = ref(false);
 const dropdownPosition = ref('top-8');
+const showFolders = ref(true);
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -417,3 +514,24 @@ onUnmounted(() => {
 });
 
 </script>
+<style scoped>
+.accordion-enter-active,
+.accordion-leave-active {
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease;
+  overflow: hidden;
+}
+
+.accordion-enter-from,
+.accordion-leave-to {
+  max-height: 0;
+  opacity: 1;
+}
+
+.accordion-enter-to,
+.accordion-leave-from {
+  max-height: 1000px; /* suficiente para tu contenido */
+  opacity: 1;
+}
+</style>
