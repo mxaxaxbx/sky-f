@@ -12,6 +12,14 @@ export interface SearchItemI {
   updated: number;
 }
 
+export interface SearchResultI {
+  data: SearchItemI[];
+  page: number;
+  perPage: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface FileI {
   id: string | number;
   name: string;
@@ -40,7 +48,7 @@ export interface FilesStateI {
   uploadProgress: number;
   uploadFiles: FileI[];
   file: FileI;
-  searchResult: SearchItemI[];
+  searchResult: SearchResultI;
 }
 
 export const state: FilesStateI = {
@@ -67,5 +75,11 @@ export const state: FilesStateI = {
     created: 0,
     updated: 0,
   },
-  searchResult: [],
+  searchResult: {
+    data: [],
+    page: 1,
+    perPage: 0,
+    total: 0,
+    totalPages: 0,
+  },
 };

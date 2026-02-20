@@ -4,7 +4,7 @@ import {
   FilesStateI,
   FilesResultI,
   FileI,
-  SearchItemI,
+  SearchResultI,
 } from './state';
 
 export const mutations: MutationTree<FilesStateI> = {
@@ -38,7 +38,7 @@ export const mutations: MutationTree<FilesStateI> = {
     state.uploadProgress = 0;
   },
 
-  setSearchResult(state: FilesStateI, payload: SearchItemI[]) {
+  setSearchResult(state: FilesStateI, payload: SearchResultI) {
     state.searchResult = payload;
   },
 
