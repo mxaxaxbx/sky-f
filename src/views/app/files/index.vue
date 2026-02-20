@@ -368,7 +368,6 @@ async function createFolder() {
 
 // Upload multiple files in a single request
 async function uploadFile(ev: Event): Promise<void> {
-  console.log('UPLOAD TRIGGERED');
   const target = ev.target as HTMLInputElement;
   if (!target.files || target.files.length === 0) {
     return;
@@ -410,6 +409,36 @@ async function uploadFile(ev: Event): Promise<void> {
     uploadQueue.value = [];
     uploading.value = false;
   }
+}
+
+async function handleSearch() {
+  const payload = {
+    page: 1,
+    q: query.value,
+  };
+
+  await store.dispatch('files/filter', payload);
+  router.replace({
+    query: {
+      ...payload,
+    },
+  });
+
+  router.push({
+    path: '/app/search',
+    query: {
+      ...payload,
+    },
+  });
+}
+
+async function handleInput() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    handleSearch();
+  }, 500);
 }
 
 onMounted(() => {
