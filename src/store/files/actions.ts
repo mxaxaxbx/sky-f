@@ -68,14 +68,21 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
         if (item.r2Url) {
           // get file from formdata payload by name
-          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name) as File;
           console.log('file->', file);
           if (file) {
             try {
-              const response = await fetch(item.r2Url, {
-                method: 'PUT',
-                body: file,
-              });
+              const response = await fetch(
+                item.r2Url,
+                {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': file.type,
+                  },
+                  body: file,
+                  credentials: 'omit',
+                },
+              );
               console.log('response', response);
               if (response.ok) {
                 completedFiles.push(item);
@@ -218,6 +225,17 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       return blobUrl;
     }
     return null;
+  },
+
+  async search(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: {
+      q: string,
+      page: number,
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/storage/search?q=${payload.q}&page=${payload.page}`);
+    context.commit('setSearchResult', snakeToCamel(data));
   },
 
 };

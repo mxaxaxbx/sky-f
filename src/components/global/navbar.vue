@@ -338,7 +338,7 @@ function onImageError(event: Event) {
 async function handleSearch() {
   const payload = {
     page: 1,
-    query: query.value,
+    q: query.value,
   };
 
   await store.dispatch('files/filter', payload);

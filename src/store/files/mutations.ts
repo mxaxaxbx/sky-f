@@ -4,6 +4,7 @@ import {
   FilesStateI,
   FilesResultI,
   FileI,
+  SearchItemI,
 } from './state';
 
 export const mutations: MutationTree<FilesStateI> = {
@@ -35,6 +36,10 @@ export const mutations: MutationTree<FilesStateI> = {
   clearUploadFiles(state: FilesStateI) {
     state.uploadFiles = [];
     state.uploadProgress = 0;
+  },
+
+  setSearchResult(state: FilesStateI, payload: SearchItemI[]) {
+    state.searchResult = payload;
   },
 
 };

@@ -1,3 +1,17 @@
+export interface SearchItemI {
+  id: string | number;
+  name: string;
+  itemType: string;
+  size: number;
+  contentType: string;
+  userId: string | number;
+  folderId: null | number;
+  isTrash: boolean;
+  uploadCompleted: boolean;
+  created: number;
+  updated: number;
+}
+
 export interface FileI {
   id: string | number;
   name: string;
@@ -26,6 +40,7 @@ export interface FilesStateI {
   uploadProgress: number;
   uploadFiles: FileI[];
   file: FileI;
+  searchResult: SearchItemI[];
 }
 
 export const state: FilesStateI = {
@@ -52,4 +67,5 @@ export const state: FilesStateI = {
     created: 0,
     updated: 0,
   },
+  searchResult: [],
 };

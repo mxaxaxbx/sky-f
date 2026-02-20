@@ -48,6 +48,7 @@ const routes: Array<RouteRecordRaw> = [
         },
         redirect: { name: 'app-files-list' },
       },
+      // files
       {
         path: 'files',
         name: 'app-files',
@@ -74,6 +75,15 @@ const routes: Array<RouteRecordRaw> = [
             },
           },
         ],
+      },
+      {
+        path: 'search',
+        name: 'app-search',
+        component: () => import('../views/app/search/index.vue'),
+        meta: {
+          title: 'Buscar',
+          requiresAuth: true,
+        },
       },
     ],
   },
