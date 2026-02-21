@@ -435,7 +435,6 @@ import { FolderI, FoldersResultI } from '@/store/folders/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
 const store = useStore();
-const route = useRoute();
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);

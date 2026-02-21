@@ -42,4 +42,14 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     context.commit('setResult', snakeToCamel(data));
   },
 
+  async getFolderDetails(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: {
+      folderId: number;
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/folders/get-folder-details/${payload.folderId}`);
+    context.commit('setFolder', snakeToCamel(data));
+  },
+
 };
