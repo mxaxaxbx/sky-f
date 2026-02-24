@@ -159,7 +159,7 @@
 
   <!-- results -->
   <div class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
-    <div class="flex items-center justify-between px-3 mb-1 sm:mb-4">
+    <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
       <h3
         class="
           flex items-center
