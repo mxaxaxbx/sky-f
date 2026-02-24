@@ -13,8 +13,10 @@
   </div>
 
   <!-- if not results -->
-  <div v-else-if="!fileResults.data.length && !folderResults.data.length" class="flex justify-center items-center">
-    <p class="text-gray-500">No hay resultados</p>
+  <div
+    v-else-if="!fileResults.data.length && !folderResults.data.length"
+    class="flex justify-center items-center mx-auto">
+    <p class="text-[var(--text-terceary)] font-regular text-lg">Looks like this space is clear</p>
   </div>
 
   <!-- folders -->
@@ -32,21 +34,19 @@
       <button
         type="button"
         @click="showFolders = !showFolders"
-        class="text-sm border border-transparent rounded-full
-          hover:border-[var(--color-primary)]
-          hover:bg-[var(--hover-bg)]
-          hover:text-[var(--text)] h-6 w-6
+        class="text-xs rounded-full mt-0.5
+          hover:text-[var(--color-primary)]
           transition-all duration-300"
         :class="showFolders ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
       >
-        <i class="fa-solid fa-angles-down"></i>
+        <i class="fa-solid fa-chevron-down"></i>
       </button>
     </h3>
     <Transition name="accordion">
       <div
         v-show="showFolders"
         class="
-          grid grid-cols-1 gap-2 mx-0
+          grid grid-cols-2 gap-2 mx-0
           text-[var(--text)] my-4
 
           sm:grid-cols-2 sm:gap-4 sm:mx-4 sm:my-4
@@ -179,7 +179,7 @@
       "
     >
       <div
-        v-for="file in fileResults.data"
+        v-for="file in sortedFiles"
         :key="file.id"
         class="
             group
@@ -438,6 +438,11 @@ const store = useStore();
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+
+const sortedFiles = computed(() => {
+  const files = fileResults.value?.data || [];
+  return [...files].sort((a, b) => b.created - a.created);
+});
 
 const loading = ref(false);
 const copied = ref(false);
