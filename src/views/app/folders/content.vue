@@ -1,12 +1,26 @@
 <template>
-  <div class="mx-2 sm:mx-14">
+  <div class=" container w-full font-sans">
     <!-- loading -->
     <div v-if="loading" class="flex justify-center items-center py-20">
       <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
     </div>
 
     <!-- folder details -->
-    <div v-if="folderDetails && folderDetails.id" class="w-full px-2 py-4 sm:px-14 sm:py-6">
+    <div v-if="folderDetails && folderDetails.id" class="max-w-4xl mx-auto">
+      <!-- Back button -->
+      <button
+        @click="$router.back()"
+        class="
+          flex items-center gap-2
+          mb-4 ml-2 sm:mb-6 ml:0
+          text-[var(--text-terceary)]
+          hover:text-[var(--text)]
+          transition-colors duration-200
+        "
+      >
+        <i class="fas fa-arrow-left"></i>
+        <span class="text-md font-regular">back</span>
+      </button>
       <div
         class="
           bg-[var(--bg-secondary)]
