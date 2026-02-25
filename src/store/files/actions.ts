@@ -13,13 +13,16 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     payload: {
       query: string;
       page: number;
+      orderBy: string;
+      order: string;
     },
   ): Promise<void> {
     // convert the payload to url query params
     let params = '';
 
     Object.entries(payload).forEach(([key, value]) => {
-      params += `${key}=${value}&`;
+      const snakeKey = camelToSnake(key);
+      params += `${snakeKey}=${value}&`;
     });
 
     const { data } = await storageClient.get(`/api/storage/listfiles?${params.toString()}`);
