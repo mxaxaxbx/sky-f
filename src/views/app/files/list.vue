@@ -13,46 +13,47 @@
   </div>
 
   <!-- if not results -->
-  <div v-else-if="!fileResults.data.length && !folderResults.data.length" class="flex justify-center items-center">
-    <p class="text-gray-500">No hay resultados</p>
+  <div
+    v-else-if="!fileResults.data.length && !folderResults.data.length"
+    class="flex justify-center items-center mx-auto">
+    <p class="text-[var(--text-terceary)] font-regular text-lg">Looks like this space is clear</p>
   </div>
 
   <!-- folders -->
   <div class="w-full border-b border-[var(--border)] mt-20 py-0 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
     <h3
       class="
-        font-regular text-sm text-[var(--text-terceary)]
-        truncate text-left
-        mb-1 px-3 gap-2
-        sm:text-lg sm:mb-0 sm:font-semibold
         flex items-center
+        font-regular text-left text-sm text-[var(--text-terceary)] truncate
+        mb-1 px-3 gap-2
+
+        sm:text-lg sm:mb-0 sm:font-semibold
       "
     >
       <span>Folders</span>
       <button
         type="button"
         @click="showFolders = !showFolders"
-        class="text-sm border border-transparent rounded-full
-          hover:border-[var(--color-primary)]
-          hover:bg-[var(--hover-bg)]
-          hover:text-[var(--text)] h-6 w-6
+        class="text-xs rounded-full mt-0.5
+          hover:text-[var(--color-primary)]
           transition-all duration-300"
         :class="showFolders ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
       >
-        <i class="fa-solid fa-angles-down"></i>
+        <i class="fa-solid fa-chevron-down"></i>
       </button>
     </h3>
-    <Transition name="accordion">
+    <Transition name="slide">
       <div
         v-show="showFolders"
         class="
-          grid grid-cols-1 gap-2 mx-0
+          grid grid-cols-2 gap-2 mx-0
           text-[var(--text)] my-4
 
           sm:grid-cols-2 sm:gap-4 sm:mx-4 sm:my-4
           md:grid-cols-3
           lg:grid-cols-4
           xl:grid-cols-6
+          transition-all duration-300
         "
       >
         <div
@@ -69,7 +70,7 @@
               hover:bg-[var(--hover-bg)]
               hover:border-[var(--hover-border)]
               hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
-              transition-colors duration-300
+              transition-all duration-300
             "
           >
           <router-link
@@ -158,16 +159,48 @@
 
   <!-- results -->
   <div class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
-    <h3
-      class="
-        font-regular text-sm text-[var(--text-terceary)]
-        truncate text-left
-        mb-1 px-3
+    <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
+      <h3
+        class="
+          flex items-center
+          font-regular text-left text-sm text-[var(--text-terceary)] truncate
+          gap-2
 
-        sm:text-lg sm:mb-4 sm:font-semibold
-      "
-    >Your Files </h3>
+          sm:text-lg sm:mb-0 sm:font-semibold
+        "
+      >
+        <span>Your Files</span>
+        <button
+          type="button"
+          @click="showFiles = !showFiles"
+          class="text-xs rounded-full mt-0.5
+            hover:text-[var(--color-primary)]
+            transition-all duration-300"
+          :class="showFiles ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
+        >
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </h3>
+      <button
+        v-show="showFiles"
+        @click="sortOrder = sortOrder === 'desc' ? 'asc' : 'desc'"
+        class="
+          flex items-center justify-center
+          px-2 py-0.5
+          text-xs text-[var(--text-terceary)]
+          rounded-full border border-[var(--border)]
+
+          hover:bg-[var(--hover-bg)]
+          hover:border-[var(--color-primary)]
+          transition-all duration-300
+        "
+      >Order:
+        {{ sortOrder === 'desc' ? 'Newest' : 'Oldest' }}
+      </button>
+    </div>
+    <Transition name="slide">
     <div
+      v-show="showFiles"
       class="
         grid grid-cols-1 gap-2 mx-0
         text-[var(--text)]
@@ -179,7 +212,7 @@
       "
     >
       <div
-        v-for="file in fileResults.data"
+        v-for="file in sortedFiles"
         :key="file.id"
         class="
             group
@@ -413,6 +446,7 @@
         </div>
       </div>
     </div>
+    </Transition>
   </div>
 </template>
 
@@ -439,10 +473,21 @@ const store = useStore();
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 
+const sortOrder = ref<'desc' | 'asc'>('desc');
 const loading = ref(false);
 const copied = ref(false);
 const dropdownPosition = ref('top-8');
 const showFolders = ref(true);
+const showFiles = ref(true);
+
+const sortedFiles = computed(() => {
+  const files = fileResults.value?.data || [];
+  const multiplier = sortOrder.value === 'desc' ? -1 : 1;
+
+  return [...files].sort(
+    (a, b) => (a.created - b.created) * multiplier,
+  );
+});
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -532,5 +577,24 @@ onUnmounted(() => {
 .accordion-leave-from {
   max-height: 1000px; /* suficiente para tu contenido */
   opacity: 1;
+}
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.35s ease;
+  overflow: hidden;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  max-height: 500px; /* ajusta según tu contenido */
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>
