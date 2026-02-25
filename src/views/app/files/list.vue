@@ -183,7 +183,7 @@
       </h3>
       <button
         v-show="showFiles"
-        @click="sortOrder = sortOrder === 'desc' ? 'asc' : 'desc'"
+        @click="sortOrder = sortOrder === 'desc' ? 'asc' : 'desc'; getFiles()"
         class="
           flex items-center justify-center
           px-2 py-0.5
@@ -212,7 +212,7 @@
       "
     >
       <div
-        v-for="file in sortedFiles"
+        v-for="file in fileResults.data"
         :key="file.id"
         class="
             group
@@ -480,15 +480,6 @@ const dropdownPosition = ref('top-8');
 const showFolders = ref(true);
 const showFiles = ref(true);
 
-const sortedFiles = computed(() => {
-  const files = fileResults.value?.data || [];
-  const multiplier = sortOrder.value === 'desc' ? -1 : 1;
-
-  return [...files].sort(
-    (a, b) => (a.created - b.created) * multiplier,
-  );
-});
-
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
 
@@ -542,6 +533,8 @@ async function getFiles() {
   await store.dispatch('files/filter', {
     query: '',
     page: 1,
+    orderBy: 'created',
+    order: sortOrder.value,
   });
 }
 
