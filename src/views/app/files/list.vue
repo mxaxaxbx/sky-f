@@ -221,6 +221,7 @@
           @keydown.enter="selectFile($event, file, index)"
           @keydown.space.prevent="selectFile($event, file, index)"
           @dblclick="router.push(`/app/files/details/${file.id}`);"
+          @longpress="selectFile($event, file, index)"
           class="
             group
             flex items-center justify-between
