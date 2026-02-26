@@ -29,13 +29,15 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     payload: {
       query: string;
       page: number;
+      folderId: number | string | null;
     },
   ): Promise<void> {
     // convert the payload to url query params
     let params = '';
 
     Object.entries(payload).forEach(([key, value]) => {
-      params += `${key}=${value}&`;
+      const snakeKey = snakeToCamel(key);
+      params += `${snakeKey}=${value}&`;
     });
 
     const { data } = await storageClient.get(`/api/folders/list-folders?${params.toString()}`);

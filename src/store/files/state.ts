@@ -30,7 +30,7 @@ export interface FileI {
   r2Url: string;
   uploadCompleted: boolean;
   error: string;
-  folderId: null | number;
+  folderId: null | number | string;
   created: number;
   updated: number;
 }

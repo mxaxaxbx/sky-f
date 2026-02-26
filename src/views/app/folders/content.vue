@@ -5,80 +5,8 @@
       <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
     </div>
 
-    <!-- folder details -->
-    <div v-if="folderDetails && folderDetails.id" class="max-w-4xl mx-auto">
-      <!-- Back button -->
-      <button
-        @click="$router.back()"
-        class="
-          flex items-center gap-2
-          mb-4 ml-2 sm:mb-6 ml:0
-          text-[var(--text-terceary)]
-          hover:text-[var(--text)]
-          transition-colors duration-200
-        "
-      >
-        <i class="fas fa-arrow-left"></i>
-        <span class="text-md font-regular">back</span>
-      </button>
-      <div
-        class="
-          bg-[var(--bg-secondary)]
-          border border-[var(--border)]
-          rounded-2xl
-          shadow-lg
-          p-4 sm:p-6
-        "
-      >
-        <div class="flex items-center gap-3 mb-4">
-          <img src="/icon/icon-folder.svg" alt="folder" class="h-8 w-8"/>
-          <h2 class="text-xl sm:text-2xl font-semibold text-[var(--text)]">
-            {{ folderDetails.name }}
-          </h2>
-        </div>
-
-        <div
-          class="
-            grid grid-cols-1
-            gap-3
-            sm:grid-cols-2 sm:gap-6
-          "
-        >
-          <!-- Created date -->
-          <div class="px-3 py-2">
-            <div class="flex-col items-center justify-between gap-2">
-              <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
-                Creation date:
-              </h3>
-            </div>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(folderDetails.created * 1000).format('DD/MM/YYYY HH:mm a') }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              {{ moment(folderDetails.created * 1000).fromNow() }}
-            </p>
-          </div>
-
-          <!-- Updated date -->
-          <div class="px-3 py-2">
-            <div class="flex-col items-center justify-between gap-2">
-              <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
-                Last modification:
-              </h3>
-            </div>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(folderDetails.updated * 1000).format('DD/MM/YYYY HH:mm a') }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              {{ moment(folderDetails.updated * 1000).fromNow() }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- if not results -->
-    <div v-else-if="!filteredFileResults.data.length && !filteredFolderResults.data.length" class="flex justify-center items-center py-20">
+    <div v-if="!filteredFileResults.data.length && !filteredFolderResults.data.length" class="flex justify-center items-center py-20">
       <p class="text-[var(--text-terceary)]">No hay contenido en esta carpeta</p>
     </div>
 
@@ -500,14 +428,13 @@ import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { FileI, FilesResultI } from '@/store/files/state';
-import { FolderI, FoldersResultI } from '@/store/folders/state';
+import { FoldersResultI } from '@/store/folders/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
 const store = useStore();
 const route = useRoute();
 
-const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 
@@ -582,24 +509,6 @@ async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
 }
 
-async function getFolderDetails() {
-  loading.value = true;
-  console.log('folderId', folderId.value);
-  try {
-    await store.dispatch('folders/getFolderDetails', {
-      folderId: Number(folderId.value),
-    });
-  } catch (error) {
-    console.error('Error loading folder details:', error);
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: 'Error al obtener los detalles de la carpeta',
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-
 async function getFolders() {
   loading.value = true;
   try {
@@ -607,6 +516,7 @@ async function getFolders() {
     await store.dispatch('folders/filter', {
       query: '',
       page: 1,
+      folderId: folderId.value,
     });
   } catch (error) {
     console.error('Error loading folders:', error);
@@ -626,6 +536,7 @@ async function getFiles() {
     await store.dispatch('files/filter', {
       query: '',
       page: 1,
+      folderId: folderId.value,
     });
   } catch (error) {
     console.error('Error loading files:', error);
@@ -640,13 +551,11 @@ async function getFiles() {
 
 // Watch for route changes
 watch(() => route.params.id, () => {
-  getFolderDetails();
   getFolders();
   getFiles();
 }, { immediate: true });
 
 onMounted(() => {
-  getFolderDetails();
   getFolders();
   getFiles();
 });

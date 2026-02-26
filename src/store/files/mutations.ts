@@ -10,6 +10,7 @@ import {
 export const mutations: MutationTree<FilesStateI> = {
 
   setResult(state: FilesStateI, payload: FilesResultI) {
+    console.log('payload', payload);
     state.result.page = payload.page;
     state.result.perPage = payload.perPage;
     state.result.totalPages = payload.totalPages;

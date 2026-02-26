@@ -5,6 +5,7 @@ import { snakeToCamel, camelToSnake } from '@/utils';
 
 import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
+import { FolderI } from '../folders/state';
 
 export const actions: ActionTree<FilesStateI, RootStateI> = {
 
@@ -15,6 +16,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       page: number;
       orderBy: string;
       order: string;
+      folderId: number | string | null;
     },
   ): Promise<void> {
     // convert the payload to url query params
@@ -239,6 +241,14 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   ): Promise<void> {
     const { data } = await storageClient.get(`/api/storage/search?q=${payload.q}&page=${payload.page}`);
     context.commit('setSearchResult', snakeToCamel(data));
+  },
+
+  async moveFilesToFolder(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/files/move-files-to-folder', camelToSnake(payload));
+    context.commit('setFiles', snakeToCamel(data));
   },
 
 };

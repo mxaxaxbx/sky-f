@@ -213,10 +213,14 @@
         "
       >
         <div
-          v-for="file in fileResults.data"
+          v-for="file, index in fileResults.data"
           :key="file.id"
           :draggable="true"
           @dragstart="onDragStart(file)"
+          @click="selectFile($event, file, index)"
+          @keydown.enter="selectFile($event, file, index)"
+          @keydown.space.prevent="selectFile($event, file, index)"
+          @dblclick="router.push(`/app/files/details/${file.id}`);"
           class="
             group
             flex items-center justify-between
@@ -230,108 +234,113 @@
             hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
             transition-colors duration-300
           "
-          >
+          :class="[
+            'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
+            isSelected(file) ?
+              'border-[var(--color-primary)] bg-[var(--hover-bg)]' :
+              'border-[var(--border)]'
+          ]"
+        >
           <div class="flex w-full h-auto items-center justify-between relative">
-            <router-link
-              :to="`/app/files/details/${file.id}`"
+            <div
               class="flex-1 min-w-0"
             >
-            <div class="flex items center justify-between p-1">
-              <div
-                class="
-                  flex items-center
-                  space-x-2
-                  min-w-0 w-full overflow-hidden
-                "
-              >
-                <!-- icons -->
-                <img
-                  v-if="file.contentType === 'application/pdf'"
-                  src="/icon/icon-pdf.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="
-                    file.contentType === 'application/msword' ||
-                    file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+              <div class="flex items center justify-between p-1">
+                <div
+                  class="
+                    flex items-center
+                    space-x-2
+                    min-w-0 w-full overflow-hidden
                   "
-                  src="/icon/icon-doc.svg"
-                  alt="Word file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="
-                    file.contentType === 'application/vnd.ms-excel' ||
-                    file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                  "
-                  src="/icon/icon-excel.svg"
-                  alt="Word file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="
-                    file.contentType === 'application/vnd.ms-powerpoint' ||
-                    file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                  "
-                  src="/icon/icon-ppt.svg"
-                  alt="PowerPoint file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
-                  src="/icon/icon-png.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="file.contentType === 'image/svg+xml'"
-                  src="/icon/icon-svg.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
-                  src="/icon/icon-img.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/^video\//.test(file.contentType)"
-                  src="/icon/icon-video.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="file.contentType === 'application/zip'"
-                  src="/icon/icon-zip.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/^audio\//.test(file.contentType)"
-                  src="/icon/icon-audio.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else
-                  src="/icon/icon-file.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <!-- title and date -->
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
-                    {{ file.name }}
-                  </h3>
-                  <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                    {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
-                  </p>
+                >
+                  <!-- icons -->
+                  <img
+                    v-if="file.contentType === 'application/pdf'"
+                    src="/icon/icon-pdf.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="
+                      file.contentType === 'application/msword' ||
+                      file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    "
+                    src="/icon/icon-doc.svg"
+                    alt="Word file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="
+                      file.contentType === 'application/vnd.ms-excel' ||
+                      file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    "
+                    src="/icon/icon-excel.svg"
+                    alt="Word file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="
+                      file.contentType === 'application/vnd.ms-powerpoint' ||
+                      file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                    "
+                    src="/icon/icon-ppt.svg"
+                    alt="PowerPoint file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
+                    src="/icon/icon-png.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="file.contentType === 'image/svg+xml'"
+                    src="/icon/icon-svg.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
+                    src="/icon/icon-img.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="/^video\//.test(file.contentType)"
+                    src="/icon/icon-video.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="file.contentType === 'application/zip'"
+                    src="/icon/icon-zip.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else-if="/^audio\//.test(file.contentType)"
+                    src="/icon/icon-audio.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <img
+                    v-else
+                    src="/icon/icon-file.svg"
+                    alt="image file icon"
+                    class="h-10 w-10"
+                  />
+                  <!-- title and date -->
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
+                      {{ file.name }}
+                    </h3>
+                    <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
+                      {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-            </router-link>
             <!-- options -->
             <div
               class="
@@ -463,6 +472,7 @@ import {
   defineAsyncComponent,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import moment from 'moment';
 
 import { FileI, FilesResultI } from '@/store/files/state';
@@ -471,9 +481,7 @@ import { FolderI, FoldersResultI } from '@/store/folders/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
 const store = useStore();
-
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const router = useRouter();
 
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const loading = ref(false);
@@ -483,6 +491,12 @@ const showFolders = ref(true);
 const showFiles = ref(true);
 const draggedFile = ref<FileI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
+const selectedFiles = ref<FileI[]>([]);
+const lastSelectedIndex = ref<number | null>(null);
+
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const isSelected = (file: FileI) => selectedFiles.value.some((f: FileI) => f.id === file.id);
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -522,9 +536,32 @@ const copyLink = async (file: FileI) => {
   }, 2000);
 };
 
+function selectFile(event: KeyboardEvent, file: FileI, index: number) {
+  // CTRL selection
+  if (event.ctrlKey) {
+    const exists = selectedFiles.value.find((f: FileI) => f.id === file.id);
+
+    if (exists) {
+      selectedFiles.value = selectedFiles.value.filter((f: FileI) => f.id !== file.id);
+    } else {
+      selectedFiles.value.push(file);
+    }
+
+    lastSelectedIndex.value = index;
+    return;
+  }
+
+  // Normal click → single selection
+  selectedFiles.value = [file];
+  lastSelectedIndex.value = index;
+}
+
 function onDragStart(file: FileI) {
+  if (!isSelected(file)) {
+    selectedFiles.value = [file];
+  }
+
   draggedFile.value = file;
-  console.log('Dragged file', draggedFile.value);
 }
 
 function onDragEnter(folderId: number | string) {
@@ -539,6 +576,7 @@ async function getFolders() {
   await store.dispatch('folders/filter', {
     query: '',
     page: 1,
+    folderId: '',
   });
 }
 
@@ -548,16 +586,27 @@ async function getFiles() {
     page: 1,
     orderBy: 'created',
     order: sortOrder.value,
+    folderId: '',
   });
 }
 
 async function onDrop(folder: FolderI) {
+  if (selectedFiles.value.length === 0) return;
+
   if (!draggedFile.value) return;
 
-  const fileId = draggedFile.value.id;
   const folderId = folder.id as number;
 
-  console.log('Move file', fileId, 'to folder', folderId);
+  const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+    ...file,
+    folderId,
+  }));
+
+  console.log('payload', payload);
+
+  await store.dispatch('files/moveFilesToFolder', payload);
+
+  selectedFiles.value = [];
 
   draggedFile.value = null;
   draggedFolder.value = null;
