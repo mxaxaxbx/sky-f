@@ -44,48 +44,51 @@
               />
             </div>
           </button>
-          <span class="text-[var(--text)] font-semibold"
-            :class="showSidebar ? 'inline' : 'hidden'">Menu</span>
-          <label
-          for="search"
-          class="text-[#a3a3a3]">
-        </label>
+          <span
+            class="text-[var(--text)] font-semibold"
+            :class="showSidebar ? 'inline' : 'hidden'"
+            >
+              Menu
+            </span>
+          <label for="search" class="text-[#a3a3a3]"></label>
 
-        <!-- Contenedor relativo -->
-        <form @submit.prevent="handleSearch"
-          :class="showSidebar ? 'opacity-0' : 'opacity-100'
-            "
-          class="relative w-full ml-2">
-          <!-- Input -->
-          <input
-            v-model="query"
-            @input="handleInput"
-            type="text"
-            placeholder="Search everything"
-            class="
-              w-full
-              pl-8 pr-4 py-1
-              bg-[var(--bg-secondary)]
-              border border-[#0B77F3]/50
-              rounded-full
-              font-light text-[var(--text)] text-xs
+          <!-- Contenedor relativo -->
+          <form @submit.prevent="handleSearch"
+            :class="showSidebar ? 'opacity-0' : 'opacity-100'
+              "
+            class="relative w-full ml-2">
+            <!-- Input -->
+            <input
+              v-model="query"
+              @input="handleInput"
+              type="text"
+              placeholder="Search everything"
+              class="
+                w-full
+                pl-8 pr-4 py-1
+                bg-[var(--bg-secondary)]
+                border border-[#0B77F3]/50
+                rounded-full
+                font-light text-[var(--text)] text-xs
 
-              hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
-              hover:border-[var(--hover-border)]
-              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              focus:outline-none
-              transition-all duration-300
-            "/>
+                hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
+                hover:border-[var(--hover-border)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:outline-none
+                transition-all duration-300
+              "/>
 
-          <!-- Ícono dentro del input -->
-          <img src="/icon/icon-search.svg" alt="Search Icon"
-            class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
-        </form>
+            <!-- Ícono dentro del input -->
+            <img src="/icon/icon-search.svg" alt="Search Icon"
+              class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
+          </form>
         </div>
         <h1
           :class="showSidebar ? 'hidden' : 'inline'"
           class="text-left text-lg mb-2 font-semibold ml-2 text-[var(--text)]
-        ">Could Drive</h1>
+        ">
+          Could Drive
+        </h1>
       </div>
 
       <!-- actions desktop-->
@@ -146,6 +149,20 @@
         >
           <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
           New folder
+        </button>
+
+        <button
+          v-if="selectedFiles.length > 0"
+          type="button"
+          @click="moveToFolderModal = true"
+          class="
+            text-[var(--text-secondary)] text-sm
+            border border-[var(--border)] bg-[var(--bg)]
+            rounded-full
+            px-3
+          "
+        >
+          Move to folder
         </button>
       </div>
 
@@ -270,6 +287,62 @@
       </button>
     </template>
   </Modal>
+
+  <Modal v-model="moveToFolderModal">
+    <template #header>
+      Move to folder
+    </template>
+
+    <template #content>
+      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-4">
+        <label for="selected-folder"></label>
+        <select
+          v-model="selectedFolder"
+          @change="handleSelectFolder"
+          class="
+            w-full
+            border border-[var(--border)]
+            bg-[var(--bg)]
+            text-sm text-[var(--text)]
+            my-2 pl-2 py-1
+            rounded-full
+          "
+        >
+          <option value="-1" selected disabled>Select a folder</option>
+          <option value="0">Root</option>
+          <option v-for="folder in folderResults.data" :key="folder.id" :value="folder.id">
+            {{ folder.name }}
+          </option>
+        </select>
+      </form>
+    </template>
+
+    <template #footer>
+      <button
+        type="button"
+        @click="moveToFolderModal = false; selectedFolder = null;"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+        ">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="move-to-folder-form"
+        class="
+          text-[var(--text)] text-sm
+          border border-[var(--color-primary)]
+          bg-[var(--bg)]
+          rounded-full
+          px-3
+        ">
+        Move
+      </button>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -284,7 +357,9 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
-const DragDrop = defineAsyncComponent(() => import('@/components/app/dragdrop.vue'));
+import { FileI } from '@/store/files/state';
+import { FoldersResultI } from '@/store/folders/state';
+
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
 const route = useRoute();
@@ -292,25 +367,25 @@ const router = useRouter();
 const store = useStore();
 
 let searchTimeout: number | undefined;
-let timeout: number | undefined;
 
 const query = ref<string>('');
 const loading = ref(false);
 const uploading = ref(false);
 const file = ref<File | null>(null);
 const uploadQueue = ref<File[]>([]);
-const isDragging = ref(false); // Drag & Drop
 const fileInputBtn = ref<HTMLInputElement | null>(null);
 const fileInputBtn2 = ref<HTMLInputElement | null>(null);
 const showFab = ref(true); // Show FAB on mobile
 const createFolderModal = ref(false);
 const folderName = ref('');
+const moveToFolderModal = ref(false);
 
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const selectedFolder = ref<number | string | null>(null);
 const progress = computed<number>(() => store.state.files.uploadProgress);
-const filesLength = computed<number>(() => store.state.files.result.data.length);
-const hideBar = computed(() => route.path.includes('/details'));
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
-// Show sidebar based on state (can be toggled on all screen sizes)
+const hideBar = computed(() => route.path.includes('/details'));
 const showSidebar = computed(() => showSidebarState.value);
 
 const toggleSidebar = () => {
@@ -441,6 +516,42 @@ async function handleInput() {
   }, 500);
 }
 
+async function handleSelectFolder(ev: Event) {
+  const target = ev.target as HTMLSelectElement;
+  selectedFolder.value = target.value;
+}
+
+async function moveToFolder() {
+  if (!selectedFolder.value) {
+    return;
+  }
+
+  try {
+    loading.value = true;
+    await store.dispatch('files/moveFilesToFolder', selectedFiles.value);
+    moveToFolderModal.value = false;
+    selectedFolder.value = null;
+
+    await store.dispatch('files/filter', {
+      query: '',
+      page: 1,
+      orderBy: 'created',
+      order: 'desc',
+      folderId: '',
+    });
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al mover los archivos';
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: msg,
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 onMounted(() => {
   scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
 
@@ -463,6 +574,7 @@ watch(
     }
   },
 );
+
 </script>
 
 <style scoped>

@@ -491,11 +491,11 @@ const showFolders = ref(true);
 const showFiles = ref(true);
 const draggedFile = ref<FileI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
-const selectedFiles = ref<FileI[]>([]);
 const lastSelectedIndex = ref<number | null>(null);
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const isSelected = (file: FileI) => selectedFiles.value.some((f: FileI) => f.id === file.id);
 
 function formatFileSize(bytes: number): string {
@@ -542,7 +542,7 @@ function selectFile(event: KeyboardEvent, file: FileI, index: number) {
     const exists = selectedFiles.value.find((f: FileI) => f.id === file.id);
 
     if (exists) {
-      selectedFiles.value = selectedFiles.value.filter((f: FileI) => f.id !== file.id);
+      store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== file.id));
     } else {
       selectedFiles.value.push(file);
     }
@@ -552,13 +552,13 @@ function selectFile(event: KeyboardEvent, file: FileI, index: number) {
   }
 
   // Normal click → single selection
-  selectedFiles.value = [file];
+  store.commit('files/setSelectedFiles', [file]);
   lastSelectedIndex.value = index;
 }
 
 function onDragStart(file: FileI) {
   if (!isSelected(file)) {
-    selectedFiles.value = [file];
+    store.commit('files/setSelectedFiles', [file]);
   }
 
   draggedFile.value = file;
@@ -606,7 +606,7 @@ async function onDrop(folder: FolderI) {
 
   await store.dispatch('files/moveFilesToFolder', payload);
 
-  selectedFiles.value = [];
+  store.commit('files/setSelectedFiles', []);
 
   draggedFile.value = null;
   draggedFolder.value = null;

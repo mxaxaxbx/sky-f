@@ -49,6 +49,7 @@ export interface FilesStateI {
   uploadFiles: FileI[];
   file: FileI;
   searchResult: SearchResultI;
+  selectedFiles: FileI[];
 }
 
 export const state: FilesStateI = {
@@ -82,4 +83,5 @@ export const state: FilesStateI = {
     total: 0,
     totalPages: 0,
   },
+  selectedFiles: [],
 };

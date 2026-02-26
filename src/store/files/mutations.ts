@@ -43,4 +43,8 @@ export const mutations: MutationTree<FilesStateI> = {
     state.searchResult = payload;
   },
 
+  setSelectedFiles(state: FilesStateI, payload: FileI[]) {
+    state.selectedFiles = payload;
+  },
+
 };
