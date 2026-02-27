@@ -73,19 +73,15 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
         if (item.r2Url) {
           // get file from formdata payload by name
-          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name) as File;
-          console.log('file->', file);
+          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+          console.log('file', file);
           if (file) {
             try {
               const response = await fetch(
                 item.r2Url,
                 {
                   method: 'PUT',
-                  headers: {
-                    'Content-Type': file.type,
-                  },
                   body: file,
-                  credentials: 'omit',
                 },
               );
               console.log('response', response);
@@ -93,9 +89,9 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
                 completedFiles.push(item);
               }
             } catch (error: unknown) {
+              console.error('Error uploading file', error);
               // eslint-disable-next-line no-param-reassign
-              (item as FileI).error = error as string;
-              console.error(error);
+              item.error = error as string || 'Error uploading file';
             }
           }
         }
