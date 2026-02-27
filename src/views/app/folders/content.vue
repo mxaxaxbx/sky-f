@@ -1,5 +1,5 @@
 <template>
-  <div class=" container w-full font-sans">
+  <div class="w-full font-sans">
     <!-- loading -->
     <div v-if="loading" class="flex justify-center items-center py-20">
       <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
@@ -14,7 +14,7 @@
     <div v-else class="w-full">
 
       <!-- folders -->
-      <div v-if="filteredFolderResults.data.length" class="w-full border-b border-[var(--border)] mt-20 py-0 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+      <div v-if="filteredFolderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-0">
         <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]
@@ -153,7 +153,7 @@
       </div>
 
       <!-- files -->
-      <div v-if="filteredFileResults.data.length" class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+      <div v-if="filteredFileResults.data.length" class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-10">
         <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]

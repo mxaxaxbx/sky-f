@@ -150,20 +150,6 @@
           <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
           New folder
         </button>
-
-        <button
-          v-if="selectedFiles.length > 0"
-          type="button"
-          @click="moveToFolderModal = true"
-          class="
-            text-[var(--text-secondary)] text-sm
-            border border-[var(--border)] bg-[var(--bg)]
-            rounded-full
-            px-3
-          "
-        >
-          Move to folder
-        </button>
       </div>
 
       <!--uploap movil-->
@@ -205,7 +191,7 @@
     </div>
   </div>
 
-  <Modal v-model="createFolderModal">
+  <Modal v-model="createFolderModal" size="xs">
     <template #header>
       New folder
     </template>
@@ -216,7 +202,7 @@
           <img
             src="/icon/icon-folder.svg"
             alt="icon"
-            class="h-5 mt-[1px] absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none"
+            class="h-5 mt-[1px] absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none"
           />
           <input
             v-model="folderName"
@@ -266,83 +252,23 @@
       <button
         type="submit"
         form="create-folder-form"
+        :disabled="!folderName || !folderName.trim()"
         class="
           text-[var(--text)] text-sm
-          border border-[var(--color-primary)]
-          bg-[var(--bg)]
+          border
           rounded-full
           px-3
-
-          hover:border-[var(--color-primary)]
-          hover:bg-[var(--color-primary)]
-          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-
-          focus:border-[var(--color-primary)]
-          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-          focus:outline-none
-          transition-all duration-300 ease-in-out
+          transition
         "
+        :class="!folderName || !folderName.trim()
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
       >
         Create
       </button>
     </template>
   </Modal>
 
-  <Modal v-model="moveToFolderModal">
-    <template #header>
-      Move to folder
-    </template>
-
-    <template #content>
-      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-4">
-        <label for="selected-folder"></label>
-        <select
-          v-model="selectedFolder"
-          @change="handleSelectFolder"
-          class="
-            w-full
-            border border-[var(--border)]
-            bg-[var(--bg)]
-            text-sm text-[var(--text)]
-            my-2 pl-2 py-1
-            rounded-full
-          "
-        >
-          <option value="-1" selected disabled>Select a folder</option>
-          <option value="0">Root</option>
-          <option v-for="folder in folderResults.data" :key="folder.id" :value="folder.id">
-            {{ folder.name }}
-          </option>
-        </select>
-      </form>
-    </template>
-
-    <template #footer>
-      <button
-        type="button"
-        @click="moveToFolderModal = false; selectedFolder = null;"
-        class="
-          text-[var(--text-secondary)] text-sm
-          border border-[var(--border)] bg-[var(--bg)]
-          rounded-full
-          px-3
-        ">
-        Cancel
-      </button>
-      <button
-        type="submit"
-        form="move-to-folder-form"
-        class="
-          text-[var(--text)] text-sm
-          border border-[var(--color-primary)]
-          bg-[var(--bg)]
-          rounded-full
-          px-3
-        ">
-        Move
-      </button>
-    </template>
-  </Modal>
 </template>
 
 <script setup lang="ts">
