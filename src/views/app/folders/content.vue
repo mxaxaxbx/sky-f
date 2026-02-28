@@ -11,7 +11,7 @@
     </div>
 
     <!-- content -->
-    <div v-else class="w-full mx-auto px-2 py-4 w-full border border-[var(--border)] rounded-2xl">
+    <div v-else class="w-full mx-auto p-4 w-full border border-[var(--border)] rounded-3xl">
 
       <!-- folders -->
       <div v-if="filteredFolderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
@@ -154,7 +154,7 @@
 
       <!-- files -->
       <div v-if="filteredFileResults.data.length" class="w-full">
-        <h3
+        <!-- <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]
             truncate text-left
@@ -162,13 +162,13 @@
 
             sm:text-lg sm:mb-4 sm:font-semibold
           "
-        >Files</h3>
+        >Files</h3> -->
         <div
           class="
             grid grid-cols-1 gap-2 mx-0
             text-[var(--text)]
 
-            sm:grid-cols-2 sm:gap-4 sm:mx-2
+            sm:grid-cols-2 sm:gap-4 sm:mx-0
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
