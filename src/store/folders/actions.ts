@@ -36,11 +36,14 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     let params = '';
 
     Object.entries(payload).forEach(([key, value]) => {
-      const snakeKey = snakeToCamel(key);
+      const snakeKey = camelToSnake(key);
       params += `${snakeKey}=${value}&`;
     });
 
-    const { data } = await storageClient.get(`/api/folders/list-folders?${params.toString()}`);
+    console.log('params', params);
+
+    const { data } = await storageClient.get(`/api/folders/list-folders?${params}`);
+    console.log('data', data);
     context.commit('setResult', snakeToCamel(data));
   },
 
@@ -52,6 +55,14 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
   ): Promise<void> {
     const { data } = await storageClient.get(`/api/folders/get-folder-details/${payload.folderId}`);
     context.commit('setFolder', snakeToCamel(data));
+  },
+
+  async moveFoldersToFolder(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/folders/move-folders-to-folder', camelToSnake(payload));
+    context.commit('setResult', snakeToCamel(data));
   },
 
 };

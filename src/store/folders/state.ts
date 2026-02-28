@@ -20,6 +20,7 @@ export interface FoldersStateI {
   trashFolder: FolderI;
   folder: FolderI;
   result: FoldersResultI;
+  selectedFolders: FolderI[];
 }
 
 export const state: FoldersStateI = {
@@ -48,4 +49,5 @@ export const state: FoldersStateI = {
     total: 0,
     totalPages: 0,
   },
+  selectedFolders: [],
 };

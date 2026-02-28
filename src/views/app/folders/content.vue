@@ -6,7 +6,7 @@
     </div>
 
     <!-- if not results -->
-    <div v-if="!filteredFileResults.data.length && !filteredFolderResults.data.length" class=" flex justify-center items-center py-20 w-full">
+    <div v-if="!fileResults.data.length && !folderResults.data.length" class=" flex justify-center items-center py-20 w-full">
       <p class="text-[var(--text-terceary)]">No hay contenido en esta carpeta</p>
     </div>
 
@@ -14,7 +14,7 @@
     <div v-else class="w-full mx-auto p-4 w-full border border-[var(--border)] rounded-3xl">
 
       <!-- folders -->
-      <div v-if="filteredFolderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
+      <div v-if="folderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
         <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]
@@ -52,7 +52,7 @@
             "
           >
             <div
-              v-for="folder in filteredFolderResults.data"
+              v-for="folder in folderResults.data"
               :key="folder.id"
               class="
                   group
@@ -153,7 +153,7 @@
       </div>
 
       <!-- files -->
-      <div v-if="filteredFileResults.data.length" class="w-full">
+      <div v-if="fileResults.data.length" class="w-full">
         <!-- <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]
@@ -175,7 +175,7 @@
           "
         >
           <div
-            v-for="file in filteredFileResults.data"
+            v-for="file in fileResults.data"
             :key="file.id"
             class="
                 group
@@ -437,6 +437,7 @@ const route = useRoute();
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+console.log('folderResults', folderResults.value);
 
 const loading = ref(false);
 const copied = ref(false);
@@ -444,25 +445,6 @@ const dropdownPosition = ref('top-8');
 const showFolders = ref(true);
 
 const folderId = computed<number>(() => Number(route.params.id as string));
-
-// Filter results client-side if API doesn't support folderId
-const filteredFileResults = computed(() => {
-  if (!folderId.value) return fileResults.value;
-
-  return {
-    ...fileResults.value,
-    data: fileResults.value.data.filter((file) => file.folderId === Number(folderId.value)),
-  };
-});
-
-const filteredFolderResults = computed(() => {
-  if (!folderId.value) return folderResults.value;
-
-  return {
-    ...folderResults.value,
-    data: folderResults.value.data.filter((folder) => folder.folderId === Number(folderId.value)),
-  };
-});
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';

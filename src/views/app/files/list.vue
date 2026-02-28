@@ -61,26 +61,41 @@
         "
       >
         <div
-          v-for="folder in folderResults.data"
+          v-for="folder, index in folderResults.data"
           :key="folder.id"
+
           @dragover.prevent
           @dragenter="onDragEnter(folder.id)"
           @dragleave="onDragLeave"
           @drop="onDrop(folder)"
+
+          :draggable="true"
+          @dragstart="onDragStart('folder', folder)"
+          @click="selectItem($event, 'folder', folder, index)"
+          @keydown.enter="selectItem($event, 'folder', folder, index)"
+          @keydown.space.prevent="selectItem($event, 'folder', folder, index)"
+          @dblclick="router.push(`/app/folders/${folder.id}`);"
+
           class="
-              group
-              flex items-center justify-between
-              w-full
-              bg-[var(--bg-secondary)]
-              border border-[var(--border)]
-              rounded-2xl min-w-0
-              hover:bg-[var(--hover-bg)]
-              hover:border-[var(--hover-border)]
-              hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
-              transition-all duration-300
-            "
-          >
-          <router-link
+            group
+            flex items-center justify-between
+            w-full
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            rounded-2xl min-w-0
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+            transition-all duration-300
+          "
+          :class="[
+            'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
+            isSelectedFolder(folder) ?
+              'border-[var(--color-primary)] bg-[var(--hover-bg)]' :
+              'border-[var(--border)]'
+          ]"
+        >
+          <div
             :to="`/app/folders/${folder.id}`"
             class="flex-1 min-w-0"
           >
@@ -102,7 +117,7 @@
                 </div>
               </div>
             </div>
-          </router-link>
+          </div>
           <div
             class="
               flex items-center justify-center
@@ -188,6 +203,7 @@
           <i class="fa-solid fa-chevron-down"></i>
         </button>
       </h3>
+      <!-- order by -->
       <button
         v-show="showFiles"
         @click="sortOrder = sortOrder === 'desc' ? 'asc' : 'desc'; getFiles()"
@@ -219,13 +235,14 @@
         <div
           v-for="file, index in fileResults.data"
           :key="file.id"
+
           :draggable="true"
-          @dragstart="onDragStart(file)"
-          @click="selectFile($event, file, index)"
-          @keydown.enter="selectFile($event, file, index)"
-          @keydown.space.prevent="selectFile($event, file, index)"
+          @dragstart="onDragStart('file', file)"
+          @click="selectItem($event, 'file', file, index)"
+          @keydown.enter="selectItem($event, 'file', file, index)"
+          @keydown.space.prevent="selectItem($event, 'file', file, index)"
           @dblclick="router.push(`/app/files/details/${file.id}`);"
-          @longpress="selectFile($event, file, index)"
+
           class="
             group
             flex items-center justify-between
@@ -241,7 +258,7 @@
           "
           :class="[
             'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-            isSelected(file) ?
+            isSelectedFile(file) ?
               'border-[var(--color-primary)] bg-[var(--hover-bg)]' :
               'border-[var(--border)]'
           ]"
@@ -588,7 +605,7 @@ const copied = ref(false);
 const dropdownPosition = ref('top-8');
 const showFolders = ref(true);
 const showFiles = ref(true);
-const draggedFile = ref<FileI | null>(null);
+const draggedItem = ref<FileI | FolderI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const moveToFolderModal = ref(false);
@@ -596,13 +613,10 @@ const moveToFolderModal = ref(false);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
+const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const selectedFolder = ref<number | string | null>(null);
-const isSelected = (file: FileI) => selectedFiles.value.some((f: FileI) => f.id === file.id);
-
-async function handleSelectFolder(ev: Event) {
-  const target = ev.target as HTMLSelectElement;
-  selectedFolder.value = target.value;
-}
 
 async function moveToFolder() {
   if (!selectedFolder.value) {
@@ -678,32 +692,49 @@ const copyLink = async (file: FileI) => {
   }, 2000);
 };
 
-function selectFile(event: KeyboardEvent, file: FileI, index: number) {
+function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
   // CTRL selection
   if (event.ctrlKey) {
-    const exists = selectedFiles.value.find((f: FileI) => f.id === file.id);
-
-    if (exists) {
-      store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== file.id));
-    } else {
-      selectedFiles.value.push(file);
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        selectedFiles.value.push(item as FileI);
+      }
+    } else if (type === 'folder') {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        selectedFolders.value.push(item as FolderI);
+      }
     }
-
     lastSelectedIndex.value = index;
     return;
   }
 
   // Normal click → single selection
-  store.commit('files/setSelectedFiles', [file]);
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+  } else if (type === 'folder') {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+  }
   lastSelectedIndex.value = index;
 }
 
-function onDragStart(file: FileI) {
-  if (!isSelected(file)) {
-    store.commit('files/setSelectedFiles', [file]);
+function onDragStart(type: string, item: FileI | FolderI) {
+  if (type === 'file') {
+    if (!isSelectedFile(item)) {
+      store.commit('files/setSelectedFiles', [item]);
+    }
+  } else if (type === 'folder') {
+    if (!isSelectedFolder(item)) {
+      store.commit('folders/setSelectedFolders', [item]);
+    }
   }
 
-  draggedFile.value = file;
+  draggedItem.value = item;
 }
 
 function onDragEnter(folderId: number | string) {
@@ -733,24 +764,29 @@ async function getFiles() {
 }
 
 async function onDrop(folder: FolderI) {
-  if (selectedFiles.value.length === 0) return;
+  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
 
-  if (!draggedFile.value) return;
+  if (!draggedItem.value) return;
 
   const folderId = folder.id as number;
 
-  const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+  const filesPayload: FileI[] = selectedFiles.value.map((file: FileI) => ({
     ...file,
     folderId,
   }));
 
-  console.log('payload', payload);
-
-  await store.dispatch('files/moveFilesToFolder', payload);
+  await store.dispatch('files/moveFilesToFolder', filesPayload);
 
   store.commit('files/setSelectedFiles', []);
 
-  draggedFile.value = null;
+  const foldersPayload: FolderI[] = selectedFolders.value.map((f: FolderI) => ({
+    ...f,
+    folderId,
+  }));
+
+  await store.dispatch('folders/moveFoldersToFolder', foldersPayload);
+
+  draggedItem.value = null;
   draggedFolder.value = null;
 
   getFiles();

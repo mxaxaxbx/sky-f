@@ -32,4 +32,8 @@ export const mutations: MutationTree<FoldersStateI> = {
     }
   },
 
+  setSelectedFolders(state: FoldersStateI, payload: FolderI[]) {
+    state.selectedFolders = payload;
+  },
+
 };
