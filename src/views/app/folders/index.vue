@@ -43,14 +43,11 @@
         <div
           class="mx-4">
           <div
-            class="
-              grid grid-cols-1
-              gap-3
-              sm:grid-cols-2 sm:gap-2
+            class="flex flex-col items-end
             "
           >
             <!-- Created date -->
-            <div class="px-2 py-2 flex items-end gap-2">
+            <div class="px-2 flex items-center justify-center gap-2">
               <div class="">
                 <h3 class="text-xs font-regular text-[var(--text-terceary)]">
                   Creation date:
@@ -62,14 +59,25 @@
             </div>
 
             <!-- Updated date -->
-            <div class="px-2 py-2 flex items-end gap-2">
-              <div class="">
+            <div class="px-2 flex items-center justify-end gap-2">
+              <div class="flex items-center justify-end">
                 <h3 class="text-xs font-regular text-[var(--text-terceary)]">
                   Last modification:
                 </h3>
               </div>
               <p class="text-xs font-light text-[var(--text)]">
                 {{ moment(folderDetails.updated * 1000).format('DD/MM/YYYY HH:mm a') }}
+              </p>
+            </div>
+
+            <div class="px-2 flex items-center justify-center gap-2">
+              <div class="">
+                <h3 class="text-xs font-regular text-[var(--text-terceary)]">
+                  Size:
+                </h3>
+              </div>
+              <p class="text-xs font-light text-[var(--text)]">
+                {{ formatFileSize(file.size) }}
               </p>
             </div>
           </div>
@@ -92,6 +100,7 @@ import { useRoute } from 'vue-router';
 import moment from 'moment';
 
 import { FolderI } from '@/store/folders/state';
+import { FileI } from '@/store/files/state';
 
 const store = useStore();
 const route = useRoute();
@@ -99,6 +108,17 @@ const loading = ref(false);
 
 const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const folderId = computed<number>(() => Number(route.params.id as string));
+const file = computed<FileI>(() => store.state.files.file);
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
+}
 
 async function getFolderDetails() {
   loading.value = true;

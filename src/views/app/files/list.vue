@@ -140,8 +140,8 @@
                 </template>
 
                 <template #content="{ }">
-                  <div class="flex flex-col gap-0.5 px-1 py-1 font-light text-sm text-[#868686]">
-                    <router-link
+                  <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                    <!-- <router-link
                       :to="`/app/folders/details/${folder.id}`"
                       class="
                         flex items-center justify-start
@@ -152,8 +152,24 @@
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3" />
+                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-3" />
                       <span>info</span>
+                    </router-link> -->
+
+                    <!-- rename-folders -->
+                    <router-link
+                      :to="``"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4"/>
+                      <span>Rename</span>
                     </router-link>
                   </div>
                 </template>
@@ -415,6 +431,22 @@
                     >
                       <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4"/>
                       <span>Preview</span>
+                    </router-link>
+
+                    <!-- rename -->
+                    <router-link
+                      :to="``"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4"/>
+                      <span>Rename</span>
                     </router-link>
 
                     <!--move to folder-->
