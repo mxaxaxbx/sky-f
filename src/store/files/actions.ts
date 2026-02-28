@@ -35,15 +35,13 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
   ): Promise<void> {
-    // Clear previous upload files and reset progress
-    context.commit('clearUploadFiles');
-
     try {
       // get the files from the payload
       const files = payload.getAll('file');
 
       files.forEach((file: FormDataEntryValue) => {
         const fileObj = file as File;
+        console.log('fileObj', fileObj);
         context.state.uploadFiles.push({
           id: 0,
           name: fileObj.name,
@@ -54,9 +52,9 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           r2Url: '',
           uploadCompleted: false,
           error: '',
-          folderId: null,
           created: 0,
           updated: 0,
+          folderId: null,
         });
       });
 
@@ -67,31 +65,29 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       const completedFiles: FileI[] = [];
 
       dataArray.forEach(async (item: FileI) => {
-        if (item.id === 0) {
-          throw new Error('File not found');
-        }
-
         if (item.r2Url) {
           // get file from formdata payload by name
-          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
+          const file = payload.getAll('file')
+            .find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
           console.log('file', file);
           if (file) {
             try {
-              const response = await fetch(
-                item.r2Url,
-                {
-                  method: 'PUT',
-                  body: file,
-                },
-              );
+              const headers = new Headers();
+              headers.set('Content-Type', (file as File).type || 'application/octet-stream');
+              const response = await fetch(item.r2Url, {
+                method: 'PUT',
+                body: file,
+                redirect: 'follow',
+                headers,
+              });
               console.log('response', response);
               if (response.ok) {
                 completedFiles.push(item);
               }
             } catch (error: unknown) {
-              console.error('Error uploading file', error);
               // eslint-disable-next-line no-param-reassign
-              item.error = error as string || 'Error uploading file';
+              (item as FileI).error = error as string;
+              console.error(error);
             }
           }
         }
@@ -106,7 +102,6 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       });
     } finally {
       // Always clear upload files and reset progress after upload completes or fails
-      context.commit('clearUploadFiles');
     }
   },
 

@@ -60,9 +60,9 @@ const snakeToCamel = (value: any): any => {
     return normalized.map(snakeToCamel);
   }
 
-  if (typeof normalized === 'string') {
-    return normalized.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-  }
+  // if (typeof normalized === 'string') {
+  //   return normalized.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+  // }
 
   if (normalized && typeof normalized === 'object') {
     const obj: any = {};

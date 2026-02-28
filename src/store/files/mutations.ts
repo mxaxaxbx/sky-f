@@ -10,7 +10,6 @@ import {
 export const mutations: MutationTree<FilesStateI> = {
 
   setResult(state: FilesStateI, payload: FilesResultI) {
-    console.log('payload', payload);
     state.result.page = payload.page;
     state.result.perPage = payload.perPage;
     state.result.totalPages = payload.totalPages;
@@ -32,11 +31,6 @@ export const mutations: MutationTree<FilesStateI> = {
 
   setFile(state: FilesStateI, payload: FileI) {
     state.file = payload;
-  },
-
-  clearUploadFiles(state: FilesStateI) {
-    state.uploadFiles = [];
-    state.uploadProgress = 0;
   },
 
   setSearchResult(state: FilesStateI, payload: SearchResultI) {

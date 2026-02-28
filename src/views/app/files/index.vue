@@ -91,6 +91,16 @@
         </h1>
       </div>
 
+      <label for="fileInputBtn"></label>
+      <input
+        id="fileInputBtn"
+        type="file"
+        class=""
+        ref="fileInputBtn"
+        @change="uploadFile"
+        :multiple="true"
+      />
+
       <!-- actions desktop-->
       <div class="flex items-center w-full gap-2 px-8">
         <label
@@ -113,15 +123,6 @@
         >
           <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
           <span>Upload</span>
-
-          <input
-            id="fileInputBtn2"
-            type="file"
-            class="hidden"
-            ref="fileInputBtn2"
-            @change="uploadFile"
-            :multiple="true"
-          />
         </label>
 
         <button
@@ -188,15 +189,6 @@
           "
         >
           <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
-
-          <input
-            id="fileInputBtn"
-            type="file"
-            class="hidden"
-            ref="fileInputBtn"
-            @change="uploadFile"
-            :multiple="true"
-          />
         </label>
       </Transition>
 
@@ -348,7 +340,6 @@
 <script setup lang="ts">
 import {
   ref,
-  watch,
   defineAsyncComponent,
   computed,
   onMounted,
@@ -370,15 +361,12 @@ let searchTimeout: number | undefined;
 
 const query = ref<string>('');
 const loading = ref(false);
-const uploading = ref(false);
-const file = ref<File | null>(null);
-const uploadQueue = ref<File[]>([]);
-const fileInputBtn = ref<HTMLInputElement | null>(null);
-const fileInputBtn2 = ref<HTMLInputElement | null>(null);
+
 const showFab = ref(true); // Show FAB on mobile
 const createFolderModal = ref(false);
 const folderName = ref('');
 const moveToFolderModal = ref(false);
+const fileInputBtn = ref<HTMLInputElement | null>(null);
 
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
@@ -450,18 +438,16 @@ async function uploadFile(ev: Event): Promise<void> {
 
   // Convert FileList to array
   const filesArray = Array.from(target.files);
-  uploadQueue.value = filesArray;
-  uploading.value = true;
-  // Show first file name for display purposes
-  [file.value] = filesArray;
+
+  const formData = new FormData();
+  // Append all files to FormData (most backends accept multiple files with same field name)
+  filesArray.forEach((fileItem) => {
+    formData.append('file', fileItem);
+  });
+
+  console.log('formData', formData);
 
   try {
-    const formData = new FormData();
-    // Append all files to FormData (most backends accept multiple files with same field name)
-    filesArray.forEach((fileItem) => {
-      formData.append('file', fileItem);
-    });
-
     await store.dispatch('files/upload', formData);
   } catch (error: unknown) {
     console.error(error);
@@ -472,17 +458,10 @@ async function uploadFile(ev: Event): Promise<void> {
       message: msg,
     });
   } finally {
-    // Clean both file inputs
+    // Clear selected files
     if (fileInputBtn.value) {
       fileInputBtn.value.value = '';
     }
-    if (fileInputBtn2.value) {
-      fileInputBtn2.value.value = '';
-    }
-    // Reset state
-    file.value = null;
-    uploadQueue.value = [];
-    uploading.value = false;
   }
 }
 
@@ -563,17 +542,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   scrollTarget.removeEventListener('scroll', handleScroll);
 });
-
-// Reset progress when individual file upload completes
-watch(
-  () => progress.value,
-  (newProgress) => {
-    if (newProgress === 1 && uploading.value && file.value) {
-      // Progress is handled in uploadFile function for multiple files
-      // This watch is kept for single file compatibility
-    }
-  },
-);
 
 </script>
 
