@@ -11,11 +11,11 @@
         mx-auto
         flex flex-col items-start
         pt-0 px-0 w-full
-        sm:pt-10
+        sm:pt-16
       "
     >
       <!-- folder details -->
-      <div v-if="folderDetails && folderDetails.id" class="mx-auto border-b border-[var(--border)] w-full py-2 px-8 flex justify-between">
+      <div v-if="folderDetails && folderDetails.id" class="mx-auto w-full pb-2 px-8 flex justify-between">
         <div class="flex items-center gap-1">
           <!-- Back button -->
           <button

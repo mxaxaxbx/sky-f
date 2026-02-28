@@ -1,20 +1,20 @@
 <template>
-  <div class="w-full font-sans">
+  <div class="w-full font-sans flex items-center px-8">
     <!-- loading -->
     <div v-if="loading" class="flex justify-center items-center py-20">
       <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
     </div>
 
     <!-- if not results -->
-    <div v-if="!filteredFileResults.data.length && !filteredFolderResults.data.length" class="flex justify-center items-center py-20">
+    <div v-if="!filteredFileResults.data.length && !filteredFolderResults.data.length" class=" flex justify-center items-center py-20 w-full">
       <p class="text-[var(--text-terceary)]">No hay contenido en esta carpeta</p>
     </div>
 
     <!-- content -->
-    <div v-else class="w-full">
+    <div v-else class="w-full mx-auto px-2 py-4 w-full border border-[var(--border)] rounded-2xl">
 
       <!-- folders -->
-      <div v-if="filteredFolderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-0">
+      <div v-if="filteredFolderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
         <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]
@@ -153,7 +153,7 @@
       </div>
 
       <!-- files -->
-      <div v-if="filteredFileResults.data.length" class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-10">
+      <div v-if="filteredFileResults.data.length" class="w-full">
         <h3
           class="
             font-regular text-sm text-[var(--text-terceary)]
@@ -168,7 +168,7 @@
             grid grid-cols-1 gap-2 mx-0
             text-[var(--text)]
 
-            sm:grid-cols-2 sm:gap-4 sm:mx-4
+            sm:grid-cols-2 sm:gap-4 sm:mx-2
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
