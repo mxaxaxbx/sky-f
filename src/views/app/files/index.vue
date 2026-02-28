@@ -95,7 +95,7 @@
       <input
         id="fileInputBtn"
         type="file"
-        class=""
+        class="hidden"
         ref="fileInputBtn"
         @change="uploadFile"
         :multiple="true"

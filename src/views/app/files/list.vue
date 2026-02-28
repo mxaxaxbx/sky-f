@@ -5,7 +5,11 @@
       mx-2 my-2 px-12 font-alexandria
 
       sm:mt-6
-      hidden sm:block">Could Drive</h1>
+      hidden sm:block
+    "
+  >
+    Could Drive
+  </h1>
 
   <!-- loading -->
   <div v-if="loading" class="flex justify-center items-center">
@@ -415,9 +419,8 @@
 
                     <!--move to folder-->
                     <button
-                      v-if="selectedFiles.length > 0"
                       type="button"
-                      @click="moveToFolderModal = true"
+                      @click="selectFile($event, file, index); moveToFolderModal = true;"
                       class="
                         flex items-center justify-start
                         rounded-xl px-2 py-1 border border-transparent
@@ -430,82 +433,6 @@
                       <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4"/>
                       <span>Move to folder</span>
                     </button>
-
-                    <Modal v-model="moveToFolderModal" size="xl">
-                      <template #header>
-                        <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
-                        <h3 class="text-lg font-light">Move:
-                        <span class="text-lg font-light">"{{ file.name }}"</span>
-                        </h3>
-                        <!-- </div> -->
-                      </template>
-
-                      <template #content>
-                        <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
-                          <div
-                            class="
-                              grid grid-cols-2 md:grid-cols-3 gap-2
-                              ">
-
-                          <button
-                            v-for="folder in folderResults.data"
-                            :key="folder.id"
-                            type="button"
-                            @click="selectedFolder = folder.id"
-                            class="
-                              flex items-center justify-start
-                              px-2 py-0.5 gap-1.5
-                              rounded-xl
-                              border border-transparent
-                              text-[var(--text-terceary)]
-                              hover:bg-[var(--hover-bg)]
-                              hover:border-[var(--color-primary)]
-                              hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
-                              hover:text-[var(--text)]
-                              transition
-                            "
-                            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
-                          >
-                            <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
-                            <span class="text-sm text-left truncate w-full">
-                              {{ folder.name }}
-                            </span>
-                          </button>
-
-                          </div>
-                        </form>
-                      </template>
-
-                      <template #footer>
-                        <button
-                          type="button"
-                          @click="moveToFolderModal = false; selectedFolder = null;"
-                          class="
-                            text-[var(--text-secondary)] text-sm
-                            border border-[var(--border)] bg-[var(--bg)]
-                            rounded-full
-                            px-3
-                          ">
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          form="move-to-folder-form"
-                          class="
-                            text-[var(--text)] text-sm
-                            border
-                            rounded-full
-                            px-3
-                            transition
-                          "
-                          :class="!selectedFolder
-                            ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-                            : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
-                        >
-                          Move
-                        </button>
-                      </template>
-                    </Modal>
 
                     <!--share link-->
                     <button
@@ -552,6 +479,85 @@
       </div>
     </Transition>
   </div>
+
+  <Modal v-model="moveToFolderModal" size="xl">
+    <template #header>
+      <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
+      <h3 class="text-lg font-light">Move:
+      <!-- <span class="text-lg font-light">"{{ file.name }}"</span> -->
+      </h3>
+      <!-- </div> -->
+    </template>
+
+    <template #content>
+      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
+        <div
+          class="
+            grid grid-cols-2 md:grid-cols-3 gap-2
+            ">
+
+        <button
+          v-for="folder in folderResults.data"
+          :key="folder.id"
+          type="button"
+          @click="selectedFolder = folder.id"
+          class="
+            flex items-center justify-start
+            px-2 py-0.5 gap-1.5
+            rounded-xl
+            border border-transparent
+            text-[var(--text-terceary)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--color-primary)]
+            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
+            hover:text-[var(--text)]
+            transition
+          "
+          :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
+        >
+          <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+          <span class="text-sm text-left truncate w-full">
+            {{ folder.name }}
+          </span>
+        </button>
+
+        </div>
+      </form>
+    </template>
+
+    <template #footer>
+      <!-- cancel button -->
+      <button
+        type="button"
+        @click="moveToFolderModal = false; selectedFolder = null;"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+        ">
+        Cancel
+      </button>
+
+      <!-- move button -->
+      <button
+        type="submit"
+        form="move-to-folder-form"
+        class="
+          text-[var(--text)] text-sm
+          border
+          rounded-full
+          px-3
+          transition
+        "
+        :class="!selectedFolder
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+      >
+        Move
+      </button>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -605,7 +611,12 @@ async function moveToFolder() {
 
   try {
     loading.value = true;
-    await store.dispatch('files/moveFilesToFolder', selectedFiles.value);
+    const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+      ...file,
+      folderId: selectedFolder.value,
+    }));
+
+    await store.dispatch('files/moveFilesToFolder', payload);
     moveToFolderModal.value = false;
     selectedFolder.value = null;
 
