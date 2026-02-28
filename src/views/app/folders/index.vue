@@ -10,12 +10,12 @@
       class="
         mx-auto
         flex flex-col items-start
-        pt-0 px-0 w-full
+        pt-12 px-0 w-full
         sm:pt-16
       "
     >
       <!-- folder details -->
-      <div v-if="folderDetails && folderDetails.id" class="mx-auto w-full pb-2 px-8 flex justify-between">
+      <div v-if="folderDetails && folderDetails.id" class="mx-auto w-full pb-2 px-2 sm:px-8 flex justify-between">
         <div class="flex items-center gap-1">
           <!-- Back button -->
           <button
@@ -24,24 +24,24 @@
               flex items-center gap-2
               px-2
               grayscale
-              text-[var(--text-terceary)] font-semibold text-xl
+              text-[var(--text-terceary)] font-semibold sm:text-xl text-sm
               hover:text-[var(--text)] hover:grayscale-0
               transition-colors duration-200
             "
           >
-            <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
+            <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
             Could Drive
           </button>
           <span class="text-[var(--text-terceary)]">></span>
           <div class="flex items-center gap-2 px-2">
-            <img src="/icon/icon-folder.svg" alt="folder" class="h-6 w-6"/>
-            <h2 class="text-xl sm:text-xl font-regular text-[var(--text)]">
+            <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
+            <h2 class="text-sm sm:text-xl font-regular text-[var(--text)]">
               {{ folderDetails.name }}
             </h2>
           </div>
         </div>
         <div
-          class="mx-4">
+          class="mx-4 hidden sm:inline">
           <div
             class="flex flex-col items-end
             "
@@ -49,36 +49,29 @@
             <!-- Created date -->
             <div class="px-2 flex items-center justify-center gap-2">
               <div class="">
-                <h3 class="text-xs font-regular text-[var(--text-terceary)]">
+                <h3 class="text-[0.7rem] font-regular text-[var(--text-terceary)]">
                   Creation date:
                 </h3>
               </div>
               <p class="text-xs font-light text-[var(--text)]">
-                {{ moment(folderDetails.created * 1000).format('DD/MM/YYYY HH:mm a') }}
+                {{ moment(folderDetails.created * 1000).format('DD/MM/YYYY') }}
               </p>
             </div>
 
             <!-- Updated date -->
             <div class="px-2 flex items-center justify-end gap-2">
               <div class="flex items-center justify-end">
-                <h3 class="text-xs font-regular text-[var(--text-terceary)]">
+                <h3 class="text-[0.7rem] font-regular text-[var(--text-terceary)]">
                   Last modification:
                 </h3>
               </div>
               <p class="text-xs font-light text-[var(--text)]">
-                {{ moment(folderDetails.updated * 1000).format('DD/MM/YYYY HH:mm a') }}
-              </p>
-            </div>
-
-            <div class="px-2 flex items-center justify-center gap-2">
-              <div class="">
-                <h3 class="text-xs font-regular text-[var(--text-terceary)]">
-                  Size:
-                </h3>
-              </div>
-              <p class="text-xs font-light text-[var(--text)]">
-                {{ formatFileSize(file.size) }}
-              </p>
+  {{
+    folderDetails?.updated
+      ? moment(folderDetails.updated * 1000).format('DD/MM/YYYY')
+      : '-'
+  }}
+</p>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class=" container w-full font-sans">
+  <div class=" container w-full pt-4 px-4 sm:px-8 mx-auto font-sans">
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <i class="fas fa-spinner fa-spin text-4xl text-[var(--color-primary)]"></i>
@@ -123,28 +123,48 @@
           <!-- File name and actions -->
           <div class="flex-1 min-w-0">
             <div class="flex items-start gap-2">
-              <button class="order-2 peer shrink-0 w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer">
+              <button
+                class="order-2 shrink-0 w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer"
+                @click="startEditing(file)"
+              >
                 <img
                   src="/icon/icon-edit.svg"
                   alt="edit"
-                  class="peer opacity-50 hover:opacity-100 cursor-pointer"
+                  class="opacity-50 hover:opacity-100 cursor-pointer"
                 />
               </button>
 
+              <!-- MODO NORMAL -->
               <h1
+                v-if="editingFileId !== file.id"
                 class="
-                order-1
+                  order-1
                   text-xl sm:text-2xl font-semibold
                   text-[var(--text)]
                   mb-2
                   break-words
-                  peer-hover:underline
-                  peer-hover:decoration-1
-                  underline-offset-4
                 "
               >
                 {{ file.name }}
               </h1>
+
+              <!-- MODO EDICIÓN -->
+              <input
+                v-else
+                v-model="editedName"
+                @keyup.enter="saveFileName(file)"
+                @blur="saveFileName(file)"
+                class="
+                  order-1
+                  text-xl sm:text-2xl font-semibold
+                  text-[var(--text)]
+                  bg-transparent
+                  border-b border-[var(--color-primary)]
+                  outline-none
+                  mb-2
+                  w-full
+                "
+              />
             </div>
             <div class="flex flex-wrap items-center gap-2 mt-2">
 
@@ -424,4 +444,27 @@ async function getFileDetails() {
 onMounted(() => {
   getFileDetails();
 });
+
+const editingFileId = ref<number | null>(null);
+const editedName = ref('');
+
+function startEditing(currentFile: FileI) {
+  editingFileId.value = currentFile.id;
+  editedName.value = currentFile.name;
+}
+
+async function saveFileName(currentFile: FileI) {
+  if (!editedName.value.trim()) return;
+  try {
+    await store.dispatch('files/editFile', {
+      id: currentFile.id,
+      name: editedName.value.trim(),
+    });
+    await store.dispatch('files/getFileDetails', currentFile.id);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    editingFileId.value = null;
+  }
+}
 </script>
