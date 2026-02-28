@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full font-sans flex items-center px-8">
+  <div class="w-full font-sans flex items-center px-2 sm:px-8">
     <!-- loading -->
     <div v-if="loading" class="flex justify-center items-center py-20">
       <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
@@ -11,7 +11,7 @@
     </div>
 
     <!-- content -->
-    <div v-else class="w-full mx-auto p-4 w-full border border-[var(--border)] rounded-3xl">
+    <div v-else class="w-full mx-auto p-2 sm:p-4 w-full border border-[var(--border)] rounded-3xl">
 
       <!-- folders -->
       <div v-if="folderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
