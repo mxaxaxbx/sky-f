@@ -14,29 +14,36 @@
           relative
           bg-[var(--bg-secondary)]
           border border-[var(--border)]
-          w-full max-w-sm
+          w-full
           transform
           overflow-hidden
           rounded-2xl
-          px-6 py-4
+          py-4
           text-left
           shadow-xl
         "
+        :class="{
+          'max-w-xs': size === 'xs',
+          'max-w-sm': size === 'sm',
+          'max-w-md': size === 'md',
+          'max-w-lg': size === 'lg',
+          'max-w-xl': size === 'xl',
+        }"
       >
         <!-- Header -->
-        <div class="mb-4">
+        <div class="mb-4 border-b border-[var(--border)] px-6 pb-2">
           <h3 class="text-md font-medium leading-6 text-white">
             <slot name="header">Modal Title</slot>
           </h3>
         </div>
 
         <!-- Content -->
-        <div class="mt-2 text-[#7f7f7f] text-sm">
+        <div class="mt-2 text-[#7f7f7f] text-sm px-4">
           <slot name="content">Default content goes here</slot>
         </div>
 
         <!-- Footer -->
-        <div class="mt-4 flex justify-end space-x-2">
+        <div class="mt-6 flex justify-end space-x-2 px-6">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"
@@ -64,12 +71,12 @@
 import { defineProps, defineEmits } from 'vue';
 
 defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true,
+  modelValue: Boolean,
+  size: {
+    type: String,
+    default: 'lg', // sm | md | lg
   },
 });
-
 defineEmits(['update:modelValue']);
 
 </script>
