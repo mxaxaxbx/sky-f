@@ -66,4 +66,15 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     context.commit('setResult', snakeToCamel(data));
   },
 
+  async changeFolderName(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: {
+      id: number | string,
+      name: string,
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.put('/api/folders/change-folder-name', camelToSnake(payload));
+    console.log('data', data);
+  },
+
 };
