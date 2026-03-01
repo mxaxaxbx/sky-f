@@ -111,9 +111,22 @@
 
                 <!-- title and date -->
                 <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-xs sm:text-sm truncate text-left">
-                    {{ folder.name }}
-                  </h3>
+                  <div>
+                    <input
+                      v-if="editingFolderId === folder.id"
+                      v-model="editedFolderName"
+                      @keyup.enter="saveFolderName(folder)"
+                      @blur="editingFolderId = null"
+                      class="bg-transparent border-b border-[var(--color-primary)] outline-none text-xs sm:text-sm w-full"
+                    />
+
+                    <h3
+                      v-else
+                      class="font-semibold text-xs sm:text-sm truncate text-left"
+                    >
+                      {{ folder.name }}
+                    </h3>
+                  </div>
                 </div>
               </div>
             </div>
@@ -156,36 +169,19 @@
 
                 <template #content="{ }">
                   <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
-                    <!-- <router-link
-                      :to="`/app/folders/details/${folder.id}`"
-                      class="
-                        flex items-center justify-start
+                    <button
+                      type="button"
+                      @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                      class="flex items-center justify-start
                         rounded-xl px-2 py-1 border border-transparent
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-3" />
-                      <span>info</span>
-                    </router-link> -->
-
-                    <!-- rename-folders -->
-                    <router-link
-                      :to="``"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
+                        transition-colors duration-300"
                     >
                       <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4"/>
                       <span>Rename</span>
-                    </router-link>
+                    </button>
                   </div>
                 </template>
               </Dropdown>
@@ -367,9 +363,23 @@
                   />
                   <!-- title and date -->
                   <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
-                      {{ file.name }}
-                    </h3>
+                    <div>
+                      <input
+                        v-if="editingFileId === file.id"
+                        v-model="editedFileName"
+                        :data-file-id="file.id"
+                        @keyup.enter="saveFileName(file)"
+                        @blur="editingFileId = null"
+                        class="bg-transparent border-b border-[var(--color-primary)] outline-none text-xs sm:text-sm w-full"
+                      />
+
+                      <h3
+                        v-else
+                        class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left"
+                      >
+                        {{ file.name }}
+                      </h3>
+                    </div>
                     <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
                       {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
                     </p>
@@ -451,20 +461,21 @@
                     </router-link>
 
                     <!-- rename -->
-                    <router-link
-                      :to="``"
+                    <button
+                      type="button"
+                      @click="() => { startEditingFile(file); closeDropdown(); }"
                       class="
                         flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                        rounded-xl px-2 py-1
+                        border border-transparent
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
+                        transition-colors duration-300"
                     >
                       <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4"/>
                       <span>Rename</span>
-                    </router-link>
+                    </button>
 
                     <!--move to folder-->
                     <button
@@ -641,6 +652,7 @@ const draggedItem = ref<FileI | FolderI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const moveToFolderModal = ref(false);
+const activeDropdownToggle = ref<(() => void) | null>(null);
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -697,20 +709,24 @@ function formatFileSize(bytes: number): string {
 }
 
 // toggle dropdown position based on click position
-const toggleDropdown = async (toggle: () => void) => {
+const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
+  if (event) event.stopPropagation();
+
+  activeDropdownToggle.value = toggle;
+
   toggle();
 
   await nextTick();
 
   const middle = window.innerHeight / 2;
-  const y = window.event?.clientY || 0;
+  const y = event?.clientY || 0;
 
-  if (y > middle) {
-    dropdownPosition.value = 'bottom-8';
-  } else {
-    dropdownPosition.value = 'top-8';
-  }
+  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
+
+function closeDropdown() {
+  activeDropdownToggle.value?.();
+}
 
 // copy link to clipboard
 const copyLink = async (file: FileI) => {
@@ -827,6 +843,49 @@ async function onDrop(folder: FolderI) {
 
 async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
+}
+// rename file
+const editingFileId = ref<number | null>(null);
+const editedFileName = ref('');
+
+async function startEditingFile(currentFile: FileI) {
+  editingFileId.value = currentFile.id;
+  editedFileName.value = currentFile.name;
+
+  await nextTick();
+
+  const input = document.querySelector(
+    `input[data-file-id="${currentFile.id}"]`,
+  ) as HTMLInputElement | null;
+
+  input?.focus();
+  input?.select();
+}
+
+// rename folder
+const editingFolderId = ref<number | null>(null);
+const editedFolderName = ref('');
+
+function startEditingFolder(folder: FolderI) {
+  editingFolderId.value = folder.id;
+  editedFolderName.value = folder.name;
+}
+
+async function saveFolderName(folder: FolderI) {
+  if (!editedFolderName.value.trim()) return;
+
+  try {
+    await store.dispatch('folders/updateFolder', {
+      id: folder.id,
+      name: editedFolderName.value.trim(),
+    });
+
+    await store.dispatch('folders/getFolderDetails', folder.id);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    editingFolderId.value = null;
+  }
 }
 
 onMounted(() => {
