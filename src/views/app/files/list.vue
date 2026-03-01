@@ -811,10 +811,14 @@ async function onDrop(folder: FolderI) {
 
   store.commit('files/setSelectedFiles', []);
 
-  const foldersPayload: FolderI[] = selectedFolders.value.map((f: FolderI) => ({
-    ...f,
-    folderId,
-  }));
+  const foldersPayload: FolderI[] = selectedFolders.value
+    .filter((f: FolderI) => f.id !== folderId)
+    .map((f: FolderI) => ({
+      ...f,
+      folderId,
+    }));
+
+  console.log('foldersPayload', foldersPayload);
 
   await store.dispatch('folders/moveFoldersToFolder', foldersPayload);
 
