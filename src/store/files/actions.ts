@@ -242,4 +242,15 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context.commit('setFiles', snakeToCamel(data));
   },
 
+  async changeFileName(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: {
+      id: number | string,
+      name: string,
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.put('/api/files/change-file-name', camelToSnake(payload));
+    console.log('data', data);
+  },
+
 };

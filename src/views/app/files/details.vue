@@ -445,7 +445,7 @@ onMounted(() => {
   getFileDetails();
 });
 
-const editingFileId = ref<number | null>(null);
+const editingFileId = ref<number | string>(0);
 const editedName = ref('');
 
 function startEditing(currentFile: FileI) {
@@ -456,7 +456,7 @@ function startEditing(currentFile: FileI) {
 async function saveFileName(currentFile: FileI) {
   if (!editedName.value.trim()) return;
   try {
-    await store.dispatch('files/editFile', {
+    await store.dispatch('files/changeFileName', {
       id: currentFile.id,
       name: editedName.value.trim(),
     });
@@ -464,7 +464,7 @@ async function saveFileName(currentFile: FileI) {
   } catch (error) {
     console.error(error);
   } finally {
-    editingFileId.value = null;
+    editingFileId.value = 0;
   }
 }
 </script>
