@@ -35,9 +35,10 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     // convert the payload to url query params
     let params = '';
 
-    Object.entries(payload).forEach(([key, value]) => {
-      const snakeKey = camelToSnake(key);
-      params += `${snakeKey}=${value}&`;
+    const payloadData = camelToSnake(payload);
+
+    Object.entries(payloadData).forEach(([key, value]) => {
+      params += `${key}=${value}&`;
     });
 
     console.log('params', params);

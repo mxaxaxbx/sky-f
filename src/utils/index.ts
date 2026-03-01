@@ -1,9 +1,9 @@
 import { toRaw } from 'vue';
 
 const camelToSnake = (value: any): any => {
-  if (typeof value === 'string') {
-    return value.replace(/([A-Z])/g, '_$1').toLowerCase();
-  }
+  // if (typeof value === 'string') {
+  //   return value.replace(/([A-Z])/g, '_$1').toLowerCase();
+  // }
 
   if (Array.isArray(value)) {
     return value.map(camelToSnake);
