@@ -125,7 +125,7 @@
             <div class="flex items-start gap-2">
               <button
                 class="order-2 shrink-0 w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer"
-                @click="startEditing(file)"
+                @click="startEditingFile(file)"
               >
                 <img
                   src="/icon/icon-edit.svg"
@@ -151,7 +151,8 @@
               <!-- MODO EDICIÓN -->
               <input
                 v-else
-                v-model="editedName"
+                :data-file-id="file.id"
+                v-model="editedFileName"
                 @keyup.enter="saveFileName(file)"
                 @blur="saveFileName(file)"
                 class="
@@ -367,7 +368,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import {
+  computed,
+  onMounted,
+  nextTick,
+  ref,
+} from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import moment from 'moment';
@@ -445,26 +451,50 @@ onMounted(() => {
   getFileDetails();
 });
 
-const editingFileId = ref<number | string>(0);
-const editedName = ref('');
+// rename file
+const editingFileId = ref<number | null>(null);
+const editedFileName = ref('');
 
-function startEditing(currentFile: FileI) {
+async function startEditingFile(currentFile: FileI) {
   editingFileId.value = currentFile.id;
-  editedName.value = currentFile.name;
+
+  // Mostrar nombre completo
+  editedFileName.value = currentFile.name;
+
+  await nextTick();
+
+  const input = document.querySelector(
+    `input[data-file-id="${currentFile.id}"]`,
+  ) as HTMLInputElement | null;
+
+  if (!input) return;
+
+  input.focus();
+
+  const lastDotIndex = currentFile.name.lastIndexOf('.');
+
+  if (lastDotIndex > 0) {
+    input.setSelectionRange(0, lastDotIndex);
+  } else {
+    input.select();
+  }
 }
 
 async function saveFileName(currentFile: FileI) {
-  if (!editedName.value.trim()) return;
+  const finalName = editedFileName.value.trim();
+  if (!finalName) return;
+
   try {
     await store.dispatch('files/changeFileName', {
       id: currentFile.id,
-      name: editedName.value.trim(),
+      name: finalName,
     });
+
     await store.dispatch('files/getFileDetails', currentFile.id);
   } catch (error) {
     console.error(error);
   } finally {
-    editingFileId.value = 0;
+    editingFileId.value = null;
   }
 }
 </script>

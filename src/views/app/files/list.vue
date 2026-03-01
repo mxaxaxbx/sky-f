@@ -861,6 +861,8 @@ const editedFileName = ref('');
 
 async function startEditingFile(currentFile: FileI) {
   editingFileId.value = currentFile.id;
+
+  // Mostrar nombre completo (incluye extensión)
   editedFileName.value = currentFile.name;
 
   await nextTick();
@@ -873,25 +875,24 @@ async function startEditingFile(currentFile: FileI) {
 
   input.focus();
 
-  const fullName = currentFile.name;
-  const lastDotIndex = fullName.lastIndexOf('.');
+  const lastDotIndex = currentFile.name.lastIndexOf('.');
 
   if (lastDotIndex > 0) {
-    // Selecciona solo el nombre sin la extensión
+    // Selecciona solo el nombre, deja visible la extensión
     input.setSelectionRange(0, lastDotIndex);
   } else {
-    // Si no tiene extensión, selecciona todo
     input.select();
   }
 }
 
 async function saveFileName(currentFile: FileI) {
-  if (!editedFileName.value.trim()) return;
+  const finalName = editedFileName.value.trim();
+  if (!finalName) return;
 
   try {
-    await store.dispatch('files/updateFile', {
+    await store.dispatch('files/changeFileName', {
       id: currentFile.id,
-      name: editedFileName.value.trim(),
+      name: finalName,
     });
 
     await store.dispatch('files/filter', {
@@ -929,7 +930,7 @@ async function startEditingFolder(folder: FolderI) {
 async function saveFolderName(folder: FolderI) {
   if (!editedFolderName.value.trim()) return;
   try {
-    await store.dispatch('folders/updateFolder', {
+    await store.dispatch('folders/changeFolderName', {
       id: folder.id,
       name: editedFolderName.value.trim(),
     });
