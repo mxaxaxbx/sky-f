@@ -105,7 +105,7 @@
                   </router-link>
                 </li>
                 <!-- trash folder -->
-                <li v-if="trashFolder.id !== 0">
+                <li>
                   <router-link
                     to="/app/trash"
                     @click="handleNavClick"
@@ -271,7 +271,6 @@ const isLight = computed(() => store.state.theme?.theme === 'light');
 
 // Show sidebar based on state (can be toggled on all screen sizes)
 const showSidebar = computed(() => showSidebarState.value);
-const trashFolder = computed(() => store.state.folders.trashFolder);
 
 function getIcon(path: string, icon: string, activeIcon: string) {
   return route.path.startsWith(path) ? activeIcon : icon;
@@ -322,14 +321,6 @@ function handleEscape(event: KeyboardEvent) {
 if (typeof window !== 'undefined') {
   document.addEventListener('keydown', handleEscape);
 }
-
-async function getTrashFolder() {
-  await store.dispatch('folders/getTrashFolder');
-}
-
-onMounted(() => {
-  getTrashFolder();
-});
 
 // Cleanup event listeners
 onBeforeUnmount(() => {

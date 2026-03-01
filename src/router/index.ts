@@ -106,6 +106,16 @@ const routes: Array<RouteRecordRaw> = [
           },
         ],
       },
+      // trash
+      {
+        path: 'trash',
+        name: 'app-trash',
+        component: () => import('../views/app/trash/index.vue'),
+        meta: {
+          title: 'Papelera',
+          requiresAuth: true,
+        },
+      },
     ],
   },
 ];
