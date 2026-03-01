@@ -116,8 +116,12 @@
                       v-if="editingFolderId === folder.id"
                       v-model="editedFolderName"
                       @keyup.enter="saveFolderName(folder)"
+                      :data-folder-id="folder.id"
                       @blur="editingFolderId = null"
-                      class="bg-transparent border-b border-[var(--color-primary)] outline-none text-xs sm:text-sm w-full"
+                      class="
+                        bg-transparent
+                        border-b border-[var(--color-primary)]
+                        outline-none text-xs sm:text-sm w-full"
                     />
 
                     <h3
@@ -370,7 +374,10 @@
                         :data-file-id="file.id"
                         @keyup.enter="saveFileName(file)"
                         @blur="editingFileId = null"
-                        class="bg-transparent border-b border-[var(--color-primary)] outline-none text-xs sm:text-sm w-full"
+                        class="
+                          bg-transparent
+                          border-b border-[var(--color-primary)]
+                          outline-none text-xs sm:text-sm w-full"
                       />
 
                       <h3
@@ -862,29 +869,75 @@ async function startEditingFile(currentFile: FileI) {
     `input[data-file-id="${currentFile.id}"]`,
   ) as HTMLInputElement | null;
 
-  input?.focus();
-  input?.select();
+  if (!input) return;
+
+  input.focus();
+
+  const fullName = currentFile.name;
+  const lastDotIndex = fullName.lastIndexOf('.');
+
+  if (lastDotIndex > 0) {
+    // Selecciona solo el nombre sin la extensión
+    input.setSelectionRange(0, lastDotIndex);
+  } else {
+    // Si no tiene extensión, selecciona todo
+    input.select();
+  }
+}
+
+async function saveFileName(currentFile: FileI) {
+  if (!editedFileName.value.trim()) return;
+
+  try {
+    await store.dispatch('files/updateFile', {
+      id: currentFile.id,
+      name: editedFileName.value.trim(),
+    });
+
+    await store.dispatch('files/filter', {
+      query: '',
+      page: 1,
+      orderBy: 'created',
+      order: 'desc',
+      folderId: '',
+    });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    editingFileId.value = null;
+  }
 }
 
 // rename folder
 const editingFolderId = ref<number | null>(null);
 const editedFolderName = ref('');
 
-function startEditingFolder(folder: FolderI) {
+async function startEditingFolder(folder: FolderI) {
   editingFolderId.value = folder.id;
   editedFolderName.value = folder.name;
+
+  await nextTick();
+
+  const input = document.querySelector(
+    `input[data-folder-id="${folder.id}"]`,
+  ) as HTMLInputElement | null;
+
+  input?.focus();
+  input?.select();
 }
 
 async function saveFolderName(folder: FolderI) {
   if (!editedFolderName.value.trim()) return;
-
   try {
     await store.dispatch('folders/updateFolder', {
       id: folder.id,
       name: editedFolderName.value.trim(),
     });
-
-    await store.dispatch('folders/getFolderDetails', folder.id);
+    await store.dispatch('folders/filter', {
+      query: '',
+      page: 1,
+      folderId: '',
+    });
   } catch (error) {
     console.error(error);
   } finally {
