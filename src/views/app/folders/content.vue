@@ -129,20 +129,38 @@
 
                     <template #content="{ }">
                       <div class="flex flex-col gap-0.5 px-1 py-1 font-light text-sm text-[#868686]">
-                        <router-link
-                          :to="`/app/folders/details/${folder.id}`"
-                          class="
-                            flex items-center justify-start
+                        <button
+                          type="button"
+                          @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                          class="flex items-center justify-start
                             rounded-xl px-2 py-1 border border-transparent
 
                             hover:bg-[var(--hover-bg)]
                             hover:border-[var(--color-primary)]
+                            transition-colors duration-300"
+                        >
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <span>Rename</span>
+                        </button>
+
+                        <!-- delate folder -->
+                        <button
+                          @click="downloadFile(file)"
+                          class="
+                            flex items-center justify-start
+                            rounded-xl px-2 py-1 border border-transparent
+                            grayscale text-[var(--warning-border)] opacity-50
+
+                            hover:bg-[var(--warning-bg)]
+                            hover:text-[var(--warning-border)]
+                            hover:border-[var(--warning-border)]
+                            hover:grayscale-0 hover:opacity-100
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3" />
-                          <span>info</span>
-                        </router-link>
+                          <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                          <span>Send to the Void</span>
+                        </button>
                       </div>
                     </template>
                   </Dropdown>
@@ -358,7 +376,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_details.svg" alt="download" class="h-4 mr-3"
+                          <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
                           />
                           <span>info</span>
                         </router-link>
@@ -375,10 +393,42 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon-preview.svg" alt="preview" class="h-4 mr-3"
-                          />
+                          <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
                           <span>Preview</span>
                         </router-link>
+
+                        <!-- rename -->
+                        <button
+                          type="button"
+                          @click="() => { startEditingFile(file); closeDropdown(); }"
+                          class="
+                            flex items-center justify-start
+                            rounded-xl px-2 py-1 border border-transparent
+
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300"
+                        >
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <span>Rename</span>
+                        </button>
+
+                        <!--move to folder-->
+                        <button
+                          type="button"
+                          @click="selectFile($event, file, index); moveToFolderModal = true;"
+                          class="
+                            flex items-center justify-start
+                            rounded-xl px-2 py-1 border border-transparent
+
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                          <span>Move to folder</span>
+                        </button>
 
                         <!--share link-->
                         <button
@@ -392,7 +442,7 @@
                             transition-all duration-300
                           "
                         >
-                          <img src="/icon/icon-link.svg" alt="download" class="h-4 mr-3"
+                          <img src="/icon/icon-link.svg" alt="download" class="h-4 mr-3 grayscale"
                           />
                           {{ copied ? 'Copied!' : 'Copy link' }}
                         </button>
@@ -403,7 +453,6 @@
                           class="
                             flex items-center justify-start
                             rounded-xl px-2 py-1 border border-transparent
-                            text-[var(--color-primary)]
                             grayscale
 
                             hover:bg-[var(--hover-bg)]

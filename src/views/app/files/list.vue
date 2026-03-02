@@ -183,8 +183,26 @@
                         hover:border-[var(--color-primary)]
                         transition-colors duration-300"
                     >
-                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4"/>
+                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
                       <span>Rename</span>
+                    </button>
+                    <!-- delate folder -->
+                    <button
+                      @click="downloadFile(file)"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+                        grayscale text-[var(--warning-border)] opacity-50
+
+                        hover:bg-[var(--warning-bg)]
+                        hover:text-[var(--warning-border)]
+                        hover:border-[var(--warning-border)]
+                        hover:grayscale-0 hover:opacity-100
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                      <span>Send to the Void</span>
                     </button>
                   </div>
                 </template>
@@ -446,7 +464,7 @@
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4"
+                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
                       />
                       <span>info</span>
                     </router-link>
@@ -463,7 +481,7 @@
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4"/>
+                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
                       <span>Preview</span>
                     </router-link>
 
@@ -473,14 +491,13 @@
                       @click="() => { startEditingFile(file); closeDropdown(); }"
                       class="
                         flex items-center justify-start
-                        rounded-xl px-2 py-1
-                        border border-transparent
+                        rounded-xl px-2 py-1 border border-transparent
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
                         transition-colors duration-300"
                     >
-                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4"/>
+                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
                       <span>Rename</span>
                     </button>
 
@@ -497,7 +514,7 @@
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4"/>
+                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
                       <span>Move to folder</span>
                     </button>
 
@@ -513,8 +530,7 @@
                         transition-all duration-300
                       "
                     >
-                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
-                      />
+                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
                       {{ copied ? 'Copied!' : 'Copy link' }}
                     </button>
 
@@ -536,6 +552,25 @@
                       <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
                       />
                       <span>Download</span>
+                    </button>
+
+                    <!-- delate file-->
+                    <button
+                      @click="downloadFile(file)"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+                        grayscale text-[var(--warning-border)] opacity-50
+
+                        hover:bg-[var(--warning-bg)]
+                        hover:text-[var(--warning-border)]
+                        hover:border-[var(--warning-border)]
+                        hover:grayscale-0 hover:opacity-100
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                      <span>Send to the Void</span>
                     </button>
                   </div>
                 </template>

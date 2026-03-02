@@ -28,7 +28,7 @@
     --info-border: #009dff;
     --info-bg: #252728;
     --warning-border: #ffa600;
-    --warning-bg: #282825;
+    --warning-bg: #373226;
   }
 
   /* Tema claro */
@@ -56,7 +56,7 @@
   --info-border: #009dff;
   --info-bg: #caedff;
   --warning-border: #ffa600;
-  --warning-bg: #fff4a4;
+  --warning-bg: #fffad2;
 }
 * {
   transition:

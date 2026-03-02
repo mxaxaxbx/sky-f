@@ -124,7 +124,7 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-start gap-2">
               <button
-                class="order-2 shrink-0 w-6 h-6 mt-2 opacity-50 hover:opacity-100 cursor-pointer"
+                class="order-2 shrink-0 w-6 h-6 mt-2 grayscale hover:grayscale-0 cursor-pointer"
                 @click="startEditingFile(file)"
               >
                 <img
@@ -178,9 +178,10 @@
                   border border-[var(--color-primary)]
                   text-[var(--text-terceary)] text-xs font-medium
                   pl-2 pr-2.5 py-0.5
-                  rounded-full
+                  rounded-full grayscale
 
                   hover:bg-[var(--hover-bg)]
+                  hover:grayscale-0
                   hover:text-[var(--text)]
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
@@ -201,10 +202,11 @@
                   text-[var(--text-terceary)] font-medium
                   text-xs
                   pl-2 pr-2.5 py-0.5
-                  rounded-full
+                  rounded-full grayscale
 
                   hover:bg-[var(--hover-bg)]
                   hover:text-[var(--text)]
+                  hover:grayscale-0
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   transition-all duration-300
