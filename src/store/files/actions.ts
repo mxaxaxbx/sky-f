@@ -166,6 +166,21 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     });
   },
 
+  async previewFile(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
+    const { data } = await storageClient.get(
+      `/api/storage/get-download-url/${payload.id}`,
+    );
+    const { url } = data;
+    const linkEl = document.createElement('a');
+    linkEl.href = url;
+    linkEl.target = '_blank';
+    linkEl.click();
+    linkEl.remove();
+  },
+
   async getDownloadUrl(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,

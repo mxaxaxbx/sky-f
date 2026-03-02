@@ -470,8 +470,8 @@
                     </router-link>
 
                     <!-- preview file -->
-                    <router-link
-                      :to="`/app/files/details/${file.id}`"
+                    <button
+                      @click="store.dispatch('files/previewFile', file)"
                       class="
                         flex items-center justify-start
                         rounded-xl px-2 py-1 border border-transparent
@@ -483,7 +483,7 @@
                     >
                       <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
                       <span>Preview</span>
-                    </router-link>
+                    </button>
 
                     <!-- rename -->
                     <button
