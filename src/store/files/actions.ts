@@ -188,40 +188,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
 
-    context.dispatch('generateBlobAndSaveInCache', {
-      url,
-      name: payload.name,
-      download: false,
-    });
-
-    // return url;
-  },
-
-  async generateBlobAndSaveInCache(
-    context: ActionContext<FilesStateI, RootStateI>,
-    payload: {
-      url: string,
-      name: string,
-      download: boolean,
-      userId: number,
-    },
-  ): Promise<void> {
-    const blob = await fetch(payload.url).then((res) => res.blob());
-    const blobUrl = URL.createObjectURL(blob);
-
-    sessionStorage.setItem(`${payload.userId}-${payload.name}`, blobUrl);
-
-    if (payload.download) {
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = payload.name;
-      a.target = '_blank';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      a.remove();
-    }
+    return url;
   },
 
   async getBlobUrl(
