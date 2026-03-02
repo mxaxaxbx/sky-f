@@ -504,7 +504,7 @@
                     <!--move to folder-->
                     <button
                       type="button"
-                      @click="selectFile($event, file, index); moveToFolderModal = true;"
+                      @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
                       class="
                         flex items-center justify-start
                         rounded-xl px-2 py-1 border border-transparent
