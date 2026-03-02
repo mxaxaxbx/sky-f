@@ -196,7 +196,7 @@
                 ">Community
             </h1>
 
-            <a href="https://discord.com/invite/UsGXbTkJSE"
+            <a href="https://discord.gg/n8NHa6sJbc"
               target="_blank"
               class="
                 flex items-center justify-between

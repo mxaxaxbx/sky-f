@@ -138,7 +138,7 @@
                       ">
                       Help Center</a></li>
                   <li><a
-                    href="https://discord.gg/UsGXbTkJSE"
+                    href="https://discord.gg/n8NHa6sJbc"
                     target="_blank"
                     class="
                       opacity-50 hover:opacity-100
