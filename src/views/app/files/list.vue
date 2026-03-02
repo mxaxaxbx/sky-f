@@ -73,7 +73,6 @@
           @dragstart="onDragStart('folder', folder)"
           @click="selectItem($event, 'folder', folder, index)"
           @keydown.enter="selectItem($event, 'folder', folder, index)"
-          @keydown.space.prevent="selectItem($event, 'folder', folder, index)"
           @dblclick="router.push(`/app/folders/${folder.id}`);"
 
           class="
@@ -173,6 +172,8 @@
 
                 <template #content="{ }">
                   <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+
+                    <!--rename folder-->
                     <button
                       type="button"
                       @click="() => { startEditingFolder(folder); closeDropdown(); }"
@@ -186,6 +187,24 @@
                       <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
                       <span>Rename</span>
                     </button>
+
+                    <!--move to folder-->
+                    <button
+                      type="button"
+                      @click="selectFile($event, file, index); moveToFolderModal = true;"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                      <span>Move to folder</span>
+                    </button>
+
                     <!-- delate folder -->
                     <button
                       @click="downloadFile(file)"
@@ -274,7 +293,6 @@
           @dragstart="onDragStart('file', file)"
           @click="selectItem($event, 'file', file, index)"
           @keydown.enter="selectItem($event, 'file', file, index)"
-          @keydown.space.prevent="selectItem($event, 'file', file, index)"
           @dblclick="router.push(`/app/files/details/${file.id}`);"
 
           class="
@@ -937,6 +955,14 @@ async function saveFileName(currentFile: FileI) {
       order: 'desc',
       folderId: '',
     });
+
+    const updatedFile = fileResults.value.data.find(
+      (f: FileI) => f.id === currentFile.id,
+    );
+
+    if (updatedFile) {
+      store.commit('files/setSelectedFiles', [updatedFile]);
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -963,17 +989,30 @@ async function startEditingFolder(folder: FolderI) {
 }
 
 async function saveFolderName(folder: FolderI) {
-  if (!editedFolderName.value.trim()) return;
+  const finalName = editedFolderName.value.trim();
+  if (!finalName) return;
+
   try {
     await store.dispatch('folders/changeFolderName', {
       id: folder.id,
-      name: editedFolderName.value.trim(),
+      name: finalName,
     });
+
     await store.dispatch('folders/filter', {
       query: '',
       page: 1,
       folderId: '',
     });
+
+    await nextTick();
+
+    const updatedFolder = folderResults.value.data.find(
+      (f: FolderI) => f.id === folder.id,
+    );
+
+    if (updatedFolder) {
+      store.commit('folders/setSelectedFolders', [updatedFolder]);
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -991,6 +1030,34 @@ onMounted(() => {
 onUnmounted(() => {
   // TODO: validate pagination
   // window.removeEventListener('scroll', getMoreResults);
+});
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key !== 'F2') return;
+
+  // Si ya está editando algo, no hacer nada
+  if (editingFileId.value || editingFolderId.value) return;
+
+  // Prioridad: archivo seleccionado
+  if (selectedFiles.value.length === 1) {
+    startEditingFile(selectedFiles.value[0]);
+    return;
+  }
+
+  // Si no hay archivo pero hay carpeta
+  if (selectedFolders.value.length === 1) {
+    startEditingFolder(selectedFolders.value[0]);
+  }
+}
+onMounted(() => {
+  getFolders();
+  getFiles();
+
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
 });
 
 </script>
