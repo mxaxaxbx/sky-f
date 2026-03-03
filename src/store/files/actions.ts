@@ -2,6 +2,7 @@ import { ActionTree, ActionContext } from 'vuex';
 
 import { storageClient } from '@/http-client';
 import { snakeToCamel, camelToSnake } from '@/utils';
+import { getDB } from '@/utils/indexeddb';
 
 import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
@@ -106,63 +107,109 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     }
   },
 
-  async download(
-    context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI,
-  ): Promise<void> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No token found');
-    }
-    const DG_STORAGE = process.env.VUE_APP_DG_SKY_SVC;
-    const link = `${DG_STORAGE}/api/storage/getfile/${payload.id}?token=${token}`;
-    const linkel = document.createElement('a');
-    linkel.href = link;
-    linkel.target = '_blank';
-    linkel.click();
-    linkel.remove();
-  },
-
   async getFileDetails(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: string,
   ): Promise<void> {
     const { data } = await storageClient.get(`/api/storage/filedetails/${payload}`);
     context.commit('setFile', snakeToCamel(data));
+    context.dispatch('saveCacheFile', snakeToCamel(data));
   },
 
   async downloadFile(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
-    const blobUrl = await context.dispatch('getBlobUrl', {
-      name: payload.name,
-      userId: payload.userId,
+    const cached = await context.dispatch('getCacheFile', {
+      id: payload.id,
     });
-    console.log('blobUrl', blobUrl);
-    if (blobUrl) {
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = payload.name;
-      a.target = '_blank';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      a.remove();
+
+    if (cached) {
+      console.log('Loaded from cache');
+
+      const link = document.createElement('a');
+      link.href = cached;
+      link.download = payload.name;
+      link.click();
+
       return;
     }
 
+    console.log('Downloading and caching');
+
+    await context.dispatch('saveCacheFile', payload);
+
+    const base64 = await context.dispatch('getCacheFile', {
+      id: payload.id,
+    });
+
+    if (base64) {
+      const link = document.createElement('a');
+      link.href = base64;
+      link.download = payload.name;
+      link.click();
+      return;
+    }
+
+    console.log('Error downloading file');
+  },
+
+  async saveCacheFile(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
     );
+
     const { url } = data;
 
-    await context.dispatch('generateBlobAndSaveInCache', {
-      url,
+    const blob = await fetch(url).then((r) => r.blob());
+
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const db = await getDB();
+
+    const tx = db.transaction('files', 'readwrite');
+    const store = tx.objectStore('files');
+
+    store.put({
+      id: payload.id,
+      base64,
       name: payload.name,
-      download: true,
-      userId: payload.userId,
+      type: payload.contentType,
+    });
+
+    // eslint-disable-next-line no-return-await
+    await new Promise((resolve) => { tx.oncomplete = resolve; });
+  },
+
+  async getCacheFile(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: { id: number | string },
+  ): Promise<string | null> {
+    const db = await getDB();
+
+    const tx = db.transaction('files', 'readonly');
+    const store = tx.objectStore('files');
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(payload.id);
+
+      request.onsuccess = () => {
+        if (request.result) {
+          resolve(request.result.base64);
+        } else {
+          resolve(null);
+        }
+      };
+
+      request.onerror = reject;
     });
   },
 
@@ -179,6 +226,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     linkEl.target = '_blank';
     linkEl.click();
     linkEl.remove();
+    await context.dispatch('saveCacheFile', payload);
   },
 
   async getDownloadUrl(
@@ -188,22 +236,9 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
 
-    return url;
-  },
+    context.dispatch('saveCacheFile', payload);
 
-  async getBlobUrl(
-    context: ActionContext<FilesStateI, RootStateI>,
-    payload: {
-      name: string,
-      userId: number,
-    },
-  ): Promise<string | null> {
-    // check if the blob url is still valid
-    const blobUrl = sessionStorage.getItem(`${payload.userId}-${payload.name}`);
-    if (blobUrl) {
-      return blobUrl;
-    }
-    return null;
+    return url;
   },
 
   async search(
