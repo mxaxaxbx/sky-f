@@ -1,4 +1,10 @@
 <template>
+<div
+class="w-full h-full"
+  @click="handleContainerClick"
+  @keydown.enter="handleContainerClick"
+  @keydown.space.prevent="handleContainerClick"
+  tabindex="0">
   <h1
     class="
       text-xl text-[var(--text)] font-semibold
@@ -68,12 +74,12 @@
           @dragenter="onDragEnter(folder.id)"
           @dragleave="onDragLeave"
           @drop="onDrop(folder)"
+          data-selectable
 
           :draggable="true"
           @dragstart="onDragStart('folder', folder)"
           @click="selectItem($event, 'folder', folder, index)"
           @keydown.enter="selectItem($event, 'folder', folder, index)"
-          @keydown.space.prevent="selectItem($event, 'folder', folder, index)"
           @dblclick="router.push(`/app/folders/${folder.id}`);"
 
           class="
@@ -85,13 +91,12 @@
             rounded-2xl min-w-0
             hover:bg-[var(--hover-bg)]
             hover:border-[var(--hover-border)]
-            hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
             transition-all duration-300
           "
           :class="[
             'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
             isSelectedFolder(folder) ?
-              'border-[var(--color-primary)] bg-[var(--hover-bg)]' :
+              'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]' :
               'border-[var(--border)]'
           ]"
         >
@@ -173,6 +178,8 @@
 
                 <template #content="{ }">
                   <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+
+                    <!--rename folder-->
                     <button
                       type="button"
                       @click="() => { startEditingFolder(folder); closeDropdown(); }"
@@ -186,6 +193,24 @@
                       <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
                       <span>Rename</span>
                     </button>
+
+                    <!--move to folder-->
+                    <button
+                      type="button"
+                      @click="selectFile($event, file, index); moveToFolderModal = true;"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                      <span>Move to folder</span>
+                    </button>
+
                     <!-- delate folder -->
                     <button
                       @click="downloadFile(file)"
@@ -214,7 +239,8 @@
   </div>
 
   <!-- files -->
-  <div class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+  <div
+    class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
     <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
       <h3
         class="
@@ -269,12 +295,12 @@
         <div
           v-for="file, index in fileResults.data"
           :key="file.id"
+          data-selectable
 
           :draggable="true"
           @dragstart="onDragStart('file', file)"
           @click="selectItem($event, 'file', file, index)"
           @keydown.enter="selectItem($event, 'file', file, index)"
-          @keydown.space.prevent="selectItem($event, 'file', file, index)"
           @dblclick="router.push(`/app/files/details/${file.id}`);"
 
           class="
@@ -287,13 +313,12 @@
             cursor-move
             hover:bg-[var(--hover-bg)]
             hover:border-[var(--hover-border)]
-            hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
             transition-colors duration-300
           "
           :class="[
             'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
             isSelectedFile(file) ?
-              'border-[var(--color-primary)] bg-[var(--hover-bg)]' :
+              'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]' :
               'border-[var(--border)]'
           ]"
         >
@@ -615,7 +640,7 @@
             hover:text-[var(--text)]
             transition
           "
-          :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
+          :class="selectedFolder === folder.id ? 'bg-[var(--bg)] border-[var(--color-primary)]' : ''"
         >
           <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
           <span class="text-sm text-left truncate w-full">
@@ -660,6 +685,7 @@
       </button>
     </template>
   </Modal>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -813,6 +839,19 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
   lastSelectedIndex.value = index;
 }
 
+function clearSelection() {
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+  lastSelectedIndex.value = null;
+}
+
+function handleContainerClick(event: MouseEvent | KeyboardEvent) {
+  const target = event.target as HTMLElement;
+  if (target.closest('[data-selectable]')) return;
+
+  clearSelection();
+}
+
 function onDragStart(type: string, item: FileI | FolderI) {
   if (type === 'file') {
     if (!isSelectedFile(item)) {
@@ -937,6 +976,14 @@ async function saveFileName(currentFile: FileI) {
       order: 'desc',
       folderId: '',
     });
+
+    const updatedFile = fileResults.value.data.find(
+      (f: FileI) => f.id === currentFile.id,
+    );
+
+    if (updatedFile) {
+      store.commit('files/setSelectedFiles', [updatedFile]);
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -963,17 +1010,30 @@ async function startEditingFolder(folder: FolderI) {
 }
 
 async function saveFolderName(folder: FolderI) {
-  if (!editedFolderName.value.trim()) return;
+  const finalName = editedFolderName.value.trim();
+  if (!finalName) return;
+
   try {
     await store.dispatch('folders/changeFolderName', {
       id: folder.id,
-      name: editedFolderName.value.trim(),
+      name: finalName,
     });
+
     await store.dispatch('folders/filter', {
       query: '',
       page: 1,
       folderId: '',
     });
+
+    await nextTick();
+
+    const updatedFolder = folderResults.value.data.find(
+      (f: FolderI) => f.id === folder.id,
+    );
+
+    if (updatedFolder) {
+      store.commit('folders/setSelectedFolders', [updatedFolder]);
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -991,6 +1051,34 @@ onMounted(() => {
 onUnmounted(() => {
   // TODO: validate pagination
   // window.removeEventListener('scroll', getMoreResults);
+});
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key !== 'F2') return;
+
+  // Si ya está editando algo, no hacer nada
+  if (editingFileId.value || editingFolderId.value) return;
+
+  // Prioridad: archivo seleccionado
+  if (selectedFiles.value.length === 1) {
+    startEditingFile(selectedFiles.value[0]);
+    return;
+  }
+
+  // Si no hay archivo pero hay carpeta
+  if (selectedFolders.value.length === 1) {
+    startEditingFolder(selectedFolders.value[0]);
+  }
+}
+onMounted(() => {
+  getFolders();
+  getFiles();
+
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
 });
 
 </script>
