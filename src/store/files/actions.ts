@@ -71,7 +71,6 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           // get file from formdata payload by name
           const file = payload.getAll('file')
             .find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
-          console.log('file', file);
           if (file) {
             try {
               const headers = new Headers();
@@ -85,6 +84,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
               console.log('response', response);
               if (response.ok) {
                 completedFiles.push(item);
+                context.dispatch('saveCacheFile', item);
               }
             } catch (error: unknown) {
               // eslint-disable-next-line no-param-reassign
@@ -174,6 +174,8 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     });
 
     const db = await getDB();
+    // Skip if not supported
+    if (!db) return;
 
     const tx = db.transaction('files', 'readwrite');
     const store = tx.objectStore('files');
@@ -194,6 +196,9 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     payload: { id: number | string },
   ): Promise<string | null> {
     const db = await getDB();
+
+    // Skip if not supported
+    if (!db) return null;
 
     const tx = db.transaction('files', 'readonly');
     const store = tx.objectStore('files');

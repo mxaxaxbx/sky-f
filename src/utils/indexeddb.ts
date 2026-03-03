@@ -1,8 +1,16 @@
-let dbPromise: Promise<IDBDatabase> | null = null;
+let dbPromise: Promise<IDBDatabase | null> | null = null;
 
-export function getDB(): Promise<IDBDatabase> {
+export function isIndexedDBSupported(): boolean {
+  return typeof window !== 'undefined' && 'indexedDB' in window;
+}
+
+export function getDB(): Promise<IDBDatabase | null> {
+  if (!isIndexedDBSupported()) {
+    return Promise.resolve(null);
+  }
+
   if (!dbPromise) {
-    dbPromise = new Promise((resolve, reject) => {
+    dbPromise = new Promise((resolve) => {
       const request = indexedDB.open('fileDB', 1);
 
       request.onupgradeneeded = (event: Event) => {
@@ -16,7 +24,8 @@ export function getDB(): Promise<IDBDatabase> {
       };
 
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+
+      request.onerror = () => resolve(null);
     });
   }
 
