@@ -37,6 +37,8 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FormData,
   ): Promise<void> {
+    const completedFiles: FileI[] = [];
+
     try {
       // get the files from the payload
       const files = payload.getAll('file');
@@ -64,8 +66,6 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
       const dataArray: FileI[] = snakeToCamel(data);
 
-      const completedFiles: FileI[] = [];
-
       dataArray.forEach(async (item: FileI) => {
         if (item.r2Url) {
           // get file from formdata payload by name
@@ -84,7 +84,6 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
               console.log('response', response);
               if (response.ok) {
                 completedFiles.push(item);
-                context.dispatch('saveCacheFile', item);
               }
             } catch (error: unknown) {
               // eslint-disable-next-line no-param-reassign
@@ -103,7 +102,9 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
         });
       });
     } finally {
-      // Always clear upload files and reset progress after upload completes or fails
+      completedFiles.forEach((file: FileI) => {
+        context.dispatch('saveCacheFile', file);
+      });
     }
   },
 
