@@ -724,6 +724,8 @@ const moveToFolderModal = ref(false);
 const activeDropdownToggle = ref<(() => void) | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
+const editingFolderId = ref<number | null>(null);
+const editedFolderName = ref('');
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1001,9 +1003,6 @@ async function saveFileName(currentFile: FileI) {
 }
 
 // rename folder
-const editingFolderId = ref<number | null>(null);
-const editedFolderName = ref('');
-
 async function startEditingFolder(folder: FolderI) {
   editingFolderId.value = folder.id;
   editedFolderName.value = folder.name;

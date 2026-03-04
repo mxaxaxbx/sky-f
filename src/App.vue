@@ -278,6 +278,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import router from '@/router';
 
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Notifications = defineAsyncComponent(() => import('@/components/global/notifications.vue'));
@@ -285,18 +286,21 @@ const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue
 
 const store = useStore();
 const route = useRoute();
+let searchTimeout: number | undefined;
 
 const { VUE_APP_DG_USERS_APP } = process.env;
 
+const year = ref(new Date().getUTCFullYear());
+const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
+const query = ref<string>('');
+
 const isHome = computed(() => route.name === 'home');
+const hideBar = computed(() => route.name === 'home' || route.name === 'login' || route.name === 'register');
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const isLight = computed(() => store.state.theme?.theme === 'light');
 const showSidebar = computed(() => isAuth.value && route.name !== 'home');
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const showSidebarMovil = computed(() => showSidebarState.value);
-
-const year = ref(new Date().getUTCFullYear());
-const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 
 const clickOutside = () => {
   if (showSidebar.value) store.commit('toggleSidebar');
@@ -312,6 +316,35 @@ const toggleTheme = () => {
 const toggleSidebar = () => {
   store.commit('toggleSidebar');
 };
+
+async function handleSearch() {
+  const payload = {
+    page: 1,
+    q: query.value,
+  };
+
+  await store.dispatch('files/filter', payload);
+  router.replace({
+    query: {
+      ...payload,
+    },
+  });
+
+  router.push({
+    path: '/app/search',
+    query: {
+      ...payload,
+    },
+  });
+}
+async function handleInput() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    handleSearch();
+  }, 500);
+}
 
 </script>
 
