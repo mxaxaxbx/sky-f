@@ -242,9 +242,9 @@
                 <img
                   v-else
                   src="/icon/icon_download.svg"
-                  alt="download" class="h-4 w-4 z-10"
+                  alt="download" class="h-4 w-4"
                 />
-                <span class="relative z-10">
+                <span class="relative">
                   {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
