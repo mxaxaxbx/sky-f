@@ -1,6 +1,6 @@
 <template>
 <div
-class="w-full h-full"
+  class="w-full h-full"
   @click="handleContainerClick"
   @keydown.enter="handleContainerClick"
   @keydown.space.prevent="handleContainerClick"
