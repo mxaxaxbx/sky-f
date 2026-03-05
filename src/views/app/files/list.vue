@@ -580,9 +580,9 @@
                         <span>Download</span>
                       </button>
 
-                      <!-- delate file-->
+                      <!-- move to trash -->
                       <button
-                        @click="downloadFile(file)"
+                        @click="selectItem($event, 'file', file, index); moveToTrash();"
                         class="
                           flex items-center justify-start
                           rounded-xl px-2 py-1 border border-transparent
@@ -719,6 +719,8 @@ const moveToFolderModal = ref(false);
 const activeDropdownToggle = ref<(() => void) | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
+const editingFolderId = ref<number | null>(null);
+const editedFolderName = ref('');
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -799,7 +801,6 @@ function closeDropdown() {
   activeDropdownToggle.value?.();
 }
 
-// copy link to clipboard
 const copyLink = async (file: FileI) => {
   const url = await store.dispatch('files/getDownloadUrl', file);
   await navigator.clipboard.writeText(url);
@@ -898,6 +899,18 @@ async function getFiles() {
   });
 }
 
+async function moveToTrash() {
+  if (selectedFiles.value.length > 0) {
+    await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
+  }
+  if (selectedFolders.value.length > 0) {
+    await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
+  }
+
+  getFiles();
+  getFolders();
+}
+
 async function onDrop(folder: FolderI) {
   if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
 
@@ -994,10 +1007,6 @@ async function saveFileName(currentFile: FileI) {
     editingFileId.value = null;
   }
 }
-
-// rename folder
-const editingFolderId = ref<number | null>(null);
-const editedFolderName = ref('');
 
 async function startEditingFolder(folder: FolderI) {
   editingFolderId.value = folder.id;

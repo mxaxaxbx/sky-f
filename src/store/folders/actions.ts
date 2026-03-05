@@ -5,6 +5,7 @@ import { snakeToCamel, camelToSnake } from '@/utils';
 
 import { RootStateI } from '../state';
 import { FolderI, FoldersStateI } from './state';
+import { FileI } from '../files/state';
 
 export const actions: ActionTree<FoldersStateI, RootStateI> = {
 
@@ -74,6 +75,22 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     },
   ): Promise<void> {
     const { data } = await storageClient.put('/api/folders/change-folder-name', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async moveFoldersToTrash(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/move-folders-to-trash', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async moveFilesToTrash(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FileI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/move-files-to-trash', camelToSnake(payload));
     console.log('data', data);
   },
 
