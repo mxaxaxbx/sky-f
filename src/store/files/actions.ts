@@ -163,6 +163,10 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     payload: FileI,
   ): Promise<void> {
     console.log('saveCacheFile', payload);
+    const db = await getDB();
+    // Skip if not supported
+    if (!db) return;
+
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
     );
@@ -177,10 +181,6 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-
-    const db = await getDB();
-    // Skip if not supported
-    if (!db) return;
 
     const tx = db.transaction('files', 'readwrite');
     const store = tx.objectStore('files');

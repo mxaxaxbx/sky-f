@@ -2,7 +2,7 @@ export interface FolderI {
   id: string | number;
   name: string;
   userId: string | number;
-  folderId: null | number;
+  folderId: null | number | string;
   isTrash: boolean;
   created: number;
   updated: number;

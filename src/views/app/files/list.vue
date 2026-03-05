@@ -203,7 +203,7 @@
                       <!--move to folder-->
                       <button
                         type="button"
-                        @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
+                        @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
                         class="
                           flex items-center justify-start
                           rounded-xl px-2 py-1 border border-transparent
@@ -619,6 +619,9 @@
           <p v-for="file in selectedFiles" :key="file.id">
             "{{ file.name }}"
           </p>
+          <p v-for="folder in selectedFolders" :key="folder.id">
+            "{{ folder.name }}"
+          </p>
         </h3>
       </template>
 
@@ -628,6 +631,7 @@
             <button
               v-for="folder in folderResults.data"
               :key="folder.id"
+              v-show="!selectedFolders.map((f: FolderI) => f.id == folder.id).includes(true)"
               type="button"
               @click="selectedFolder = folder.id"
               class="
@@ -736,6 +740,7 @@ const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 
 async function moveToFolder() {
+  console.log('selectedFolder', selectedFolder.value);
   if (!selectedFolder.value) {
     return;
   }
@@ -743,26 +748,40 @@ async function moveToFolder() {
   try {
     loading.value = true;
     console.log('selectedFiles', selectedFiles.value);
-    const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+    const payloadFiles: FileI[] = selectedFiles.value.map((file: FileI) => ({
       ...file,
       folderId: selectedFolder.value,
     }));
-    console.log('payload', payload);
+    console.log('payload', payloadFiles);
 
-    if (payload.length > 0) {
-      await store.dispatch('files/moveFilesToFolder', payload);
+    if (payloadFiles.length > 0) {
+      await store.dispatch('files/moveFilesToFolder', payloadFiles);
+      await store.dispatch('files/filter', {
+        query: '',
+        page: 1,
+        orderBy: 'created',
+        order: 'desc',
+        folderId: '',
+      });
+    }
+
+    const payloadFolders: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
+      ...folder,
+      folderId: selectedFolder.value,
+    }));
+    console.log('payload', payloadFolders);
+
+    if (payloadFolders.length > 0) {
+      await store.dispatch('folders/moveFoldersToFolder', payloadFolders);
+      await store.dispatch('folders/filter', {
+        query: '',
+        page: 1,
+        folderId: '',
+      });
     }
 
     moveToFolderModal.value = false;
     selectedFolder.value = null;
-
-    await store.dispatch('files/filter', {
-      query: '',
-      page: 1,
-      orderBy: 'created',
-      order: 'desc',
-      folderId: '',
-    });
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
