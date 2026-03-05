@@ -24,7 +24,7 @@
     </h1>
 
     <!-- loading -->
-    <div v-if="loading" class="flex justify-center items-center">
+    <div v-if="loading" class="flex justify-center items-center text-[var(--color-primary)]">
       <i class="fas fa-spinner fa-spin text-2xl"></i>
     </div>
 

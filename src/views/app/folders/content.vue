@@ -1,7 +1,7 @@
 <template>
   <div class="w-full font-sans flex items-center px-2 pt-2 sm:pt-0 sm:px-8">
     <!-- loading -->
-    <div v-if="loading" class="flex justify-center items-center py-20">
+    <div v-if="loading" class="flex justify-center items-center py-20 text-[var(--color-primary)]">
       <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
     </div>
 

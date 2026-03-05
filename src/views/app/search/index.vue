@@ -9,7 +9,7 @@
 
     <!-- loading -->
     <div v-if="loading" class="flex justify-center items-center py-20">
-      <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
+      <i class="fas fa-spinner fa-spin text-2xl text-[var(--color-primary)]"></i>
     </div>
 
     <!-- if no results -->
