@@ -726,6 +726,7 @@ const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
 const editingFolderId = ref<number | null>(null);
 const editedFolderName = ref('');
+const selectedFolder = ref<number | string | null>(null);
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -733,7 +734,6 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
-const selectedFolder = ref<number | string | null>(null);
 
 async function moveToFolder() {
   if (!selectedFolder.value) {
@@ -954,6 +954,7 @@ async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
 }
 
+// rename file
 async function startEditingFile(currentFile: FileI) {
   // eslint-disable-next-line no-param-reassign
   editingFileId.value = currentFile.id;
