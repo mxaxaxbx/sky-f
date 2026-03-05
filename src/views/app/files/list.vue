@@ -502,7 +502,7 @@
 
                       <!-- preview file -->
                       <button
-                        @click="store.dispatch('files/previewFile', file)"
+                        @click="openFile(file)"
                         class="
                           flex items-center justify-start
                           rounded-xl px-2 py-1 border border-transparent
@@ -734,6 +734,10 @@ const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFo
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const selectedFolder = ref<number | string | null>(null);
+
+const openFile = (currentFile: FileI) => {
+  window.open(currentFile.url, '_blank');
+};
 
 async function moveToFolder() {
   if (!selectedFolder.value) {
