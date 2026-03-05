@@ -1,9 +1,8 @@
 <template>
   <div
-    class="w-full h-full"
+    class="w-full h-full focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
-    @keydown.space.prevent="handleContainerClick"
     tabindex="0"
   >
     <h1
@@ -17,9 +16,15 @@
     >
       Could Drive
     </h1>
+    <h1
+      class="text-left text-lg font-semibold mx-4 text-[var(--text)] mt-14 sm:hidden block
+      "
+    >
+      Could Drive
+    </h1>
 
     <!-- loading -->
-    <div v-if="loading" class="flex justify-center items-center">
+    <div v-if="loading" class="flex justify-center items-center text-[var(--color-primary)]">
       <i class="fas fa-spinner fa-spin text-2xl"></i>
     </div>
 
@@ -31,7 +36,7 @@
     </div>
 
     <!-- folders -->
-    <div class="w-full border-b border-[var(--border)] mt-20 py-0 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+    <div class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14">
       <h3
         class="
           flex items-center
@@ -1008,6 +1013,7 @@ async function saveFileName(currentFile: FileI) {
   }
 }
 
+// rename folder
 async function startEditingFolder(folder: FolderI) {
   editingFolderId.value = folder.id;
   editedFolderName.value = folder.name;

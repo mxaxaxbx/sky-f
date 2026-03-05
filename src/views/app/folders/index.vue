@@ -4,6 +4,7 @@
       bg-[var(--bg)]
       h-screen
       font-alexandria font-sans
+      pt-14 sm:pt-0
     "
   >
     <div

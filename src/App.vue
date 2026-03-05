@@ -10,6 +10,81 @@
     <!-- menu -->
     <Notifications />
     <Navbar />
+    <!-- search box movil-->
+    <div
+      v-if="!hideBar"
+      class="
+        fixed top-10
+        flex flex-col justify-center
+        w-full px-2 pt-2
+        bg-[var(--bg)] z-50
+
+        sm:hidden
+      "
+    >
+      <div class="flex flex-row items-center w-full mb-2">
+        <button
+          @click="toggleSidebar"
+          class="h-10 flex items-center transition-all duration-200"
+          :class="showSidebar ? 'justify-center' : 'justify-center'
+          "
+        >
+          <!-- Ícono wrapper -->
+          <div class="w-6 h-6 flex items-center justify-center">
+            <img
+              :src="showSidebar
+                ? '/icon/icon-close.svg'
+                : '/icon/icon-open.svg'"
+              :alt="showSidebar ? 'close' : 'open'"
+              class="w-6 h-6 opacity-50 hover:opacity-100 transition"
+            />
+          </div>
+        </button>
+        <span
+          class="text-[var(--text)] font-semibold text-center"
+          :class="showSidebarMovil ? 'inline w-full -ml-6' : 'hidden'"
+          >
+            Menu
+        </span>
+
+        <label for="search" class="text-[#a3a3a3]"></label>
+        <!-- Contenedor relativo -->
+        <form @submit.prevent="handleSearch"
+          :class="showSidebarMovil ? 'hidden' : 'inline'"
+          class="relative w-full ml-2
+          "
+        >
+          <!-- Input -->
+          <input
+            v-model="query"
+            @input="handleInput"
+            type="text"
+            placeholder="Search everything"
+            class="
+              w-full
+              pl-8 pr-4 py-1
+              bg-[var(--bg-secondary)]
+              border border-[#0B77F3]/50
+              rounded-full
+              font-light text-[var(--text)] text-xs
+
+              hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
+              hover:border-[var(--hover-border)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300
+            "
+          />
+
+          <!-- Ícono dentro del input -->
+          <img src="/icon/icon-search.svg" alt="Search Icon"
+            class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
+          />
+        </form>
+      </div>
+    </div>
+
+    <!-- sidebar wrapper -->
     <div
       class="
         w-full fixed
@@ -203,6 +278,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import router from '@/router';
 
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Notifications = defineAsyncComponent(() => import('@/components/global/notifications.vue'));
@@ -210,16 +286,21 @@ const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue
 
 const store = useStore();
 const route = useRoute();
+let searchTimeout: number | undefined;
 
 const { VUE_APP_DG_USERS_APP } = process.env;
 
-const isHome = computed(() => route.name === 'home');
-const isAuth = computed(() => store.getters['auth/isAuth']);
-const showSidebar = computed(() => isAuth.value && route.name !== 'home');
-const isLight = computed(() => store.state.theme?.theme === 'light');
-
 const year = ref(new Date().getUTCFullYear());
 const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
+const query = ref<string>('');
+
+const isHome = computed(() => route.name === 'home');
+const hideBar = computed(() => route.name === 'home' || route.name === 'login' || route.name === 'register');
+const isAuth = computed(() => store.getters['auth/isAuth']);
+const isLight = computed(() => store.state.theme?.theme === 'light');
+const showSidebar = computed(() => isAuth.value && route.name !== 'home');
+const showSidebarState = computed<boolean>(() => store.state.sidebar);
+const showSidebarMovil = computed(() => showSidebarState.value);
 
 const clickOutside = () => {
   if (showSidebar.value) store.commit('toggleSidebar');
@@ -235,6 +316,35 @@ const toggleTheme = () => {
 const toggleSidebar = () => {
   store.commit('toggleSidebar');
 };
+
+async function handleSearch() {
+  const payload = {
+    page: 1,
+    q: query.value,
+  };
+
+  await store.dispatch('files/filter', payload);
+  router.replace({
+    query: {
+      ...payload,
+    },
+  });
+
+  router.push({
+    path: '/app/search',
+    query: {
+      ...payload,
+    },
+  });
+}
+async function handleInput() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    handleSearch();
+  }, 500);
+}
 
 </script>
 

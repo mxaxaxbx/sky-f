@@ -1,5 +1,5 @@
 <template>
-  <div class=" container w-full pt-4 px-4 sm:px-8 mx-auto font-sans">
+  <div class=" container w-full mx-auto pt-16 px-4 sm:px-8 font-sans">
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <i class="fas fa-spinner fa-spin text-4xl text-[var(--color-primary)]"></i>
@@ -7,30 +7,29 @@
 
     <!-- File details -->
     <div v-else-if="file.id" class="max-w-4xl mx-auto">
-      <!-- Back button -->
-      <button
-        @click="$router.back()"
-        class="
-          flex items-center gap-2
-          mb-4 ml-2 sm:mb-6 ml:0
-          text-[var(--text-terceary)]
-          hover:text-[var(--text)]
-          transition-colors duration-200
-        "
-      >
-        <i class="fas fa-arrow-left"></i>
-        <span class="text-md font-regular">back</span>
-      </button>
-
       <!-- Main card -->
       <div
         class="
+          relative
           bg-[var(--bg-secondary)] w-full
           border border-[var(--border)]
           rounded-2xl
           shadow-lg
         "
       >
+        <!-- close button -->
+      <button
+        @click="$router.back()"
+        class="
+          absolute right-2.5 top-1
+          text-md
+          text-[var(--text-terceary)]
+          hover:text-[var(--text)]
+          transition-colors duration-200
+        "
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
         <!-- Header section -->
         <div
           class="
@@ -242,9 +241,9 @@
                 <img
                   v-else
                   src="/icon/icon_download.svg"
-                  alt="download" class="h-4 w-4 z-10"
+                  alt="download" class="h-4 w-4"
                 />
-                <span class="relative z-10">
+                <span class="relative">
                   {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
