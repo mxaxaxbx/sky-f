@@ -44,7 +44,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'app-home',
         // component: () => import('../views/app/home.vue'),
         meta: {
-          title: 'Inicio',
+          title: 'Home',
         },
         redirect: { name: 'app-files-list' },
       },
@@ -54,7 +54,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'app-files',
         component: () => import('../views/app/files/index.vue'),
         meta: {
-          title: 'Archivos',
+          title: 'Cloud Drive',
           requiresAuth: true,
         },
         children: [
@@ -63,7 +63,7 @@ const routes: Array<RouteRecordRaw> = [
             name: 'app-files-list',
             component: () => import('../views/app/files/list.vue'),
             meta: {
-              title: 'Archivos',
+              title: 'Cloud Drive',
             },
           },
           {
@@ -71,7 +71,7 @@ const routes: Array<RouteRecordRaw> = [
             name: 'app-files-details',
             component: () => import('../views/app/files/details.vue'),
             meta: {
-              title: 'Detalles del archivo',
+              title: 'Details',
             },
           },
         ],
@@ -82,7 +82,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'app-search',
         component: () => import('../views/app/search/index.vue'),
         meta: {
-          title: 'Buscar',
+          title: 'Search',
           requiresAuth: true,
         },
       },
@@ -92,7 +92,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'app-folders',
         component: () => import('../views/app/folders/index.vue'),
         meta: {
-          title: 'Carpetas',
+          title: 'Folders',
           requiresAuth: true,
         },
         children: [
@@ -112,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'app-trash',
         component: () => import('../views/app/trash/index.vue'),
         meta: {
-          title: 'Papelera',
+          title: 'Event Horizon',
           requiresAuth: true,
         },
       },
