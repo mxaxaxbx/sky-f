@@ -66,7 +66,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
       const dataArray: FileI[] = snakeToCamel(data);
 
-      dataArray.forEach(async (item: FileI) => {
+      await dataArray.forEach(async (item: FileI) => {
         if (item.r2Url) {
           // get file from formdata payload by name
           const file = payload.getAll('file')
@@ -95,16 +95,19 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
         const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
         console.log('confirmedData', confirmedData);
+        if (confirmedData && confirmedData.length > 0) {
+          confirmedData.forEach((file: FileI) => {
+            context.dispatch('saveCacheFile', file);
+          });
+        }
         // TODO: validate current page and query through route query params
         context.dispatch('filter', {
           query: '',
           page: 1,
         });
       });
-    } finally {
-      completedFiles.forEach((file: FileI) => {
-        context.dispatch('saveCacheFile', file);
-      });
+    } catch (error) {
+      console.error(error);
     }
   },
 
@@ -159,6 +162,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
+    console.log('saveCacheFile', payload);
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
     );
