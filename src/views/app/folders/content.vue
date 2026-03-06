@@ -771,7 +771,7 @@ async function saveFileName(currentFile: FileI) {
       page: 1,
       orderBy: 'created',
       order: 'desc',
-      folderId: '',
+      folderId: folderId.value,
     });
 
     const updatedFile = fileResults.value.data.find(
