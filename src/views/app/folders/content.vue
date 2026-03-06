@@ -171,159 +171,203 @@
       </div>
 
       <!-- files -->
-      <div v-if="fileResults.data.length" class="w-full p-3">
-        <h3
-          class="
-            font-regular text-sm text-[var(--text-terceary)]
-            truncate text-left
-            mb-1 px-3 gap-2
-            sm:text-lg sm:mb-0 sm:font-semibold
-            flex items-center
-          "
-        >
-        <span>Files</span>
-        <button
-          type="button"
-          @click="showFiles = !showFiles"
-          class="text-xs rounded-full mt-0.5
-            hover:text-[var(--color-primary)]
-            transition-all duration-300"
-          :class="showFiles ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
-        >
-          <i class="fa-solid fa-chevron-down"></i>
-        </button>
-        </h3>
+      <div class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+        <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
+          <h3
+            class="
+              flex items-center
+              font-regular text-left text-sm text-[var(--text-terceary)] truncate
+              gap-2
+
+              sm:text-lg sm:mb-0 sm:font-semibold
+            "
+          >
+            <span>Your Files</span>
+            <button
+              type="button"
+              @click="showFiles = !showFiles"
+              class="text-xs rounded-full mt-0.5
+                hover:text-[var(--color-primary)]
+                transition-all duration-300"
+              :class="showFiles ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
+            >
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </h3>
+          <!-- order by -->
+          <button
+            v-show="showFiles"
+            @click="sortOrder = sortOrder === 'desc' ? 'asc' : 'desc'; getFiles()"
+            class="
+              flex items-center justify-center
+              px-2 py-0.5
+              text-xs text-[var(--text-terceary)]
+              rounded-full border border-[var(--border)]
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--color-primary)]
+              transition-all duration-300
+            "
+          >Order:
+            {{ sortOrder === 'desc' ? 'Newest' : 'Oldest' }}
+          </button>
+        </div>
         <Transition name="slide">
           <div
             v-show="showFiles"
             class="
               grid grid-cols-1 gap-2 mx-0
               text-[var(--text)]
-
-              sm:grid-cols-2 sm:gap-4 sm:mx-4 sm:my-2
+              sm:grid-cols-2 sm:gap-4 sm:mx-4
               md:grid-cols-3
               lg:grid-cols-4
               xl:grid-cols-6
             "
           >
             <div
-              v-for="file in fileResults.data"
+              v-for="file, index in fileResults.data"
               :key="file.id"
-              class="
-                  group
-                  flex items-center justify-between
-                  w-full
-                  bg-[var(--bg-secondary)]
-                  border border-[var(--border)]
-                  rounded-2xl min-w-0
+              data-selectable
 
-                  hover:bg-[var(--hover-bg)]
-                  hover:border-[var(--hover-border)]
-                  hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
-                  transition-colors duration-300
-                "
+              :draggable="true"
+              @dragstart="onDragStart('file', file)"
+              @click="selectItem($event, 'file', file, index)"
+              @keydown.enter="selectItem($event, 'file', file, index)"
+              @dblclick="router.push(`/app/files/details/${file.id}`);"
+
+              class="
+                group
+                flex items-center justify-between
+                w-full
+                bg-[var(--bg-secondary)]
+                border border-[var(--border)]
+                rounded-2xl min-w-0
+                cursor-move
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--hover-border)]
+                transition-colors duration-300
+              "
+              :class="[
+                'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
+                isSelectedFile(file) ?
+                  'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]' :
+                  'border-[var(--border)]'
+              ]"
             >
               <div class="flex w-full h-auto items-center justify-between relative">
-                <router-link
-                  :to="`/app/files/details/${file.id}`"
-                  class="flex-1 min-w-0"
-                >
-                <div class="flex items center justify-between p-1">
-                  <div
-                    class="
-                      flex items-center
-                      space-x-2
-                      min-w-0 w-full overflow-hidden
-                    "
-                  >
-                    <!-- icons -->
-                    <img
-                      v-if="file.contentType === 'application/pdf'"
-                      src="/icon/icon-pdf.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/msword' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                <div class="flex-1 min-w-0">
+                  <div class="flex items center justify-between p-1">
+                    <div
+                      class="
+                        flex items-center
+                        space-x-2
+                        min-w-0 w-full overflow-hidden
                       "
-                      src="/icon/icon-doc.svg"
-                      alt="Word file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/vnd.ms-excel' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                      "
-                      src="/icon/icon-excel.svg"
-                      alt="Word file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/vnd.ms-powerpoint' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                      "
-                      src="/icon/icon-ppt.svg"
-                      alt="PowerPoint file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
-                      src="/icon/icon-png.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="file.contentType === 'image/svg+xml'"
-                      src="/icon/icon-svg.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
-                      src="/icon/icon-img.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/^video\//.test(file.contentType)"
-                      src="/icon/icon-video.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="file.contentType === 'application/zip'"
-                      src="/icon/icon-zip.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/^audio\//.test(file.contentType)"
-                      src="/icon/icon-audio.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else
-                      src="/icon/icon-file.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <!-- title and date -->
-                    <div class="flex-1 min-w-0">
-                      <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
-                        {{ file.name }}
-                      </h3>
-                      <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                        {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
-                      </p>
+                    >
+                      <!-- icons -->
+                      <img
+                        v-if="file.contentType === 'application/pdf'"
+                        src="/icon/icon-pdf.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="
+                          file.contentType === 'application/msword' ||
+                          file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                        "
+                        src="/icon/icon-doc.svg"
+                        alt="Word file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="
+                          file.contentType === 'application/vnd.ms-excel' ||
+                          file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        "
+                        src="/icon/icon-excel.svg"
+                        alt="Word file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="
+                          file.contentType === 'application/vnd.ms-powerpoint' ||
+                          file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                        "
+                        src="/icon/icon-ppt.svg"
+                        alt="PowerPoint file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
+                        src="/icon/icon-png.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="file.contentType === 'image/svg+xml'"
+                        src="/icon/icon-svg.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
+                        src="/icon/icon-img.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="/^video\//.test(file.contentType)"
+                        src="/icon/icon-video.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="file.contentType === 'application/zip'"
+                        src="/icon/icon-zip.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else-if="/^audio\//.test(file.contentType)"
+                        src="/icon/icon-audio.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <img
+                        v-else
+                        src="/icon/icon-file.svg"
+                        alt="image file icon"
+                        class="h-10 w-10"
+                      />
+                      <!-- title and date -->
+                      <div class="flex-1 min-w-0">
+                        <div>
+                          <input
+                            v-if="editingFileId === file.id"
+                            v-model="editedFileName"
+                            :data-file-id="file.id"
+                            @keyup.enter="saveFileName(file)"
+                            @blur="editingFileId = null"
+                            class="
+                              bg-transparent
+                              border-b border-[var(--color-primary)]
+                              outline-none text-xs sm:text-sm w-full"
+                          />
+
+                          <h3
+                            v-else
+                            class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left"
+                          >
+                            {{ file.name }}
+                          </h3>
+                        </div>
+                        <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
+                          {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-                </router-link>
                 <!-- options -->
                 <div
                   class="
@@ -348,7 +392,7 @@
                   >
                     <template #trigger="{ toggle }">
                       <button
-                        @click="toggleDropdown(toggle)"
+                        @click="toggleDropdown(toggle, $event)"
                         class="
                           text-[var(--text-terceary)]
                           w-6 h-10
@@ -362,7 +406,7 @@
                     </template>
 
                     <template #content="{ }">
-                      <div class="flex flex-col gap-0.5 px-1 py-1 font-light text-sm text-[#868686]">
+                      <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
 
                         <!-- info file -->
                         <router-link
@@ -382,8 +426,8 @@
                         </router-link>
 
                         <!-- preview file -->
-                        <router-link
-                          :to="`/app/files/details/${file.id}`"
+                        <button
+                          @click="openFile(file)"
                           class="
                             flex items-center justify-start
                             rounded-xl px-2 py-1 border border-transparent
@@ -395,7 +439,7 @@
                         >
                           <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
                           <span>Preview</span>
-                        </router-link>
+                        </button>
 
                         <!-- rename -->
                         <button
@@ -416,7 +460,7 @@
                         <!--move to folder-->
                         <button
                           type="button"
-                          @click="selectFile($event, file, index); moveToFolderModal = true;"
+                          @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
                           class="
                             flex items-center justify-start
                             rounded-xl px-2 py-1 border border-transparent
@@ -442,8 +486,7 @@
                             transition-all duration-300
                           "
                         >
-                          <img src="/icon/icon-link.svg" alt="download" class="h-4 mr-3 grayscale"
-                          />
+                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
                           {{ copied ? 'Copied!' : 'Copy link' }}
                         </button>
 
@@ -456,14 +499,34 @@
                             grayscale
 
                             hover:bg-[var(--hover-bg)]
+                            hover:text-[var(--color-primary)]
                             hover:border-[var(--color-primary)]
                             hover:grayscale-0
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_download_2.svg" alt="download" class="h-4 mr-3"
+                          <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
                           />
                           <span>Download</span>
+                        </button>
+
+                        <!-- move to trash -->
+                        <button
+                          @click="selectItem($event, 'file', file, index); moveToTrash();"
+                          class="
+                            flex items-center justify-start
+                            rounded-xl px-2 py-1 border border-transparent
+                            grayscale text-[var(--warning-border)] opacity-50
+
+                            hover:bg-[var(--warning-bg)]
+                            hover:text-[var(--warning-border)]
+                            hover:border-[var(--warning-border)]
+                            hover:grayscale-0 hover:opacity-100
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                          <span>Send to the Void</span>
                         </button>
                       </div>
                     </template>
@@ -510,6 +573,9 @@ const showFolders = ref(true);
 const showFiles = ref(true);
 
 const folderId = computed<number>(() => Number(route.params.id as string));
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+
+const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
