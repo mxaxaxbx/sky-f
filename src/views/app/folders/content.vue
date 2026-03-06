@@ -427,7 +427,7 @@
 
                         <!-- preview file -->
                         <button
-                          @click="openFile(file)"
+                          @click="store.dispatch('files/previewFile', file)"
                           class="
                             flex items-center justify-start
                             rounded-xl px-2 py-1 border border-transparent
@@ -624,7 +624,7 @@ import {
   nextTick,
   defineAsyncComponent,
 } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import moment from 'moment';
 
@@ -636,6 +636,7 @@ const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue')
 
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 
 const loading = ref(false);
 const copied = ref(false);
