@@ -815,7 +815,7 @@ async function moveToFolder() {
       page: 1,
       orderBy: 'created',
       order: 'desc',
-      folderId: '',
+      folderId: folderId.value,
     });
   } catch (error: unknown) {
     console.error(error);
