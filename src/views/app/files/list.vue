@@ -502,7 +502,7 @@
 
                       <!-- preview file -->
                       <button
-                        @click="openFile(file)"
+                        @click="store.dispatch('files/previewFile', file)"
                         class="
                           flex items-center justify-start
                           rounded-xl px-2 py-1 border border-transparent
@@ -740,10 +740,6 @@ const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFo
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 
-const openFile = (currentFile: FileI) => {
-  window.open(currentFile.url, '_blank');
-};
-
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
   if (!selectedFolder.value) {
@@ -978,6 +974,7 @@ async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
 }
 
+// rename file
 async function startEditingFile(currentFile: FileI) {
   // eslint-disable-next-line no-param-reassign
   editingFileId.value = currentFile.id;

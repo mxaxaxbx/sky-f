@@ -170,7 +170,7 @@
 
               <!--preview buttom-->
               <button
-                @click="openFile(file)"
+                @click="store.dispatch('files/previewFile', file)"
                 class="
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
@@ -183,6 +183,7 @@
                   hover:grayscale-0
                   hover:text-[var(--text)]
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   focus:grayscale-0
                   transition-all duration-300
@@ -208,7 +209,9 @@
                   hover:text-[var(--text)]
                   hover:grayscale-0
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  focus:grayscale-0
                   transition-all duration-300
                 "
               >
@@ -238,18 +241,18 @@
                   overflow-hidden
                 "
               >
-                <i v-if="downloading" class="fas fa-spinner fa-spin text-white z-10"></i>
+                <i v-if="downloading" class="fas fa-spinner fa-spin text-white"></i>
                 <img
                   v-else
                   src="/icon/icon_download.svg"
-                  alt="download" class="h-4 w-4"
+                  alt="download" class="h-4 w-4 z-0 sm:z-10"
                 />
-                <span class="relative">
+                <span class="relative z-0 sm:z-10">
                   {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
                   class="
-                    absolute inset-0 z-0
+                    absolute inset-0
                     bg-[#202F41]/50
                     rounded-full
                     transition-transform duration-300 ease-in-out
