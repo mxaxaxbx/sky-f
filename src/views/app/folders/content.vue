@@ -552,6 +552,23 @@
         <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
           <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
             <button
+              type="button"
+              @click="selectedFolder = 0"
+              class="
+                flex items-center justify-start
+                px-2 py-0.5 gap-1.5
+                rounded-xl
+                border border-transparent
+                text-[var(--text-terceary)]
+              "
+              :class="selectedFolder === 0 ? 'bg-[var(--bg)] border-[var(--color-primary)]' : ''"
+            >
+              <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+              <span class="text-sm text-left truncate w-full">
+                Root
+              </span>
+            </button>
+            <button
               v-for="folder in folderResults.data"
               :key="folder.id"
               type="button"
@@ -604,7 +621,7 @@
             px-3
             transition
           "
-          :class="!selectedFolder
+          :class="selectedFolder !== null
             ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
             : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
         >
