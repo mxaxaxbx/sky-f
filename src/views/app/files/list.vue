@@ -742,7 +742,7 @@ const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: Folde
 
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
-  if (!selectedFolder.value) {
+  if (selectedFolder.value === null) {
     return;
   }
 

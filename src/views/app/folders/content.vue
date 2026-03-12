@@ -621,9 +621,10 @@
             px-3
             transition
           "
-          :class="selectedFolder !== null
+          :class="selectedFolder === null
             ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-            : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+            : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'
+          "
         >
           Move
         </button>
@@ -807,8 +808,12 @@ async function saveFileName(currentFile: FileI) {
 
 // move to folder
 async function moveToFolder() {
-  if (!selectedFolder.value) {
+  if (selectedFolder.value === null) {
     return;
+  }
+
+  if (selectedFolder.value === 0) {
+    selectedFolder.value = null;
   }
 
   try {
