@@ -968,6 +968,39 @@ async function getFiles() {
   }
 }
 
+async function saveFolderName(folder: FolderI) {
+  const finalName = editedFolderName.value.trim();
+  if (!finalName) return;
+
+  try {
+    await store.dispatch('folders/changeFolderName', {
+      id: folder.id,
+      name: finalName,
+    });
+
+    await getFiles();
+    await getFolders();
+
+    await nextTick();
+
+    const updatedFolder = folderResults.value.data.find(
+      (f: FolderI) => f.id === folder.id,
+    );
+
+    if (updatedFolder) {
+      store.commit('folders/setSelectedFolders', [updatedFolder]);
+    }
+  } catch (error) {
+    console.error(error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al cambiar el nombre de la carpeta',
+    });
+  } finally {
+    editingFolderId.value = null;
+  }
+}
+
 async function moveToTrash() {
   if (selectedFiles.value.length > 0) {
     await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
