@@ -788,6 +788,7 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
     console.log('selectedFiles', selectedFiles.value);
   } else if (type === 'folder') {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
+    console.log('selectedFolders', selectedFolders.value);
   }
   lastSelectedIndex.value = index;
 }
@@ -865,26 +866,47 @@ async function moveToFolder() {
   try {
     loading.value = true;
     console.log('selectedFiles', selectedFiles.value);
-    const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
-      ...file,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payload);
+    if (selectedFiles.value.length > 0) {
+      const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+        ...file,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFiles', payload);
 
-    if (payload.length > 0) {
-      await store.dispatch('files/moveFilesToFolder', payload);
+      if (payload.length > 0) {
+        await store.dispatch('files/moveFilesToFolder', payload);
+      }
+
+      await store.dispatch('files/filter', {
+        query: '',
+        page: 1,
+        orderBy: 'created',
+        order: 'desc',
+        folderId: folderId.value,
+      });
+    }
+
+    console.log('selectedFolders', selectedFolders.value);
+    if (selectedFolders.value.length > 0) {
+      const payload: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
+        ...folder,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFolders', payload);
+
+      if (payload.length > 0) {
+        await store.dispatch('folders/moveFoldersToFolder', payload);
+      }
+
+      await store.dispatch('folders/filter', {
+        query: '',
+        page: 1,
+        folderId: folderId.value,
+      });
     }
 
     moveToFolderModal.value = false;
     selectedFolder.value = null;
-
-    await store.dispatch('files/filter', {
-      query: '',
-      page: 1,
-      orderBy: 'created',
-      order: 'desc',
-      folderId: folderId.value,
-    });
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
