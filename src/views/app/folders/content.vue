@@ -950,6 +950,28 @@ async function startEditingFolder(folder: FolderI) {
   input?.select();
 }
 
+function onDragStart(type: string, item: FileI | FolderI) {
+  if (type === 'file') {
+    if (!isSelectedFile(item as FileI)) {
+      store.commit('files/setSelectedFiles', [item]);
+    }
+  } else if (type === 'folder') {
+    if (!isSelectedFolder(item as FolderI)) {
+      store.commit('folders/setSelectedFolders', [item]);
+    }
+  }
+
+  draggedItem.value = item;
+}
+
+function onDragEnter(fId: number | string | null) {
+  draggedFolder.value = fId;
+}
+
+function onDragLeave() {
+  draggedFolder.value = null;
+}
+
 async function getFolders() {
   loading.value = true;
   try {
@@ -988,6 +1010,40 @@ async function getFiles() {
   } finally {
     loading.value = false;
   }
+}
+
+async function onDrop(folder: FolderI) {
+  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
+
+  if (!draggedItem.value) return;
+
+  const fId = folder.id as number;
+
+  const filesPayload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+    ...file,
+    folderId: fId,
+  }));
+
+  await store.dispatch('files/moveFilesToFolder', filesPayload);
+
+  store.commit('files/setSelectedFiles', []);
+
+  const foldersPayload: FolderI[] = selectedFolders.value
+    .filter((f: FolderI) => f.id !== fId)
+    .map((f: FolderI) => ({
+      ...f,
+      folderId: fId,
+    }));
+
+  console.log('foldersPayload', foldersPayload);
+
+  await store.dispatch('folders/moveFoldersToFolder', foldersPayload);
+
+  draggedItem.value = null;
+  draggedFolder.value = null;
+
+  getFiles();
+  getFolders();
 }
 
 async function saveFolderName(folder: FolderI) {
