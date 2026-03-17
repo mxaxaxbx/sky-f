@@ -68,6 +68,8 @@
             hover:border-[var(--hover-border)]
             hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
             focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:border-[var(--hover-border)]
+            focus:grayscale-0
             transition-all duration-300 ease-in-out
             cursor-pointer
           "

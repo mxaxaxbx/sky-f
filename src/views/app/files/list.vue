@@ -16,10 +16,7 @@
     >
       Could Drive
     </h1>
-    <h1
-      class="text-left text-lg font-semibold mx-4 text-[var(--text)] mt-14 sm:hidden block
-      "
-    >
+    <h1 class="text-left text-lg font-semibold mx-4 text-[var(--text)] mt-14 sm:hidden block">
       Could Drive
     </h1>
 
@@ -36,7 +33,9 @@
     </div>
 
     <!-- folders -->
-    <div class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14">
+    <div
+    v-if="folderResults.data.length"
+    class="w-full py-0 px-2 pt-4 sm:py-4 sm:px-14">
       <h3
         class="
           flex items-center
@@ -246,7 +245,8 @@
 
     <!-- files -->
     <div
-      class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+      v-if="fileResults.data.length"
+      class="w-full  border-t border-[var(--border)] py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
       <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
         <h3
           class="
@@ -682,7 +682,7 @@
             transition
           "
           :class="!selectedFolder
-            ? 'opacity-40 tex-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+            ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
             : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'"
         >
           Move

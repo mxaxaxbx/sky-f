@@ -16,11 +16,19 @@
       "
     >
       <!-- folder details -->
-      <div v-if="folderDetails && folderDetails.id" class="mx-auto w-full pb-2 px-2 sm:px-8 flex justify-between">
+      <div
+        v-if="folderDetails && folderDetails.id"
+        class="
+          flex justify-between items-center
+          w-full
+          mx-auto px-2
+          sm:px-8
+        "
+      >
         <div class="flex items-center gap-1">
           <!-- Back button -->
-          <button
-            @click="$router.back()"
+          <router-link
+            to="/app/files"
             class="
               flex items-center gap-2
               px-2
@@ -32,29 +40,81 @@
           >
             <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
             Could Drive
-          </button>
+          </router-link>
           <span class="text-[var(--text-terceary)]">></span>
           <div class="flex items-center gap-2 px-2">
             <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
-            <h2 class="text-sm sm:text-xl font-regular text-[var(--text)]">
+            <h2 class="text-xs sm:text-lg font-light text-[var(--text)]">
               {{ folderDetails.name }}
             </h2>
           </div>
         </div>
-        <div
-          class="mx-4 hidden sm:inline">
-          <div
-            class="flex flex-col items-end
-            "
-          >
+        <div class="mx-4 hidden sm:inline">
+          <!-- actions desktop-->
+          <div class="flex items-center gap-2">
+
+            <!-- Upload button -->
+            <label
+              v-if="!hideBar"
+              for="fileInputBtn"
+              class="
+                hidden items-center
+                bg-[var(--color-primary)]
+                border border-[var(--color-primary)]
+                text-white text-sm font-medium
+                px-2 py-0.5
+                rounded-full
+
+                sm:flex
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                transition-all duration-300 ease-in-out
+                cursor-pointer
+              "
+            >
+              <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
+              <span>Upload</span>
+            </label>
+
+            <!-- New folder-->
+            <button
+              v-if="!hideBar"
+              @click="createFolderModal = true"
+              class="
+                hidden items-center
+                bg-[var(--bg-secondary)]
+                border border-[var(--border)]
+                text-[var(--text-terceary)] text-sm font-medium
+                pl-2 pr-2.5 py-0.5
+                grayscale
+                rounded-full
+
+                sm:flex
+                hover:grayscale-0
+                hover:text-[var(--text)]
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--hover-border)]
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:border-[var(--hover-border)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:grayscale-0
+                transition-all duration-300 ease-in-out
+                cursor-pointer
+              "
+            >
+              <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+              New folder
+            </button>
+
+            <div class="flex flex-col items-end justify-end ml-4">
             <!-- Created date -->
-            <div class="px-2 flex items-center justify-center gap-2">
+            <div class="px-2 flex items-center justify-center gap-2 ">
               <div class="">
-                <h3 class="text-[0.7rem] font-regular text-[var(--text-terceary)]">
+                <h3 class="text-[0.6rem] font-regular text-[var(--text-terceary)]">
                   Creation date:
                 </h3>
               </div>
-              <p class="text-xs font-light text-[var(--text)]">
+              <p class="text-[0.6rem] font-light text-[var(--text)]">
                 {{ moment(folderDetails.created * 1000).format('DD/MM/YYYY') }}
               </p>
             </div>
@@ -62,17 +122,18 @@
             <!-- Updated date -->
             <div class="px-2 flex items-center justify-end gap-2">
               <div class="flex items-center justify-end">
-                <h3 class="text-[0.7rem] font-regular text-[var(--text-terceary)]">
+                <h3 class="text-[0.6rem] font-regular text-[var(--text-terceary)]">
                   Last modification:
                 </h3>
               </div>
-              <p class="text-xs font-light text-[var(--text)]">
-  {{
-    folderDetails?.updated
-      ? moment(folderDetails.updated * 1000).format('DD/MM/YYYY')
-      : '-'
-  }}
-</p>
+              <p class="text-[0.6rem] font-light text-[var(--text)]">
+                {{
+                  folderDetails?.updated
+                    ? moment(folderDetails.updated * 1000).format('DD/MM/YYYY')
+                    : '-'
+                }}
+              </p>
+            </div>
             </div>
           </div>
         </div>

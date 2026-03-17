@@ -1,16 +1,84 @@
 <template>
   <!-- loading -->
-  <div v-if="loading" class="flex justify-center items-center py-20 text-[var(--color-primary)]">
-    <i class="fas fa-spinner fa-spin text-2xl text-[var(--text)]"></i>
+  <div v-if="loading" class="flex mx-auto justify-center items-center py-20 text-[var(--color-primary)]">
+    <i class="fas fa-spinner fa-spin text-2xl"></i>
   </div>
 
   <!-- if not results -->
-  <div v-if="!fileResults.data.length && !folderResults.data.length" class=" flex justify-center items-center py-20 w-full">
-    <p class="text-[var(--text-terceary)]">This folder is waiting for something awesome.</p>
+  <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full h-full mt-4">
+    <div
+      class="
+        flex flex-col gap-8 justify-center items-center
+        w-full h-[calc(100vh-120px)] ml-2
+        border-2 border-[var(--text-terceary)] border-dashed
+        rounded-2xl
+        "
+      >
+      <p class="text-[var(--text-terceary)] text-2xl font-regular">
+          This folder is waiting for something awesome.
+      </p>
+      <!-- actions desktop-->
+      <div class="flex items-center gap-3">
+      <!-- Upload button -->
+      <label
+        v-if="!hideBar"
+        for="fileInputBtn"
+        class="
+          hidden items-center
+          bg-[var(--color-primary)]
+          border border-[var(--color-primary)]
+          text-white text-sm font-medium
+          px-2 py-0.5
+          rounded-full
+
+          sm:flex
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          transition-all duration-300 ease-in-out
+          cursor-pointer
+        "
+      >
+        <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
+        <span>Upload</span>
+      </label>
+
+      <!-- New folder-->
+      <button
+        v-if="!hideBar"
+        @click="createFolderModal = true"
+        class="
+          hidden items-center
+          bg-[var(--bg-secondary)]
+          border border-[var(--border)]
+          text-[var(--text-terceary)] text-sm font-medium
+          pl-2 pr-2.5 py-0.5
+          grayscale
+          rounded-full
+
+          sm:flex
+          hover:grayscale-0
+          hover:text-[var(--text)]
+          hover:bg-[var(--hover-bg)]
+          hover:border-[var(--hover-border)]
+          hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:border-[var(--hover-border)]
+          focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          focus:grayscale-0
+          transition-all duration-300 ease-in-out
+          cursor-pointer
+        "
+      >
+        <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+        New folder
+      </button>
+      </div>
+    </div>
   </div>
 
   <!-- folders -->
-  <div class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14">
+  <div
+    v-if="folderResults.data.length"
+    class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14">
     <h3
       class="
         flex items-center
@@ -219,7 +287,9 @@
   </div>
 
   <!-- files -->
-  <div class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+  <div
+    v-if="fileResults.data.length"
+    class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
     <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
       <h3
         class="
