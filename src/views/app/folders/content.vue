@@ -588,7 +588,7 @@
 
   <Modal v-model="moveToFolderModal" size="xl">
     <template #header>
-      <h3 class="text-lg font-light">Move:
+      <h3 class="text-lg font-light text-[var(--text)]">Move:
         <p v-for="file in selectedFiles" :key="file.id">
           "{{ file.name }}"
         </p>
@@ -605,14 +605,19 @@
               flex items-center justify-start
               px-2 py-0.5 gap-1.5
               rounded-xl
-              border border-transparent
+              border
               text-[var(--text-terceary)]
+
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--color-primary)]
+              hover:text-[var(--text)]
+              transition
             "
-            :class="selectedFolder === 0 ? 'bg-[var(--bg)] border-[var(--color-primary)]' : ''"
+            :class="selectedFolder === 0 ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
           >
-            <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+            <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
             <span class="text-sm text-left truncate w-full">
-              Root
+              Cloud Drive
             </span>
           </button>
           <button
@@ -624,17 +629,17 @@
               flex items-center justify-start
               px-2 py-0.5 gap-1.5
               rounded-xl
-              border border-transparent
+              border
               text-[var(--text-terceary)]
+
               hover:bg-[var(--hover-bg)]
               hover:border-[var(--color-primary)]
-              hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
               hover:text-[var(--text)]
               transition
             "
-            :class="selectedFolder === folder.id ? 'bg-[var(--bg)] border-[var(--color-primary)]' : ''"
+            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
           >
-            <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+            <img src="/icon/icon-folder.svg" alt="folder" class="h-6"/>
             <span class="text-sm text-left truncate w-full">
               {{ folder.name }}
             </span>
@@ -662,15 +667,15 @@
         type="submit"
         form="move-to-folder-form"
         class="
-          text-[var(--text)] text-sm
+          text-sm
           border
           rounded-full
           px-3
           transition
         "
         :class="selectedFolder === null
-          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'
+          ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
         "
       >
         Move
