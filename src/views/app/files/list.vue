@@ -26,10 +26,17 @@
     </div>
 
     <!-- if not results -->
-    <div
-      v-else-if="!fileResults.data.length && !folderResults.data.length"
-      class="flex justify-center items-center mx-auto">
-      <p class="text-[var(--text-terceary)] font-regular text-lg">Looks like this space is clear</p>
+    <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full mt-4">
+      <div
+        class="
+        flex flex-col gap-8 justify-center items-center
+        w-full h-[calc(100vh-180px)] ml-2
+        border-2 border-[var(--text-terceary)] border-dashed
+        rounded-2xl
+      "
+      >
+        <p class="text-[var(--text-terceary)] font-regular text-lg">Looks like this space is clear</p>
+      </div>
     </div>
 
     <!-- folders -->
