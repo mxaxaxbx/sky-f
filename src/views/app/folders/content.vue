@@ -130,88 +130,88 @@
               transition-colors duration-300
             "
           >
-              <Dropdown
-                :classes="[
-                  'bg-[var(--bg-secondary)]',
-                  'border border-[var(--border)]',
-                  'rounded-2xl',
-                  'absolute','-right-0', 'z-20',
-                  dropdownPosition,
-                  'w-48',
-                  'sm:-right-2'
-                ]"
-              >
-                <template #trigger="{ toggle }">
-                  <button
-                    @click="toggleDropdown(toggle, $event)"
-                    class="
-                      text-[var(--text-terceary)]
-                      w-6 h-auto
+            <Dropdown
+              :classes="[
+                'bg-[var(--bg-secondary)]',
+                'border border-[var(--border)]',
+                'rounded-2xl',
+                'absolute','-right-0', 'z-20',
+                dropdownPosition,
+                'w-48',
+                'sm:-right-2'
+              ]"
+            >
+              <template #trigger="{ toggle }">
+                <button
+                  @click="toggleDropdown(toggle, $event)"
+                  class="
+                    text-[var(--text-terceary)]
+                    w-6 h-auto
 
-                      hover:text-[var(--text)]
+                    hover:text-[var(--text)]
+                    transition-colors duration-300
+                  "
+                >
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </template>
+
+              <template #content="{ }">
+                <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+
+                  <!--rename folder-->
+                  <button
+                    type="button"
+                    @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                    class="flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
+                      transition-colors duration-300"
+                  >
+                    <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                    <span>Rename</span>
+                  </button>
+
+                  <!--move to folder-->
+                  <button
+                    type="button"
+                    @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
                       transition-colors duration-300
                     "
                   >
-                    <i class="fas fa-ellipsis-v"></i>
+                    <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                    <span>Move to folder</span>
                   </button>
-                </template>
 
-                <template #content="{ }">
-                  <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                  <!-- move to trash -->
+                  <button
+                    @click="selectItem($event, 'folder', folder, index); moveToTrash();"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+                      grayscale text-[var(--warning-border)] opacity-50
 
-                    <!--rename folder-->
-                    <button
-                      type="button"
-                      @click="() => { startEditingFolder(folder); closeDropdown(); }"
-                      class="flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300"
-                    >
-                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                      <span>Rename</span>
-                    </button>
-
-                    <!--move to folder-->
-                    <button
-                      type="button"
-                      @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                      <span>Move to folder</span>
-                    </button>
-
-                    <!-- move to trash -->
-                    <button
-                      @click="selectItem($event, 'folder', folder, index); moveToTrash();"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-                        grayscale text-[var(--warning-border)] opacity-50
-
-                        hover:bg-[var(--warning-bg)]
-                        hover:text-[var(--warning-border)]
-                        hover:border-[var(--warning-border)]
-                        hover:grayscale-0 hover:opacity-100
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
-                      <span>Send to the Void</span>
-                    </button>
-                  </div>
-                </template>
-              </Dropdown>
+                      hover:bg-[var(--warning-bg)]
+                      hover:text-[var(--warning-border)]
+                      hover:border-[var(--warning-border)]
+                      hover:grayscale-0 hover:opacity-100
+                      transition-colors duration-300
+                    "
+                  >
+                    <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                    <span>Send to the Void</span>
+                  </button>
+                </div>
+              </template>
+            </Dropdown>
           </div>
         </div>
       </div>
