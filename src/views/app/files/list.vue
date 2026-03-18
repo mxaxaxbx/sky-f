@@ -16,10 +16,7 @@
     >
       Could Drive
     </h1>
-    <h1
-      class="text-left text-lg font-semibold mx-4 text-[var(--text)] mt-14 sm:hidden block
-      "
-    >
+    <h1 class="text-left text-lg font-semibold mx-4 text-[var(--text)] mt-14 sm:hidden block">
       Could Drive
     </h1>
 
@@ -29,14 +26,23 @@
     </div>
 
     <!-- if not results -->
-    <div
-      v-else-if="!fileResults.data.length && !folderResults.data.length"
-      class="flex justify-center items-center mx-auto">
-      <p class="text-[var(--text-terceary)] font-regular text-lg">Looks like this space is clear</p>
+    <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full mt-4">
+      <div
+        class="
+        flex flex-col gap-8 justify-center items-center
+        w-full h-[calc(100vh-180px)] ml-2
+        border-2 border-[var(--text-terceary)] border-dashed
+        rounded-2xl
+      "
+      >
+        <p class="text-[var(--text-terceary)] font-regular text-lg">Looks like this space is clear</p>
+      </div>
     </div>
 
     <!-- folders -->
-    <div class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14">
+    <div
+    v-if="folderResults.data.length"
+    class="w-full py-0 px-2 pt-4 sm:py-4 sm:px-14">
       <h3
         class="
           flex items-center
@@ -246,7 +252,8 @@
 
     <!-- files -->
     <div
-      class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
+      v-if="fileResults.data.length"
+      class="w-full  border-t border-[var(--border)] py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
       <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
         <h3
           class="
@@ -638,17 +645,16 @@
                 flex items-center justify-start
                 px-2 py-0.5 gap-1.5
                 rounded-xl
-                border border-transparent
+                border
                 text-[var(--text-terceary)]
                 hover:bg-[var(--hover-bg)]
                 hover:border-[var(--color-primary)]
-                hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
                 hover:text-[var(--text)]
                 transition
               "
-              :class="selectedFolder === folder.id ? 'bg-[var(--bg)] border-[var(--color-primary)]' : ''"
+              :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
             >
-              <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+              <img src="/icon/icon-folder.svg" alt="folder" class="h-6"/>
               <span class="text-sm text-left truncate w-full">
                 {{ folder.name }}
               </span>
@@ -676,15 +682,15 @@
           type="submit"
           form="move-to-folder-form"
           class="
-            text-[var(--text)] text-sm
+            text-sm
             border
             rounded-full
             px-3
             transition
           "
           :class="!selectedFolder
-            ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-            : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+            ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+            : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'"
         >
           Move
         </button>
