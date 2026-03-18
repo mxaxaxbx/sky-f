@@ -10,10 +10,10 @@
   </div>
 
   <!-- content -->
-  <div v-else class="w-full mx-auto p-2 sm:p-4 w-full border border-[var(--border)] rounded-3xl">
+  <div v-else class="w-full h-full mt-10 mx-auto p-2 sm:p-4">
 
     <!-- folders -->
-    <div v-if="folderResults.data.length" class="w-full border-t border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
+    <div v-if="folderResults.data.length" class="w-full border border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
       <h3
         class="
           font-regular text-sm text-[var(--text-terceary)]
@@ -152,8 +152,8 @@
     </div>
 
     <!-- files -->
-    <div v-if="fileResults.data.length" class="w-full">
-      <!-- <h3
+    <div v-if="fileResults.data.length" class="w-full border border-[var(--border)] mt-20 py-0 px-2 sm:mt-0 sm:px-0">
+      <h3
         class="
           font-regular text-sm text-[var(--text-terceary)]
           truncate text-left
@@ -161,7 +161,7 @@
 
           sm:text-lg sm:mb-4 sm:font-semibold
         "
-      >Files</h3> -->
+      >Files</h3>
       <div
         class="
           grid grid-cols-1 gap-2 mx-0
