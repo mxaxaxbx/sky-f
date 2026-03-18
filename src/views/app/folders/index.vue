@@ -30,10 +30,14 @@
           <router-link
             to="/app/files"
             class="
-              flex items-center gap-2
-              px-2
+              flex items-center
+              gap-2 px-2
               grayscale
-              text-[var(--text-terceary)] font-semibold sm:text-xl text-sm
+              text-[var(--text-terceary)] font-semibold
+              text-xs
+
+              sm:text-sm md:text-md lg:text-lg
+
               hover:text-[var(--text)] hover:grayscale-0
               transition-colors duration-200
             "
@@ -44,7 +48,14 @@
           <span class="text-[var(--text-terceary)]">></span>
           <div class="flex items-center gap-2 px-2">
             <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
-            <h2 class="text-xs sm:text-lg font-light text-[var(--text)]">
+            <h2
+              class="
+                font-light text-[var(--text)]
+                text-xs
+
+                sm:text-sm md:text-md lg:text-lg
+              "
+            >
               {{ folderDetails.name }}
             </h2>
           </div>
@@ -106,7 +117,7 @@
               New folder
             </button>
 
-            <div class="flex flex-col items-end justify-end ml-4">
+            <div class="flex flex-col items-end justify-end ml-4 hidden lg:inline">
             <!-- Created date -->
             <div class="px-2 flex items-center justify-center gap-2 ">
               <div class="">

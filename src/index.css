@@ -12,7 +12,9 @@
     --text-terceary: #a3a3a3;
     --border: #3d3d3d;
     --sun:#345D8D;
+    --spaceship:#202F41;
     --bg-path: #142B47;
+    --bg-path-secondary: #CFE6FF;
   
     /* hover */
     --hover-border: #0A77F3;
@@ -40,7 +42,9 @@
   --text-terceary: #797979;
   --border: #DCDCDC;
   --sun:#BFDCFF;
+  --spaceship:#ffffff;
   --bg-path: #FDFDFD;
+  --bg-path-secondary: #002e5f;
   
   /* hover */
   --hover-border: #0A77F3;

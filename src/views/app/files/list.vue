@@ -26,7 +26,7 @@
     </div>
 
     <!-- if not results -->
-    <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full mt-4">
+    <div v-else-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full mt-4">
       <div
         class="
         flex flex-col gap-8 justify-center items-center
@@ -56,12 +56,19 @@
         <button
           type="button"
           @click="showFolders = !showFolders"
-          class="text-xs rounded-full mt-0.5
+          class="
+            text-xs rounded-xl p-1 mt-0.5
+            border border-transparent
+
+            hover:border-[var(--color-primary)]
             hover:text-[var(--color-primary)]
             transition-all duration-300"
-          :class="showFolders ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
+          :class="showFolders ? 'text-[var(--color-primary)]' : 'grayscale'"
         >
-          <i class="fa-solid fa-chevron-down"></i>
+        <img
+            :src="showFolders ? '/icon/icon-preview.svg' : '/icon/icon-close-eye.svg'"
+            alt="eye icon"
+            class="h-5"/>
         </button>
       </h3>
       <Transition name="slide">
@@ -71,7 +78,7 @@
             grid grid-cols-2 gap-2 mx-0
             text-[var(--text)] my-4
 
-            sm:grid-cols-2 sm:gap-4 sm:mx-4 sm:my-4
+            sm:grid-cols-2 sm:gap-4 sm:mx-2 sm:my-2
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
@@ -268,12 +275,20 @@
           <button
             type="button"
             @click="showFiles = !showFiles"
-            class="text-xs rounded-full mt-0.5
+            class="
+              text-xs rounded-xl
+              border border-transparent
+              p-1 mt-0.5
+
               hover:text-[var(--color-primary)]
+              hover:border-[var(--color-primary)]
               transition-all duration-300"
-            :class="showFiles ? '-rotate-90 text-[var(--color-primary)]' : 'rotate-0'"
+            :class="showFiles ? 'text-[var(--color-primary)]' : 'grayscale'"
           >
-            <i class="fa-solid fa-chevron-down"></i>
+            <img
+              :src="showFiles ? '/icon/icon-preview.svg' : '/icon/icon-close-eye.svg'"
+              alt="eye icon"
+              class="h-5"/>
           </button>
         </h3>
         <!-- order by -->
