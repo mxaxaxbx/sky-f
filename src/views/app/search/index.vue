@@ -224,14 +224,17 @@
       >
         Files ({{ files.length }})
       </h3>
-      <div class="
-        grid grid-cols-1 gap-2 mx-0
-        text-[var(--text)]
-        sm:grid-cols-2 sm:gap-4
-        md:grid-cols-3
-        lg:grid-cols-4
-        xl:grid-cols-6
-      ">
+      <div
+        class="
+          grid grid-cols-1 gap-2 mx-0
+          text-[var(--text)]
+
+          sm:grid-cols-2 sm:gap-4 sm:mx-0
+          md:grid-cols-3
+          lg:grid-cols-4
+          xl:grid-cols-6
+        "
+      >
         <div
           v-for="file, index in fileResults.data"
           :key="file.id"
@@ -264,7 +267,7 @@
       >
         <div class="flex w-full h-auto items-center justify-between relative">
           <div class="flex-1 min-w-0">
-            <div class="flex items center justify-between p-0">
+            <div class="flex items center justify-between p-1">
               <div
                 class="
                   flex items-center
