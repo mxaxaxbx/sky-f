@@ -55,22 +55,24 @@
 
         "
       >
-        <div class="flex gap-1">
-          <span class="text-md font-medium text-[var(--text)] mr-auto">
-            {{ selectedIds.size }} <span class="ml-1">selected:</span>
-          </span>
+        <div class="flex gap-2">
           <!-- clear selection -->
           <button
             @click="clearSelection"
             class="
-              text-xs text-[var(--text-terceary)]
-              rounded-lg border border-transparent
+              text-xs text-[var(--text-terceary)] w-6 h-6
+              rounded-full border border-transparent
               hover:border-[var(--color-primary)] hover:text-[var(--text)]
+              hover:bg-[var(--hover-bg)]
+              hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]
               transition-all duration-300
             "
           >
             <i class="fas fa-xmark m-1.5" />
           </button>
+          <span class="text-md font-medium text-[var(--text)] mr-auto">
+            {{ selectedIds.size }} <span class="">selected:</span>
+          </span>
         </div>
         <div class="flex gap-2">
           <!-- recover selected -->
@@ -78,21 +80,25 @@
             :disabled="loading"
             @click="recoverSelected"
             class="
-              flex items-center gap-1.5
-              px-3 py-0.5
-              text-sm font-medium
+              flex items-center gap-2
+              px-2 py-0.5
+              text-s font-medium
               rounded-full border
-              text-[var(--success-border)]
-              border-[var(--success-border)]
-              bg-[var(--success-bg)] opacity-70
+              text-[var(--color-primary)]
+              border-[var(--color-primary)]
+              bg-[var(--bg-secondary)]
+              grayscale
 
-              hover:opacity-100
-              hover:shadow-[0_0_3px_2px_rgba(0,180,75,0.3)]
+              hover:border-[var(--color-primary)]
+              hover:bg-[var(--hover-bg)]
+              hover:opacity-100 hover:grayscale-0
+              hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]
+              focus:grayscale-0 focus:opacity-100
               transition-all duration-300
               disabled:opacity-40
             "
           >
-            <i class="fas fa-rotate-left text-xs" />
+            <img src="/icon/icon-recover.svg" alt="recover" class="h-5" />
             Recover
           </button>
 
@@ -101,22 +107,25 @@
             :disabled="loading"
             @click="confirmDeleteSelected"
             class="
-              flex items-center gap-1.5
+              flex items-center gap-2
               px-2.5 py-0.5
-              text-sm font-medium
+              text-s font-medium
               rounded-full border
-              text-[var(--error-border)]
-              border-[var(--error-border)]
-              bg-[var(--error-bg)]
-              opacity-70
+              text-[var(--warning-border)]
+              border-[var(--warning-border)]
+              bg-[var(--bg-secondary)]
+              grayscale opacity-60
 
-              hover:opacity-100
-              hover:shadow-[0_0_3px_2px_rgba(255,33,33,0.3)]
+              hover:border-[var(--warning-border)]
+              hover:bg-[var(--warning-bg)]
+              hover:opacity-100 hover:grayscale-0
+              hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
+              focus:grayscale-0 focus:opacity-100
               transition-all duration-300
               disabled:opacity-40
             "
           >
-            <img src="/icon/icon-delate-red.svg" alt="delate" class="h-4"/>
+            <img src="/icon/icon-delate.svg" alt="delate" class="h-5"/>
             Delete permanently
           </button>
         </div>
