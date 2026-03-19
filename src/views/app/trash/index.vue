@@ -1,266 +1,525 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-6">
-    <div class="max-w-5xl mx-auto">
+  <!-- loading -->
+  <div v-if="loading" class="flex mx-auto justify-center items-center py-20 text-[var(--color-primary)]">
+    <i class="fas fa-spinner fa-spin text-2xl"></i>
+  </div>
 
-      <!-- Header -->
-      <div class="mb-6">
-        <div class="flex items-center gap-3 mb-1">
-          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-            <i class="fa-solid fa-trash text-red-500 text-lg" />
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-gray-800">Papelera</h1>
-            <p class="text-sm text-gray-400">
-              {{ totalItems }} elemento{{ totalItems !== 1 ? 's' : '' }} eliminado{{ totalItems !== 1 ? 's' : '' }}
-            </p>
-          </div>
-        </div>
-      </div>
+  <!-- empty state -->
+  <div v-else-if="!folders.length && !files.length" class="px-8 mx-auto w-full h-full mt-4">
+    <div
+      class="
+        flex flex-col gap-6 justify-center items-center
+        w-full h-[calc(100vh-120px)]
+        border-2 border-[var(--text-terceary)] border-dashed
+        rounded-2xl
+        hover:border-[var(--color-primary)]
+        transition-colors duration-300
+      "
+    >
+      <i class="fas fa-trash-can text-6xl text-[var(--text-terceary)]"></i>
+      <p class="text-[var(--text-terceary)] text-center text-2xl font-regular">
+        The void is empty. Nothing to delete here.
+      </p>
+    </div>
+  </div>
 
-      <!-- Bulk actions bar -->
-      <transition
-        enter-active-class="animate__animated animate__fadeInDown animate__faster"
-        leave-active-class="animate__animated animate__fadeOutUp animate__faster"
-      >
-        <div
-          v-if="selectedIds.size > 0"
-          class="mb-4 flex flex-wrap items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3"
-        >
-          <span class="text-sm font-semibold text-indigo-600 mr-auto">
-            <i class="fa-solid fa-check-square mr-1" />
-            {{ selectedIds.size }} seleccionado{{ selectedIds.size !== 1 ? 's' : '' }}
-          </span>
+  <template v-else>
 
-          <button
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-100 text-emerald-700 text-sm font-medium hover:bg-emerald-200 transition-colors disabled:opacity-50"
-            :disabled="loading"
-            @click="recoverSelected"
-          >
-            <i class="fa-solid fa-rotate-left" />
-            Recuperar seleccionados
-          </button>
-
-          <button
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 text-sm font-medium hover:bg-red-200 transition-colors disabled:opacity-50"
-            :disabled="loading"
-            @click="confirmDeleteSelected"
-          >
-            <i class="fa-solid fa-trash-can" />
-            Eliminar definitivamente
-          </button>
-
-          <button
-            class="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2 py-1 rounded"
-            @click="clearSelection"
-          >
-            <i class="fa-solid fa-xmark mr-1" />Deseleccionar
-          </button>
-        </div>
-      </transition>
-
-      <!-- Loading skeleton -->
-      <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div v-for="n in 6" :key="n" class="h-16 rounded-xl bg-gray-200 animate-pulse" />
-      </div>
-
-      <!-- Empty state -->
+    <!-- bulk actions bar -->
+    <transition
+      enter-active-class="animate__animated animate__fadeInDown animate__faster"
+      leave-active-class="animate__animated animate__fadeOutUp animate__faster"
+    >
       <div
-        v-else-if="totalItems === 0"
-        class="flex flex-col items-center justify-center py-24 text-gray-400 animate__animated animate__fadeIn"
+        v-if="selectedIds.size > 0"
+        class="
+          flex flex-wrap items-center gap-2
+          mx-2 mt-4 mb-0 px-4 py-2
+          bg-[var(--hover-bg)]
+          border border-[var(--color-primary)]
+          shadow-[0_0_5px_2px_rgba(10,119,243,0.2)]
+          rounded-2xl
+
+          sm:mx-14
+        "
       >
-        <i class="fa-solid fa-trash-can text-6xl mb-4 text-gray-300" />
-        <h2 class="text-xl font-semibold text-gray-500 mb-1">La papelera está vacía</h2>
-        <p class="text-sm">Los elementos eliminados aparecerán aquí.</p>
+        <span class="text-sm font-semibold text-[var(--color-primary)] mr-auto">
+          <i class="fas fa-check-square mr-1" />
+          {{ selectedIds.size }} selected
+        </span>
+
+        <!-- recover selected -->
+        <button
+          :disabled="loading"
+          @click="recoverSelected"
+          class="
+            flex items-center gap-1.5
+            px-3 py-0.5
+            text-sm font-medium
+            rounded-full border
+            text-emerald-600 border-emerald-400 bg-emerald-50
+            hover:bg-emerald-100 hover:shadow-[0_0_3px_3px_rgba(5,150,105,0.3)]
+            transition-all duration-300
+            disabled:opacity-40
+          "
+        >
+          <i class="fas fa-rotate-left text-xs" />
+          Recover
+        </button>
+
+        <!-- delete selected -->
+        <button
+          :disabled="loading"
+          @click="confirmDeleteSelected"
+          class="
+            flex items-center gap-1.5
+            px-3 py-0.5
+            text-sm font-medium
+            rounded-full border
+            text-[var(--warning-border)] border-[var(--warning-border)] bg-[var(--warning-bg)]
+            hover:shadow-[0_0_3px_3px_rgba(239,68,68,0.3)]
+            opacity-70 hover:opacity-100
+            transition-all duration-300
+            disabled:opacity-40
+          "
+        >
+          <i class="fas fa-trash-can text-xs" />
+          Delete permanently
+        </button>
+
+        <button
+          @click="clearSelection"
+          class="
+            text-xs text-[var(--text-terceary)]
+            px-2 py-1 rounded-xl border border-transparent
+            hover:border-[var(--border)] hover:text-[var(--text)]
+            transition-all duration-300
+          "
+        >
+          <i class="fas fa-xmark mr-1" />Deselect
+        </button>
       </div>
+    </transition>
 
-      <template v-else>
+    <!-- folders section -->
+    <div
+      v-if="folders.length"
+      class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14"
+    >
+      <h3
+        class="
+          flex items-center
+          font-regular text-left text-sm text-[var(--text-terceary)] truncate
+          mb-1 gap-2
+          sm:text-lg sm:mb-0 sm:font-semibold
+        "
+      >
+        <span>Folders</span>
+        <button
+          type="button"
+          @click="showFolders = !showFolders"
+          class="
+            text-xs rounded-xl p-1 border border-transparent mt-0.5
+            hover:border-[var(--color-primary)]
+            hover:text-[var(--color-primary)]
+            focus:outline-none
+            transition-all duration-300"
+          :class="showFolders ? 'text-[var(--color-primary)]' : 'grayscale'"
+        >
+          <img :src="showFolders ? '/icon/icon-preview.svg' : '/icon/icon-close-eye.svg'" alt="eye icon" class="h-5" />
+        </button>
+      </h3>
 
-        <!-- Select all -->
-        <div class="mb-4">
-          <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              class="w-4 h-4 rounded accent-indigo-600 cursor-pointer"
-              :checked="allSelected"
-              :indeterminate="someSelected"
-              @change="toggleSelectAll"
-            />
-            Seleccionar todo
-          </label>
+      <Transition name="slide">
+        <div
+          v-show="showFolders"
+          class="
+            grid grid-cols-2 gap-2 mx-0
+            text-[var(--text)] my-4
+            sm:grid-cols-2 sm:gap-4 sm:my-2
+            md:grid-cols-3
+            lg:grid-cols-4
+            xl:grid-cols-6
+            transition-all duration-300
+          "
+        >
+          <button
+            v-for="folder in folders"
+            :key="folder.id"
+            @click="toggleSelect('folder-' + folder.id)"
+            class="
+              group
+              flex items-center justify-between
+              w-full
+              bg-[var(--bg-secondary)]
+              border border-[var(--border)]
+              rounded-2xl min-w-0
+              cursor-pointer
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--hover-border)]
+              transition-all duration-300
+            "
+            :class="selectedIds.has(`folder-${folder.id}`)
+              ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+              : 'border-[var(--border)]'
+            "
+          >
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between p-1">
+                <div class="flex items-center space-x-2 min-w-0 w-full overflow-hidden">
+                  <!-- checkbox -->
+                  <label for="folder-{{ folder.id }}"></label>
+                  <input
+                    type="checkbox"
+                    :checked="selectedIds.has('folder-' + folder.id)"
+                    @click.stop
+                    @change="toggleSelect('folder-' + folder.id)"
+                    class="w-3.5 h-3.5 rounded accent-[var(--color-primary)] flex-shrink-0 ml-1 cursor-pointer"
+                  />
+                  <img src="/icon/icon-folder.svg" alt="folder" class="h-8 flex-shrink-0" />
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-xs sm:text-sm truncate text-left">
+                      {{ folder.name }}
+                    </h3>
+                    <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
+                      {{ formatDate(folder.updated) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- actions -->
+            <div
+              class="
+                flex items-center justify-center
+                border-l border-[var(--border)]
+                w-6 py-2
+                group-hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <Dropdown
+                :classes="[
+                  'bg-[var(--bg-secondary)]',
+                  'border border-[var(--border)]',
+                  'rounded-2xl',
+                  'absolute', '-right-0', 'z-20',
+                  dropdownPosition,
+                  'w-52',
+                  'sm:-right-2'
+                ]"
+              >
+                <template #trigger="{ toggle }">
+                  <button
+                    @click.stop="toggleDropdown(toggle, $event)"
+                    class="
+                      text-[var(--text-terceary)] w-6 h-auto
+                      hover:text-[var(--text)]
+                      transition-colors duration-300
+                    "
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </template>
+
+                <template #content>
+                  <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+
+                    <!-- recover -->
+                    <button
+                      @click.stop="recoverItem('folder', folder.id)"
+                      :disabled="loading"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+                        text-emerald-600
+
+                        hover:bg-emerald-50
+                        hover:border-emerald-400
+                        transition-colors duration-300
+                        disabled:opacity-40
+                      "
+                    >
+                      <i class="fas fa-rotate-left h-5 w-5 mr-4 text-center" />
+                      <span>Recover</span>
+                    </button>
+
+                    <!-- delete permanently -->
+                    <button
+                      @click.stop="confirmDeleteItem('folder', folder.id, folder.name)"
+                      :disabled="loading"
+                      class="
+                        flex items-center justify-start
+                        rounded-xl px-2 py-1 border border-transparent
+                        grayscale text-[var(--warning-border)] opacity-50
+
+                        hover:bg-[var(--warning-bg)]
+                        hover:text-[var(--warning-border)]
+                        hover:border-[var(--warning-border)]
+                        hover:grayscale-0 hover:opacity-100
+                        transition-colors duration-300
+                        disabled:opacity-30
+                      "
+                    >
+                      <i class="fas fa-trash-can h-5 w-5 mr-4 text-center" />
+                      <span>Delete permanently</span>
+                    </button>
+
+                  </div>
+                </template>
+              </Dropdown>
+            </div>
+          </button>
         </div>
-
-        <!-- Folders -->
-        <section v-if="folders.length > 0" class="mb-6">
-          <h2 class="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            <i class="fa-solid fa-folder text-amber-400" />
-            Carpetas
-            <span class="bg-gray-200 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">
-              {{ folders.length }}
-            </span>
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <button
-              v-for="folder in folders"
-              :key="'folder-' + folder.id"
-              class="group relative flex items-center gap-3 px-4 py-3 bg-white rounded-xl border-2 cursor-pointer transition-all duration-150"
-              :class="selectedIds.has('folder-' + folder.id)
-                ? 'border-indigo-400 bg-indigo-50 shadow-sm shadow-indigo-100'
-                : 'border-gray-100 hover:border-indigo-200 hover:shadow-sm'"
-              @click="toggleSelect('folder-' + folder.id)"
-            >
-              <label for="folder-{{ folder.id }}"></label>
-              <input
-                type="checkbox"
-                class="w-4 h-4 rounded accent-indigo-600 cursor-pointer flex-shrink-0"
-                :checked="selectedIds.has('folder-' + folder.id)"
-                @click.stop
-                @change="toggleSelect('folder-' + folder.id)"
-              />
-              <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-folder text-amber-400 text-lg" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800 truncate">{{ folder.name }}</p>
-                <p class="text-xs text-gray-400">{{ formatDate(folder.updated) }}</p>
-              </div>
-              <div
-                class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0"
-                :class="{ 'opacity-100': selectedIds.has('folder-' + folder.id) }"
-                @click.stop
-              >
-                <button
-                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-40"
-                  title="Recuperar"
-                  :disabled="loading"
-                  @click="recoverItem('folder', folder.id)"
-                >
-                  <i class="fa-solid fa-rotate-left text-sm" />
-                </button>
-                <button
-                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-40"
-                  title="Eliminar definitivamente"
-                  :disabled="loading"
-                  @click="confirmDeleteItem('folder', folder.id, folder.name)"
-                >
-                  <i class="fa-solid fa-trash-can text-sm" />
-                </button>
-              </div>
-            </button>
-          </div>
-        </section>
-
-        <!-- Files -->
-        <section v-if="files.length > 0">
-          <h2 class="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            <i class="fa-solid fa-file text-blue-400" />
-            Archivos
-            <span class="bg-gray-200 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">
-              {{ files.length }}
-            </span>
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <button
-              v-for="file in files"
-              :key="'file-' + file.id"
-              class="group relative flex items-center gap-3 px-4 py-3 bg-white rounded-xl border-2 cursor-pointer transition-all duration-150"
-              :class="selectedIds.has('file-' + file.id)
-                ? 'border-indigo-400 bg-indigo-50 shadow-sm shadow-indigo-100'
-                : 'border-gray-100 hover:border-indigo-200 hover:shadow-sm'"
-              @click="toggleSelect('file-' + file.id)"
-            >
-              <label for="file-{{ file.id }}"></label>
-              <input
-                type="checkbox"
-                class="w-4 h-4 rounded accent-indigo-600 cursor-pointer flex-shrink-0"
-                :checked="selectedIds.has('file-' + file.id)"
-                @click.stop
-                @change="toggleSelect('file-' + file.id)"
-              />
-              <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-file text-blue-400 text-lg" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800 truncate">{{ file.name }}</p>
-                <p class="text-xs text-gray-400">{{ formatDate(file.updated) }}</p>
-              </div>
-              <div
-                class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0"
-                :class="{ 'opacity-100': selectedIds.has('file-' + file.id) }"
-                @click.stop
-              >
-                <button
-                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-40"
-                  title="Recuperar"
-                  :disabled="loading"
-                  @click="recoverItem('file', file.id)"
-                >
-                  <i class="fa-solid fa-rotate-left text-sm" />
-                </button>
-                <button
-                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-40"
-                  title="Eliminar definitivamente"
-                  :disabled="loading"
-                  @click="confirmDeleteItem('file', file.id, file.name)"
-                >
-                  <i class="fa-solid fa-trash-can text-sm" />
-                </button>
-              </div>
-            </button>
-          </div>
-        </section>
-
-      </template>
+      </Transition>
     </div>
 
-    <!-- Confirm delete modal -->
-    <transition
-      enter-active-class="animate__animated animate__fadeIn animate__faster"
-      leave-active-class="animate__animated animate__fadeOut animate__faster"
+    <!-- files section -->
+    <div
+      v-if="files.length"
+      class="w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14"
     >
-      <button
-        v-if="confirmDialog.visible"
-        class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
-        @click.self="confirmDialog.visible = false"
+      <h3
+        class="
+          flex items-center
+          font-regular text-left text-sm text-[var(--text-terceary)] truncate
+          mb-1 gap-2
+          sm:text-lg sm:mb-0 sm:font-semibold
+        "
       >
-        <div class="animate__animated animate__zoomIn animate__faster bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
-          <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl" />
-          </div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2">Eliminar definitivamente</h3>
-          <p class="text-sm text-gray-600 mb-1">
-            <template v-if="confirmDialog.isBulk">
-              ¿Eliminar definitivamente los
-              <span class="font-semibold">{{ selectedIds.size }} elementos</span> seleccionados?
-            </template>
-            <template v-else>
-              ¿Eliminar definitivamente
-              <span class="font-semibold">"{{ confirmDialog.name }}"</span>?
-            </template>
-          </p>
-          <p class="text-xs text-red-500 font-medium mb-6">
-            <i class="fa-solid fa-circle-exclamation mr-1" />
-            Esta acción no se puede deshacer.
-          </p>
-          <div class="flex gap-3 justify-center">
-            <button
-              class="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors"
-              @click="confirmDialog.visible = false"
-            >
-              Cancelar
-            </button>
-            <button
-              class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
-              :disabled="loading"
-              @click="executeDelete"
-            >
-              <i class="fa-solid fa-trash-can" />
-              {{ loading ? 'Eliminando...' : 'Eliminar' }}
-            </button>
-          </div>
+        <span>Your Files</span>
+        <button
+          type="button"
+          @click="showFiles = !showFiles"
+          class="
+            text-xs rounded-xl p-1 border border-transparent mt-0.5
+            hover:border-[var(--color-primary)]
+            hover:text-[var(--color-primary)]
+            transition-all duration-300"
+          :class="showFiles ? 'text-[var(--color-primary)]' : 'grayscale'"
+        >
+          <img :src="showFiles ? '/icon/icon-preview.svg' : '/icon/icon-close-eye.svg'" alt="eye icon" class="h-5" />
+        </button>
+      </h3>
+
+      <Transition name="slide">
+        <div
+          v-show="showFiles"
+          class="
+            grid grid-cols-1 gap-2 mx-0
+            text-[var(--text)]
+            sm:grid-cols-2 sm:gap-4
+            md:grid-cols-3
+            lg:grid-cols-4
+            xl:grid-cols-6
+          "
+        >
+          <button
+            v-for="file in files"
+            :key="file.id"
+            @click="toggleSelect('file-' + file.id)"
+            class="
+              group
+              flex items-center justify-between
+              w-full
+              bg-[var(--bg-secondary)]
+              border border-[var(--border)]
+              rounded-2xl min-w-0
+              cursor-pointer
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--hover-border)]
+              transition-colors duration-300
+            "
+            :class="selectedIds.has('file-' + file.id)
+              ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]'
+              : 'border-[var(--border)]'
+            "
+          >
+            <div class="flex w-full h-auto items-center justify-between relative">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between p-1">
+                  <div class="flex items-center space-x-2 min-w-0 w-full overflow-hidden">
+                    <!-- checkbox -->
+                    <label for="file-{{ file.id }}"></label>
+                    <input
+                      type="checkbox"
+                      :checked="selectedIds.has('file-' + file.id)"
+                      @click.stop
+                      @change="toggleSelect('file-' + file.id)"
+                      class="w-3.5 h-3.5 rounded accent-[var(--color-primary)] flex-shrink-0 ml-1 cursor-pointer"
+                    />
+                    <!-- file type icon -->
+                    <img v-if="file.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-10 w-10" />
+                    <img v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)" src="/icon/icon-png.svg" alt="png" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-10 w-10" />
+                    <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)" src="/icon/icon-img.svg" alt="img" class="h-10 w-10" />
+                    <img v-else-if="/^video\//.test(file.contentType)" src="/icon/icon-video.svg" alt="video" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/zip'" src="/icon/icon-zip.svg" alt="zip" class="h-10 w-10" />
+                    <img v-else-if="/^audio\//.test(file.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-10 w-10" />
+                    <img v-else src="/icon/icon-file.svg" alt="file" class="h-10 w-10" />
+
+                    <!-- name & date -->
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
+                        {{ file.name }}
+                      </h3>
+                      <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
+                        {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} · {{ formatFileSize(file.size) }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- actions -->
+              <div
+                class="
+                  flex items-center justify-center
+                  border-l border-[var(--border)]
+                  w-6 py-1
+                  group-hover:border-[var(--color-primary)]
+                  transition-colors duration-300
+                "
+              >
+                <Dropdown
+                  :classes="[
+                    'bg-[var(--bg-secondary)]',
+                    'border border-[var(--border)]',
+                    'rounded-2xl',
+                    'absolute', '-right-0', 'z-20',
+                    dropdownPosition,
+                    'w-52',
+                    'sm:-right-2'
+                  ]"
+                >
+                  <template #trigger="{ toggle }">
+                    <button
+                      @click.stop="toggleDropdown(toggle, $event)"
+                      class="
+                        text-[var(--text-terceary)] w-6 h-10
+                        hover:text-[var(--text)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                  </template>
+
+                  <template #content>
+                    <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+
+                      <!-- recover -->
+                      <button
+                        @click.stop="recoverItem('file', file.id)"
+                        :disabled="loading"
+                        class="
+                          flex items-center justify-start
+                          rounded-xl px-2 py-1 border border-transparent
+                          text-emerald-600
+
+                          hover:bg-emerald-50
+                          hover:border-emerald-400
+                          transition-colors duration-300
+                          disabled:opacity-40
+                        "
+                      >
+                        <i class="fas fa-rotate-left h-5 w-5 mr-4 text-center" />
+                        <span>Recover</span>
+                      </button>
+
+                      <!-- delete permanently -->
+                      <button
+                        @click.stop="confirmDeleteItem('file', file.id, file.name)"
+                        :disabled="loading"
+                        class="
+                          flex items-center justify-start
+                          rounded-xl px-2 py-1 border border-transparent
+                          grayscale text-[var(--warning-border)] opacity-50
+
+                          hover:bg-[var(--warning-bg)]
+                          hover:text-[var(--warning-border)]
+                          hover:border-[var(--warning-border)]
+                          hover:grayscale-0 hover:opacity-100
+                          transition-colors duration-300
+                          disabled:opacity-30
+                        "
+                      >
+                        <i class="fas fa-trash-can h-5 w-5 mr-4 text-center" />
+                        <span>Delete permanently</span>
+                      </button>
+
+                    </div>
+                  </template>
+                </Dropdown>
+              </div>
+            </div>
+          </button>
         </div>
+      </Transition>
+    </div>
+
+  </template>
+
+  <!-- confirm delete modal -->
+  <Modal v-model="confirmDialog.visible" size="sm">
+    <template #header>
+      <h3 class="text-lg font-light text-[var(--text)] flex items-center gap-2">
+        <i class="fas fa-triangle-exclamation text-[var(--warning-border)]" />
+        Delete permanently
+      </h3>
+    </template>
+
+    <template #content>
+      <p class="text-sm text-[var(--text-terceary)] my-2">
+        <template v-if="confirmDialog.isBulk">
+          Are you sure you want to permanently delete
+          <span class="font-semibold text-[var(--text)]">{{ selectedIds.size }} items</span>?
+        </template>
+        <template v-else>
+          Are you sure you want to permanently delete
+          <span class="font-semibold text-[var(--text)]">"{{ confirmDialog.name }}"</span>?
+        </template>
+      </p>
+      <p class="text-xs text-[var(--warning-border)] font-medium flex items-center gap-1">
+        <i class="fas fa-circle-exclamation" />
+        This action cannot be undone.
+      </p>
+    </template>
+
+    <template #footer>
+      <button
+        type="button"
+        @click="confirmDialog.visible = false"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full px-3
+        "
+      >
+        Cancel
       </button>
-    </transition>
-  </div>
+      <button
+        @click="executeDelete"
+        :disabled="loading"
+        class="
+          flex items-center gap-2
+          text-sm border rounded-full px-3
+          text-white bg-red-500 border-red-500
+          hover:bg-red-600
+          hover:shadow-[0_0_3px_3px_rgba(239,68,68,0.4)]
+          transition-all duration-300
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
+      >
+        <i class="fas fa-trash-can text-xs" />
+        {{ loading ? 'Deleting...' : 'Delete permanently' }}
+      </button>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -279,7 +538,10 @@ import { FilesResultI } from '@/store/files/state';
 const store = useStore();
 
 const loading = ref(false);
+const showFolders = ref(true);
+const showFiles = ref(true);
 const selectedIds = ref<Set<string>>(new Set());
+const dropdownPosition = ref('top-8');
 
 const confirmDialog = reactive({
   visible: false,
@@ -295,18 +557,6 @@ const fileResults = computed<FilesResultI>(() => store.state.files.result);
 
 const folders = computed<FolderI[]>(() => folderResults.value?.data ?? []);
 const files = computed(() => fileResults.value?.data ?? []);
-const totalItems = computed(() => folders.value.length + files.value.length);
-
-const allIds = computed(() => [
-  ...folders.value.map((f: FolderI) => `folder-${f.id}`),
-  ...files.value.map((f: any) => `file-${f.id}`),
-]);
-const allSelected = computed(
-  () => allIds.value.length > 0 && allIds.value.every((id: string) => selectedIds.value.has(id)),
-);
-const someSelected = computed(
-  () => !allSelected.value && allIds.value.some((id: string) => selectedIds.value.has(id)),
-);
 
 function toggleSelect(id: string) {
   const next = new Set(selectedIds.value);
@@ -318,16 +568,24 @@ function toggleSelect(id: string) {
   selectedIds.value = next;
 }
 
-function toggleSelectAll() {
-  selectedIds.value = allSelected.value ? new Set() : new Set(allIds.value);
-}
-
 function clearSelection() {
   selectedIds.value = new Set();
 }
 
 function formatDate(date: number) {
   return moment(date * 1000).fromNow();
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
+function toggleDropdown(toggle: () => void, event: Event) {
+  event.stopPropagation();
+  toggle();
 }
 
 function notify(type: 'success' | 'error', message: string) {
@@ -339,7 +597,7 @@ async function getTrashFolder() {
   try {
     await store.dispatch('folders/getTrashFolder');
   } catch {
-    notify('error', 'Error al obtener la papelera');
+    notify('error', 'Error getting the trash folder');
   } finally {
     loading.value = false;
   }
@@ -350,7 +608,7 @@ async function getFolders() {
   try {
     await store.dispatch('folders/filter', { query: '', page: 1, folderId: trashFolder.value.id });
   } catch {
-    notify('error', 'Error al obtener las carpetas');
+    notify('error', 'Error getting folders');
   } finally {
     loading.value = false;
   }
@@ -361,7 +619,7 @@ async function getFiles() {
   try {
     await store.dispatch('files/filter', { query: '', page: 1, folderId: trashFolder.value.id });
   } catch {
-    notify('error', 'Error al obtener los archivos');
+    notify('error', 'Error getting files');
   } finally {
     loading.value = false;
   }
@@ -376,10 +634,10 @@ async function recoverItem(type: 'folder' | 'file', id: string | number) {
   loading.value = true;
   try {
     await store.dispatch(`${type}s/recover`, { id });
-    notify('success', 'Elemento recuperado correctamente');
+    notify('success', 'Item recovered successfully');
     await refresh();
   } catch {
-    notify('error', 'Error al recuperar el elemento');
+    notify('error', 'Error recovering item');
   } finally {
     loading.value = false;
   }
@@ -394,11 +652,11 @@ async function recoverSelected() {
         return store.dispatch(`${type}s/recover`, { id: Number(id) });
       }),
     );
-    notify('success', 'Elementos recuperados correctamente');
+    notify('success', 'Items recovered successfully');
     clearSelection();
     await refresh();
   } catch {
-    notify('error', 'Error al recuperar los elementos');
+    notify('error', 'Error recovering items');
   } finally {
     loading.value = false;
   }
@@ -431,16 +689,16 @@ async function executeDelete() {
           return store.dispatch(`${type}s/deletePermanently`, { id: Number(id) });
         }),
       );
-      notify('success', 'Elementos eliminados definitivamente');
+      notify('success', 'Items permanently deleted');
       clearSelection();
     } else {
       await store.dispatch(`${confirmDialog.type}s/deletePermanently`, { id: confirmDialog.id });
-      notify('success', 'Elemento eliminado definitivamente');
+      notify('success', 'Item permanently deleted');
     }
     confirmDialog.visible = false;
     await refresh();
   } catch {
-    notify('error', 'Error al eliminar el elemento');
+    notify('error', 'Error deleting items');
   } finally {
     loading.value = false;
   }
