@@ -15,19 +15,20 @@
         rounded-2xl
 
         hover:border-[var(--color-primary)]
+        hover:shadow-[0_0_8px_2px_rgba(10,119,243,0.5)]
         transition-colors duration-300
         "
       >
       <!-- <h1 class="text-6xl font-bold text-center text-white">Fui a comprar lo del almuerzo! :D</h1> -->
-      <svg width="190" height="240" viewBox="0 0 190 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="300" height="260" viewBox="0 0 220 260" fill="#fffff" xmlns="http://www.w3.org/2000/svg">
         <!-- luz -->
-        <g>
+        <g class="lights">
         <ellipse cx="96.6104" cy="224.696" rx="79.5" ry="14.5" fill="var(--bg-path-secondary)" fill-opacity="0.2"/>
         <path d="M176.109 223.755C176.109 232.283 140.516 239.196 96.6094 239.196C52.7027 239.196 17.1094 232.283 17.1094 223.755C17.1094 216.703 48 89.201 48 89.201C48 89.201 86.8023 89.1963 94.401 89.1963C102 89.1963 141.5 86.1963 141.5 86.1963C141.5 86.1963 176.109 216.703 176.109 223.755Z"
           fill="var(--sun)" fill-opacity="0.5"/>
         </g>
         <!-- nave espacial -->
-        <g>
+        <g class="spacesship">
         <path d="M92.6311 34.3746C117.232 31.7957 139.756 33.1275 156.249 37.2734C164.508 39.3496 171.09 42.0915 175.653 45.2715C180.225 48.4579 182.45 51.8427 182.802 55.2004C183.154 58.5581 181.679 62.3308 177.868 66.396C174.064 70.453 168.192 74.4996 160.544 78.2433C145.269 85.7193 123.511 91.694 98.9101 94.2729C74.3088 96.8518 51.784 95.5192 35.2913 91.3732C27.0327 89.2971 20.4497 86.556 15.887 83.3761C11.3152 80.1897 9.08969 76.8049 8.73769 73.4472C8.38571 70.0895 9.86093 66.3168 13.6726 62.2516C17.4766 58.1945 23.3479 54.147 30.9966 50.4033C46.2709 42.9272 68.0298 36.9535 92.6311 34.3746Z"
           fill="var(--spaceship)" stroke="var(--color-primary)" stroke-width="6" stroke-linejoin="round"/>
         <path d="M88.1337 12.6491C110.649 10.2892 130.82 26.5555 133.319 49.0223C133.284 49.0936 133.226 49.2019 133.13 49.3494C132.805 49.8481 132.217 50.537 131.301 51.3773C129.481 53.0467 126.671 55.0332 123.02 57.0156C115.73 60.9727 105.418 64.7345 93.7222 65.9605C82.0265 67.1866 71.1575 65.6452 63.2057 63.2857C59.2224 62.1037 56.0619 60.7431 53.935 59.4874C52.8645 58.8554 52.1468 58.3034 51.7254 57.8828C51.6005 57.7582 51.5207 57.6646 51.4721 57.6021C49.2573 35.1054 65.6185 15.0094 88.1337 12.6491Z"
@@ -1305,61 +1306,99 @@ onMounted(() => {
 /* SUBIDA */
 .group:hover svg .icon:nth-child(1) {
   transform: translate(-10px, -70px) rotate(20deg) scale(1.2);
+  transition-duration: 1.6s;
+  transition-delay: 0.4s;
   animation: float1 2s ease-in-out infinite alternate;
-  animation-delay: 0.8s;
+  animation-delay: 1.9s;
 }
 
 .group:hover svg .icon:nth-child(2) {
-  transform: translate(-25px, -99px) rotate(25deg) scale(1.2);
+  transform: translate(-25px, -80px) rotate(25deg) scale(1.2);
+  transition-duration: 2.7s;
+  transition-delay: 0.4s;
   animation: float2 2.5s ease-in-out infinite alternate;
-  animation-delay: 0.6s;
+  animation-delay: 3s;
 }
 
 .group:hover svg .icon:nth-child(3) {
-  transform: translate(0px, -20px) rotate(-25deg) scale(1.2);
+  transform: translate(12px, -20px) rotate(-25deg) scale(1.2);
+  transition-duration: 1.7s;
+  transition-delay: 0.4s;
   animation: float3 1.8s ease-in-out infinite alternate;
-  animation-delay: 0.9s;
+  animation-delay: 1.9s;
 }
 
 .group:hover svg .icon:nth-child(4) {
-  transform: translate(6px, -25px) rotate(18deg) scale(1.2);
-  animation: float4 2.2s ease-in-out infinite alternate;
-  animation-delay: 0.6s;
+  transform: translate(0px, -25px) rotate(18deg) scale(1.2);
+  transition-duration: 2.3s;
+  transition-delay: 0.4s;
+  animation: float4 2s ease-in-out infinite alternate;
+  animation-delay: 2.45s;
 }
 
 .group:hover svg .icon:nth-child(5) {
   transform: translate(3px, -55px) rotate(-20deg) scale(1.2);
+  transition-duration: 1.9s;
+  transition-delay: 0.4s;
   animation: float5 2.7s ease-in-out infinite alternate;
-  animation-delay: 0.5s;
+  animation-delay: 2.4s;
 }
 
 .group:not(:hover) svg .icon {
   animation: none;
-  animation-delay: 0s !important;
-  animation-duration: 0s !important;
-  animation-iteration-count: 0 !important;
   transition: transform 1.5s ease-in;
 }
 
+.lights {
+  transform-origin: center;
+  transform: scaleX(0.1);
+  opacity: 0;
+  filter: blur(1px);
+  transition:
+    transform 0.6s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.4s ease,
+    filter 0.2s ease;
+}
+
+/* hover */
+.group:hover svg .lights {
+  opacity: 1;
+  transform: scaleX(1);
+  transform: scaleY(1.1);
+}
+
+.spacesship {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spaceshipFloat 6s ease-in-out infinite;
+}
+
 /* FLOTACIÓN  */
+@keyframes float {
+  0% {transform: translateX(0px) scaleY(1.1);}
+  25% {transform: translateX(-5px) scaleY(1.1);}
+  50% {transform: translateX(4px) scaleY(1.1);}
+  75% {transform: translateX(2px) scaleY(1.1);}
+  100% {transform: translateX(0px) scaleY(1.1);}
+}
 @keyframes float1 {
   0%   { transform: translate(-10px, -70px) rotate(20deg) scale(1.2); }
   100% { transform: translate(-7px, -76px) rotate(23deg) scale(1.2); }
 }
 
 @keyframes float2 {
-  0%   { transform: translate(-25px, -99px) rotate(25deg) scale(1.2); }
-  100% { transform: translate(-20px, -95px) rotate(10deg) scale(1.2); }
+  0%   { transform: translate(-25px, -80px) rotate(25deg) scale(1.2); }
+  100% { transform: translate(-20px, -85px) rotate(10deg) scale(1.2); }
 }
 
 @keyframes float3 {
-  0%   { transform: translate(0px, -20px) rotate(-25deg) scale(1.2); }
-  100% { transform: translate(3px, -26px) rotate(-20deg) scale(1.2); }
+  0%   { transform: translate(12px, -20px) rotate(-25deg) scale(1.2); }
+  100% { transform: translate(18px, -26px) rotate(-20deg) scale(1.2); }
 }
 
 @keyframes float4 {
-  0%   { transform: translate(6px, -25px) rotate(18deg) scale(1.2); }
-  100% { transform: translate(2px, -32px) rotate(22deg) scale(1.2); }
+  0%   { transform: translate(0px, -25px) rotate(18deg) scale(1.2); }
+  100% { transform: translate(2px, -18px) rotate(14deg) scale(1.2); }
 }
 
 @keyframes float5 {
@@ -1367,4 +1406,11 @@ onMounted(() => {
   100% { transform: translate(9px, -64px) rotate(-28deg) scale(1.2); }
 }
 
+@keyframes spaceshipFloat {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  25%  { transform: translate(16px, 16px) rotate(-8deg); }
+  50%  { transform: translate(-6px, 18px) rotate(10deg); }
+  75%  { transform: translate(-8px, -8px) rotate(8deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
 </style>
