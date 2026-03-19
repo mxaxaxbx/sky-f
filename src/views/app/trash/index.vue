@@ -177,7 +177,7 @@
           <button
             v-for="folder in folders"
             :key="folder.id"
-            @click="toggleSelect('folder-' + folder.id)"
+            @click="toggleSelect(folder, 'folder')"
             class="
               group
               flex items-center justify-between
@@ -202,9 +202,9 @@
                   <label for="folder-{{ folder.id }}"></label>
                   <input
                     type="checkbox"
-                    :checked="selectedIds.has('folder-' + folder.id)"
+                    :checked="selectedFolders.some((f: FolderI) => f.id === folder.id)"
                     @click.stop
-                    @change="toggleSelect('folder-' + folder.id)"
+                    @change="toggleSelect(folder, 'folder')"
                     class="w-3.5 h-3.5 rounded accent-[var(--color-primary)] flex-shrink-0 ml-1 cursor-pointer"
                   />
                   <img src="/icon/icon-folder.svg" alt="folder" class="h-8 flex-shrink-0" />
@@ -349,7 +349,7 @@
           <button
             v-for="file in files"
             :key="file.id"
-            @click="toggleSelect('file-' + file.id)"
+            @click="toggleSelect(file, 'file')"
             class="
               group
               flex items-center justify-between
@@ -375,9 +375,9 @@
                     <label for="file-{{ file.id }}"></label>
                     <input
                       type="checkbox"
-                      :checked="selectedIds.has('file-' + file.id)"
+                      :checked="selectedFiles.some((f: FileI) => f.id === file.id)"
                       @click.stop
-                      @change="toggleSelect('file-' + file.id)"
+                      @change="toggleSelect(file, 'file')"
                       class="w-3.5 h-3.5 rounded accent-[var(--color-primary)] flex-shrink-0 ml-1 cursor-pointer"
                     />
                     <!-- file type icon -->
@@ -509,7 +509,7 @@
       <p class="text-sm text-[var(--text-terceary)] my-2">
         <template v-if="confirmDialog.isBulk">
           Are you sure you want to permanently delete
-          <span class="font-semibold text-[var(--text)]">{{ selectedIds.size }} items</span>?
+          <span class="font-semibold text-[var(--text)]">{{ selectedFiles.length + selectedFolders.length }} items</span>?
         </template>
         <template v-else>
           Are you sure you want to permanently delete
@@ -565,14 +565,15 @@ import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { FolderI, FoldersResultI } from '@/store/folders/state';
-import { FilesResultI } from '@/store/files/state';
+import { FileI, FilesResultI } from '@/store/files/state';
 
 const store = useStore();
 
 const loading = ref(false);
 const showFolders = ref(true);
 const showFiles = ref(true);
-const selectedIds = ref<Set<string>>(new Set());
+const selectedFiles = ref<FileI[]>([]);
+const selectedFolders = ref<FolderI[]>([]);
 const dropdownPosition = ref('top-8');
 
 const confirmDialog = reactive({
@@ -590,18 +591,17 @@ const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folders = computed<FolderI[]>(() => folderResults.value?.data ?? []);
 const files = computed(() => fileResults.value?.data ?? []);
 
-function toggleSelect(id: string) {
-  const next = new Set(selectedIds.value);
-  if (next.has(id)) {
-    next.delete(id);
-  } else {
-    next.add(id);
+function toggleSelect(item: FileI | FolderI, type: 'file' | 'folder') {
+  if (type === 'file') {
+    selectedFiles.value.push(item as FileI);
+  } else if (type === 'folder') {
+    selectedFolders.value.push(item as FolderI);
   }
-  selectedIds.value = next;
 }
 
 function clearSelection() {
-  selectedIds.value = new Set();
+  selectedFiles.value = [];
+  selectedFolders.value = [];
 }
 
 function formatDate(date: number) {
@@ -678,12 +678,12 @@ async function recoverItem(type: 'folder' | 'file', id: string | number) {
 async function recoverSelected() {
   loading.value = true;
   try {
-    await Promise.all(
-      [...selectedIds.value].map((cid: string) => {
-        const [type, id] = cid.split('-');
-        return store.dispatch(`${type}s/recover`, { id: Number(id) });
-      }),
-    );
+    // await Promise.all(
+    //   [...selectedIds.value].map((cid: string) => {
+    //     const [type, id] = cid.split('-');
+    //     return store.dispatch(`${type}s/recover`, { id: Number(id) });
+    //   }),
+    // );
     notify('success', 'Items recovered successfully');
     clearSelection();
     await refresh();
@@ -715,12 +715,12 @@ async function executeDelete() {
   loading.value = true;
   try {
     if (confirmDialog.isBulk) {
-      await Promise.all(
-        [...selectedIds.value].map((cid: string) => {
-          const [type, id] = cid.split('-');
-          return store.dispatch(`${type}s/deletePermanently`, { id: Number(id) });
-        }),
-      );
+      // await Promise.all(
+      //   [...selectedIds.value].map((cid: string) => {
+      //     const [type, id] = cid.split('-');
+      //     return store.dispatch(`${type}s/deletePermanently`, { id: Number(id) });
+      //   }),
+      // );
       notify('success', 'Items permanently deleted');
       clearSelection();
     } else {

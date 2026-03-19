@@ -281,4 +281,12 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     console.log('data', data);
   },
 
+  async restoreFiles(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/restore-files-in-trash-folder', camelToSnake(payload));
+    console.log('data', data);
+  },
+
 };
