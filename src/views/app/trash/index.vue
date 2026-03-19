@@ -24,6 +24,22 @@
   </div>
 
   <template v-else>
+    <div class="mt-10 border border-transparent">
+      <h1
+      class="
+        text-xl text-[var(--text)] font-semibold
+        mx-2 my-2 px-12 font-alexandria
+
+        sm:mt-8
+        hidden sm:block
+      "
+    >
+      Horizon Events
+    </h1>
+    <p class="mx-2 mt-8 px-12 text-md text-[var(--text-terceary)] font-light">
+      Deleted files don’t disappear right away: you have 30 days to restore them.
+      Then they’re permanently removed.
+    </p>
 
     <!-- bulk actions bar -->
     <transition
@@ -33,71 +49,77 @@
       <div
         v-if="selectedIds.size > 0"
         class="
-          flex flex-wrap items-center gap-2
-          mx-2 mt-4 mb-0 px-4 py-2
-          bg-[var(--hover-bg)]
-          border border-[var(--color-primary)]
-          shadow-[0_0_5px_2px_rgba(10,119,243,0.2)]
-          rounded-2xl
+          flex items-center gap-12
+          mt-8 px-14 py-3
+          border-b border-[var(--border)]
 
-          sm:mx-14
         "
       >
-        <span class="text-sm font-semibold text-[var(--color-primary)] mr-auto">
-          <i class="fas fa-check-square mr-1" />
-          {{ selectedIds.size }} selected
-        </span>
+        <div class="flex gap-1">
+          <span class="text-md font-medium text-[var(--text)] mr-auto">
+            {{ selectedIds.size }} <span class="ml-1">selected:</span>
+          </span>
+          <!-- clear selection -->
+          <button
+            @click="clearSelection"
+            class="
+              text-xs text-[var(--text-terceary)]
+              rounded-lg border border-transparent
+              hover:border-[var(--color-primary)] hover:text-[var(--text)]
+              transition-all duration-300
+            "
+          >
+            <i class="fas fa-xmark m-1.5" />
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <!-- recover selected -->
+          <button
+            :disabled="loading"
+            @click="recoverSelected"
+            class="
+              flex items-center gap-1.5
+              px-3 py-0.5
+              text-sm font-medium
+              rounded-full border
+              text-[var(--success-border)]
+              border-[var(--success-border)]
+              bg-[var(--success-bg)] opacity-70
 
-        <!-- recover selected -->
-        <button
-          :disabled="loading"
-          @click="recoverSelected"
-          class="
-            flex items-center gap-1.5
-            px-3 py-0.5
-            text-sm font-medium
-            rounded-full border
-            text-emerald-600 border-emerald-400 bg-emerald-50
-            hover:bg-emerald-100 hover:shadow-[0_0_3px_3px_rgba(5,150,105,0.3)]
-            transition-all duration-300
-            disabled:opacity-40
-          "
-        >
-          <i class="fas fa-rotate-left text-xs" />
-          Recover
-        </button>
+              hover:opacity-100
+              hover:shadow-[0_0_3px_2px_rgba(0,180,75,0.3)]
+              transition-all duration-300
+              disabled:opacity-40
+            "
+          >
+            <i class="fas fa-rotate-left text-xs" />
+            Recover
+          </button>
 
-        <!-- delete selected -->
-        <button
-          :disabled="loading"
-          @click="confirmDeleteSelected"
-          class="
-            flex items-center gap-1.5
-            px-3 py-0.5
-            text-sm font-medium
-            rounded-full border
-            text-[var(--warning-border)] border-[var(--warning-border)] bg-[var(--warning-bg)]
-            hover:shadow-[0_0_3px_3px_rgba(239,68,68,0.3)]
-            opacity-70 hover:opacity-100
-            transition-all duration-300
-            disabled:opacity-40
-          "
-        >
-          <i class="fas fa-trash-can text-xs" />
-          Delete permanently
-        </button>
+          <!-- delete selected -->
+          <button
+            :disabled="loading"
+            @click="confirmDeleteSelected"
+            class="
+              flex items-center gap-1.5
+              px-2.5 py-0.5
+              text-sm font-medium
+              rounded-full border
+              text-[var(--error-border)]
+              border-[var(--error-border)]
+              bg-[var(--error-bg)]
+              opacity-70
 
-        <button
-          @click="clearSelection"
-          class="
-            text-xs text-[var(--text-terceary)]
-            px-2 py-1 rounded-xl border border-transparent
-            hover:border-[var(--border)] hover:text-[var(--text)]
-            transition-all duration-300
-          "
-        >
-          <i class="fas fa-xmark mr-1" />Deselect
-        </button>
+              hover:opacity-100
+              hover:shadow-[0_0_3px_2px_rgba(255,33,33,0.3)]
+              transition-all duration-300
+              disabled:opacity-40
+            "
+          >
+            <img src="/icon/icon-delate-red.svg" alt="delate" class="h-4"/>
+            Delete permanently
+          </button>
+        </div>
       </div>
     </transition>
 
@@ -462,6 +484,7 @@
       </Transition>
     </div>
 
+    </div>
   </template>
 
   <!-- confirm delete modal -->
