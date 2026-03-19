@@ -2,7 +2,6 @@
   <div
     class="
       bg-[var(--bg)]
-      h-screen
       font-alexandria font-sans
       pt-14 sm:pt-0
     "
@@ -11,7 +10,8 @@
       class="
         mx-auto
         flex flex-col items-start
-        pt-12 px-0 w-full
+        px-0 w-full max-h-screen
+        pt-12
         sm:pt-16
       "
     >
@@ -25,18 +25,18 @@
           sm:px-8
         "
       >
-        <div class="flex items-center gap-1">
+        <div class="flex items-center px-2 gap-1">
           <!-- Back button -->
           <router-link
             to="/app/files"
             class="
               flex items-center
-              gap-2 px-2
+              gap-2
               grayscale
               text-[var(--text-terceary)] font-semibold
               text-xs
 
-              sm:text-sm md:text-md lg:text-lg
+              sm:text-md md:text-lg lg:text-xl
 
               hover:text-[var(--text)] hover:grayscale-0
               transition-colors duration-200
@@ -45,15 +45,15 @@
             <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
             Could Drive
           </router-link>
-          <span class="text-[var(--text-terceary)]">></span>
-          <div class="flex items-center gap-2 px-2">
+          <span class="text-[var(--text-terceary)] px-1">></span>
+          <div class="flex items-center gap-1">
             <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
             <h2
               class="
                 font-light text-[var(--text)]
                 text-xs
 
-                sm:text-sm md:text-md lg:text-lg
+                sm:text-md md:text-lg lg:text-xl
               "
             >
               {{ folderDetails.name }}
@@ -62,6 +62,15 @@
         </div>
         <div class="mx-4 hidden sm:inline">
           <!-- actions desktop-->
+          <label for="fileInputBtn"></label>
+          <input
+            id="fileInputBtn"
+            type="file"
+            class="hidden"
+            ref="fileInputBtn"
+            @change="uploadFile"
+            :multiple="true"
+          />
           <div class="flex items-center gap-2">
 
             <!-- Upload button -->
@@ -149,14 +158,135 @@
           </div>
         </div>
       </div>
+      <div class="flex items-center gap-1 px-12 pb-1 mt-4 w-full gap-2">
+        <h2
+          class="
+            font-semibold text-[var(--text)]
+            text-2xl
+            break-words
+          "
+        >
+        {{ folder.name }}
+        </h2>
+        <!-- MODO EDICIÓN -->
+        <input
+          class="
+            w-full mb-2
+            text-[var(--text)] text-xl font-semibold
+            bg-transparent
+            border-b border-[var(--color-primary)]
+            outline-none
+
+            sm:text-2xl
+          "
+        />
+        <button
+          class="
+            p-1 mt-1.5
+            border border-transparent
+            rounded-xl
+            grayscale
+
+            hover:border-[var(--color-primary)]
+            hover:grayscale-0
+            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img
+            src="/icon/icon-edit.svg"
+            alt="edit"
+            class="cursor-pointer h-5"
+          />
+        </button>
+      </div>
       <router-view></router-view>
     </div>
   </div>
+  <Modal v-model="createFolderModal" size="xs">
+    <template #header>
+      New folder
+    </template>
+    <template #content>
+      <div class="my-4">
+        <form @submit.prevent="createFolder" id="create-folder-form">
+          <label for="folder-name"></label>
+          <img
+            src="/icon/icon-folder.svg"
+            alt="icon"
+            class="h-5 mt-[1px] absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            v-model="folderName"
+            type="text"
+            placeholder="Folder name"
+            id="folder-name"
+            class="
+              w-full border
+              border-[var(--border)] bg-[var(--bg)]
+              text-sm text-[var(--text)]
+              my-2 pl-8 py-1
+              rounded-full
+
+              placeholder:text-[var(--text-terceary)]
+              placeholder:font-light
+              placeholder:text-sm
+
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--color-primary)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300 ease-in-out
+            "
+            name="folder-name"
+          />
+        </form>
+      </div>
+    </template>
+    <template #footer>
+      <button
+        type="button"
+        @click="createFolderModal = false"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
+        ">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="create-folder-form"
+        :disabled="!folderName || !folderName.trim()"
+        class="
+          text-[var(--text)] text-sm
+          border
+          rounded-full
+          px-3
+          transition
+        "
+        :class="!folderName || !folderName.trim()
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+      >
+        Create
+      </button>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
 import {
   computed,
+  defineAsyncComponent,
   onMounted,
   watch,
   ref,
@@ -168,9 +298,15 @@ import moment from 'moment';
 import { FolderI } from '@/store/folders/state';
 import { FileI } from '@/store/files/state';
 
+const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
+
 const store = useStore();
 const route = useRoute();
+
 const loading = ref(false);
+const createFolderModal = ref(false);
+const folderName = ref('');
+const fileInputBtn = ref<HTMLInputElement | null>(null);
 
 const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const folderId = computed<number>(() => Number(route.params.id as string));
@@ -184,6 +320,35 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
+}
+
+async function createFolder() {
+  // test folder name
+  if (!folderName.value) {
+    store.commit('notifications/addNotification', {
+      message: 'Folder name is required',
+      type: 'error',
+    });
+    return;
+  }
+  // strip folder name
+  const strippedFolderName = folderName.value.trim();
+  loading.value = true;
+  try {
+    await store.dispatch('folders/createFolder', strippedFolderName);
+    createFolderModal.value = false;
+    folderName.value = '';
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function getFolderDetails() {
@@ -204,6 +369,41 @@ async function getFolderDetails() {
   }
 }
 
+// Upload multiple files in a single request
+async function uploadFile(ev: Event): Promise<void> {
+  const target = ev.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) {
+    return;
+  }
+
+  // Convert FileList to array
+  const filesArray = Array.from(target.files);
+
+  const formData = new FormData();
+  // Append all files to FormData (most backends accept multiple files with same field name)
+  filesArray.forEach((fileItem) => {
+    formData.append('file', fileItem);
+  });
+
+  console.log('formData', formData);
+
+  try {
+    await store.dispatch('files/upload', formData);
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al subir los archivos';
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: msg,
+    });
+  } finally {
+    // Clear selected files
+    if (fileInputBtn.value) {
+      fileInputBtn.value.value = '';
+    }
+  }
+}
 onMounted(() => {
   getFolderDetails();
 });

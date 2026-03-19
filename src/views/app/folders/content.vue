@@ -5,13 +5,13 @@
   </div>
 
   <!-- if not results -->
-  <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full h-full mt-4">
+  <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full">
     <div
       class="
         group
         flex flex-col gap-8 justify-center items-center
-        w-full h-[calc(100vh-120px)] ml-2
-        border-2 border-[var(--text-terceary)] border-dashed
+        w-full h-[calc(100vh-150px)] ml-2
+        border-2 border-[var(--border)] border-dashed
         rounded-2xl
 
         hover:border-[var(--color-primary)]
@@ -90,6 +90,15 @@
           This folder is waiting for something awesome.
       </p>
       <!-- actions desktop-->
+      <label for="fileInputBtn"></label>
+      <input
+        id="fileInputBtn"
+        type="file"
+        class="hidden"
+        ref="fileInputBtn"
+        @change="uploadFile"
+        :multiple="true"
+      />
       <div class="flex items-center gap-3">
       <!-- Upload button -->
       <label
@@ -849,6 +858,83 @@
       </button>
     </template>
   </Modal>
+  <Modal v-model="createFolderModal" size="xs">
+    <template #header>
+      New folder
+    </template>
+    <template #content>
+      <div class="my-4">
+        <form @submit.prevent="createFolder" id="create-folder-form">
+          <label for="folder-name"></label>
+          <img
+            src="/icon/icon-folder.svg"
+            alt="icon"
+            class="h-5 mt-[1px] absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            v-model="folderName"
+            type="text"
+            placeholder="Folder name"
+            id="folder-name"
+            class="
+              w-full border
+              border-[var(--border)] bg-[var(--bg)]
+              text-sm text-[var(--text)]
+              my-2 pl-8 py-1
+              rounded-full
+
+              placeholder:text-[var(--text-terceary)]
+              placeholder:font-light
+              placeholder:text-sm
+
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--color-primary)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300 ease-in-out
+            "
+            name="folder-name"
+          />
+        </form>
+      </div>
+    </template>
+    <template #footer>
+      <button
+        type="button"
+        @click="createFolderModal = false"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
+        ">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="create-folder-form"
+        :disabled="!folderName || !folderName.trim()"
+        class="
+          text-[var(--text)] text-sm
+          border
+          rounded-full
+          px-3
+          transition
+        "
+        :class="!folderName || !folderName.trim()
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+      >
+        Create
+      </button>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -889,6 +975,9 @@ const editedFileName = ref('');
 const editingFolderId = ref<number | string | null>(null);
 const editedFolderName = ref('');
 const selectedFolder = ref<number | string | null>(null);
+const fileInputBtn = ref<HTMLInputElement | null>(null);
+const createFolderModal = ref(false);
+const folderName = ref('');
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -909,6 +998,71 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
 }
 
+// Upload multiple files in a single request
+async function uploadFile(ev: Event): Promise<void> {
+  const target = ev.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) {
+    return;
+  }
+
+  // Convert FileList to array
+  const filesArray = Array.from(target.files);
+
+  const formData = new FormData();
+  // Append all files to FormData (most backends accept multiple files with same field name)
+  filesArray.forEach((fileItem) => {
+    formData.append('file', fileItem);
+  });
+
+  console.log('formData', formData);
+
+  try {
+    await store.dispatch('files/upload', formData);
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al subir los archivos';
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: msg,
+    });
+  } finally {
+    // Clear selected files
+    if (fileInputBtn.value) {
+      fileInputBtn.value.value = '';
+    }
+  }
+}
+
+// create new folder
+async function createFolder() {
+  // test folder name
+  if (!folderName.value) {
+    store.commit('notifications/addNotification', {
+      message: 'Folder name is required',
+      type: 'error',
+    });
+    return;
+  }
+  // strip folder name
+  const strippedFolderName = folderName.value.trim();
+  loading.value = true;
+  try {
+    await store.dispatch('folders/createFolder', strippedFolderName);
+    createFolderModal.value = false;
+    folderName.value = '';
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
 // toggle dropdown position based on click position
 const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
   if (event) event.stopPropagation();

@@ -36,7 +36,7 @@
     >
       Horizon Events
     </h1>
-    <p class="mx-2 mt-8 px-12 text-md text-[var(--text-terceary)] font-light">
+    <p class="mx-2 mt-8 px-12 text-sm text-[var(--text-terceary)] font-light">
       Deleted files don’t disappear right away: you have 30 days to restore them.
       Then they’re permanently removed.
     </p>
@@ -47,7 +47,7 @@
       leave-active-class="animate__animated animate__fadeOutUp animate__faster"
     >
       <div
-        v-if="selectedIds.size > 0"
+        v-if="!selectedIds.size > 0"
         class="
           flex items-center gap-12
           mt-8 px-14 py-3

@@ -409,9 +409,12 @@
                     class="
                       flex items-center justify-start
                       rounded-xl px-2 py-1 border border-transparent
+                      grayscale
 
                       hover:bg-[var(--hover-bg)]
                       hover:border-[var(--color-primary)]
+                      hover:grayscale-0
+                      focus:grayscale-0
                       transition-colors duration-300
                     "
                   >
@@ -426,9 +429,12 @@
                     class="
                       flex items-center justify-start
                       rounded-xl px-2 py-1 border border-transparent
+                      grayscale
 
                       hover:bg-[var(--hover-bg)]
                       hover:border-[var(--color-primary)]
+                      hover:grayscale-0
+                      focus:grayscale-0
                       transition-colors duration-300
                     "
                   >
@@ -444,9 +450,12 @@
                     class="
                       flex items-center justify-start
                       rounded-xl px-2 py-1 border border-transparent
+                      grayscale
 
                       hover:bg-[var(--hover-bg)]
                       hover:border-[var(--color-primary)]
+                      hover:grayscale-0
+                      focus:grayscale-0
                       transition-colors duration-300
                     "
                   >
@@ -454,7 +463,55 @@
                     <span>Move to folder</span>
                   </button>
 
-                  <Modal v-model="moveToFolderModal" size="xl">
+                  <!--share link-->
+                  <button
+                    @click="copyLink(file)"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+                      grayscale
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--color-primary)]
+                      hover:grayscale-0
+                      focus:grayscale-0
+                      transition-all duration-300
+                    "
+                  >
+                    <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
+                    />
+                    {{ copied ? 'Copied!' : 'Copy link' }}
+                  </button>
+
+                  <!-- download -->
+                  <button
+                    @click="downloadFile(file)"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+                      grayscale
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:text-[var(--color-primary)]
+                      hover:border-[var(--color-primary)]
+                      hover:grayscale-0
+                      transition-colors duration-300
+                    "
+                  >
+                    <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                    />
+                    <span>Download</span>
+                  </button>
+                </div>
+              </template>
+            </Dropdown>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <Modal v-model="moveToFolderModal" size="xl">
                     <template #header>
                       <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
                       <h3 class="text-lg font-light">Move:
@@ -528,53 +585,7 @@
                         Move
                       </button>
                     </template>
-                  </Modal>
-
-                  <!--share link-->
-                  <button
-                    @click="copyLink(file)"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      transition-all duration-300
-                    "
-                  >
-                    <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
-                    />
-                    {{ copied ? 'Copied!' : 'Copy link' }}
-                  </button>
-
-                  <!-- download -->
-                  <button
-                    @click="downloadFile(file)"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
-
-                      hover:bg-[var(--hover-bg)]
-                      hover:text-[var(--color-primary)]
-                      hover:border-[var(--color-primary)]
-                      hover:grayscale-0
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
-                    />
-                    <span>Download</span>
-                  </button>
-                </div>
-              </template>
-            </Dropdown>
-          </div>
-        </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </Modal>
 </template>
 
 <script setup lang="ts">
