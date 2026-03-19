@@ -47,7 +47,7 @@
       leave-active-class="animate__animated animate__fadeOutUp animate__faster"
     >
       <div
-        v-if="!selectedIds.size > 0"
+        v-if="selectedIds.size > 0"
         class="
           flex items-center gap-12
           mt-8 px-14 py-3

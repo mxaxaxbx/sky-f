@@ -166,20 +166,8 @@
             break-words
           "
         >
-        {{ folder.name }}
+        {{ folderDetails.name }}
         </h2>
-        <!-- MODO EDICIÓN -->
-        <input
-          class="
-            w-full mb-2
-            text-[var(--text)] text-xl font-semibold
-            bg-transparent
-            border-b border-[var(--color-primary)]
-            outline-none
-
-            sm:text-2xl
-          "
-        />
         <button
           class="
             p-1 mt-1.5
