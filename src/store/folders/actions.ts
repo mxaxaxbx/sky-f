@@ -94,4 +94,12 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     console.log('data', data);
   },
 
+  async restoreFolders(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/restore-folders-in-root-folder', camelToSnake(payload));
+    console.log('data', data);
+  },
+
 };

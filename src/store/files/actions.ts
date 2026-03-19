@@ -285,7 +285,15 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI[],
   ): Promise<void> {
-    const { data } = await storageClient.post('/api/trash/restore-files-in-trash-folder', camelToSnake(payload));
+    const { data } = await storageClient.post('/api/trash/restore-files-in-root-folder', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async removeFilesFromTrash(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/remove-files-definitely', camelToSnake(payload));
     console.log('data', data);
   },
 

@@ -74,7 +74,7 @@
             <i class="fas fa-xmark m-1.5" />
           </button>
           <span class="text-md font-medium text-[var(--text)] mr-auto">
-            {{ selectedIds.size }} <span class="">selected:</span>
+            {{ selectedFiles.length + selectedFolders.length }} <span class="">selected:</span>
           </span>
         </div>
         <div class="flex gap-2">
@@ -684,12 +684,11 @@ async function recoverSelected() {
     if (selectedFiles.value.length) {
       await store.dispatch('files/restoreFiles', selectedFiles.value);
     }
-    // await Promise.all(
-    //   [...selectedIds.value].map((cid: string) => {
-    //     const [type, id] = cid.split('-');
-    //     return store.dispatch(`${type}s/recover`, { id: Number(id) });
-    //   }),
-    // );
+
+    if (selectedFolders.value.length) {
+      await store.dispatch('folders/restoreFolders', selectedFolders.value);
+    }
+
     notify('success', 'Items recovered successfully');
     clearSelection();
     await refresh();
