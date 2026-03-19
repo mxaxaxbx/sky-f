@@ -47,7 +47,7 @@
       leave-active-class="animate__animated animate__fadeOutUp animate__faster"
     >
       <div
-        v-if="selectedIds.size > 0"
+        v-if="selectedFiles.length || selectedFolders.length"
         class="
           flex items-center gap-12
           mt-8 px-14 py-3
@@ -57,7 +57,7 @@
       >
         <div class="flex gap-1">
           <span class="text-md font-medium text-[var(--text)] mr-auto">
-            {{ selectedIds.size }} <span class="ml-1">selected:</span>
+            {{ selectedFiles.length + selectedFolders.length }} <span class="ml-1">selected:</span>
           </span>
           <!-- clear selection -->
           <button
@@ -669,6 +669,9 @@ async function recoverItem(type: 'folder' | 'file', id: string | number) {
 async function recoverSelected() {
   loading.value = true;
   try {
+    if (selectedFiles.value.length) {
+      await store.dispatch('files/restoreFiles', selectedFiles.value);
+    }
     // await Promise.all(
     //   [...selectedIds.value].map((cid: string) => {
     //     const [type, id] = cid.split('-');
