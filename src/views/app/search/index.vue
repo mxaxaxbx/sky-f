@@ -23,20 +23,43 @@
 
     <!-- folders -->
     <div v-if="folders.length" class="w-full my-4 px-2">
-      <h3 class="font-semibold text-md truncate text-left mb-2 text-[var(--text-terceary)]">
+      <h3
+        class="
+          flex items-center
+          font-regular text-left text-sm text-[var(--text-terceary)] truncate
+          mb-1 gap-2
+
+          sm:text-lg sm:mb-0 sm:font-semibold
+        "
+      >
         Folders ({{ folders.length }})
       </h3>
-      <div class="
-        grid grid-cols-2 gap-2 mx-0
-        text-[var(--text)]
-        sm:grid-cols-3 sm:gap-4
-        md:grid-cols-4
-        lg:grid-cols-5
-        xl:grid-cols-6
-      ">
+      <div
+        class="
+          grid grid-cols-2 gap-2 mx-0
+          text-[var(--text)] my-4
+
+          sm:grid-cols-2 sm:gap-4 sm:my-2
+          md:grid-cols-3
+          lg:grid-cols-4
+          xl:grid-cols-6
+          transition-all duration-300
+        "
+      >
         <div
           v-for="folder in folders"
           :key="folder.id"
+          @dragover.prevent
+          @dragenter="onDragEnter(folder.id)"
+          @dragleave="onDragLeave"
+          @drop="onDrop(folder)"
+          data-selectable
+
+          :draggable="true"
+          @dragstart="onDragStart('folder', folder)"
+          @click="selectItem($event, 'folder', folder, index)"
+          @keydown.enter="selectItem($event, 'folder', folder, index)"
+          @dblclick="router.push(`/app/folders/${folder.id}`);"
           class="
             group
             flex items-center justify-between
@@ -55,51 +78,17 @@
               'border-[var(--border)]'
           ]"
         >
-          <div
-            v-for="folder, index in folderResults.data"
-            :key="folder.id"
-
-            @dragover.prevent
-            @dragenter="onDragEnter(folder.id)"
-            @dragleave="onDragLeave"
-            @drop="onDrop(folder)"
-            data-selectable
-
-            :draggable="true"
-            @dragstart="onDragStart('folder', folder)"
-            @click="selectItem($event, 'folder', folder, index)"
-            @keydown.enter="selectItem($event, 'folder', folder, index)"
-            @dblclick="router.push(`/app/folders/${folder.id}`);"
-
-            class="
-              group
-              flex items-center justify-between
-              w-full
-              bg-[var(--bg-secondary)]
-              border border-[var(--border)]
-              rounded-2xl min-w-0
-              hover:bg-[var(--hover-bg)]
-              hover:border-[var(--hover-border)]
-              transition-all duration-300
-            "
-            :class="[
-              'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-              isSelectedFolder(folder) ?
-                'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]' :
-                'border-[var(--border)]'
-            ]"
-          >
-            <div class="flex items center justify-between p-1">
+        <div class="flex items center justify-between p-1">
               <div
-                class="
-                  flex items-center
-                  space-x-2
-                  min-w-0 w-full overflow-hidden
-                "
-              >
+                  class="
+                    flex items-center
+                    space-x-2
+                    min-w-0 w-full overflow-hidden
+                  "
+                >
                 <img src="/icon/icon-folder.svg" alt="folder" class="h-8"/>
 
-                <!-- title and date (search-FOLDERS)-->
+                <!-- title and date -->
                 <div class="flex-1 min-w-0">
                   <div>
                     <input
@@ -113,17 +102,17 @@
                         border-b border-[var(--color-primary)]
                         outline-none text-xs sm:text-sm w-full"
                     />
-                    <h3 class="font-semibold text-sm truncate text-left text-[var(--text)]">
+
+                    <h3
+                      v-else
+                      class="font-semibold text-xs sm:text-sm truncate text-left"
+                    >
                       {{ folder.name }}
                     </h3>
                   </div>
-                  <p class="text-[0.6rem] text-[var(--text-terceary)] font-light">
-                    {{ moment(folder.created * 1000).format('DD/MM/YY HH:mm') }}
-                  </p>
                 </div>
               </div>
             </div>
-          </div>
             <!-- options -->
             <div
               class="
@@ -235,14 +224,17 @@
       >
         Files ({{ files.length }})
       </h3>
-      <div class="
-        grid grid-cols-1 gap-2 mx-0
-        text-[var(--text)]
-        sm:grid-cols-2 sm:gap-4
-        md:grid-cols-3
-        lg:grid-cols-4
-        xl:grid-cols-6
-      ">
+      <div
+        class="
+          grid grid-cols-1 gap-2 mx-0
+          text-[var(--text)]
+
+          sm:grid-cols-2 sm:gap-4 sm:mx-0
+          md:grid-cols-3
+          lg:grid-cols-4
+          xl:grid-cols-6
+        "
+      >
         <div
           v-for="file, index in fileResults.data"
           :key="file.id"
@@ -275,7 +267,7 @@
       >
         <div class="flex w-full h-auto items-center justify-between relative">
           <div class="flex-1 min-w-0">
-            <div class="flex items center justify-between p-0">
+            <div class="flex items center justify-between p-1">
               <div
                 class="
                   flex items-center
