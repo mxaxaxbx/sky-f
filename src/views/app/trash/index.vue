@@ -193,7 +193,7 @@
               hover:border-[var(--hover-border)]
               transition-all duration-300
             "
-            :class="selectedIds.has(`folder-${folder.id}`)
+            :class="selectedFolders.some((f: FolderI) => f.id === folder.id)
               ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
               : 'border-[var(--border)]'
             "
@@ -262,7 +262,7 @@
 
                     <!-- recover -->
                     <button
-                      @click.stop="recoverItem('folder', folder.id)"
+                      @click.stop="recoverItem('folder', folder)"
                       :disabled="loading"
                       class="
                         flex items-center justify-start
@@ -365,7 +365,7 @@
               hover:border-[var(--hover-border)]
               transition-colors duration-300
             "
-            :class="selectedIds.has('file-' + file.id)
+            :class="selectedFiles.some((f: FileI) => f.id === file.id)
               ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]'
               : 'border-[var(--border)]'
             "
@@ -665,10 +665,14 @@ async function refresh() {
   await getFiles();
 }
 
-async function recoverItem(type: 'folder' | 'file', id: string | number) {
+async function recoverItem(type: 'folder' | 'file', item: FileI | FolderI) {
   loading.value = true;
   try {
-    await store.dispatch(`${type}s/recover`, { id });
+    if (type === 'folder') {
+      await store.dispatch('folders/restoreFolders', [item as FolderI]);
+    } else if (type === 'file') {
+      await store.dispatch('files/restoreFiles', [item as FileI]);
+    }
     notify('success', 'Item recovered successfully');
     await refresh();
   } catch {
@@ -720,12 +724,13 @@ async function executeDelete() {
   loading.value = true;
   try {
     if (confirmDialog.isBulk) {
-      // await Promise.all(
-      //   [...selectedIds.value].map((cid: string) => {
-      //     const [type, id] = cid.split('-');
-      //     return store.dispatch(`${type}s/deletePermanently`, { id: Number(id) });
-      //   }),
-      // );
+      if (selectedFolders.value.length) {
+        await store.dispatch('folders/removeFoldersFromTrash', selectedFolders.value);
+      }
+      if (selectedFiles.value.length) {
+        await store.dispatch('files/removeFilesFromTrash', selectedFiles.value);
+      }
+
       notify('success', 'Items permanently deleted');
       clearSelection();
     } else {

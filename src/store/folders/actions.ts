@@ -102,4 +102,12 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     console.log('data', data);
   },
 
+  async removeFoldersFromTrash(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/remove-folders-definitely', camelToSnake(payload));
+    console.log('data', data);
+  },
+
 };
