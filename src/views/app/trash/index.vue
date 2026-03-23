@@ -38,7 +38,7 @@
     </h1>
     <p class="mx-2 mt-8 px-12 text-sm text-[var(--text-terceary)] font-light">
       Deleted files don’t disappear right away: you have 30 days to restore them.
-      Then they’re permanently removed.
+      Then they’re permanently removed. {{ showDeleteModal }}
     </p>
 
     <!-- bulk actions bar -->
@@ -47,7 +47,7 @@
       leave-active-class="animate__animated animate__fadeOutUp animate__faster"
     >
       <div
-        v-if="selectedIds.size > 0"
+        v-if="selectedFiles.length || selectedFolders.length"
         class="
           flex items-center gap-12
           mt-8 px-14 py-3
@@ -77,6 +77,7 @@
             {{ selectedFiles.length + selectedFolders.length }} <span class="">selected:</span>
           </span>
         </div>
+
         <div class="flex gap-2">
           <!-- recover selected -->
           <button
@@ -108,7 +109,7 @@
           <!-- delete selected -->
           <button
             :disabled="loading"
-            @click="confirmDeleteSelected"
+            @click="showDeleteModal = true"
             class="
               flex items-center gap-2
               px-2.5 py-0.5
@@ -281,7 +282,7 @@
 
                     <!-- delete permanently -->
                     <button
-                      @click.stop="confirmDeleteItem('folder', folder.id, folder.name)"
+                      @click.stop="showDeleteModal = true"
                       :disabled="loading"
                       class="
                         flex items-center justify-start
@@ -500,7 +501,7 @@
   </template>
 
   <!-- confirm delete modal -->
-  <Modal v-model="confirmDialog.visible" size="sm">
+  <Modal v-model="showDeleteModal" size="xl">
     <template #header>
       <h3 class="text-lg font-light text-[var(--text)] flex items-center gap-2">
         <i class="fas fa-triangle-exclamation text-[var(--warning-border)]" />
@@ -510,13 +511,20 @@
 
     <template #content>
       <p class="text-sm text-[var(--text-terceary)] my-2">
-        <template v-if="confirmDialog.isBulk">
+        <template v-if="selectedFiles.length + selectedFolders.length > 1">
           Are you sure you want to permanently delete
           <span class="font-semibold text-[var(--text)]">{{ selectedFiles.length + selectedFolders.length }} items</span>?
         </template>
         <template v-else>
-          Are you sure you want to permanently delete
-          <span class="font-semibold text-[var(--text)]">"{{ confirmDialog.name }}"</span>?
+          Are you sure you want to permanently delete the following items
+          <ul class="list-disc list-inside">
+            <li v-for="file in selectedFiles" :key="file.id">
+              {{ file.name }}
+            </li>
+            <li v-for="folder in selectedFolders" :key="folder.id">
+              {{ folder.name }}
+            </li>
+          </ul>
         </template>
       </p>
       <p class="text-xs text-[var(--warning-border)] font-medium flex items-center gap-1">
@@ -528,7 +536,7 @@
     <template #footer>
       <button
         type="button"
-        @click="confirmDialog.visible = false"
+        @click="showDeleteModal = false"
         class="
           text-[var(--text-secondary)] text-sm
           border border-[var(--border)] bg-[var(--bg)]
@@ -563,12 +571,16 @@ import {
   onMounted,
   reactive,
   ref,
+  defineAsyncComponent,
 } from 'vue';
 import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { FolderI, FoldersResultI } from '@/store/folders/state';
 import { FileI, FilesResultI } from '@/store/files/state';
+
+const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
+const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 
 const store = useStore();
 
@@ -593,6 +605,7 @@ const fileResults = computed<FilesResultI>(() => store.state.files.result);
 
 const folders = computed<FolderI[]>(() => folderResults.value?.data ?? []);
 const files = computed(() => fileResults.value?.data ?? []);
+const showDeleteModal = ref(false);
 
 function toggleSelect(item: FileI | FolderI, type: 'file' | 'folder') {
   if (type === 'file') {
@@ -703,41 +716,19 @@ async function recoverSelected() {
   }
 }
 
-function confirmDeleteItem(type: 'folder' | 'file', id: string | number, name: string) {
-  Object.assign(
-    confirmDialog,
-    {
-      isBulk: false,
-      type,
-      id,
-      name,
-      visible: true,
-    },
-  );
-}
-
-function confirmDeleteSelected() {
-  Object.assign(confirmDialog, { isBulk: true, visible: true });
-}
-
 async function executeDelete() {
   loading.value = true;
   try {
-    if (confirmDialog.isBulk) {
-      if (selectedFolders.value.length) {
-        await store.dispatch('folders/removeFoldersFromTrash', selectedFolders.value);
-      }
-      if (selectedFiles.value.length) {
-        await store.dispatch('files/removeFilesFromTrash', selectedFiles.value);
-      }
-
-      notify('success', 'Items permanently deleted');
-      clearSelection();
-    } else {
-      await store.dispatch(`${confirmDialog.type}s/deletePermanently`, { id: confirmDialog.id });
-      notify('success', 'Item permanently deleted');
+    if (selectedFolders.value.length) {
+      await store.dispatch('folders/removeFoldersFromTrash', selectedFolders.value);
     }
-    confirmDialog.visible = false;
+    if (selectedFiles.value.length) {
+      await store.dispatch('files/removeFilesFromTrash', selectedFiles.value);
+    }
+
+    notify('success', 'Items permanently deleted');
+    clearSelection();
+    showDeleteModal.value = false;
     await refresh();
   } catch {
     notify('error', 'Error deleting items');

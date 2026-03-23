@@ -230,9 +230,9 @@
                         <span>Move to folder</span>
                       </button>
 
-                      <!-- delate folder -->
+                      <!-- delete folder -->
                       <button
-                        @click="downloadFile(file)"
+                        @click="selectItem($event, 'folder', folder, index); moveToTrash();"
                         class="
                           flex items-center justify-start
                           rounded-xl px-2 py-1 border border-transparent
