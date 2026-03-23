@@ -177,7 +177,6 @@
 
             hover:border-[var(--color-primary)]
             hover:grayscale-0
-            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
             transition-all duration-300 ease-in-out
             cursor-pointer
           "
