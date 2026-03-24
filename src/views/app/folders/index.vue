@@ -319,6 +319,24 @@ async function getFolders() {
   }
 }
 
+async function getFolderDetails() {
+  loading.value = true;
+  console.log('folderId', folderId.value);
+  try {
+    await store.dispatch('folders/getFolderDetails', {
+      folderId: Number(folderId.value),
+    });
+  } catch (error) {
+    console.error('Error loading folder details:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener los detalles de la carpeta',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function createFolder() {
   // test folder name
   if (!folderName.value) {
@@ -340,6 +358,7 @@ async function createFolder() {
     createFolderModal.value = false;
     folderName.value = '';
 
+    await getFolderDetails();
     await getFolders();
   } catch (error: unknown) {
     console.error(error);
@@ -348,24 +367,6 @@ async function createFolder() {
     store.commit('notifications/addNotification', {
       message: msg,
       type: 'error',
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function getFolderDetails() {
-  loading.value = true;
-  console.log('folderId', folderId.value);
-  try {
-    await store.dispatch('folders/getFolderDetails', {
-      folderId: Number(folderId.value),
-    });
-  } catch (error) {
-    console.error('Error loading folder details:', error);
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: 'Error al obtener los detalles de la carpeta',
     });
   } finally {
     loading.value = false;
@@ -413,6 +414,7 @@ onMounted(() => {
 });
 
 watch(() => route.params.id, () => {
+  console.log('route.params.id', route.params.id);
   getFolderDetails();
 }, { immediate: true });
 </script>
