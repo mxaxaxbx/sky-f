@@ -449,7 +449,7 @@
 
                       <!-- recover -->
                       <button
-                        @click.stop="recoverItem('file', file.id)"
+                        @click.stop="recoverItem('file', file)"
                         :disabled="loading"
                         class="
                           flex items-center justify-start
@@ -468,7 +468,7 @@
 
                       <!-- delete permanently -->
                       <button
-                        @click.stop="confirmDeleteItem('file', file.id, file.name)"
+                        @click.stop="selectedFiles.push(file); showDeleteModal = true"
                         :disabled="loading"
                         class="
                           flex items-center justify-start

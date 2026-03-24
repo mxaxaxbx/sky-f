@@ -191,6 +191,7 @@
       <router-view></router-view>
     </div>
   </div>
+
   <Modal v-model="createFolderModal" size="xs">
     <template #header>
       New folder
