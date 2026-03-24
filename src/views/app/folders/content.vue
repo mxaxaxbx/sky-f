@@ -1048,7 +1048,7 @@ async function createFolder() {
   const strippedFolderName = folderName.value.trim();
   loading.value = true;
   try {
-    await store.dispatch('folders/createFolder', strippedFolderName);
+    await store.dispatch('folders/createFolder', { name: strippedFolderName, folderId: null });
     createFolderModal.value = false;
     folderName.value = '';
   } catch (error: unknown) {

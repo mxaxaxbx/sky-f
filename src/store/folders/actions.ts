@@ -18,9 +18,9 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
 
   async createFolder(
     context: ActionContext<FoldersStateI, RootStateI>,
-    name: string,
+    payload: FolderI,
   ): Promise<void> {
-    const { data } = await storageClient.post('/api/folders/create-folder', { name });
+    const { data } = await storageClient.post('/api/folders/create-folder', camelToSnake(payload));
     context.commit('setFolder', snakeToCamel(data));
     context.dispatch('filter', { query: '', page: 1 });
   },
