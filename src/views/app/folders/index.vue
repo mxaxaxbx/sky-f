@@ -158,7 +158,22 @@
       </div>
 
       <div class="flex items-center gap-1 px-12 pb-1 mt-4 w-full gap-2">
+        <input
+          v-if="editingFolderId === folderDetails.id"
+          v-model="editedFolderName"
+          @keyup.enter="saveFolderName(folderDetails)"
+          @blur="editingFolderId = null"
+          :data-folder-id="folderDetails.id"
+          class="
+            font-semibold text-2xl
+            text-[var(--text)]
+            bg-transparent
+            border-b border-[var(--color-primary)]
+            outline-none
+          "
+        />
         <h2
+          v-else
           class="
             font-semibold text-[var(--text)]
             text-2xl
@@ -169,6 +184,7 @@
         </h2>
 
         <button
+          @click="startEditingFolder(folderDetails)"
           class="
             p-1 mt-1.5
             border border-transparent
@@ -276,6 +292,7 @@ import {
   computed,
   defineAsyncComponent,
   onMounted,
+  nextTick,
   watch,
   ref,
 } from 'vue';
@@ -283,7 +300,7 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import moment from 'moment';
 
-import { FolderI } from '@/store/folders/state';
+import { FolderI, FoldersResultI } from '@/store/folders/state';
 import { FileI } from '@/store/files/state';
 
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
@@ -295,9 +312,12 @@ const loading = ref(false);
 const createFolderModal = ref(false);
 const folderName = ref('');
 const fileInputBtn = ref<HTMLInputElement | null>(null);
+const editingFolderId = ref<number | string | null>(null);
+const editedFolderName = ref('');
 
 const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const folderId = computed<number>(() => Number(route.params.id as string));
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 
 async function getFolders() {
   loading.value = true;
@@ -405,6 +425,58 @@ async function uploadFile(ev: Event): Promise<void> {
     if (fileInputBtn.value) {
       fileInputBtn.value.value = '';
     }
+  }
+}
+
+async function startEditingFolder() {
+  if (!folderDetails.value) return;
+
+  editingFolderId.value = folderDetails.value.id;
+  editedFolderName.value = folderDetails.value.name;
+
+  await nextTick();
+
+  const input = document.querySelector(
+    `input[data-folder-id="${folderDetails.value.id}"]`,
+  ) as HTMLInputElement | null;
+
+  input?.focus();
+  input?.select();
+}
+
+async function saveFolderName() {
+  if (!folderDetails.value) return;
+
+  const finalName = editedFolderName.value.trim();
+  if (!finalName) return;
+
+  try {
+    await store.dispatch('folders/changeFolderName', {
+      id: folderDetails.value.id,
+      name: finalName,
+    });
+
+    folderDetails.value.name = finalName;
+
+    await getFolders();
+
+    await nextTick();
+
+    const updatedFolder = folderResults.value.data.find(
+      (f: FolderI) => f.id === folderDetails.value.id,
+    );
+
+    if (updatedFolder) {
+      store.commit('folders/setSelectedFolders', [updatedFolder]);
+    }
+  } catch (error) {
+    console.error(error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al cambiar el nombre de la carpeta',
+    });
+  } finally {
+    editingFolderId.value = null;
   }
 }
 
