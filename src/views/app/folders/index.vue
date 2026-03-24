@@ -298,16 +298,25 @@ const fileInputBtn = ref<HTMLInputElement | null>(null);
 
 const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const folderId = computed<number>(() => Number(route.params.id as string));
-const file = computed<FileI>(() => store.state.files.file);
 
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
+async function getFolders() {
+  loading.value = true;
+  try {
+    // Load all folders - filtering by folderId is done client-side
+    await store.dispatch('folders/filter', {
+      query: '',
+      page: 1,
+      folderId: folderId.value,
+    });
+  } catch (error) {
+    console.error('Error loading folders:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener las carpetas',
+    });
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function createFolder() {
@@ -323,9 +332,15 @@ async function createFolder() {
   const strippedFolderName = folderName.value.trim();
   loading.value = true;
   try {
-    await store.dispatch('folders/createFolder', { name: strippedFolderName, folderId: null });
+    await store.dispatch('folders/createFolder', {
+      name: strippedFolderName,
+      folderId: folderId.value,
+    });
+
     createFolderModal.value = false;
     folderName.value = '';
+
+    await getFolders();
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
@@ -392,6 +407,7 @@ async function uploadFile(ev: Event): Promise<void> {
     }
   }
 }
+
 onMounted(() => {
   getFolderDetails();
 });

@@ -1034,6 +1034,46 @@ async function uploadFile(ev: Event): Promise<void> {
   }
 }
 
+async function getFolders() {
+  loading.value = true;
+  try {
+    // Load all folders - filtering by folderId is done client-side
+    await store.dispatch('folders/filter', {
+      query: '',
+      page: 1,
+      folderId: folderId.value,
+    });
+  } catch (error) {
+    console.error('Error loading folders:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener las carpetas',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function getFiles() {
+  loading.value = true;
+  try {
+    // Load all files - filtering by folderId is done client-side
+    await store.dispatch('files/filter', {
+      query: '',
+      page: 1,
+      folderId: folderId.value,
+    });
+  } catch (error) {
+    console.error('Error loading files:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener los archivos',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 // create new folder
 async function createFolder() {
   // test folder name
@@ -1048,12 +1088,18 @@ async function createFolder() {
   const strippedFolderName = folderName.value.trim();
   loading.value = true;
   try {
-    await store.dispatch('folders/createFolder', {
-      name: strippedFolderName,
-      folderId: folderId.value,
-    });
-    createFolderModal.value = false;
-    folderName.value = '';
+    console.log('strippedFolderName', strippedFolderName);
+    console.log('folderId', folderId.value);
+    // await store.dispatch('folders/createFolder', {
+    //   name: strippedFolderName,
+    //   folderId: folderId.value,
+    // });
+
+    // createFolderModal.value = false;
+    // folderName.value = '';
+
+    // await getFolders();
+    // await getFiles();
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
@@ -1066,6 +1112,7 @@ async function createFolder() {
     loading.value = false;
   }
 }
+
 // toggle dropdown position based on click position
 const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
   if (event) event.stopPropagation();
@@ -1299,46 +1346,6 @@ function onDragEnter(fId: number | string | null) {
 
 function onDragLeave() {
   draggedFolder.value = null;
-}
-
-async function getFolders() {
-  loading.value = true;
-  try {
-    // Load all folders - filtering by folderId is done client-side
-    await store.dispatch('folders/filter', {
-      query: '',
-      page: 1,
-      folderId: folderId.value,
-    });
-  } catch (error) {
-    console.error('Error loading folders:', error);
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: 'Error al obtener las carpetas',
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function getFiles() {
-  loading.value = true;
-  try {
-    // Load all files - filtering by folderId is done client-side
-    await store.dispatch('files/filter', {
-      query: '',
-      page: 1,
-      folderId: folderId.value,
-    });
-  } catch (error) {
-    console.error('Error loading files:', error);
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: 'Error al obtener los archivos',
-    });
-  } finally {
-    loading.value = false;
-  }
 }
 
 async function onDrop(folder: FolderI) {
