@@ -300,7 +300,7 @@ async function uploadFile(ev: Event): Promise<void> {
   console.log('formData', formData);
 
   try {
-    await store.dispatch('files/upload', formData);
+    await store.dispatch('files/upload', { formData, folderId: null });
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };

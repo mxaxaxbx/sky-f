@@ -75,7 +75,6 @@
 
             <!-- Upload button -->
             <label
-              v-if="!hideBar"
               for="fileInputBtn"
               class="
                 hidden items-center
@@ -98,7 +97,6 @@
 
             <!-- New folder-->
             <button
-              v-if="!hideBar"
               @click="createFolderModal = true"
               class="
                 hidden items-center
@@ -158,6 +156,7 @@
           </div>
         </div>
       </div>
+
       <div class="flex items-center gap-1 px-12 pb-1 mt-4 w-full gap-2">
         <h2
           class="
@@ -168,6 +167,7 @@
         >
         {{ folderDetails.name }}
         </h2>
+
         <button
           class="
             p-1 mt-1.5
@@ -391,7 +391,7 @@ async function uploadFile(ev: Event): Promise<void> {
   console.log('formData', formData);
 
   try {
-    await store.dispatch('files/upload', formData);
+    await store.dispatch('files/upload', { formData, folderId: folderId.value });
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };

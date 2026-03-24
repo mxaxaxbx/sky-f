@@ -35,13 +35,16 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async upload(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FormData,
+    payload: {
+      formData: FormData,
+      folderId: number | string | null,
+    },
   ): Promise<void> {
     const completedFiles: FileI[] = [];
 
     try {
       // get the files from the payload
-      const files = payload.getAll('file');
+      const files = payload.formData.getAll('file');
 
       files.forEach((file: FormDataEntryValue) => {
         const fileObj = file as File;
@@ -58,7 +61,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           error: '',
           created: 0,
           updated: 0,
-          folderId: null,
+          folderId: payload.folderId,
         });
       });
 
@@ -69,7 +72,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       await dataArray.forEach(async (item: FileI) => {
         if (item.r2Url) {
           // get file from formdata payload by name
-          const file = payload.getAll('file')
+          const file = payload.formData.getAll('file')
             .find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
           if (file) {
             try {
@@ -104,6 +107,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
         context.dispatch('filter', {
           query: '',
           page: 1,
+          folderId: payload.folderId,
         });
       });
     } catch (error) {
