@@ -568,10 +568,12 @@
   <!-- confirm delete modal -->
   <Modal v-model="showDeleteModal" size="xl">
     <template #header>
-      <h3 class="text-lg font-normal text-[var(--text)] flex items-center gap-2">
-        <img src="/icon/icon-warning.svg" alt="warning" class="h-6" />
-        Delete permanently
-      </h3>
+      <div class="flex items-center mb-1">
+        <h3 class="text-lg font-medium text-[var(--warning-border)] flex items-center gap-2">
+          <img src="/icon/icon-delate-red.svg" alt="warning" class="h-6" />
+          Delete permanently
+        </h3>
+      </div>
     </template>
 
     <template #content>
@@ -602,7 +604,7 @@
       </div>
         </template>
       </p>
-      <p class="text-sm text-[var(--warning-border)] font-medium flex items-center justify-center gap-2 mt-6">
+      <p class="text-md text-[var(--warning-border)] font-medium gap-2 mx-4 mt-6">
         This action cannot be undone.
       </p>
     </template>

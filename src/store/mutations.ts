@@ -7,6 +7,10 @@ const mutations: MutationTree<RootStateI> = {
     state.sidebar = !state.sidebar;
     localStorage.setItem('sidebar', JSON.stringify(state.sidebar));
   },
+  closeSidebar(state) {
+    state.sidebar = false;
+    localStorage.setItem('sidebar', JSON.stringify(false));
+  },
 };
 
 export {

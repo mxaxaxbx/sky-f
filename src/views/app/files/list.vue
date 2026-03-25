@@ -190,11 +190,11 @@
         sm:py-4 sm:px-14
       "
     >
-      <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
+      <div class="flex items-center justify-between mb-4 sm:mb-4">
         <h3 class="
             flex items-center
             font-regular text-left text-sm text-[var(--text-terceary)] truncate
-            mb-1 px-3 gap-2
+            mb-1 gap-2 mx-2
 
             sm:text-lg sm:mb-0 sm:font-semibold
           "
@@ -223,10 +223,12 @@
         <div
           v-show="showFolders"
           class="
-            grid grid-cols-2 gap-2 mx-0
-            text-[var(--text)] my-4
+            grid grid-cols-2 gap-2
+            text-[var(--text)]
+            my-4  mx-0
 
-            sm:grid-cols-2 sm:gap-4 sm:mx-2 sm:my-2
+            sm:gap-4 sm:mx-2 sm:my-2
+            sm:grid-cols-2
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
@@ -408,13 +410,20 @@
     <!-- files -->
     <div
       v-if="fileResults.data.length"
-      class="w-full  border-t border-[var(--border)] py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14">
-      <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
+      class="
+        border-t border-[var(--border)]
+        w-full
+        py-6 px-2 pt-4
+
+        sm:mt-0 sm:py-4 sm:px-14
+      "
+    >
+      <div class="flex items-center justify-between mb-4 sm:mb-4">
         <h3
           class="
             flex items-center
             font-regular text-left text-sm text-[var(--text-terceary)] truncate
-            gap-2
+            mb-1 gap-2 mx-2
 
             sm:text-lg sm:mb-0 sm:font-semibold
           "
@@ -460,9 +469,12 @@
         <div
           v-show="showFiles"
           class="
-            grid grid-cols-1 gap-2 mx-0
+            grid grid-cols-1 gap-2
             text-[var(--text)]
-            sm:grid-cols-2 sm:gap-4 sm:mx-4
+            my-4  mx-0
+
+            sm:gap-4 sm:mx-2 sm:my-2
+            sm:grid-cols-2
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
