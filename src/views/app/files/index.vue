@@ -81,27 +81,79 @@
 
       <!--uploap movil-->
       <Transition name="fab">
-        <label
+        <div
           v-show="showFab && !hideBar"
-          for="fileInputBtn"
           :class="showSidebar ? 'hidden' : 'inline'"
           class="
             fixed bottom-3 right-3 sm:hidden z-10
-            flex items-center
-            bg-[#0A77F3]
-            text-white text-md font-medium
-            shadow-sm
-            py-2 px-2
-            rounded-full
-            cursor-pointer
-
-            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-            transition-all duration-300 ease-in-out
           "
         >
-          <img src="/icon/icon-upload.svg" alt="icon" class="h-8 w-8" />
-        </label>
+          <Dropdown
+            :classes="[
+              'bg-[var(--bg-secondary)]',
+              'border border-[var(--border)]',
+              'rounded-2xl',
+              'absolute','-right-0', 'bottom-10','z-20',
+              dropdownPosition,
+              'w-48',
+            ]">
+              <template #trigger="{ toggle }">
+                <button
+                  @click="toggleDropdown(toggle, $event)"
+                  class="
+                    flex items-center justify-center
+                    bg-[#0A77F3]
+                    text-white text-md font-medium
+                    shadow-sm h-12 w-12
+                    rounded-full
+                    cursor-pointer
+
+                    hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                    focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                    transition-all duration-300 ease-in-out
+                  "
+                >
+                  <img src="/icon/icon-add.svg" alt="icon" class="h-8 w-8" />
+                </button>
+              </template>
+              <template #content="{ }">
+                <div class="flex flex-col gap-0.5 px-1 py-1 font-medium text-md text-[var(--color-primary)]">
+                  <label
+                    for="fileInputBtn"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+                      grayscale
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:grayscale-0
+                      hover:border-[var(--color-primary)]
+                      transition-colors duration-300"
+                  >
+                    <img src="/icon/icon_download_2.svg" alt="newFolder" class="rotate-180 h-6 mr-4"/>
+                    <span>Upload</span>
+                  </label>
+                  <!--create a folder-->
+                  <button
+                    type="button"
+                    @click="createFolderModal = true"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+                      grayscale
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:grayscale-0
+                      hover:border-[var(--color-primary)]
+                      transition-colors duration-300"
+                  >
+                    <img src="/icon/icon-new-folder.svg" alt="newFolder" class="h-6 mr-4"/>
+                    <span>Create a folder</span>
+                  </button>
+                </div>
+              </template>
+          </Dropdown>
+        </div>
       </Transition>
 
       <router-view></router-view>
@@ -195,6 +247,7 @@ import {
   defineAsyncComponent,
   computed,
   onMounted,
+  nextTick,
   onBeforeUnmount,
 } from 'vue';
 import { useStore } from 'vuex';
@@ -203,6 +256,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { FileI } from '@/store/files/state';
 import { FoldersResultI } from '@/store/folders/state';
 
+const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
 const route = useRoute();
@@ -215,6 +269,8 @@ const query = ref<string>('');
 const loading = ref(false);
 
 const showFab = ref(true); // Show FAB on mobile
+const dropdownPosition = ref('top-8');
+const activeDropdownToggle = ref<(() => void) | null>(null);
 const createFolderModal = ref(false);
 const folderName = ref('');
 const moveToFolderModal = ref(false);
@@ -227,6 +283,22 @@ const progress = computed<number>(() => store.state.files.uploadProgress);
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const hideBar = computed(() => route.path.includes('/details'));
 const showSidebar = computed(() => showSidebarState.value);
+
+// toggle dropdown position based on click position
+const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
+  if (event) event.stopPropagation();
+
+  activeDropdownToggle.value = toggle;
+
+  toggle();
+
+  await nextTick();
+
+  const middle = window.innerHeight / 2;
+  const y = event?.clientY || 0;
+
+  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
+};
 
 const toggleSidebar = () => {
   store.commit('toggleSidebar');
