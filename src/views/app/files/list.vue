@@ -179,36 +179,43 @@
 
     <!-- folders -->
     <div
-    v-if="folderResults.data.length"
-    class="w-full py-0 px-2 pt-4 sm:py-4 sm:px-14">
-      <h3
-        class="
-          flex items-center
-          font-regular text-left text-sm text-[var(--text-terceary)] truncate
-          mb-1 px-3 gap-2
+      v-if="folderResults.data.length"
+      class="
+        w-full
+        py-0 px-2 pt-4
 
-          sm:text-lg sm:mb-0 sm:font-semibold
-        "
-      >
-        <span>Folders</span>
-        <button
-          type="button"
-          @click="showFolders = !showFolders"
-          class="
-            text-xs rounded-xl p-1 mt-0.5
-            border border-transparent
+        sm:py-4 sm:px-14
+      "
+    >
+      <div class="flex items-center justify-between px-3 mb-4 sm:mb-4">
+        <h3 class="
+            flex items-center
+            font-regular text-left text-sm text-[var(--text-terceary)] truncate
+            mb-1 px-3 gap-2
 
-            hover:border-[var(--color-primary)]
-            hover:text-[var(--color-primary)]
-            transition-all duration-300"
-          :class="showFolders ? 'text-[var(--color-primary)]' : 'grayscale'"
+            sm:text-lg sm:mb-0 sm:font-semibold
+          "
         >
-        <img
-            :src="showFolders ? '/icon/icon-preview.svg' : '/icon/icon-close-eye.svg'"
-            alt="eye icon"
-            class="h-5"/>
-        </button>
-      </h3>
+          <span>Folders</span>
+          <button
+            type="button"
+            @click="showFolders = !showFolders"
+            class="
+              text-xs rounded-xl p-1 mt-0.5
+              border border-transparent
+
+              hover:border-[var(--color-primary)]
+              hover:text-[var(--color-primary)]
+              transition-all duration-300"
+            :class="showFolders ? 'text-[var(--color-primary)]' : 'grayscale'"
+          >
+          <img
+              :src="showFolders ? '/icon/icon-preview.svg' : '/icon/icon-close-eye.svg'"
+              alt="eye icon"
+              class="h-5"/>
+          </button>
+        </h3>
+      </div>
       <Transition name="slide">
         <div
           v-show="showFolders"
@@ -477,6 +484,7 @@
               border border-[var(--border)]
               rounded-2xl min-w-0
               cursor-move
+
               hover:bg-[var(--hover-bg)]
               hover:border-[var(--hover-border)]
               transition-colors duration-300
@@ -608,7 +616,7 @@
                 class="
                   flex items-center justify-center
                   border-l border-[var(--border)]
-                  w-6 py-1
+                  w-6 h-full py-1
 
                   group-hover:border-[var(--color-primary)]
                   transition-colors duration-300
@@ -1280,7 +1288,7 @@ async function startEditingFile(currentFile: FileI) {
     input.select();
   }
 }
-
+// save rename file
 async function saveFileName(currentFile: FileI) {
   const finalName = editedFileName.value.trim();
   if (!finalName) return;
@@ -1327,7 +1335,7 @@ async function startEditingFolder(folder: FolderI) {
   input?.focus();
   input?.select();
 }
-
+// save
 async function saveFolderName(folder: FolderI) {
   const finalName = editedFolderName.value.trim();
   if (!finalName) return;

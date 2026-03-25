@@ -157,7 +157,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-1 px-12 pb-1 mt-4 w-full gap-2">
+      <div class="flex items-center gap-1 px-5 pb-1 mt-4 w-full sm:px-12">
         <input
           v-if="editingFolderId === folderDetails.id"
           v-model="editedFolderName"

@@ -5,18 +5,21 @@
   </div>
 
   <!-- if not results -->
-  <div v-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full">
+  <div v-if="!fileResults.data.length && !folderResults.data.length" class="mx-auto w-full px-2 sm:px-8">
     <div
       class="
         group
-        flex flex-col gap-8 justify-center items-center
-        w-full h-[calc(100vh-150px)] ml-2
+        flex flex-col
+        justify-center items-center
+        w-full h-[calc(100vh-190px)]
+        ml-2 gap-8
         border-2 border-[var(--border)] border-dashed
         rounded-2xl
 
         hover:border-[var(--color-primary)]
         hover:shadow-[0_0_8px_2px_rgba(10,119,243,0.5)]
         transition-colors duration-300
+        sm:h-[calc(100vh-150px)]
         "
       >
       <!-- <h1 class="text-6xl font-bold text-center text-white">Fui a comprar lo del almuerzo! :D</h1> -->
@@ -99,20 +102,19 @@
         @change="uploadFile"
         :multiple="true"
       />
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
       <!-- Upload button -->
       <label
         v-if="!hideBar"
         for="fileInputBtn"
         class="
-          hidden items-center
+          flex items-center
           bg-[var(--color-primary)]
           border border-[var(--color-primary)]
           text-white text-sm font-medium
           px-2 py-0.5
           rounded-full
 
-          sm:flex
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           transition-all duration-300 ease-in-out
@@ -128,7 +130,7 @@
         v-if="!hideBar"
         @click="createFolderModal = true"
         class="
-          hidden items-center
+          flex items-center
           bg-[var(--bg-secondary)]
           border border-[var(--border)]
           text-[var(--text-terceary)] text-sm font-medium
@@ -136,12 +138,12 @@
           grayscale
           rounded-full
 
-          sm:flex
           hover:grayscale-0
           hover:text-[var(--text)]
           hover:bg-[var(--hover-bg)]
           hover:border-[var(--hover-border)]
           hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
           focus:border-[var(--hover-border)]
           focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
           focus:grayscale-0
@@ -159,14 +161,20 @@
   <!-- folders -->
   <div
     v-if="folderResults.data.length"
-    class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14">
+    class="
+      w-full border-b border-[var(--border)]
+      py-0 px-2 pt-4
+
+      sm:py-4 sm:px-14
+    "
+  >
     <h3
       class="
         flex items-center
-        font-regular text-left text-sm text-[var(--text-terceary)] truncate
-        mb-1 gap-2
+        font-regular text-left text-md text-[var(--text-terceary)] truncate
+        mb-1 gap-2 mx-4
 
-        sm:text-lg sm:mb-0 sm:font-semibold
+        sm:text-md sm:font-semibold sm:mb-0 sm:mx-0
       "
     >
       <span>Folders</span>
@@ -174,7 +182,10 @@
         type="button"
         @click="showFolders = !showFolders"
         class="
-          text-xs rounded-xl p-1 border border-transparent mt-0.5
+          text-xs rounded-xl
+          p-1 mt-0.5
+          border border-transparent
+
           hover:border-[var(--color-primary)]
           hover:text-[var(--color-primary)]
           focus:outline-none
@@ -191,10 +202,10 @@
       <div
         v-show="showFolders"
         class="
-          grid grid-cols-2 gap-2 mx-0
-          text-[var(--text)] my-4
+          grid grid-cols-2 gap-2 mx-2
+          text-[var(--text)] my-2
 
-          sm:grid-cols-2 sm:gap-4 sm:my-2
+          sm:grid-cols-2 sm:gap-4 sm:mx-0
           md:grid-cols-3
           lg:grid-cols-4
           xl:grid-cols-6
@@ -384,18 +395,16 @@
   >
     <div
       class="
-        flex items-center justify-between
-
-        pb-1 mb-4
+        flex items-center justify-between mx-4 sm:mx-0
       "
     >
       <h3
         class="
           flex items-center
-          font-regular text-left text-sm text-[var(--text-terceary)] truncate
-          gap-2
+          font-regular text-left text-md text-[var(--text-terceary)] truncate
+          mb-1 gap-2
 
-          sm:text-lg sm:mb-0 sm:font-semibold
+          sm:text-md sm:mb-0 sm:font-semibold
         "
       >
         <span>Your Files</span>
@@ -403,7 +412,8 @@
           type="button"
           @click="showFiles = !showFiles"
           class="
-            text-xs rounded-xl p-1 mt-0.5
+            text-xs rounded-xl
+            p-1 mt-0.5
             border border-transparent
 
             hover:border-[var(--color-primary)]
@@ -439,8 +449,10 @@
       <div
         v-show="showFiles"
         class="
-          grid grid-cols-1 gap-2 mx-0
+          grid grid-cols-1 gap-2
+          mx-2 my-2
           text-[var(--text)]
+
           sm:grid-cols-2 sm:gap-4 sm:mx-0
           md:grid-cols-3
           lg:grid-cols-4
