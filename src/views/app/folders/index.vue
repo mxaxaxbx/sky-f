@@ -429,6 +429,7 @@ async function uploadFile(ev: Event): Promise<void> {
   }
 }
 
+// rename folder
 async function startEditingFolder() {
   if (!folderDetails.value) return;
 

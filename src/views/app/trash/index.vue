@@ -545,9 +545,10 @@
         </template>
         <template v-else>
           Are you sure you want to permanently delete the following items
+          <div class="my-4">
           <div v-if="selectedFolders.length" class="my-2">
           <span class="text-md text-[var(--text)] font-normal">Folder ({{selectedFolders.length}})</span>
-          <ul class="grid grid-cols-2 list-disc list-inside my-4 ml-2 font-light text-[var(--text-terceary)] text-sm">
+          <ul class="grid grid-cols-2 list-disc list-inside mt-2 ml-2 font-light text-[var(--text-terceary)] text-sm">
             <li v-for="folder in selectedFolders" :key="folder.id" class="ml-2">
               {{ folder.name }}
             </li>
@@ -555,15 +556,16 @@
         </div>
         <div v-if="selectedFiles.length" class="my-2">
           <span class="text-md text-[var(--text)] font-normal">Files ({{selectedFiles.length}})</span>
-          <ul class=" grid grid-cols-2 list-disc list-inside  ml-2 font-light text-[var(--text-terceary)] text-sm">
+          <ul class=" grid grid-cols-2 list-disc list-inside mt-2 ml-2 font-light text-[var(--text-terceary)] text-sm">
             <li v-for="file in selectedFiles" :key="file.id" class="ml-2 truncate">
               {{ file.name }}
             </li>
           </ul>
         </div>
+      </div>
         </template>
       </p>
-      <p class="text-sm text-[var(--warning-border)] font-medium flex items-center gap-2 mx-3">
+      <p class="text-sm text-[var(--warning-border)] font-medium flex items-center justify-center gap-2 mt-6">
         This action cannot be undone.
       </p>
     </template>
@@ -575,7 +577,12 @@
         class="
           text-[var(--text-secondary)] text-sm
           border border-[var(--border)] bg-[var(--bg)]
-          rounded-full px-3
+          rounded-full
+          px-3
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
         "
       >
         Cancel
@@ -585,15 +592,24 @@
         :disabled="loading"
         class="
           flex items-center gap-2
-          text-sm border rounded-full px-3
-          text-white bg-red-500 border-red-500
-          hover:bg-red-600
-          hover:shadow-[0_0_3px_3px_rgba(239,68,68,0.4)]
+          px-2.5 py-0.5
+          text-sm font-medium
+          rounded-full border
+          text-[var(--warning-border)]
+          border-[var(--warning-border)]
+          bg-[var(--bg-secondary)]
+          opacity-70
+
+          hover:border-[var(--warning-border)]
+          hover:bg-[var(--warning-bg)]
+          hover:opacity-100 hover:grayscale-0
+          hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
+          focus:grayscale-0 focus:opacity-100
           transition-all duration-300
-          disabled:opacity-50 disabled:cursor-not-allowed
+          disabled:opacity-40
         "
       >
-        <i class="fas fa-trash-can text-xs" />
+      <img src="/icon/icon-delate.svg" alt="delate" class="h-4"/>
         {{ loading ? 'Deleting...' : 'Delete permanently' }}
       </button>
     </template>
