@@ -1,6 +1,6 @@
 <template>
   <!-- loading -->
-  <div v-if="loading" class="flex mx-auto justify-center items-center py-20 text-[var(--color-primary)]">
+  <div v-if="loading" class="flex mx-auto justify-center items-center py-20 mt-10 text-[var(--color-primary)]">
     <i class="fas fa-spinner fa-spin text-2xl"></i>
   </div>
 
@@ -27,15 +27,15 @@
     <div class="mt-10 border border-transparent">
       <h1 class="
           text-lg text-[var(--text)]
-          font-alexandria font-regular
+          font-alexandria font-semibold
           mx-2 my-2 mt-14
           px-2
 
           sm:mt-8 sm:px-12
-          sm:font-semibold sm:text-xl
+          sm:text-xl
         "
       >
-        Horizon Events
+        Event Horizon
       </h1>
     <p class="
         mx-2 mt-4 px-2

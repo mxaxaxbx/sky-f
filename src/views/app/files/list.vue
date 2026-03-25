@@ -16,7 +16,10 @@
     >
       Could Drive
     </h1>
-    <h1 class="text-left text-lg font-semibold mx-4 text-[var(--text)] mt-14 sm:hidden block">
+    <h1 class="
+      text-left text-lg font-semibold
+      text-[var(--text)]
+      mx-4 mt-14 sm:hidden block">
       Could Drive
     </h1>
 
