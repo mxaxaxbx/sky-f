@@ -52,7 +52,7 @@ onUnmounted(() => {
 <template>
   <div class="relative inline-block" v-click-outside="close">
     <!-- Trigger slot -->
-    <slot name="trigger" :isOpen="isOpen" :toggle="toggle" />
+    <slot name="trigger" :isOpen="isOpen" :toggle="toggle" :close="close" />
 
     <!-- Dropdown content -->
     <transition

@@ -47,7 +47,7 @@
         "
       >
         <div
-          v-for="folder in folders"
+          v-for="folder, index in folders"
           :key="folder.id"
           @dragover.prevent
           @dragenter="onDragEnter(folder.id)"
@@ -135,9 +135,9 @@
                   'sm:-right-2'
                 ]"
               >
-                <template #trigger="{ toggle }">
+              <template #trigger="{ toggle, close }">
                   <button
-                    @click="toggleDropdown(toggle, $event)"
+                    @click="toggleDropdown(toggle, close, $event)"
                     class="
                       text-[var(--text-terceary)]
                       w-6 h-auto
@@ -151,58 +151,62 @@
                 </template>
 
                 <template #content="{ }">
-                  <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                  <div class="flex flex-col font-regular text-sm text-[#868686]">
 
-                    <!--rename folder-->
-                    <button
-                      type="button"
-                      @click="() => { startEditingFolder(folder); closeDropdown(); }"
-                      class="flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                    <div class="border-b border-[var(--border)] p-1 space-y-1">
+                      <!--rename folder-->
+                      <button
+                        type="button"
+                        @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                        class="flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300"
-                    >
-                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                      <span>Rename</span>
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-colors duration-300"
+                      >
+                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                        <span>Rename</span>
+                      </button>
+
+                      <!--move to folder-->
+                      <button
+                        type="button"
+                        @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
+
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-colors duration-300
+                        "
+                      >
+                        <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                        <span>Move to folder</span>
                     </button>
+                  </div>
 
-                    <!--move to folder-->
-                    <button
-                      type="button"
-                      @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                    <div class="p-1">
+                      <!-- move to trash -->
+                      <button
+                        @click="selectItem($event, 'folder', folder, index); moveToTrash();"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
+                          grayscale text-[var(--warning-border)] opacity-50
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                      <span>Move to folder</span>
-                    </button>
-
-                    <!-- move to trash -->
-                    <button
-                      @click="selectItem($event, 'folder', folder, index); moveToTrash();"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-                        grayscale text-[var(--warning-border)] opacity-50
-
-                        hover:bg-[var(--warning-bg)]
-                        hover:text-[var(--warning-border)]
-                        hover:border-[var(--warning-border)]
-                        hover:grayscale-0 hover:opacity-100
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
-                      <span>Send to the Void</span>
-                    </button>
+                          hover:bg-[var(--warning-bg)]
+                          hover:text-[var(--warning-border)]
+                          hover:border-[var(--warning-border)]
+                          hover:grayscale-0 hover:opacity-100
+                          transition-colors duration-300
+                        "
+                      >
+                        <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                        <span>Send to the Void</span>
+                      </button>
+                    </div>
                   </div>
                 </template>
               </Dropdown>
@@ -385,9 +389,9 @@
                 'sm:-right-2'
               ]"
             >
-              <template #trigger="{ toggle }">
+              <template #trigger="{ toggle, close }">
                 <button
-                  @click="toggleDropdown(toggle, $event)"
+                  @click="toggleDropdown(toggle, close, $event)"
                   class="
                     text-[var(--text-terceary)]
                     w-6 h-10
@@ -401,107 +405,135 @@
               </template>
 
               <template #content="{ }">
-                <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                <div class="flex flex-col font-regular text-sm text-[#868686]">
 
-                  <!-- info file -->
-                  <router-link
-                    :to="`/app/files/details/${file.id}`"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
+                  <!-- zone info -->
+                  <div class="border-b border-[var(--border)] p-1 space-y-1">
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      hover:grayscale-0
-                      focus:grayscale-0
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4"
-                    />
-                    <span>info</span>
-                  </router-link>
+                    <!-- info file-->
+                    <router-link
+                      :to="`/app/files/details/${file.id}`"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-3 py-1 border border-transparent
+                        grayscale
 
-                  <!-- preview file -->
-                  <router-link
-                    :to="`/app/files/details/${file.id}`"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        focus:grayscale-0
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4"
+                      />
+                      <span>info</span>
+                    </router-link>
+                  </div>
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      hover:grayscale-0
-                      focus:grayscale-0
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4"/>
-                    <span>Preview</span>
-                  </router-link>
+                  <!-- zone actions -->
+                  <div class="border-b border-[var(--border)] p-1 space-y-1">
+                    <!-- preview file -->
+                    <router-link
+                      :to="`/app/files/details/${file.id}`"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-3 py-1 border border-transparent
+                        grayscale
 
-                  <!--move to folder-->
-                  <button
-                    v-if="selectedFiles.length > 0"
-                    type="button"
-                    @click="moveToFolderModal = true"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        focus:grayscale-0
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4"/>
+                      <span>Preview</span>
+                    </router-link>
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      hover:grayscale-0
-                      focus:grayscale-0
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4"/>
-                    <span>Move to folder</span>
-                  </button>
+                    <!-- download -->
+                    <button
+                      @click="downloadFile(file)"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-3 py-1 border border-transparent
+                        grayscale
 
-                  <!--share link-->
-                  <button
-                    @click="copyLink(file)"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
+                        hover:bg-[var(--hover-bg)]
+                        hover:text-[var(--color-primary)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                      />
+                      <span>Download</span>
+                    </button>
+                  </div>
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      hover:grayscale-0
-                      focus:grayscale-0
-                      transition-all duration-300
-                    "
-                  >
-                    <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
-                    />
-                    {{ copied ? 'Copied!' : 'Copy link' }}
-                  </button>
+                  <!-- zone move -->
+                  <div class="border-b border-[var(--border)] p-1 space-y-1">
+                    <!--move to folder-->
+                    <button
+                      type="button"
+                      @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-3 py-1 border border-transparent
 
-                  <!-- download -->
-                  <button
-                    @click="downloadFile(file)"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                      <span>Move to folder</span>
+                    </button>
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:text-[var(--color-primary)]
-                      hover:border-[var(--color-primary)]
-                      hover:grayscale-0
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
-                    />
-                    <span>Download</span>
-                  </button>
+                    <!--share link-->
+                    <button
+                      @click="copyLink(file)"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-3 py-1 border border-transparent
+                        grayscale
+
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        focus:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
+                      />
+                      {{ copied ? 'Copied!' : 'Copy link' }}
+                    </button>
+                  </div>
+
+                  <!-- zone dangerous -->
+                  <div class="p-1">
+                    <!-- move to trash -->
+                    <button
+                      @click="selectItem($event, 'file', file, index); moveToTrash();"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-4 py-1 border border-transparent
+                        grayscale text-[var(--warning-border)] opacity-50
+
+                        hover:bg-[var(--warning-bg)]
+                        hover:text-[var(--warning-border)]
+                        hover:border-[var(--warning-border)]
+                        hover:grayscale-0 hover:opacity-100
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                      <span>Send to the Void</span>
+                    </button>
+                  </div>
                 </div>
               </template>
             </Dropdown>
@@ -511,80 +543,79 @@
       </div>
     </div>
   </div>
+
   <Modal v-model="moveToFolderModal" size="xl">
-                    <template #header>
-                      <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
-                      <h3 class="text-lg font-light">Move:
-                      <span class="text-lg font-light">"{{ file.name }}"</span>
-                      </h3>
-                      <!-- </div> -->
-                    </template>
+    <template #header>
+      <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
+        <h3 class="text-lg font-light">Move:
+          <span class="text-lg font-light">"{{ file.name }}"</span>
+        </h3>
+      <!-- </div> -->
+    </template>
 
-                    <template #content>
-                      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
-                        <div
-                          class="
-                            grid grid-cols-2 md:grid-cols-3 gap-2
-                            ">
+    <template #content>
+      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <button
+            v-for="folder in folderResults.data"
+            :key="folder.id"
+            type="button"
+            @click="selectedFolder = folder.id"
+            class="
+              flex items-center justify-start
+              px-2 py-0.5 gap-1.5
+              rounded-xl
+              border border-transparent
+              text-[var(--text-terceary)]
 
-                        <button
-                          v-for="folder in folderResults.data"
-                          :key="folder.id"
-                          type="button"
-                          @click="selectedFolder = folder.id"
-                          class="
-                            flex items-center justify-start
-                            px-2 py-0.5 gap-1.5
-                            rounded-xl
-                            border border-transparent
-                            text-[var(--text-terceary)]
-                            hover:bg-[var(--hover-bg)]
-                            hover:border-[var(--color-primary)]
-                            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
-                            hover:text-[var(--text)]
-                            transition
-                          "
-                          :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
-                        >
-                          <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
-                          <span class="text-sm text-left truncate w-full">
-                            {{ folder.name }}
-                          </span>
-                        </button>
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
+              hover:text-[var(--text)]
+              transition
+            "
+            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
+          >
+            <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+            <span class="text-sm text-left truncate w-full">
+              {{ folder.name }}
+            </span>
+          </button>
+        </div>
+      </form>
+    </template>
 
-                        </div>
-                      </form>
-                    </template>
-
-                    <template #footer>
-                      <button
-                        type="button"
-                        @click="moveToFolderModal = false; selectedFolder = null;"
-                        class="
-                          text-[var(--text-secondary)] text-sm
-                          border border-[var(--border)] bg-[var(--bg)]
-                          rounded-full
-                          px-3
-                        ">
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        form="move-to-folder-form"
-                        class="
-                          text-[var(--text)] text-sm
-                          border
-                          rounded-full
-                          px-3
-                          transition
-                        "
-                        :class="!selectedFolder
-                          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-                          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
-                      >
-                        Move
-                      </button>
-                    </template>
+    <template #footer>
+      <button
+        type="button"
+        @click="moveToFolderModal = false; selectedFolder = null;"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+        "
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="move-to-folder-form"
+        class="
+          text-[var(--text)] text-sm
+          border
+          rounded-full
+          px-3
+          transition
+        "
+        :class="!selectedFolder
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'
+        "
+      >
+        Move
+      </button>
+    </template>
   </Modal>
 </template>
 
@@ -612,8 +643,9 @@ const route = useRoute();
 const router = useRouter();
 
 const loading = ref(false);
+const sortOrder = ref<'desc' | 'asc'>('desc');
 const dropdownPosition = ref('top-8');
-const activeDropdownToggle = ref<(() => void) | null>(null);
+const activeDropdown = ref<(() => void) | null>(null);
 const moveToFolderModal = ref(false);
 const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
@@ -796,24 +828,25 @@ async function moveToFolder() {
 }
 
 // toggle dropdown position based on click position
-const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
+const toggleDropdown = async (
+  toggle: () => void,
+  close: () => void,
+  event?: MouseEvent,
+) => {
   if (event) event.stopPropagation();
 
-  activeDropdownToggle.value = toggle;
+  if (activeDropdown.value && activeDropdown.value !== close) {
+    activeDropdown.value();
+  }
 
+  activeDropdown.value = close;
   toggle();
 
   await nextTick();
-
   const middle = window.innerHeight / 2;
   const y = event?.clientY || 0;
-
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
-
-function closeDropdown() {
-  activeDropdownToggle.value?.();
-}
 
 // rename folder
 async function startEditingFolder(folder: FolderI) {
@@ -860,6 +893,36 @@ async function saveFolderName(folder: FolderI) {
   } finally {
     editingFolderId.value = null;
   }
+}
+
+async function getFolders() {
+  await store.dispatch('folders/filter', {
+    query: '',
+    page: 1,
+    folderId: '',
+  });
+}
+
+async function getFiles() {
+  await store.dispatch('files/filter', {
+    query: '',
+    page: 1,
+    orderBy: 'created',
+    order: sortOrder.value,
+    folderId: '',
+  });
+}
+
+async function moveToTrash() {
+  if (selectedFiles.value.length > 0) {
+    await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
+  }
+  if (selectedFolders.value.length > 0) {
+    await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
+  }
+
+  getFiles();
+  getFolders();
 }
 
 // Watch for route query changes

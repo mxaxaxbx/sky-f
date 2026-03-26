@@ -123,13 +123,25 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-start gap-2">
               <button
-                class="order-2 shrink-0 w-6 h-6 mt-2 grayscale hover:grayscale-0 cursor-pointer"
+                class="
+                  order-2
+                  shrink-0
+                  p-1
+                  grayscale
+                  border border-transparent
+                  rounded-xl
+
+                  hover:border-[var(--color-primary)]
+                  hover:grayscale-0
+                  transition-all duration-300 ease-in-out
+                  cursor-pointer
+                "
                 @click="startEditingFile(file)"
               >
                 <img
                   src="/icon/icon-edit.svg"
                   alt="edit"
-                  class="opacity-50 hover:opacity-100 cursor-pointer"
+                  class="opacity-50 hover:opacity-100 cursor-pointer h-5"
                 />
               </button>
 
@@ -167,7 +179,6 @@
               />
             </div>
             <div class="flex flex-wrap items-center gap-2 mt-2">
-
               <!--preview buttom-->
               <button
                 @click="store.dispatch('files/previewFile', file)"
@@ -175,7 +186,7 @@
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-[var(--text-terceary)] text-xs font-medium
+                  text-[var(--color-primary)] text-sm font-medium
                   pl-2 pr-2.5 py-0.5
                   rounded-full grayscale
 
@@ -200,8 +211,7 @@
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-[var(--text-terceary)] font-medium
-                  text-xs
+                  text-[var(--color-primary)] font-medium text-sm
                   pl-2 pr-2.5 py-0.5
                   rounded-full grayscale
 
@@ -226,25 +236,28 @@
                 class="
                   group relative
                   inline-flex items-center gap-1
-                  bg-[var(--color-primary)]
+                  bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-white text-xs font-medium
+                  text-[var(--color-primary)] text-sm font-medium
                   pl-2 pr-2.5 py-0.5
                   rounded-full
+                  grayscale
 
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  hover:text-white
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  hover:grayscale-0
+                  focus:grayscale-0
                   transition-all duration-300
 
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  disabled:hover:shadow-none
+                  disabled:opacity-100 disabled:cursor-not-allowed
                   overflow-hidden
                 "
               >
                 <i v-if="downloading" class="fas fa-spinner fa-spin text-white"></i>
                 <img
                   v-else
-                  src="/icon/icon_download.svg"
+                  src="/icon/icon_download_2.svg"
                   alt="download" class="h-4 w-4 z-0 sm:z-10"
                 />
                 <span class="relative z-0 sm:z-10">
@@ -253,7 +266,7 @@
                 <span
                   class="
                     absolute inset-0
-                    bg-[#202F41]/50
+                    bg-[var(--hover-bg)]
                     rounded-full
                     transition-transform duration-300 ease-in-out
                     transform -translate-x-full
@@ -261,6 +274,32 @@
                   "
                 >
                 </span>
+              </button>
+
+              <!--Delete button-->
+              <button
+                @click.stop="selectItem($event, 'file', file, index); moveToTrash(); $router.back();"
+                class="
+                  inline-flex items-center gap-2
+                  bg-[var(--bg-secondary)]
+                  border border-[var(--warning-border)]
+                  text-[var(--text-terceary)] font-medium text-sm
+                  pl-2 pr-2.5 py-0.5
+                  rounded-full
+                  grayscale opacity-60
+
+                  hover:bg-[var(--warning-bg)]
+                  hover:text-[var(--warning-border)]
+                  hover:grayscale-0 hover:opacity-100
+                  hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
+
+                  hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
+                  focus:grayscale-0
+                  transition-all duration-300
+                "
+              >
+                <img src="/icon/icon-delate.svg" alt="delate" class="h-4"/>
+                <span>Delete</span>
               </button>
             </div>
           </div>
@@ -384,14 +423,58 @@ import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { FileI } from '@/store/files/state';
+import { FolderI } from '@/store/folders/state';
 
 const store = useStore();
 const route = useRoute();
 
-const file = computed<FileI>(() => store.state.files.file);
+const sortOrder = ref<'desc' | 'asc'>('desc');
 const loading = ref(false);
 const downloading = ref(false);
 const copied = ref(false);
+const editingFileId = ref<number | null>(null);
+const editedFileName = ref('');
+const lastSelectedIndex = ref<number | null>(null);
+
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const file = computed<FileI>(() => store.state.files.file);
+
+const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+
+function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  if (event.ctrlKey) {
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        selectedFiles.value.push(item as FileI);
+      }
+    } else if (type === 'folder') {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        selectedFolders.value.push(item as FolderI);
+      }
+    }
+    lastSelectedIndex.value = index;
+    return;
+  }
+
+  console.log('item', item);
+  console.log('type', type);
+  console.log('index', index);
+
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+    console.log('selectedFiles', selectedFiles.value);
+  } else if (type === 'folder') {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+  }
+  lastSelectedIndex.value = index;
+}
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -470,9 +553,6 @@ onMounted(() => {
 });
 
 // rename file
-const editingFileId = ref<number | null>(null);
-const editedFileName = ref('');
-
 async function startEditingFile(currentFile: FileI) {
   editingFileId.value = currentFile.id;
 
@@ -514,5 +594,35 @@ async function saveFileName(currentFile: FileI) {
   } finally {
     editingFileId.value = null;
   }
+}
+
+async function getFolders() {
+  await store.dispatch('folders/filter', {
+    query: '',
+    page: 1,
+    folderId: '',
+  });
+}
+
+async function getFiles() {
+  await store.dispatch('files/filter', {
+    query: '',
+    page: 1,
+    orderBy: 'created',
+    order: sortOrder.value,
+    folderId: '',
+  });
+}
+
+async function moveToTrash() {
+  if (selectedFiles.value.length > 0) {
+    await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
+  }
+  if (selectedFolders.value.length > 0) {
+    await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
+  }
+
+  getFiles();
+  getFolders();
 }
 </script>

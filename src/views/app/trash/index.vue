@@ -276,9 +276,9 @@
                   'sm:-right-2'
                 ]"
               >
-                <template #trigger="{ toggle }">
+                <template #trigger="{ toggle, close }">
                   <button
-                    @click.stop="toggleDropdown(toggle, $event)"
+                    @click="toggleDropdown(toggle, close, $event)"
                     class="
                       text-[var(--text-terceary)] w-6 h-auto
                       hover:text-[var(--text)]
@@ -482,9 +482,9 @@
                     'sm:-right-2'
                   ]"
                 >
-                  <template #trigger="{ toggle }">
+                <template #trigger="{ toggle, close }">
                     <button
-                      @click.stop.prevent="toggleDropdown(toggle, $event)"
+                      @click="toggleDropdown(toggle, close, $event)"
                       class="
                         text-[var(--text-terceary)] w-6 h-10
                         hover:text-[var(--text)]
@@ -661,6 +661,7 @@ import {
   onMounted,
   reactive,
   ref,
+  nextTick,
   defineAsyncComponent,
 } from 'vue';
 import { useStore } from 'vuex';
@@ -680,6 +681,7 @@ const showFiles = ref(true);
 const selectedFiles = ref<FileI[]>([]);
 const selectedFolders = ref<FolderI[]>([]);
 const dropdownPosition = ref('top-8');
+const activeDropdown = ref<(() => void) | null>(null);
 
 const confirmDialog = reactive({
   visible: false,
@@ -737,11 +739,25 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
-function toggleDropdown(toggle: () => void, event: Event) {
-  event.stopPropagation();
-  toggle();
-}
+const toggleDropdown = async (
+  toggle: () => void,
+  close: () => void,
+  event?: MouseEvent,
+) => {
+  if (event) event.stopPropagation();
 
+  if (activeDropdown.value && activeDropdown.value !== close) {
+    activeDropdown.value();
+  }
+
+  activeDropdown.value = close;
+  toggle();
+
+  await nextTick();
+  const middle = window.innerHeight / 2;
+  const y = event?.clientY || 0;
+  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
+};
 function notify(type: 'success' | 'error', message: string) {
   store.commit('notifications/addNotification', { type, message });
 }

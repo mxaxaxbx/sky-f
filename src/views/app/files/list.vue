@@ -323,16 +323,16 @@
                   :classes="[
                     'bg-[var(--bg-secondary)]',
                     'border border-[var(--border)]',
-                    'rounded-2xl',
+                    'rounded-2xl','shadow-md',
                     'absolute','-right-0', 'z-20',
                     dropdownPosition,
                     'w-48',
                     'sm:-right-2'
                   ]"
                 >
-                  <template #trigger="{ toggle }">
+                  <template #trigger="{ toggle, close }">
                     <button
-                      @click="toggleDropdown(toggle, $event)"
+                      @click="toggleDropdown(toggle, close, $event)"
                       class="
                         text-[var(--text-terceary)]
                         w-6 h-auto
@@ -346,58 +346,60 @@
                   </template>
 
                   <template #content="{ }">
-                    <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                    <div class="flex flex-col font-regular text-sm text-[#868686]">
 
+                      <div class="border-b border-[var(--border)] p-1 space-y-1">
                       <!--rename folder-->
-                      <button
-                        type="button"
-                        @click="() => { startEditingFolder(folder); closeDropdown(); }"
-                        class="flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                        <button
+                          type="button"
+                          @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                          class="flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300"
-                      >
-                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                        <span>Rename</span>
-                      </button>
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300"
+                        >
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <span>Rename</span>
+                        </button>
+                        <!--move to folder-->
+                        <button
+                          type="button"
+                          @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
 
-                      <!--move to folder-->
-                      <button
-                        type="button"
-                        @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                          <span>Move to folder</span>
+                        </button>
+                      </div>
+                      <div class="p-1">
+                        <!-- delete folder -->
+                        <button
+                          @click="selectItem($event, 'folder', folder, index); moveToTrash();"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
+                            grayscale text-[var(--warning-border)] opacity-50
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                        <span>Move to folder</span>
-                      </button>
-
-                      <!-- delete folder -->
-                      <button
-                        @click="selectItem($event, 'folder', folder, index); moveToTrash();"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
-                          grayscale text-[var(--warning-border)] opacity-50
-
-                          hover:bg-[var(--warning-bg)]
-                          hover:text-[var(--warning-border)]
-                          hover:border-[var(--warning-border)]
-                          hover:grayscale-0 hover:opacity-100
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
-                        <span>Send to the Void</span>
-                      </button>
+                            hover:bg-[var(--warning-bg)]
+                            hover:text-[var(--warning-border)]
+                            hover:border-[var(--warning-border)]
+                            hover:grayscale-0 hover:opacity-100
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                          <span>Send to the Void</span>
+                        </button>
+                      </div>
                     </div>
                   </template>
                 </Dropdown>
@@ -641,16 +643,16 @@
                   :classes="[
                     'bg-[var(--bg-secondary)]',
                     'border border-[var(--border)]',
-                    'rounded-2xl',
+                    'rounded-2xl','shadow-md',
                     'absolute','-right-0', 'z-20',
                     dropdownPosition,
                     'w-48',
                     'sm:-right-2'
                   ]"
                 >
-                  <template #trigger="{ toggle }">
+                  <template #trigger="{ toggle, close }">
                     <button
-                      @click="toggleDropdown(toggle, $event)"
+                      @click="toggleDropdown(toggle, close, $event)"
                       class="
                         text-[var(--text-terceary)]
                         w-6 h-10
@@ -664,128 +666,137 @@
                   </template>
 
                   <template #content="{ }">
-                    <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                    <div class="flex flex-col font-regular text-sm text-[#868686]">
+                      <!--actions info-->
+                      <div class="border-b border-[var(--border)] p-1 space-y-1">
+                        <!-- info file -->
+                        <router-link
+                          :to="`/app/files/details/${file.id}`"
+                          class="
+                            flex items-center justify-start
+                            rounded-xl px-3 py-1 border border-transparent
 
-                      <!-- info file -->
-                      <router-link
-                        :to="`/app/files/details/${file.id}`"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
+                          />
+                          <span>info</span>
+                        </router-link>
+                        <!-- rename -->
+                        <button
+                          type="button"
+                          @click="() => { startEditingFile(file); closeDropdown(); }"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
-                        />
-                        <span>info</span>
-                      </router-link>
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300"
+                        >
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <span>Rename</span>
+                        </button>
+                      </div>
 
-                      <!-- preview file -->
-                      <button
-                        @click="store.dispatch('files/previewFile', file)"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                      <!--actions file-->
+                      <div class="border-b border-[var(--border)] p-1 space-y-1">
+                        <!-- preview file -->
+                        <button
+                          @click="store.dispatch('files/previewFile', file)"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
-                        <span>Preview</span>
-                      </button>
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
+                          <span>Preview</span>
+                        </button>
+                        <!-- download -->
+                        <button
+                          @click="downloadFile(file)"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
+                            grayscale
 
-                      <!-- rename -->
-                      <button
-                        type="button"
-                        @click="() => { startEditingFile(file); closeDropdown(); }"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                            hover:bg-[var(--hover-bg)]
+                            hover:text-[var(--color-primary)]
+                            hover:border-[var(--color-primary)]
+                            hover:grayscale-0
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                          />
+                          <span>Download</span>
+                        </button>
+                      </div>
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300"
-                      >
-                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                        <span>Rename</span>
-                      </button>
+                      <!--actions move-->
+                      <div class="border-b border-[var(--border)] p-1 space-y-1">
+                        <!--move to folder-->
+                        <button
+                          type="button"
+                          @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
 
-                      <!--move to folder-->
-                      <button
-                        type="button"
-                        @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                          <span>Move to folder</span>
+                        </button>
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                        <span>Move to folder</span>
-                      </button>
+                        <!--share link-->
+                        <button
+                          @click="copyLink(file)"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
 
-                      <!--share link-->
-                      <button
-                        @click="copyLink(file)"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-all duration-300
+                          "
+                        >
+                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
+                          {{ copied ? 'Copied!' : 'Copy link' }}
+                        </button>
+                      </div>
 
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-all duration-300
-                        "
-                      >
-                        <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
-                        {{ copied ? 'Copied!' : 'Copy link' }}
-                      </button>
+                      <!--actions dangerous-->
+                      <div class="p-1">
+                        <!-- move to trash -->
+                        <button
+                          @click="selectItem($event, 'file', file, index); moveToTrash();"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-4 py-1 border border-transparent
+                            grayscale text-[var(--warning-border)] opacity-50
 
-                      <!-- download -->
-                      <button
-                        @click="downloadFile(file)"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
-                          grayscale
-
-                          hover:bg-[var(--hover-bg)]
-                          hover:text-[var(--color-primary)]
-                          hover:border-[var(--color-primary)]
-                          hover:grayscale-0
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
-                        />
-                        <span>Download</span>
-                      </button>
-
-                      <!-- move to trash -->
-                      <button
-                        @click="selectItem($event, 'file', file, index); moveToTrash();"
-                        class="
-                          flex items-center justify-start
-                          rounded-xl px-2 py-1 border border-transparent
-                          grayscale text-[var(--warning-border)] opacity-50
-
-                          hover:bg-[var(--warning-bg)]
-                          hover:text-[var(--warning-border)]
-                          hover:border-[var(--warning-border)]
-                          hover:grayscale-0 hover:opacity-100
-                          transition-colors duration-300
-                        "
-                      >
-                        <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
-                        <span>Send to the Void</span>
-                      </button>
+                            hover:bg-[var(--warning-bg)]
+                            hover:text-[var(--warning-border)]
+                            hover:border-[var(--warning-border)]
+                            hover:grayscale-0 hover:opacity-100
+                            transition-colors duration-300
+                          "
+                        >
+                          <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                          <span>Send to the Void</span>
+                        </button>
+                      </div>
                     </div>
                   </template>
                 </Dropdown>
@@ -980,13 +991,13 @@ const sortOrder = ref<'desc' | 'asc'>('desc');
 const loading = ref(false);
 const copied = ref(false);
 const dropdownPosition = ref('top-8');
+const activeDropdown = ref<(() => void) | null>(null);
 const showFolders = ref(true);
 const showFiles = ref(true);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const moveToFolderModal = ref(false);
-const activeDropdownToggle = ref<(() => void) | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
 const editingFolderId = ref<number | null>(null);
@@ -1070,25 +1081,25 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
 }
 
-// toggle dropdown position based on click position
-const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
+const toggleDropdown = async (
+  toggle: () => void,
+  close: () => void,
+  event?: MouseEvent,
+) => {
   if (event) event.stopPropagation();
 
-  activeDropdownToggle.value = toggle;
+  if (activeDropdown.value && activeDropdown.value !== close) {
+    activeDropdown.value();
+  }
 
+  activeDropdown.value = close;
   toggle();
 
   await nextTick();
-
   const middle = window.innerHeight / 2;
   const y = event?.clientY || 0;
-
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
-
-function closeDropdown() {
-  activeDropdownToggle.value?.();
-}
 
 const copyLink = async (file: FileI) => {
   try {
