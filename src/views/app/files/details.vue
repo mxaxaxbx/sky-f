@@ -411,25 +411,11 @@ const copyLink = async (f: FileI) => {
   try {
     const url = await store.dispatch('files/getDownloadUrl', f);
 
-    const textArea = document.createElement('textarea');
-    textArea.value = url;
-    textArea.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 1px;
-      height: 1px;
-      opacity: 1;
-      border: none;
-      outline: none;
-      box-shadow: none;
-      background: transparent;
-    `;
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.setSelectionRange(0, url.length);
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'text/plain': new Blob([url], { type: 'text/plain' }),
+      }),
+    ]);
 
     copied.value = true;
     setTimeout(() => { copied.value = false; }, 2000);
