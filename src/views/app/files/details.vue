@@ -419,7 +419,7 @@ const copyLink = async (f: FileI) => {
       left: 50%;
       width: 1px;
       height: 1px;
-      opacity: 0.01;
+      opacity: 1;
       border: none;
       outline: none;
       box-shadow: none;
