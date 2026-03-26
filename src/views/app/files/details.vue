@@ -408,14 +408,27 @@ const openFile = (currentFile: FileI) => {
 };
 
 const copyLink = async (f: FileI) => {
-  const url = await store.dispatch('files/getDownloadUrl', f);
-  await navigator.clipboard.writeText(url);
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', f);
 
-  copied.value = true;
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
 
-  setTimeout(() => {
-    copied.value = false;
-  }, 2000);
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch (error) {
+    console.error('Error al copiar:', error);
+  }
 };
 
 async function downloadFile() {

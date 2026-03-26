@@ -128,7 +128,7 @@
         <span>Upload</span>
       </label>
 
-      <!-- New folder-->
+      <!-- create a folder-->
       <button
         v-if="!hideBar"
         @click="createFolderModal = true"
@@ -1049,6 +1049,42 @@ async function uploadFile(ev: Event): Promise<void> {
   }
 }
 
+// Select item with ctrl key
+function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  if (event.ctrlKey) {
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        selectedFiles.value.push(item as FileI);
+      }
+    } else if (type === 'folder') {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        selectedFolders.value.push(item as FolderI);
+      }
+    }
+    lastSelectedIndex.value = index;
+    return;
+  }
+
+  console.log('item', item);
+  console.log('type', type);
+  console.log('index', index);
+
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+    console.log('selectedFiles', selectedFiles.value);
+  } else if (type === 'folder') {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+    console.log('selectedFolders', selectedFolders.value);
+  }
+  lastSelectedIndex.value = index;
+}
+
 async function getFolders() {
   loading.value = true;
   try {
@@ -1089,39 +1125,18 @@ async function getFiles() {
   }
 }
 
-// create new folder
-async function createFolder() {
-  // test folder name
-  if (!folderName.value) {
-    store.commit('notifications/addNotification', {
-      message: 'Folder name is required',
-      type: 'error',
-    });
-    return;
-  }
-  // strip folder name
-  const strippedFolderName = folderName.value.trim();
+async function getFolderDetails() {
   loading.value = true;
+  console.log('folderId', folderId.value);
   try {
-    console.log('strippedFolderName', strippedFolderName);
-    console.log('folderId', folderId.value);
-    // await store.dispatch('folders/createFolder', {
-    //   name: strippedFolderName,
-    //   folderId: folderId.value,
-    // });
-
-    // createFolderModal.value = false;
-    // folderName.value = '';
-
-    // await getFolders();
-    // await getFiles();
-  } catch (error: unknown) {
-    console.error(error);
-    const errorResponse = error as { response?: { data?: { error?: string } } };
-    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
+    await store.dispatch('folders/getFolderDetails', {
+      folderId: Number(folderId.value),
+    });
+  } catch (error) {
+    console.error('Error loading folder details:', error);
     store.commit('notifications/addNotification', {
-      message: msg,
       type: 'error',
+      message: 'Error al obtener los detalles de la carpeta',
     });
   } finally {
     loading.value = false;
@@ -1148,40 +1163,89 @@ function closeDropdown() {
   activeDropdownToggle.value?.();
 }
 
-// Select item with ctrl key
-function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
-  if (event.ctrlKey) {
-    if (type === 'file') {
-      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
-      if (exists) {
-        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
-      } else {
-        selectedFiles.value.push(item as FileI);
-      }
-    } else if (type === 'folder') {
-      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
-      if (exists) {
-        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
-      } else {
-        selectedFolders.value.push(item as FolderI);
-      }
-    }
-    lastSelectedIndex.value = index;
+// create new folder
+async function createFolder() {
+  // test folder name
+  if (!folderName.value) {
+    store.commit('notifications/addNotification', {
+      message: 'Folder name is required',
+      type: 'error',
+    });
     return;
   }
+  // strip folder name
+  const strippedFolderName = folderName.value.trim();
+  loading.value = true;
+  try {
+    await store.dispatch('folders/createFolder', {
+      name: strippedFolderName,
+      folderId: folderId.value,
+    });
 
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
+    createFolderModal.value = false;
+    folderName.value = '';
 
-  if (type === 'file') {
-    store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
-    store.commit('folders/setSelectedFolders', [item as FolderI]);
-    console.log('selectedFolders', selectedFolders.value);
+    await getFolderDetails();
+    await getFolders();
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
   }
-  lastSelectedIndex.value = index;
+}
+// rename folder
+async function startEditingFolder(folder: FolderI) {
+  editingFolderId.value = folder.id;
+  editedFolderName.value = folder.name;
+
+  await nextTick();
+
+  const input = document.querySelector(
+    `input[data-folder-id="${folder.id}"]`,
+  ) as HTMLInputElement | null;
+
+  input?.focus();
+  input?.select();
+}
+
+// save name folder
+async function saveFolderName(folder: FolderI) {
+  const finalName = editedFolderName.value.trim();
+  if (!finalName) return;
+
+  try {
+    await store.dispatch('folders/changeFolderName', {
+      id: folder.id,
+      name: finalName,
+    });
+
+    await getFiles();
+    await getFolders();
+
+    await nextTick();
+
+    const updatedFolder = folderResults.value.data.find(
+      (f: FolderI) => f.id === folder.id,
+    );
+
+    if (updatedFolder) {
+      store.commit('folders/setSelectedFolders', [updatedFolder]);
+    }
+  } catch (error) {
+    console.error(error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al cambiar el nombre de la carpeta',
+    });
+  } finally {
+    editingFolderId.value = null;
+  }
 }
 
 // rename file
@@ -1211,7 +1275,7 @@ async function startEditingFile(currentFile: FileI) {
     input.select();
   }
 }
-
+// save rename file
 async function saveFileName(currentFile: FileI) {
   const finalName = editedFileName.value.trim();
   if (!finalName) return;
@@ -1313,32 +1377,33 @@ async function moveToFolder() {
 
 // copy link to clipboard
 const copyLink = async (file: FileI) => {
-  const url = await store.dispatch('files/getDownloadUrl', file);
-  await navigator.clipboard.writeText(url);
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
 
-  copied.value = true;
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      // fallback Safari
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
 
-  setTimeout(() => {
-    copied.value = false;
-  }, 2000);
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch (error) {
+    console.error('Error al copiar:', error);
+  }
 };
 
+// download buttom
 async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
-}
-
-async function startEditingFolder(folder: FolderI) {
-  editingFolderId.value = folder.id;
-  editedFolderName.value = folder.name;
-
-  await nextTick();
-
-  const input = document.querySelector(
-    `input[data-folder-id="${folder.id}"]`,
-  ) as HTMLInputElement | null;
-
-  input?.focus();
-  input?.select();
 }
 
 function onDragStart(type: string, item: FileI | FolderI) {
@@ -1397,39 +1462,7 @@ async function onDrop(folder: FolderI) {
   getFolders();
 }
 
-async function saveFolderName(folder: FolderI) {
-  const finalName = editedFolderName.value.trim();
-  if (!finalName) return;
-
-  try {
-    await store.dispatch('folders/changeFolderName', {
-      id: folder.id,
-      name: finalName,
-    });
-
-    await getFiles();
-    await getFolders();
-
-    await nextTick();
-
-    const updatedFolder = folderResults.value.data.find(
-      (f: FolderI) => f.id === folder.id,
-    );
-
-    if (updatedFolder) {
-      store.commit('folders/setSelectedFolders', [updatedFolder]);
-    }
-  } catch (error) {
-    console.error(error);
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: 'Error al cambiar el nombre de la carpeta',
-    });
-  } finally {
-    editingFolderId.value = null;
-  }
-}
-
+// delete
 async function moveToTrash() {
   if (selectedFiles.value.length > 0) {
     await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
