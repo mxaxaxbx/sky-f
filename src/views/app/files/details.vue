@@ -411,13 +411,23 @@ const copyLink = async (f: FileI) => {
   try {
     const url = await store.dispatch('files/getDownloadUrl', f);
 
-    // Siempre usar textarea — funciona en todos los browsers incluyendo Safari iOS
     const textArea = document.createElement('textarea');
     textArea.value = url;
-    textArea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    textArea.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 1px;
+      height: 1px;
+      opacity: 0.01;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      background: transparent;
+    `;
     document.body.appendChild(textArea);
     textArea.focus();
-    textArea.select();
+    textArea.setSelectionRange(0, url.length);
     document.execCommand('copy');
     document.body.removeChild(textArea);
 
@@ -427,6 +437,7 @@ const copyLink = async (f: FileI) => {
     console.error('Error al copiar:', error);
   }
 };
+
 async function downloadFile() {
   if (!file.value.uploadCompleted) {
     return;
