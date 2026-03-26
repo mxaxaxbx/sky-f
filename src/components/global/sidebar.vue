@@ -234,9 +234,10 @@ import {
   ref,
   onBeforeUnmount,
   onMounted,
+  nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { PermissionI } from '@/store/auth/state';
 
@@ -244,6 +245,7 @@ const token = localStorage.getItem('token');
 
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 
 // Track when user is interacting with project dropdown
 const isProjectDropdownActive = ref(false);
@@ -296,16 +298,16 @@ function closeSidebar() {
   store.commit('closeSidebar');
 }
 
-// Function to handle navigation link clicks
 function handleNavClick() {
-  // Close sidebar
-  closeSidebar();
-  // Scroll to top
+  if (window.innerWidth < 1024) {
+    nextTick(() => {
+      store.commit('closeSidebar');
+    });
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-watch(windowWidth, (w) => {
-  if (w < 640 && store.state.sidebar) {
+watch(route, () => {
+  if (window.innerWidth < 1024) {
     store.commit('closeSidebar');
   }
 });

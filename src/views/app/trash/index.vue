@@ -1,6 +1,6 @@
 <template>
   <!-- loading -->
-  <div v-if="loading" class="flex mx-auto justify-center items-center py-20 text-[var(--color-primary)]">
+  <div v-if="loading" class="flex mx-auto justify-center items-center py-20 mt-10 text-[var(--color-primary)]">
     <i class="fas fa-spinner fa-spin text-2xl"></i>
   </div>
 
@@ -25,38 +25,51 @@
 
   <template v-else>
     <div class="mt-10 border border-transparent">
-      <h1
-      class="
-        text-xl text-[var(--text)] font-semibold
-        mx-2 my-2 px-12 font-alexandria
+      <h1 class="
+          text-lg text-[var(--text)]
+          font-alexandria font-semibold
+          mx-2 my-2 mt-14
+          px-2
 
-        sm:mt-8
-        hidden sm:block
+          sm:mt-8 sm:px-12
+          sm:text-xl
+        "
+      >
+        Event Horizon
+      </h1>
+    <p class="
+        mx-2 mt-4 px-2
+        text-sm text-[var(--text-terceary)] font-light
+
+        sm:px-12 sm:mt-8
       "
     >
-      Horizon Events
-    </h1>
-    <p class="mx-2 mt-8 px-12 text-sm text-[var(--text-terceary)] font-light">
       Deleted files don’t disappear right away: you have 30 days to restore them.
       Then they’re permanently removed. {{ showDeleteModal }}
     </p>
 
     <!-- bulk actions bar -->
-    <transition
-      enter-active-class="animate__animated animate__fadeInDown animate__faster"
-      leave-active-class="animate__animated animate__fadeOutUp animate__faster"
-    >
+    <transition name="soft">
       <div
-        v-show="selectedFiles.length || selectedFolders.length"
+        v-if="selectedFiles.length || selectedFolders.length"
         class="
-          flex items-center gap-12
-          mt-8 px-14 py-3
+          flex items-center justify-between gap-4
+          mt-4 px-2 py-3
           border-b border-[var(--border)]
+
+          sm:px-14 sm:mt-8 sm:gap-12
+          sm:items-center sm:justify-start
 
         "
       >
-        <div class="flex gap-2 items-center">
-          <span class="text-lg font-medium text-[var(--text)] mr-auto">
+        <div class="flex  items-center gap-1 sm:gap-2">
+          <span class="
+            text-sm font-base text-[var(--text)]
+            mr-auto
+
+            sm:text-lg sm:font-medium
+            "
+          >
             {{ selectedFiles.length + selectedFolders.length }} <span class="ml-1">selected:</span>
           </span>
           <!-- clear selection -->
@@ -65,13 +78,14 @@
             class="
               text-s text-[var(--text-terceary)]
               rounded-xl border border-transparent
+
               hover:border-[var(--color-primary)] hover:text-[var(--text)]
               hover:bg-[var(--hover-bg)]
               hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]
-              transition-all duration-300
+              transition-colors duration-300
             "
           >
-            <i class="fas fa-xmark m-2" />
+            <i class="fas fa-xmark m-1 sm:m-2" />
           </button>
         </div>
 
@@ -81,9 +95,9 @@
             :disabled="loading"
             @click="recoverSelected"
             class="
-              flex items-center gap-2
-              px-2 py-0.5
-              text-s font-medium
+              flex items-center
+              px-1.5 py-1 gap-1
+              text-xs font-medium
               rounded-full border
               text-[var(--color-primary)]
               border-[var(--color-primary)]
@@ -97,9 +111,12 @@
               focus:grayscale-0 focus:opacity-100
               transition-all duration-300
               disabled:opacity-40
+
+              sm:px-2.5 sm:py-0.5 sm:gap-2
+              sm:text-sm
             "
           >
-            <img src="/icon/icon-recover.svg" alt="recover" class="h-5" />
+            <img src="/icon/icon-recover.svg" alt="recover" class="h-4 sm:h-5" />
             Recover
           </button>
 
@@ -108,9 +125,9 @@
             :disabled="loading"
             @click="showDeleteModal = true"
             class="
-              flex items-center gap-2
-              px-2.5 py-0.5
-              text-s font-medium
+              flex items-center
+              px-1.5 py-1 gap-1
+              text-xs font-medium
               rounded-full border
               text-[var(--warning-border)]
               border-[var(--warning-border)]
@@ -124,9 +141,12 @@
               focus:grayscale-0 focus:opacity-100
               transition-all duration-300
               disabled:opacity-40
+
+              sm:px-2.5 sm:py-0.5 sm:gap-2
+              sm:text-sm
             "
           >
-            <img src="/icon/icon-delate.svg" alt="delate" class="h-5"/>
+            <img src="/icon/icon-delate.svg" alt="delate" class="h-4 sm:h-5"/>
             Delete permanently
           </button>
         </div>
@@ -136,13 +156,20 @@
     <!-- folders section -->
     <div
       v-if="folders.length"
-      class="w-full border-b border-[var(--border)] py-0 px-2 pt-4 sm:py-4 sm:px-14"
+      class="
+        w-full
+        border-b border-[var(--border)]
+        py-0 px-2 pt-4
+
+        sm:py-4 sm:px-14
+      "
     >
       <h3
         class="
           flex items-center
-          font-regular text-left text-sm text-[var(--text-terceary)] truncate
-          mb-1 gap-2
+          font-regular text-left text-md text-[var(--text-terceary)] truncate
+          mb-1 gap-2 mx-2
+
           sm:text-lg sm:mb-0 sm:font-semibold
         "
       >
@@ -151,7 +178,11 @@
           type="button"
           @click="showFolders = !showFolders"
           class="
-            text-xs rounded-xl p-1 border border-transparent mt-0.5
+            text-xs
+            p-1 mt-0.5
+            border border-transparent
+            rounded-xl
+
             hover:border-[var(--color-primary)]
             hover:text-[var(--color-primary)]
             focus:outline-none
@@ -166,9 +197,12 @@
         <div
           v-show="showFolders"
           class="
-            grid grid-cols-2 gap-2 mx-0
-            text-[var(--text)] my-4
-            sm:grid-cols-2 sm:gap-4 sm:my-2
+            grid grid-cols-2 gap-2
+            text-[var(--text)]
+            my-4  mx-0
+
+            sm:gap-4 sm:my-2
+            sm:grid-cols-2
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
@@ -329,8 +363,8 @@
       <h3
         class="
           flex items-center
-          font-regular text-left text-sm text-[var(--text-terceary)] truncate
-          mb-1 gap-2
+          font-regular text-left text-md text-[var(--text-terceary)] truncate
+          mb-1 gap-2 mx-2
 
           sm:text-lg sm:mb-2 sm:font-semibold
         "
@@ -354,9 +388,12 @@
         <div
           v-show="showFiles"
           class="
-            grid grid-cols-1 gap-2 mx-0
+            grid grid-cols-1 gap-2
+            my-4 mx-0
             text-[var(--text)]
-            sm:grid-cols-2 sm:gap-4
+
+            sm:gap-4 sm:my-2
+            sm:grid-cols-2
             md:grid-cols-3
             lg:grid-cols-4
             xl:grid-cols-6
@@ -531,10 +568,12 @@
   <!-- confirm delete modal -->
   <Modal v-model="showDeleteModal" size="xl">
     <template #header>
-      <h3 class="text-lg font-normal text-[var(--text)] flex items-center gap-2">
-        <img src="/icon/icon-warning.svg" alt="warning" class="h-6" />
-        Delete permanently
-      </h3>
+      <div class="flex items-center mb-1">
+        <h3 class="text-lg font-medium text-[var(--warning-border)] flex items-center gap-2">
+          <img src="/icon/icon-delate-red.svg" alt="warning" class="h-6" />
+          Delete permanently
+        </h3>
+      </div>
     </template>
 
     <template #content>
@@ -545,9 +584,10 @@
         </template>
         <template v-else>
           Are you sure you want to permanently delete the following items
+          <div class="my-4">
           <div v-if="selectedFolders.length" class="my-2">
           <span class="text-md text-[var(--text)] font-normal">Folder ({{selectedFolders.length}})</span>
-          <ul class="grid grid-cols-2 list-disc list-inside my-4 ml-2 font-light text-[var(--text-terceary)] text-sm">
+          <ul class="grid grid-cols-2 list-disc list-inside mt-2 ml-2 font-light text-[var(--text-terceary)] text-sm">
             <li v-for="folder in selectedFolders" :key="folder.id" class="ml-2">
               {{ folder.name }}
             </li>
@@ -555,15 +595,16 @@
         </div>
         <div v-if="selectedFiles.length" class="my-2">
           <span class="text-md text-[var(--text)] font-normal">Files ({{selectedFiles.length}})</span>
-          <ul class=" grid grid-cols-2 list-disc list-inside  ml-2 font-light text-[var(--text-terceary)] text-sm">
+          <ul class=" grid grid-cols-2 list-disc list-inside mt-2 ml-2 font-light text-[var(--text-terceary)] text-sm">
             <li v-for="file in selectedFiles" :key="file.id" class="ml-2 truncate">
               {{ file.name }}
             </li>
           </ul>
         </div>
+      </div>
         </template>
       </p>
-      <p class="text-sm text-[var(--warning-border)] font-medium flex items-center gap-2 mx-3">
+      <p class="text-md text-[var(--warning-border)] font-medium gap-2 mx-4 mt-6">
         This action cannot be undone.
       </p>
     </template>
@@ -575,7 +616,12 @@
         class="
           text-[var(--text-secondary)] text-sm
           border border-[var(--border)] bg-[var(--bg)]
-          rounded-full px-3
+          rounded-full
+          px-3
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
         "
       >
         Cancel
@@ -585,15 +631,24 @@
         :disabled="loading"
         class="
           flex items-center gap-2
-          text-sm border rounded-full px-3
-          text-white bg-red-500 border-red-500
-          hover:bg-red-600
-          hover:shadow-[0_0_3px_3px_rgba(239,68,68,0.4)]
+          px-2.5 py-0.5
+          text-sm font-medium
+          rounded-full border
+          text-[var(--warning-border)]
+          border-[var(--warning-border)]
+          bg-[var(--bg-secondary)]
+          opacity-70
+
+          hover:border-[var(--warning-border)]
+          hover:bg-[var(--warning-bg)]
+          hover:opacity-100 hover:grayscale-0
+          hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
+          focus:grayscale-0 focus:opacity-100
           transition-all duration-300
-          disabled:opacity-50 disabled:cursor-not-allowed
+          disabled:opacity-40
         "
       >
-        <i class="fas fa-trash-can text-xs" />
+      <img src="/icon/icon-delate.svg" alt="delate" class="h-4"/>
         {{ loading ? 'Deleting...' : 'Delete permanently' }}
       </button>
     </template>
@@ -794,3 +849,27 @@ onMounted(async () => {
   await getFiles();
 });
 </script>
+<style scoped>
+.soft-enter-active {
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.soft-leave-active {
+  transition: all 0.2s ease;
+}
+
+.soft-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.soft-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.soft-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+</style>
