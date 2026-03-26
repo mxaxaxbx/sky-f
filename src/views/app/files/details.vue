@@ -411,11 +411,15 @@ const copyLink = async (f: FileI) => {
   try {
     const url = await store.dispatch('files/getDownloadUrl', f);
 
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        'text/plain': new Blob([url], { type: 'text/plain' }),
-      }),
-    ]);
+    // Siempre usar textarea — funciona en todos los browsers incluyendo Safari iOS
+    const textArea = document.createElement('textarea');
+    textArea.value = url;
+    textArea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
 
     copied.value = true;
     setTimeout(() => { copied.value = false; }, 2000);
