@@ -253,12 +253,10 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   async getDownloadUrl(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
-  ): Promise<void> {
+  ): Promise<string> {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
-
     context.dispatch('saveCacheFile', payload);
-
     return url;
   },
 
