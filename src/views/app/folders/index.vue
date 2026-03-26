@@ -499,7 +499,7 @@ async function createFolder() {
     folderName.value = '';
 
     await getFolderDetails();
-    await getFolders();
+    // await getFolders();
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };

@@ -23,6 +23,12 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     console.log('payload', payload);
     const { data } = await storageClient.post('/api/folders/create-folder', camelToSnake(payload));
     context.commit('setFolder', snakeToCamel(data));
+
+    await context.dispatch('filter', {
+      query: '',
+      page: 1,
+      folderId: payload.folderId,
+    });
   },
 
   async filter(
