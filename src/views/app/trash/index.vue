@@ -64,10 +64,10 @@
       >
         <div class="flex  items-center gap-1 sm:gap-2">
           <span class="
-            text-sm font-base text-[var(--text)]
+            text-sm font-medium text-[var(--text)]
             mr-auto
 
-            sm:text-lg sm:font-medium
+            sm:text-lg
             "
           >
             {{ selectedFiles.length + selectedFolders.length }} <span class="ml-1">selected:</span>
@@ -77,7 +77,7 @@
             @click="clearSelection"
             class="
               text-s text-[var(--text-terceary)]
-              rounded-xl border border-transparent
+              rounded-xl border border-transparent p-1
 
               hover:border-[var(--color-primary)] hover:text-[var(--text)]
               hover:bg-[var(--hover-bg)]
@@ -85,7 +85,7 @@
               transition-colors duration-300
             "
           >
-            <i class="fas fa-xmark m-1 sm:m-2" />
+            <i class="fas fa-xmark h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
@@ -96,9 +96,9 @@
             @click="recoverSelected"
             class="
               flex items-center
-              px-1.5 py-1 gap-1
-              text-xs font-medium
-              rounded-full border
+              px-1 py-1 gap-2
+              text-sm font-medium
+              rounded-xl border
               text-[var(--color-primary)]
               border-[var(--color-primary)]
               bg-[var(--bg-secondary)]
@@ -107,17 +107,15 @@
               hover:border-[var(--color-primary)]
               hover:bg-[var(--hover-bg)]
               hover:opacity-100 hover:grayscale-0
-              hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.3)]
+              hover:shadow-[0_0_5px_3px_rgba(10,119,243,0.3)]
               focus:grayscale-0 focus:opacity-100
               transition-all duration-300
-              disabled:opacity-40
 
-              sm:px-2.5 sm:py-0.5 sm:gap-2
-              sm:text-sm
+              sm:px-2
             "
           >
-            <img src="/icon/icon-recover.svg" alt="recover" class="h-4 sm:h-5" />
-            Recover
+            <img src="/icon/icon-recover.svg" alt="recover" class="h-5" />
+            <span class="hidden sm:inline">Recover</span>
           </button>
 
           <!-- delete selected -->
@@ -125,28 +123,37 @@
             :disabled="loading"
             @click="showDeleteModal = true"
             class="
+              btn-delete
               flex items-center
-              px-1.5 py-1 gap-1
-              text-xs font-medium
-              rounded-full border
-              text-[var(--warning-border)]
-              border-[var(--warning-border)]
+              px-2 py-1 gap-2
+              text-sm font-medium
+              rounded-xl border
+              text-[var(--delete-color)]
+              border-[var(--delete-color)]
               bg-[var(--bg-secondary)]
               grayscale opacity-60
 
-              hover:border-[var(--warning-border)]
-              hover:bg-[var(--warning-bg)]
+              hover:border-[var(--delete-color)]
+              hover:bg-[var(--delete-bg)]
               hover:opacity-100 hover:grayscale-0
-              hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
               focus:grayscale-0 focus:opacity-100
               transition-all duration-300
               disabled:opacity-40
 
-              sm:px-2.5 sm:py-0.5 sm:gap-2
+              sm:px-2 sm:gap-2
               sm:text-sm
             "
           >
-            <img src="/icon/icon-delate.svg" alt="delate" class="h-4 sm:h-5"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+              <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <rect width="24" height="24" fill="#FFC506"/>
+              </mask>
+              <g mask="url(#mask0_1676_2)">
+                <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                  3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                  4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+              </g>
+            </svg>
             Delete permanently
           </button>
         </div>
@@ -290,16 +297,16 @@
                 </template>
 
                 <template #content>
-                  <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                  <div class="flex flex-col gap-1 px-1 py-1 font-regular text-sm text-[#868686]">
 
                     <!-- recover -->
                     <button
                       @click.stop="recoverItem('folder', folder)"
                       :disabled="loading"
                       class="
-                        flex items-center gap-2
-                        px-2 py-1
-                        text-s font-medium
+                        flex items-center gap-4
+                        px-3 py-1
+                        text-sm font-medium
                         rounded-xl border
                         text-[var(--color-primary)]
                         border-transparent
@@ -324,27 +331,36 @@
                       @click.stop.prevent="showDeleteModal = true"
                       :disabled="loading"
                       class="
-                        flex items-center gap-2
-                        px-2.5 py-1
-                        text-s font-medium
-                        rounded-xl border
-                        text-[var(--warning-border)]
-                        border-transparent
-                        bg-[var(--bg-secondary)]
-                        grayscale opacity-60
+                          btn-delete
+                          flex items-center gap-4
+                          px-3 py-1
+                          text-sm font-medium
+                          rounded-xl border
+                          text-[var(--delete-color)]
+                          border-transparent
+                          bg-[var(--bg-secondary)]
+                          grayscale opacity-60
 
-                        hover:border-[var(--warning-border)]
-                        hover:bg-[var(--warning-bg)]
-                        hover:opacity-100 hover:grayscale-0
-                        hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
-                        focus:grayscale-0 focus:opacity-100
-                        transition-all duration-300
-                        disabled:opacity-40
-                      "
-                    >
-                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5"/>
-                      Delete permanently
-                    </button>
+                          hover:border-[var(--delete-color)]
+                          hover:bg-[var(--delete-bg)]
+                          hover:opacity-100 hover:grayscale-0
+                          focus:grayscale-0 focus:opacity-100
+                          transition-all duration-300
+                          disabled:opacity-40
+                        "
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+                          <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                            <rect width="24" height="24" fill="#FFC506"/>
+                          </mask>
+                          <g mask="url(#mask0_1676_2)">
+                            <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                              3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                              4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                          </g>
+                        </svg>
+                        Delete permanently
+                      </button>
 
                   </div>
                 </template>
@@ -496,16 +512,16 @@
                   </template>
 
                   <template #content>
-                    <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                    <div class="flex flex-col gap-1 px-1 py-1 font-regular text-sm text-[#868686]">
 
                       <!-- recover -->
                       <button
                         @click.stop="recoverItem('file', file)"
                         :disabled="loading"
                         class="
-                          flex items-center gap-2
-                          px-2 py-1
-                          text-s font-medium
+                          flex items-center gap-4
+                          px-3 py-1
+                          text-sm font-medium
                           rounded-xl border
                           text-[var(--color-primary)]
                           border-transparent
@@ -530,28 +546,36 @@
                         @click.stop="selectedFiles.push(file); showDeleteModal = true"
                         :disabled="loading"
                         class="
-                          flex items-center gap-2
-                          px-2.5 py-1
-                          text-s font-medium
+                          btn-delete
+                          flex items-center gap-4
+                          px-3 py-1
+                          text-sm font-medium
                           rounded-xl border
-                          text-[var(--warning-border)]
+                          text-[var(--delete-color)]
                           border-transparent
                           bg-[var(--bg-secondary)]
                           grayscale opacity-60
 
-                          hover:border-[var(--warning-border)]
-                          hover:bg-[var(--warning-bg)]
+                          hover:border-[var(--delete-color)]
+                          hover:bg-[var(--delete-bg)]
                           hover:opacity-100 hover:grayscale-0
-                          hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
                           focus:grayscale-0 focus:opacity-100
                           transition-all duration-300
                           disabled:opacity-40
                         "
                       >
-                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5"/>
-                      Delete permanently
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+                          <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                            <rect width="24" height="24" fill="#FFC506"/>
+                          </mask>
+                          <g mask="url(#mask0_1676_2)">
+                            <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                              3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                              4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                          </g>
+                        </svg>
+                        Delete permanently
                       </button>
-
                     </div>
                   </template>
                 </Dropdown>
@@ -887,5 +911,8 @@ onMounted(async () => {
 .soft-leave-to {
   opacity: 0;
   transform: translateY(-6px);
+}
+.btn-delete:hover {
+  box-shadow: var(--delete-shadow);
 }
 </style>

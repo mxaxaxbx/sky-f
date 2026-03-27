@@ -21,7 +21,7 @@
       <button
         @click="$router.back()"
         class="
-          absolute right-2.5 top-1
+          absolute right-3 top-1
           text-md
           text-[var(--text-terceary)]
           hover:text-[var(--text)]
@@ -120,12 +120,46 @@
           </div>
 
           <!-- File name and actions -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start gap-2">
+          <div class="flex-1 w-full">
+            <div class="flex items-start min-w-0 gap-1 overflow-hidden">
+              <!-- MODO NORMAL -->
+              <h1
+                v-if="editingFileId !== file.id"
+                class="
+                  flex-1
+                  min-w-0
+                  text-lg md:text-2xl font-semibold
+                  text-[var(--text)]
+                  mb-2
+                  break-words whitespace-normal
+                  overflow-hidden
+                "
+              >
+                {{ file.name }}
+              </h1>
+
+              <!-- MODO EDICIÓN -->
+              <input
+                v-else
+                :data-file-id="file.id"
+                v-model="editedFileName"
+                @keyup.enter="saveFileName(file)"
+                @blur="saveFileName(file)"
+                class="
+                  flex-1
+                  min-w-0
+                  text-lg md:text-2xl font-semibold
+                  text-[var(--text)]
+                  bg-transparent
+                  border-b border-[var(--color-primary)]
+                  break-words whitespace-normal
+                  outline-none
+                  mb-2
+                "
+              />
               <button
                 class="
-                  order-2
-                  shrink-0
+                  flex-shrink-0
                   p-1
                   grayscale
                   border border-transparent
@@ -141,42 +175,9 @@
                 <img
                   src="/icon/icon-edit.svg"
                   alt="edit"
-                  class="opacity-50 hover:opacity-100 cursor-pointer h-5"
+                  class="cursor-pointer h-5"
                 />
               </button>
-
-              <!-- MODO NORMAL -->
-              <h1
-                v-if="editingFileId !== file.id"
-                class="
-                  order-1
-                  text-xl sm:text-2xl font-semibold
-                  text-[var(--text)]
-                  mb-2
-                  break-words
-                "
-              >
-                {{ file.name }}
-              </h1>
-
-              <!-- MODO EDICIÓN -->
-              <input
-                v-else
-                :data-file-id="file.id"
-                v-model="editedFileName"
-                @keyup.enter="saveFileName(file)"
-                @blur="saveFileName(file)"
-                class="
-                  order-1
-                  text-xl sm:text-2xl font-semibold
-                  text-[var(--text)]
-                  bg-transparent
-                  border-b border-[var(--color-primary)]
-                  outline-none
-                  mb-2
-                  w-full
-                "
-              />
             </div>
             <div class="flex flex-wrap items-center gap-2 mt-2">
               <!--preview buttom-->
@@ -187,8 +188,8 @@
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
                   text-[var(--color-primary)] text-sm font-medium
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full grayscale
+                  p-1
+                  rounded-xl grayscale
 
                   hover:bg-[var(--hover-bg)]
                   hover:grayscale-0
@@ -200,8 +201,8 @@
                   transition-all duration-300
                 "
               >
-                <img src="/icon/icon-preview.svg" alt="download" class="h-4 w-4"/>
-                Preview
+                <img src="/icon/icon-preview.svg" alt="download" class="h-5"/>
+                <span class="hidden md:inline pr-1">Preview</span>
               </button>
 
               <!-- Copy link button -->
@@ -212,8 +213,8 @@
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
                   text-[var(--color-primary)] font-medium text-sm
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full grayscale
+                  p-1
+                  rounded-xl grayscale
 
                   hover:bg-[var(--hover-bg)]
                   hover:text-[var(--text)]
@@ -225,8 +226,8 @@
                   transition-all duration-300
                 "
               >
-                <img src="/icon/icon-link.svg" alt="download" class="h-4 w-4"/>
-                  {{ copied ? 'Copied!' : 'Copy link' }}
+                <img src="/icon/icon-link.svg" alt="download" class="h-5 -rotate-45"/>
+                <span class="hidden sm:inline pr-1">{{ copied ? 'Copied!' : 'Copy link' }}</span>
               </button>
 
               <!-- Download button -->
@@ -239,12 +240,12 @@
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
                   text-[var(--color-primary)] text-sm font-medium
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full
+                  p-1
+                  rounded-xl
                   grayscale
 
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  hover:text-white
+                  hover:text-[var(--color-primary)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                   hover:grayscale-0
                   focus:grayscale-0
@@ -258,9 +259,9 @@
                 <img
                   v-else
                   src="/icon/icon_download_2.svg"
-                  alt="download" class="h-4 w-4 z-0 sm:z-10"
+                  alt="download" class="h-5 z-0 sm:z-10"
                 />
-                <span class="relative z-0 sm:z-10">
+                <span class="relative z-0 pr-1 hidden sm:inline sm:z-10">
                   {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
@@ -280,26 +281,35 @@
               <button
                 @click.stop="selectItem($event, 'file', file, index); moveToTrash(); $router.back();"
                 class="
+                  btn-delete
                   inline-flex items-center gap-2
                   bg-[var(--bg-secondary)]
-                  border border-[var(--warning-border)]
-                  text-[var(--text-terceary)] font-medium text-sm
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full
+                  border border-[var(--delete-color)]
+                  text-[var(--delete-color)] font-medium text-sm
+                  p-1
+                  rounded-xl
                   grayscale opacity-60
 
-                  hover:bg-[var(--warning-bg)]
-                  hover:text-[var(--warning-border)]
+                  hover:bg-[var(--delete-bg)]
+                  hover:text-[var(--delete-color)]
                   hover:grayscale-0 hover:opacity-100
-                  hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
 
-                  hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
                   focus:grayscale-0
                   transition-all duration-300
                 "
               >
-                <img src="/icon/icon-delate.svg" alt="delate" class="h-4"/>
-                <span>Delete</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5">
+                  <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                  <rect width="24" height="24" fill="#FFC506"/>
+                  </mask>
+                  <g mask="url(#mask0_1676_2)">
+                  <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                    3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                    4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                  </g>
+                </svg>
+
+                <span class="pr-1">Delete</span>
               </button>
             </div>
           </div>
@@ -626,3 +636,8 @@ async function moveToTrash() {
   getFolders();
 }
 </script>
+<style scoped>
+.btn-delete:hover {
+  box-shadow: var(--delete-shadow);
+}
+</style>

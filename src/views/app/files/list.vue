@@ -387,16 +387,25 @@
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
-                            grayscale text-[var(--warning-border)] opacity-50
+                            grayscale text-[var(--delete-color)] opacity-60
 
-                            hover:bg-[var(--warning-bg)]
-                            hover:text-[var(--warning-border)]
-                            hover:border-[var(--warning-border)]
+                            hover:bg-[var(--delete-bg)]
+                            hover:text-[var(--delete-color)]
+                            hover:border-[var(--delete-color)]
                             hover:grayscale-0 hover:opacity-100
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+                              <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                              <rect width="24" height="24" fill="#FFC506"/>
+                              </mask>
+                              <g mask="url(#mask0_1676_2)">
+                              <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                                3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                                4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                              </g>
+                            </svg>
                           <span>Send to the Void</span>
                         </button>
                       </div>
@@ -771,7 +780,7 @@
                             transition-all duration-300
                           "
                         >
-                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
                           {{ copied ? 'Copied!' : 'Copy link' }}
                         </button>
                       </div>
@@ -783,17 +792,26 @@
                           @click="selectItem($event, 'file', file, index); moveToTrash();"
                           class="
                             flex items-center justify-start w-full
-                            rounded-xl px-4 py-1 border border-transparent
-                            grayscale text-[var(--warning-border)] opacity-50
+                            rounded-xl px-3 py-1 border border-transparent
+                            grayscale text-[var(--delete-color)] opacity-60
 
-                            hover:bg-[var(--warning-bg)]
-                            hover:text-[var(--warning-border)]
-                            hover:border-[var(--warning-border)]
+                            hover:bg-[var(--delete-bg)]
+                            hover:text-[var(--delete-color)]
+                            hover:border-[var(--delete-color)]
                             hover:grayscale-0 hover:opacity-100
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+                            <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                            <rect width="24" height="24" fill="#FFC506"/>
+                            </mask>
+                            <g mask="url(#mask0_1676_2)">
+                            <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                              3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                              4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                            </g>
+                          </svg>
                           <span>Send to the Void</span>
                         </button>
                       </div>
@@ -961,6 +979,103 @@
         </button>
       </template>
     </Modal>
+    <Modal v-model="createShareModal" size="md">
+  <template #header>
+    <h3 class="text-lg font-semibold text-[var(--text)] pb-1"> Copy link:
+      <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+            {{ file.name }}
+      </p>
+      <p class="font-light text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+            "{{ folder.name }}"
+      </p>
+    </h3>
+    <button
+      type="button"
+      @click="createShareModal = false"
+      class="
+        absolute right-3 top-2
+        text-md
+        text-[var(--text-terceary)]
+        hover:text-[var(--text)]
+        transition-colors duration-200
+      "
+    >
+    <i class="fa-solid fa-xmark"></i>
+    </button>
+  </template>
+  <template #content>
+    <div class="flex flex-col gap-3">
+      <div
+        class="
+          flex
+          group
+          p-0.5
+          bg-[var(--bg)]
+          border border-[var(--color-primary)]
+          rounded-xl
+
+          hover:bg-[var(--bg-hover)]
+          shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+          transition-all duration-300 ease-in-out
+        "
+      >
+        <input
+          :value="shareUrl"
+          readonly
+          class="
+            w-full flex-1
+            text-xs text-[var(--text)]
+            pr-1 pl-2 py-1
+            bg-transparent
+            rounded-full
+            select-all
+            focus:outline-none
+          "
+          @focus="e => (e.target as HTMLInputElement).select()"
+        />
+        <button
+          type="button"
+          @click="tryCopy"
+          class="
+            flex items-center
+            px-2 gap-1
+            text-[var(--text)] text-sm font-medium
+            bg-[var(--bg-secondary)]
+            border border-[var(--color-primary)]
+
+            hover:bg-[var(--color-primary)]
+            hover:text-white
+            hover:border-[var(--color-primary)]
+            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
+            rounded-lg
+            transition-all duration-300 ease-in-out
+          "
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
+            <mask id="mask0_1677_12" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+            <rect width="24" height="24"/>
+            </mask>
+            <g mask="url(#mask0_1677_12)">
+            <path d="M11 17H7C5.61667 17 4.4375 16.5125 3.4625 15.5375C2.4875 14.5625 2 13.3833 2 12C2 10.6167
+              2.4875 9.4375 3.4625 8.4625C4.4375 7.4875 5.61667 7 7 7H11V9H7C6.16667 9 5.45833 9.29167
+              4.875 9.875C4.29167 10.4583 4 11.1667 4 12C4 12.8333 4.29167 13.5417 4.875 14.125C5.45833
+              14.7083 6.16667 15 7 15H11V17ZM8 13V11H16V13H8ZM13 17V15H17C17.8333 15 18.5417
+              14.7083 19.125 14.125C19.7083 13.5417 20 12.8333 20 12C20 11.1667 19.7083 10.4583
+              19.125 9.875C18.5417 9.29167 17.8333 9 17 9H13V7H17C18.3833 7 19.5625 7.4875 20.5375
+              8.4625C21.5125 9.4375 22 10.6167 22 12C22 13.3833 21.5125 14.5625 20.5375 15.5375C19.5625
+              16.5125 18.3833 17 17 17H13Z"/>
+            </g>
+          </svg>
+          {{ copied ? 'Copied!' : 'Copy link' }}
+        </button>
+      </div>
+      <p class="flex items-center font-light text-sm text-center text-[var(--text-terceary)] py-2 mx-2 gap-2">
+        <img src="/icon/icon-warning.svg" alt="warning" class="h-5"/>
+        Anyone with the link will be able to download the file.
+      </p>
+    </div>
+  </template>
+</Modal>
   </div>
 </template>
 
@@ -998,12 +1113,13 @@ const draggedItem = ref<FileI | FolderI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const moveToFolderModal = ref(false);
+const createShareModal = ref(false);
+const createFolderModal = ref(false);
 const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
 const editingFolderId = ref<number | null>(null);
 const editedFolderName = ref('');
 const selectedFolder = ref<number | string | null>(null);
-const createFolderModal = ref(false);
 const folderName = ref('');
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
@@ -1014,6 +1130,8 @@ const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFo
 
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+
+const shareUrl = ref('');
 
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
@@ -1101,15 +1219,13 @@ const toggleDropdown = async (
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
 
-const copyLink = async (file: FileI) => {
+const tryCopy = async () => {
   try {
-    const url = await store.dispatch('files/getDownloadUrl', file);
-
     if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl.value);
     } else {
       const textArea = document.createElement('textarea');
-      textArea.value = url;
+      textArea.value = shareUrl.value;
       textArea.style.cssText = 'position:fixed;opacity:0;';
       document.body.appendChild(textArea);
       textArea.focus();
@@ -1117,11 +1233,21 @@ const copyLink = async (file: FileI) => {
       document.execCommand('copy');
       document.body.removeChild(textArea);
     }
-
     copied.value = true;
     setTimeout(() => { copied.value = false; }, 2000);
   } catch (error) {
     console.error('Error al copiar:', error);
+  }
+};
+
+const copyLink = async (file: FileI) => {
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
+    shareUrl.value = url;
+    createShareModal.value = true;
+    tryCopy();
+  } catch (error) {
+    console.error('Error:', error);
   }
 };
 

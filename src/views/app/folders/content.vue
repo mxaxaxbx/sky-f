@@ -368,17 +368,26 @@
                       @click="selectItem($event, 'folder', folder, index); moveToTrash();"
                       class="
                         flex items-center justify-start w-full
-                        rounded-xl px-2 py-1 border border-transparent
-                        grayscale text-[var(--warning-border)] opacity-50
+                        rounded-xl px-3 py-1 border border-transparent
+                        grayscale text-[var(--delete-color)] opacity-60
 
-                        hover:bg-[var(--warning-bg)]
-                        hover:text-[var(--warning-border)]
-                        hover:border-[var(--warning-border)]
+                        hover:bg-[var(--delete-bg)]
+                        hover:text-[var(--delete-color)]
+                        hover:border-[var(--delete-color)]
                         hover:grayscale-0 hover:opacity-100
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                        <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                          <rect width="24" height="24" fill="#FFC506"/>
+                        </mask>
+                        <g mask="url(#mask0_1676_2)">
+                          <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                            3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                            4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                        </g>
+                      </svg>
                       <span>Send to the Void</span>
                     </button>
                   </div>
@@ -755,7 +764,7 @@
                           transition-all duration-300
                         "
                       >
-                        <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
+                        <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
                         {{ copied ? 'Copied!' : 'Copy link' }}
                       </button>
                     </div>
@@ -767,17 +776,26 @@
                         @click="selectItem($event, 'file', file, index); moveToTrash();"
                         class="
                           flex items-center justify-start w-full
-                          rounded-xl px-2 py-1 border border-transparent
-                          grayscale text-[var(--warning-border)] opacity-50
+                          rounded-xl px-3 py-1 border border-transparent
+                          grayscale text-[var(--delete-color)] opacity-60
 
-                          hover:bg-[var(--warning-bg)]
-                          hover:text-[var(--warning-border)]
-                          hover:border-[var(--warning-border)]
+                          hover:bg-[var(--delete-bg)]
+                          hover:text-[var(--delete-color)]
+                          hover:border-[var(--delete-color)]
                           hover:grayscale-0 hover:opacity-100
                           transition-colors duration-300
                         "
                       >
-                        <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                          <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                          <rect width="24" height="24" fill="#FFC506"/>
+                          </mask>
+                          <g mask="url(#mask0_1676_2)">
+                          <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                            3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                            4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                          </g>
+                        </svg>
                         <span>Send to the Void</span>
                       </button>
                     </div>

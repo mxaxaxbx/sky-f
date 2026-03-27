@@ -8,17 +8,16 @@
     ></div>
 
     <!-- Modal -->
-    <div class="flex min-h-full items-center justify-center p-4">
+    <div class="flex min-h-full items-center justify-center">
       <div
         class="
           relative
           bg-[var(--bg-secondary)]
           border border-[var(--border)]
-          w-full
+          w-full py-2
           transform
           overflow-hidden
           rounded-2xl
-          py-4
           text-left
           shadow-xl
         "
@@ -31,7 +30,7 @@
         }"
       >
         <!-- Header -->
-        <div class="mb-4 border-b border-[var(--border)] px-6 pb-2">
+        <div class="mb-4 border-b border-[var(--border)] px-4">
           <h3 class="text-md font-medium leading-6 text-white">
             <slot name="header">Modal Title</slot>
           </h3>
@@ -43,7 +42,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="mt-6 flex justify-end space-x-2 px-6">
+        <div v-if="$slots.footer" class="mt-6 flex justify-end space-x-2 px-6">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"
