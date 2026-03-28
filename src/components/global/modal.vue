@@ -8,7 +8,7 @@
     ></div>
 
     <!-- Modal -->
-    <div class="flex min-h-full items-center justify-center">
+    <div class="flex min-h-full items-center justify-center mx-2">
       <div
         class="
           relative

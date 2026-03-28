@@ -593,7 +593,7 @@
   <Modal v-model="showDeleteModal" size="xl">
     <template #header>
       <div class="flex items-center mb-1">
-        <h3 class="text-lg font-medium text-[var(--warning-border)] flex items-center gap-2">
+        <h3 class="text-lg font-medium text-[var(--delete-color)] flex items-center gap-2">
           <img src="/icon/icon-delate-red.svg" alt="warning" class="h-6" />
           Delete permanently
         </h3>
@@ -628,7 +628,7 @@
       </div>
         </template>
       </p>
-      <p class="text-md text-[var(--warning-border)] font-medium gap-2 mx-4 mt-6">
+      <p class="text-md text-[var(--delete-color)] font-medium gap-2 mx-4 mt-6">
         This action cannot be undone.
       </p>
     </template>
@@ -654,25 +654,34 @@
         @click="executeDelete"
         :disabled="loading"
         class="
+          btn-delete
           flex items-center gap-2
           px-2.5 py-0.5
           text-sm font-medium
           rounded-full border
-          text-[var(--warning-border)]
-          border-[var(--warning-border)]
+          text-[var(--delete-color)]
+          border-[var(--delete-color)]
           bg-[var(--bg-secondary)]
           opacity-70
 
-          hover:border-[var(--warning-border)]
-          hover:bg-[var(--warning-bg)]
+          hover:border-[var(--delete-color)]
+          hover:bg-[var(--delete-bg)]
           hover:opacity-100 hover:grayscale-0
-          hover:shadow-[0_0_5px_2px_rgba(255,166,0,0.3)]
           focus:grayscale-0 focus:opacity-100
           transition-all duration-300
           disabled:opacity-40
         "
       >
-      <img src="/icon/icon-delate.svg" alt="delate" class="h-4"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+          <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+            <rect width="24" height="24" fill="#FFC506"/>
+          </mask>
+          <g mask="url(#mask0_1676_2)">
+            <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+              3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+              4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+          </g>
+        </svg>
         {{ loading ? 'Deleting...' : 'Delete permanently' }}
       </button>
     </template>
