@@ -31,9 +31,22 @@
       >
         <!-- Header -->
         <div class="mb-4 border-b border-[var(--border)] px-4">
-          <h3 class="text-md font-medium leading-6 text-white">
+          <h3 class="text-lg font-semibold text-[var(--text)] pb-1">
             <slot name="header">Modal Title</slot>
           </h3>
+          <button
+          type="button"
+          @click="$emit('update:modelValue', false)"
+          class="
+            absolute right-3 top-1.5
+            text-md
+            text-[var(--text-terceary)]
+            hover:text-[var(--text)]
+            transition-colors duration-200
+          "
+        >
+        <i class="fa-solid fa-xmark"></i>
+        </button>
         </div>
 
         <!-- Content -->
@@ -42,7 +55,7 @@
         </div>
 
         <!-- Footer -->
-        <div v-if="$slots.footer" class="mt-6 flex justify-end space-x-2 px-6">
+        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-6">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"

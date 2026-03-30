@@ -334,7 +334,7 @@
                       type="button"
                       @click="() => { startEditingFolder(folder); closeDropdown(); }"
                       class="flex items-center justify-start w-full
-                        rounded-xl px-2 py-1 border border-transparent
+                        rounded-xl px-3 py-1 border border-transparent
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
@@ -350,7 +350,7 @@
                       @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
                       class="
                         flex items-center justify-start w-full
-                        rounded-xl px-2 py-1 border border-transparent
+                        rounded-xl px-3 py-1 border border-transparent
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
@@ -409,11 +409,7 @@
       sm:mt-0 sm:py-4 sm:px-14
     "
   >
-    <div
-      class="
-        flex items-center justify-between mx-4 sm:mx-0
-      "
-    >
+    <div class="flex items-center justify-between mx-4 sm:mx-0">
       <h3
         class="
           flex items-center
@@ -811,9 +807,12 @@
 
   <Modal v-model="moveToFolderModal" size="xl">
     <template #header>
-      <h3 class="text-lg font-light text-[var(--text)]">Move:
-        <p v-for="file in selectedFiles" :key="file.id">
-          "{{ file.name }}"
+      <h3 class="">Move:
+        <p class="font-light text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+          {{ file.name }}
+        </p>
+        <p class="font-normal text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+          {{ folder.name }}
         </p>
       </h3>
     </template>
@@ -905,9 +904,12 @@
       </button>
     </template>
   </Modal>
+
   <Modal v-model="createFolderModal" size="xs">
     <template #header>
-      New folder
+      <h3 class="">
+        New folder
+      </h3>
     </template>
     <template #content>
       <div class="my-4">
@@ -982,6 +984,101 @@
       </button>
     </template>
   </Modal>
+
+  <Modal v-model="createShareModal" size="md">
+    <template #header>
+      <h3 class=""> Copy link:
+        <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+          {{ file.name }}
+        </p>
+        <p class="font-light text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+          {{ folder.name }}
+        </p>
+      </h3>
+    </template>
+    <template #content>
+      <div class="flex flex-col gap-3">
+        <div
+          class="
+            flex
+            group
+            p-0.5
+            bg-[var(--bg)]
+            border border-[var(--color-primary)]
+            rounded-xl
+
+            hover:bg-[var(--bg-hover)]
+            shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            transition-all duration-300 ease-in-out
+          "
+        >
+          <input
+            :value="shareUrl"
+            readonly
+            class="
+               w-full flex-1
+              text-xs text-[var(--text)]
+              pr-1 pl-2 py-1
+              bg-transparent
+              rounded-full
+              select-all
+              focus:outline-none
+            "
+            @focus="e => (e.target as HTMLInputElement).select()
+            "
+          />
+          <button
+            type="button"
+            @click.stop="tryCopy"
+            class="
+              flex items-center
+              px-2 gap-1
+              text-[var(--text)] text-sm font-medium
+              bg-[var(--bg-secondary)]
+              border border-[var(--color-primary)]
+
+              hover:bg-[var(--color-primary)]
+              hover:text-white
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
+              rounded-lg
+              transition-all duration-300 ease-in-out
+            "
+            :class="copied ? 'bg-[var(--color-primary)] text-white shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]' : ''
+            "
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
+                <mask id="mask0_1677_12" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <rect width="24" height="24"/>
+                </mask>
+                <g mask="url(#mask0_1677_12)">
+                <path d="M11 17H7C5.61667 17 4.4375 16.5125 3.4625 15.5375C2.4875 14.5625 2 13.3833 2 12C2 10.6167
+                  2.4875 9.4375 3.4625 8.4625C4.4375 7.4875 5.61667 7 7 7H11V9H7C6.16667 9 5.45833 9.29167
+                  4.875 9.875C4.29167 10.4583 4 11.1667 4 12C4 12.8333 4.29167 13.5417 4.875 14.125C5.45833
+                  14.7083 6.16667 15 7 15H11V17ZM8 13V11H16V13H8ZM13 17V15H17C17.8333 15 18.5417
+                  14.7083 19.125 14.125C19.7083 13.5417 20 12.8333 20 12C20 11.1667 19.7083 10.4583
+                  19.125 9.875C18.5417 9.29167 17.8333 9 17 9H13V7H17C18.3833 7 19.5625 7.4875 20.5375
+                  8.4625C21.5125 9.4375 22 10.6167 22 12C22 13.3833 21.5125 14.5625 20.5375 15.5375C19.5625
+                  16.5125 18.3833 17 17 17H13Z"/>
+                </g>
+            </svg>
+            {{ copied ? 'Copied!' : 'Copy link' }}
+          </button>
+        </div>
+        <p class="
+          flex items-center
+          font-light text-xs text-center text-[var(--text-terceary)]
+          py-2 mx-2 gap-2
+
+          sm:text-sm
+          "
+        >
+          <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-5"/>
+          Anyone with the link will be able to download the file.
+        </p>
+      </div>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -997,43 +1094,46 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import moment from 'moment';
 
-import { FileI, FilesResultI } from '@/store/files/state';
 import { FolderI, FoldersResultI } from '@/store/folders/state';
+import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
+const router = useRouter();
 const store = useStore();
 const route = useRoute();
-const router = useRouter();
 
+const activeDropdown = ref<(() => void) | null>(null);
+const dropdownPosition = ref('top-8');
 const loading = ref(false);
 const copied = ref(false);
-const dropdownPosition = ref('top-8');
-const activeDropdown = ref<(() => void) | null>(null);
-const showFolders = ref(true);
-const showFiles = ref(true);
-const draggedItem = ref<FileI | FolderI | null>(null);
+const shareUrl = ref('');
+
+const editingFolderId = ref<number | string | null>(null);
 const draggedFolder = ref<number | string | null>(null);
+const fileInputBtn = ref<HTMLInputElement | null>(null);
+const editingFileId = ref<number | string | null>(null);
+const selectedFolder = ref<number | string | null>(null);
+const draggedItem = ref<FileI | FolderI | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const moveToFolderModal = ref(false);
-const editingFileId = ref<number | string | null>(null);
-const editedFileName = ref('');
-const editingFolderId = ref<number | string | null>(null);
-const editedFolderName = ref('');
-const selectedFolder = ref<number | string | null>(null);
-const fileInputBtn = ref<HTMLInputElement | null>(null);
+const createShareModal = ref(false);
 const createFolderModal = ref(false);
+const editedFolderName = ref('');
+const editedFileName = ref('');
+const showFolders = ref(true);
+const showFiles = ref(true);
 const folderName = ref('');
 
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
-const folderId = computed<number>(() => Number(route.params.id as string));
-const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
+const folderId = computed<number>(() => Number(route.params.id as string));
 
-const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -1409,16 +1509,13 @@ async function moveToFolder() {
 }
 
 // copy link to clipboard
-const copyLink = async (file: FileI) => {
+const tryCopy = async () => {
   try {
-    const url = await store.dispatch('files/getDownloadUrl', file);
-
     if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl.value);
     } else {
-      // fallback Safari
       const textArea = document.createElement('textarea');
-      textArea.value = url;
+      textArea.value = shareUrl.value;
       textArea.style.cssText = 'position:fixed;opacity:0;';
       document.body.appendChild(textArea);
       textArea.focus();
@@ -1426,11 +1523,21 @@ const copyLink = async (file: FileI) => {
       document.execCommand('copy');
       document.body.removeChild(textArea);
     }
-
     copied.value = true;
     setTimeout(() => { copied.value = false; }, 2000);
   } catch (error) {
     console.error('Error al copiar:', error);
+  }
+};
+
+const copyLink = async (file: FileI) => {
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
+    shareUrl.value = url;
+    createShareModal.value = true;
+    tryCopy();
+  } catch (error) {
+    console.error('Error:', error);
   }
 };
 

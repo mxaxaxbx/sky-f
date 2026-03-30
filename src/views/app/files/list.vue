@@ -827,12 +827,12 @@
 
     <Modal v-model="moveToFolderModal" size="xl">
       <template #header>
-        <h3 class="text-lg font-light">Move:
-          <p v-for="file in selectedFiles" :key="file.id">
-            "{{ file.name }}"
+        <h3 class="">Move:
+          <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+            {{ file.name }}
           </p>
-          <p v-for="folder in selectedFolders" :key="folder.id">
-            "{{ folder.name }}"
+          <p class="font-normal text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+            {{ folder.name }}
           </p>
         </h3>
       </template>
@@ -904,7 +904,9 @@
 
     <Modal v-model="createFolderModal" size="xs">
       <template #header>
+        <h3 class="">
         New folder
+        </h3>
       </template>
       <template #content>
         <div class="my-4">
@@ -983,7 +985,7 @@
 
     <Modal v-model="createShareModal" size="md">
       <template #header>
-        <h3 class="text-lg font-semibold text-[var(--text)] pb-1"> Copy link:
+        <h3 class=""> Copy link:
           <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
                 {{ file.name }}
           </p>
@@ -991,19 +993,6 @@
                 "{{ folder.name }}"
           </p>
         </h3>
-        <button
-          type="button"
-          @click="createShareModal = false"
-          class="
-            absolute right-3 top-2
-            text-md
-            text-[var(--text-terceary)]
-            hover:text-[var(--text)]
-            transition-colors duration-200
-          "
-        >
-        <i class="fa-solid fa-xmark"></i>
-        </button>
       </template>
       <template #content>
         <div class="flex flex-col gap-3">
@@ -1073,8 +1062,15 @@
               {{ copied ? 'Copied!' : 'Copy link' }}
             </button>
           </div>
-          <p class="flex items-center font-light text-sm text-center text-[var(--text-terceary)] py-2 mx-2 gap-2">
-            <img src="/icon/icon-warning.svg" alt="warning" class="h-5"/>
+          <p class="
+            flex items-center
+            font-light text-xs text-center text-[var(--text-terceary)]
+            py-2 mx-2 gap-2
+
+            sm:text-sm
+            "
+          >
+            <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-5"/>
             Anyone with the link will be able to download the file.
           </p>
         </div>
@@ -1109,6 +1105,7 @@ const router = useRouter();
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const loading = ref(false);
 const copied = ref(false);
+const shareUrl = ref('');
 const dropdownPosition = ref('top-8');
 const activeDropdown = ref<(() => void) | null>(null);
 const showFolders = ref(true);
@@ -1134,8 +1131,6 @@ const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFo
 
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
-
-const shareUrl = ref('');
 
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
