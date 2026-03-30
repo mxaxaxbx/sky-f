@@ -236,7 +236,7 @@
         "
       >
         <div
-          v-for="file, index in fileResults.data"
+          v-for="file, index in files"
           :key="file.id"
           data-selectable
 
@@ -512,79 +512,79 @@
     </div>
   </div>
   <Modal v-model="moveToFolderModal" size="xl">
-                    <template #header>
-                      <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
-                      <h3 class="text-lg font-light">Move:
-                      <span class="text-lg font-light">"{{ file.name }}"</span>
-                      </h3>
-                      <!-- </div> -->
-                    </template>
+    <template #header>
+      <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
+      <h3 class="text-lg font-light">Move:
+      <span class="text-lg font-light">"{{ file.name }}"</span>
+      </h3>
+      <!-- </div> -->
+    </template>
 
-                    <template #content>
-                      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
-                        <div
-                          class="
-                            grid grid-cols-2 md:grid-cols-3 gap-2
-                            ">
+    <template #content>
+      <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
+        <div
+          class="
+            grid grid-cols-2 md:grid-cols-3 gap-2
+            ">
 
-                        <button
-                          v-for="folder in folderResults.data"
-                          :key="folder.id"
-                          type="button"
-                          @click="selectedFolder = folder.id"
-                          class="
-                            flex items-center justify-start
-                            px-2 py-0.5 gap-1.5
-                            rounded-xl
-                            border border-transparent
-                            text-[var(--text-terceary)]
-                            hover:bg-[var(--hover-bg)]
-                            hover:border-[var(--color-primary)]
-                            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
-                            hover:text-[var(--text)]
-                            transition
-                          "
-                          :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
-                        >
-                          <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
-                          <span class="text-sm text-left truncate w-full">
-                            {{ folder.name }}
-                          </span>
-                        </button>
+        <button
+          v-for="folder in folderResults.data"
+          :key="folder.id"
+          type="button"
+          @click="selectedFolder = folder.id"
+          class="
+            flex items-center justify-start
+            px-2 py-0.5 gap-1.5
+            rounded-xl
+            border border-transparent
+            text-[var(--text-terceary)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--color-primary)]
+            hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
+            hover:text-[var(--text)]
+            transition
+          "
+          :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
+        >
+          <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
+          <span class="text-sm text-left truncate w-full">
+            {{ folder.name }}
+          </span>
+        </button>
 
-                        </div>
-                      </form>
-                    </template>
+        </div>
+      </form>
+    </template>
 
-                    <template #footer>
-                      <button
-                        type="button"
-                        @click="moveToFolderModal = false; selectedFolder = null;"
-                        class="
-                          text-[var(--text-secondary)] text-sm
-                          border border-[var(--border)] bg-[var(--bg)]
-                          rounded-full
-                          px-3
-                        ">
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        form="move-to-folder-form"
-                        class="
-                          text-[var(--text)] text-sm
-                          border
-                          rounded-full
-                          px-3
-                          transition
-                        "
-                        :class="!selectedFolder
-                          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-                          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
-                      >
-                        Move
-                      </button>
-                    </template>
+    <template #footer>
+      <button
+        type="button"
+        @click="moveToFolderModal = false; selectedFolder = null;"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+        ">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="move-to-folder-form"
+        class="
+          text-[var(--text)] text-sm
+          border
+          rounded-full
+          px-3
+          transition
+        "
+        :class="!selectedFolder
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+      >
+        Move
+      </button>
+    </template>
   </Modal>
 </template>
 

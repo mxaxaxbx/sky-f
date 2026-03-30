@@ -34,6 +34,7 @@ export const mutations: MutationTree<FilesStateI> = {
   },
 
   setSearchResult(state: FilesStateI, payload: SearchResultI) {
+    console.log('payload', payload);
     state.searchResult = payload;
   },
 
