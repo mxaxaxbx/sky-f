@@ -21,7 +21,7 @@
       <button
         @click="$router.back()"
         class="
-          absolute right-2.5 top-1
+          absolute right-3 top-1
           text-md
           text-[var(--text-terceary)]
           hover:text-[var(--text)]
@@ -120,28 +120,19 @@
           </div>
 
           <!-- File name and actions -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start gap-2">
-              <button
-                class="order-2 shrink-0 w-6 h-6 mt-2 grayscale hover:grayscale-0 cursor-pointer"
-                @click="startEditingFile(file)"
-              >
-                <img
-                  src="/icon/icon-edit.svg"
-                  alt="edit"
-                  class="opacity-50 hover:opacity-100 cursor-pointer"
-                />
-              </button>
-
+          <div class="flex-1 w-full">
+            <div class="flex items-start min-w-0 gap-1 overflow-hidden">
               <!-- MODO NORMAL -->
               <h1
                 v-if="editingFileId !== file.id"
                 class="
-                  order-1
-                  text-xl sm:text-2xl font-semibold
+                  flex-1
+                  min-w-0
+                  text-lg md:text-2xl font-semibold
                   text-[var(--text)]
                   mb-2
-                  break-words
+                  break-words whitespace-normal
+                  overflow-hidden
                 "
               >
                 {{ file.name }}
@@ -155,19 +146,40 @@
                 @keyup.enter="saveFileName(file)"
                 @blur="saveFileName(file)"
                 class="
-                  order-1
-                  text-xl sm:text-2xl font-semibold
+                  flex-1
+                  min-w-0
+                  text-lg md:text-2xl font-semibold
                   text-[var(--text)]
                   bg-transparent
                   border-b border-[var(--color-primary)]
+                  break-words whitespace-normal
                   outline-none
                   mb-2
-                  w-full
                 "
               />
+              <button
+                class="
+                  flex-shrink-0
+                  p-1
+                  grayscale
+                  border border-transparent
+                  rounded-xl
+
+                  hover:border-[var(--color-primary)]
+                  hover:grayscale-0
+                  transition-all duration-300 ease-in-out
+                  cursor-pointer
+                "
+                @click="startEditingFile(file)"
+              >
+                <img
+                  src="/icon/icon-edit.svg"
+                  alt="edit"
+                  class="cursor-pointer h-5"
+                />
+              </button>
             </div>
             <div class="flex flex-wrap items-center gap-2 mt-2">
-
               <!--preview buttom-->
               <button
                 @click="store.dispatch('files/previewFile', file)"
@@ -175,9 +187,9 @@
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-[var(--text-terceary)] text-xs font-medium
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full grayscale
+                  text-[var(--color-primary)] text-sm font-medium
+                  p-1
+                  rounded-xl grayscale
 
                   hover:bg-[var(--hover-bg)]
                   hover:grayscale-0
@@ -189,8 +201,8 @@
                   transition-all duration-300
                 "
               >
-                <img src="/icon/icon-preview.svg" alt="download" class="h-4 w-4"/>
-                Preview
+                <img src="/icon/icon-preview.svg" alt="download" class="h-5"/>
+                <span class="hidden md:inline pr-1">Preview</span>
               </button>
 
               <!-- Copy link button -->
@@ -200,10 +212,9 @@
                   inline-flex items-center gap-1
                   bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-[var(--text-terceary)] font-medium
-                  text-xs
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full grayscale
+                  text-[var(--color-primary)] font-medium text-sm
+                  p-1
+                  rounded-xl grayscale
 
                   hover:bg-[var(--hover-bg)]
                   hover:text-[var(--text)]
@@ -215,8 +226,8 @@
                   transition-all duration-300
                 "
               >
-                <img src="/icon/icon-link.svg" alt="download" class="h-4 w-4"/>
-                  {{ copied ? 'Copied!' : 'Copy link' }}
+                <img src="/icon/icon-link.svg" alt="download" class="h-5 -rotate-45"/>
+                <span class="hidden sm:inline pr-1">{{ copied ? 'Copied!' : 'Copy link' }}</span>
               </button>
 
               <!-- Download button -->
@@ -226,34 +237,37 @@
                 class="
                   group relative
                   inline-flex items-center gap-1
-                  bg-[var(--color-primary)]
+                  bg-[var(--bg-secondary)]
                   border border-[var(--color-primary)]
-                  text-white text-xs font-medium
-                  pl-2 pr-2.5 py-0.5
-                  rounded-full
+                  text-[var(--color-primary)] text-sm font-medium
+                  p-1
+                  rounded-xl
+                  grayscale
 
                   hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  hover:text-[var(--color-primary)]
                   focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  hover:grayscale-0
+                  focus:grayscale-0
                   transition-all duration-300
 
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  disabled:hover:shadow-none
+                  disabled:opacity-100 disabled:cursor-not-allowed
                   overflow-hidden
                 "
               >
                 <i v-if="downloading" class="fas fa-spinner fa-spin text-white"></i>
                 <img
                   v-else
-                  src="/icon/icon_download.svg"
-                  alt="download" class="h-4 w-4 z-0 sm:z-10"
+                  src="/icon/icon_download_2.svg"
+                  alt="download" class="h-5 z-0 sm:z-10"
                 />
-                <span class="relative z-0 sm:z-10">
+                <span class="relative z-0 pr-1 hidden sm:inline sm:z-10">
                   {{ downloading ? 'Downloading...' : 'Download' }}
                 </span>
                 <span
                   class="
                     absolute inset-0
-                    bg-[#202F41]/50
+                    bg-[var(--hover-bg)]
                     rounded-full
                     transition-transform duration-300 ease-in-out
                     transform -translate-x-full
@@ -261,6 +275,41 @@
                   "
                 >
                 </span>
+              </button>
+
+              <!--Delete button-->
+              <button
+                @click.stop="selectItem($event, 'file', file, index); moveToTrash(); $router.back();"
+                class="
+                  btn-delete
+                  inline-flex items-center gap-2
+                  bg-[var(--bg-secondary)]
+                  border border-[var(--delete-color)]
+                  text-[var(--delete-color)] font-medium text-sm
+                  p-1
+                  rounded-xl
+                  grayscale opacity-60
+
+                  hover:bg-[var(--delete-bg)]
+                  hover:text-[var(--delete-color)]
+                  hover:grayscale-0 hover:opacity-100
+
+                  focus:grayscale-0
+                  transition-all duration-300
+                "
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5">
+                  <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                  <rect width="24" height="24" fill="#FFC506"/>
+                  </mask>
+                  <g mask="url(#mask0_1676_2)">
+                  <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                    3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                    4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                  </g>
+                </svg>
+
+                <span class="pr-1">Delete</span>
               </button>
             </div>
           </div>
@@ -384,14 +433,58 @@ import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { FileI } from '@/store/files/state';
+import { FolderI } from '@/store/folders/state';
 
 const store = useStore();
 const route = useRoute();
 
-const file = computed<FileI>(() => store.state.files.file);
+const sortOrder = ref<'desc' | 'asc'>('desc');
 const loading = ref(false);
 const downloading = ref(false);
 const copied = ref(false);
+const editingFileId = ref<number | null>(null);
+const editedFileName = ref('');
+const lastSelectedIndex = ref<number | null>(null);
+
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const file = computed<FileI>(() => store.state.files.file);
+
+const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+
+function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  if (event.ctrlKey) {
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        selectedFiles.value.push(item as FileI);
+      }
+    } else if (type === 'folder') {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        selectedFolders.value.push(item as FolderI);
+      }
+    }
+    lastSelectedIndex.value = index;
+    return;
+  }
+
+  console.log('item', item);
+  console.log('type', type);
+  console.log('index', index);
+
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+    console.log('selectedFiles', selectedFiles.value);
+  } else if (type === 'folder') {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+  }
+  lastSelectedIndex.value = index;
+}
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -408,14 +501,27 @@ const openFile = (currentFile: FileI) => {
 };
 
 const copyLink = async (f: FileI) => {
-  const url = await store.dispatch('files/getDownloadUrl', f);
-  await navigator.clipboard.writeText(url);
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', f);
 
-  copied.value = true;
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
 
-  setTimeout(() => {
-    copied.value = false;
-  }, 2000);
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch (error) {
+    console.error('Error al copiar:', error);
+  }
 };
 
 async function downloadFile() {
@@ -457,9 +563,6 @@ onMounted(() => {
 });
 
 // rename file
-const editingFileId = ref<number | null>(null);
-const editedFileName = ref('');
-
 async function startEditingFile(currentFile: FileI) {
   editingFileId.value = currentFile.id;
 
@@ -502,4 +605,39 @@ async function saveFileName(currentFile: FileI) {
     editingFileId.value = null;
   }
 }
+
+async function getFolders() {
+  await store.dispatch('folders/filter', {
+    query: '',
+    page: 1,
+    folderId: '',
+  });
+}
+
+async function getFiles() {
+  await store.dispatch('files/filter', {
+    query: '',
+    page: 1,
+    orderBy: 'created',
+    order: sortOrder.value,
+    folderId: '',
+  });
+}
+
+async function moveToTrash() {
+  if (selectedFiles.value.length > 0) {
+    await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
+  }
+  if (selectedFolders.value.length > 0) {
+    await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
+  }
+
+  getFiles();
+  getFolders();
+}
 </script>
+<style scoped>
+.btn-delete:hover {
+  box-shadow: var(--delete-shadow);
+}
+</style>

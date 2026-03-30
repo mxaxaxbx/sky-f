@@ -31,6 +31,9 @@
     --info-bg: #252728;
     --warning-border: #ffa600;
     --warning-bg: #373226;
+    --delete-color:#ffa600;
+    --delete-bg: #373226;
+    --delete-shadow:0 0 5px 3px rgba(255,166,0,0.3);
   }
 
   /* Tema claro */
@@ -61,6 +64,9 @@
   --info-bg: #caedff;
   --warning-border: #ffa600;
   --warning-bg: #fffad2;
+  --delete-color:#ff0000;
+  --delete-bg:#ffe8e8;
+  --delete-shadow: 0 0 5px 3px rgba(255, 36, 36, 0.2);
 }
 * {
   transition:

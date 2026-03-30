@@ -128,7 +128,7 @@
         <span>Upload</span>
       </label>
 
-      <!-- New folder-->
+      <!-- create a folder-->
       <button
         v-if="!hideBar"
         @click="createFolderModal = true"
@@ -310,9 +310,9 @@
                 'sm:-right-2'
               ]"
             >
-              <template #trigger="{ toggle }">
+              <template #trigger="{ toggle, close }">
                 <button
-                  @click="toggleDropdown(toggle, $event)"
+                  @click="toggleDropdown(toggle, close, $event)"
                   class="
                     text-[var(--text-terceary)]
                     w-6 h-auto
@@ -326,58 +326,71 @@
               </template>
 
               <template #content="{ }">
-                <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                <div class="flex flex-col font-regular text-sm text-[#868686]">
 
-                  <!--rename folder-->
-                  <button
-                    type="button"
-                    @click="() => { startEditingFolder(folder); closeDropdown(); }"
-                    class="flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
+                  <div class="border-b border-[var(--border)] p-1 space-y-1">
+                    <!--rename folder-->
+                    <button
+                      type="button"
+                      @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                      class="flex items-center justify-start w-full
+                        rounded-xl px-2 py-1 border border-transparent
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      transition-colors duration-300"
-                  >
-                    <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                    <span>Rename</span>
-                  </button>
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300"
+                    >
+                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                      <span>Rename</span>
+                    </button>
 
-                  <!--move to folder-->
-                  <button
-                    type="button"
-                    @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
+                    <!--move to folder-->
+                    <button
+                      type="button"
+                      @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-2 py-1 border border-transparent
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--color-primary)]
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                    <span>Move to folder</span>
-                  </button>
+                        hover:bg-[var(--hover-bg)]
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300
+                      "
+                    >
+                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                      <span>Move to folder</span>
+                    </button>
+                  </div>
 
-                  <!-- move to trash -->
-                  <button
-                    @click="selectItem($event, 'folder', folder, index); moveToTrash();"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale text-[var(--warning-border)] opacity-50
+                  <div class="p-1">
+                    <!-- move to trash -->
+                    <button
+                      @click="selectItem($event, 'folder', folder, index); moveToTrash();"
+                      class="
+                        flex items-center justify-start w-full
+                        rounded-xl px-3 py-1 border border-transparent
+                        grayscale text-[var(--delete-color)] opacity-60
 
-                      hover:bg-[var(--warning-bg)]
-                      hover:text-[var(--warning-border)]
-                      hover:border-[var(--warning-border)]
-                      hover:grayscale-0 hover:opacity-100
-                      transition-colors duration-300
-                    "
-                  >
-                    <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
-                    <span>Send to the Void</span>
-                  </button>
+                        hover:bg-[var(--delete-bg)]
+                        hover:text-[var(--delete-color)]
+                        hover:border-[var(--delete-color)]
+                        hover:grayscale-0 hover:opacity-100
+                        transition-colors duration-300
+                      "
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                        <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                          <rect width="24" height="24" fill="#FFC506"/>
+                        </mask>
+                        <g mask="url(#mask0_1676_2)">
+                          <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                            3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                            4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                        </g>
+                      </svg>
+                      <span>Send to the Void</span>
+                    </button>
+                  </div>
                 </div>
               </template>
             </Dropdown>
@@ -629,9 +642,9 @@
                   'sm:-right-2'
                 ]"
               >
-                <template #trigger="{ toggle }">
+                <template #trigger="{ toggle, close }">
                   <button
-                    @click="toggleDropdown(toggle, $event)"
+                    @click="toggleDropdown(toggle, close, $event)"
                     class="
                       text-[var(--text-terceary)]
                       w-6 h-10
@@ -645,128 +658,147 @@
                 </template>
 
                 <template #content="{ }">
-                  <div class="flex flex-col gap-0.5 px-1 py-1 font-regular text-sm text-[#868686]">
+                  <div class="flex flex-col font-regular text-sm text-[#868686]">
+                    <!-- zone info-->
+                    <div class="border-b border-[var(--border)] p-1 space-y-1">
+                      <!-- info file -->
+                      <router-link
+                        :to="`/app/files/details/${file.id}`"
+                        class="
+                          flex items-center justify-start
+                          rounded-xl px-3 py-1 border border-transparent
 
-                    <!-- info file -->
-                    <router-link
-                      :to="`/app/files/details/${file.id}`"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-colors duration-300
+                        "
+                      >
+                        <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
+                        />
+                        <span>info</span>
+                      </router-link>
+                      <!-- rename -->
+                      <button
+                        type="button"
+                        @click="() => { startEditingFile(file); closeDropdown(); }"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
-                      />
-                      <span>info</span>
-                    </router-link>
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-colors duration-300"
+                      >
+                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                        <span>Rename</span>
+                      </button>
+                    </div>
 
-                    <!-- preview file -->
-                    <button
-                      @click="store.dispatch('files/previewFile', file)"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                    <!-- zone info-->
+                    <div class="border-b border-[var(--border)] p-1 space-y-1">
+                      <!-- zone file -->
+                      <button
+                        @click="store.dispatch('files/previewFile', file)"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
-                      <span>Preview</span>
-                    </button>
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-colors duration-300
+                        "
+                      >
+                        <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
+                        <span>Preview</span>
+                      </button>
 
-                    <!-- rename -->
-                    <button
-                      type="button"
-                      @click="() => { startEditingFile(file); closeDropdown(); }"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                      <!-- download -->
+                      <button
+                        @click="downloadFile(file)"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
+                          grayscale
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300"
-                    >
-                      <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                      <span>Rename</span>
-                    </button>
+                          hover:bg-[var(--hover-bg)]
+                          hover:text-[var(--color-primary)]
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-colors duration-300
+                        "
+                      >
+                        <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                        />
+                        <span>Download</span>
+                      </button>
+                    </div>
 
-                    <!--move to folder-->
-                    <button
-                      type="button"
-                      @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                    <!-- zone move-->
+                    <div class="border-b border-[var(--border)] p-1 space-y-1">
+                      <!--move to folder-->
+                      <button
+                        type="button"
+                        @click="selectItem($event, 'file', file, index); moveToFolderModal = true;"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                      <span>Move to folder</span>
-                    </button>
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-colors duration-300
+                        "
+                      >
+                        <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                        <span>Move to folder</span>
+                      </button>
 
-                    <!--share link-->
-                    <button
-                      @click="copyLink(file)"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
+                      <!--share link-->
+                      <button
+                        @click="copyLink(file)"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:border-[var(--color-primary)]
-                        transition-all duration-300
-                      "
-                    >
-                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"/>
-                      {{ copied ? 'Copied!' : 'Copy link' }}
-                    </button>
+                          hover:bg-[var(--hover-bg)]
+                          hover:border-[var(--color-primary)]
+                          transition-all duration-300
+                        "
+                      >
+                        <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
+                        {{ copied ? 'Copied!' : 'Copy link' }}
+                      </button>
+                    </div>
 
-                    <!-- download -->
-                    <button
-                      @click="downloadFile(file)"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-                        grayscale
+                    <!-- zone dangerous-->
+                    <div class="p-1">
+                      <!-- move to trash -->
+                      <button
+                        @click="selectItem($event, 'file', file, index); moveToTrash();"
+                        class="
+                          flex items-center justify-start w-full
+                          rounded-xl px-3 py-1 border border-transparent
+                          grayscale text-[var(--delete-color)] opacity-60
 
-                        hover:bg-[var(--hover-bg)]
-                        hover:text-[var(--color-primary)]
-                        hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
-                      />
-                      <span>Download</span>
-                    </button>
-
-                    <!-- move to trash -->
-                    <button
-                      @click="selectItem($event, 'file', file, index); moveToTrash();"
-                      class="
-                        flex items-center justify-start
-                        rounded-xl px-2 py-1 border border-transparent
-                        grayscale text-[var(--warning-border)] opacity-50
-
-                        hover:bg-[var(--warning-bg)]
-                        hover:text-[var(--warning-border)]
-                        hover:border-[var(--warning-border)]
-                        hover:grayscale-0 hover:opacity-100
-                        transition-colors duration-300
-                      "
-                    >
-                      <img src="/icon/icon-delate.svg" alt="delate" class="h-5 mr-4"/>
-                      <span>Send to the Void</span>
-                    </button>
+                          hover:bg-[var(--delete-bg)]
+                          hover:text-[var(--delete-color)]
+                          hover:border-[var(--delete-color)]
+                          hover:grayscale-0 hover:opacity-100
+                          transition-colors duration-300
+                        "
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                          <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                          <rect width="24" height="24" fill="#FFC506"/>
+                          </mask>
+                          <g mask="url(#mask0_1676_2)">
+                          <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                            3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                            4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                          </g>
+                        </svg>
+                        <span>Send to the Void</span>
+                      </button>
+                    </div>
                   </div>
                 </template>
               </Dropdown>
@@ -978,13 +1010,13 @@ const router = useRouter();
 const loading = ref(false);
 const copied = ref(false);
 const dropdownPosition = ref('top-8');
+const activeDropdown = ref<(() => void) | null>(null);
 const showFolders = ref(true);
 const showFiles = ref(true);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const moveToFolderModal = ref(false);
-const activeDropdownToggle = ref<(() => void) | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const editedFileName = ref('');
 const editingFolderId = ref<number | string | null>(null);
@@ -1049,6 +1081,42 @@ async function uploadFile(ev: Event): Promise<void> {
   }
 }
 
+// Select item with ctrl key
+function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  if (event.ctrlKey) {
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        selectedFiles.value.push(item as FileI);
+      }
+    } else if (type === 'folder') {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        selectedFolders.value.push(item as FolderI);
+      }
+    }
+    lastSelectedIndex.value = index;
+    return;
+  }
+
+  console.log('item', item);
+  console.log('type', type);
+  console.log('index', index);
+
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+    console.log('selectedFiles', selectedFiles.value);
+  } else if (type === 'folder') {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+    console.log('selectedFolders', selectedFolders.value);
+  }
+  lastSelectedIndex.value = index;
+}
+
 async function getFolders() {
   loading.value = true;
   try {
@@ -1089,6 +1157,45 @@ async function getFiles() {
   }
 }
 
+async function getFolderDetails() {
+  loading.value = true;
+  console.log('folderId', folderId.value);
+  try {
+    await store.dispatch('folders/getFolderDetails', {
+      folderId: Number(folderId.value),
+    });
+  } catch (error) {
+    console.error('Error loading folder details:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener los detalles de la carpeta',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+// toggle dropdown position based on click position
+const toggleDropdown = async (
+  toggle: () => void,
+  close: () => void,
+  event?: MouseEvent,
+) => {
+  if (event) event.stopPropagation();
+
+  if (activeDropdown.value && activeDropdown.value !== close) {
+    activeDropdown.value();
+  }
+
+  activeDropdown.value = close;
+  toggle();
+
+  await nextTick();
+  const middle = window.innerHeight / 2;
+  const y = event?.clientY || 0;
+  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
+};
+
 // create new folder
 async function createFolder() {
   // test folder name
@@ -1103,18 +1210,16 @@ async function createFolder() {
   const strippedFolderName = folderName.value.trim();
   loading.value = true;
   try {
-    console.log('strippedFolderName', strippedFolderName);
-    console.log('folderId', folderId.value);
-    // await store.dispatch('folders/createFolder', {
-    //   name: strippedFolderName,
-    //   folderId: folderId.value,
-    // });
+    await store.dispatch('folders/createFolder', {
+      name: strippedFolderName,
+      folderId: folderId.value,
+    });
 
-    // createFolderModal.value = false;
-    // folderName.value = '';
+    createFolderModal.value = false;
+    folderName.value = '';
 
-    // await getFolders();
-    // await getFiles();
+    await getFolderDetails();
+    await getFolders();
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
@@ -1127,61 +1232,53 @@ async function createFolder() {
     loading.value = false;
   }
 }
-
-// toggle dropdown position based on click position
-const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
-  if (event) event.stopPropagation();
-
-  activeDropdownToggle.value = toggle;
-
-  toggle();
+// rename folder
+async function startEditingFolder(folder: FolderI) {
+  editingFolderId.value = folder.id;
+  editedFolderName.value = folder.name;
 
   await nextTick();
 
-  const middle = window.innerHeight / 2;
-  const y = event?.clientY || 0;
+  const input = document.querySelector(
+    `input[data-folder-id="${folder.id}"]`,
+  ) as HTMLInputElement | null;
 
-  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
-};
-
-function closeDropdown() {
-  activeDropdownToggle.value?.();
+  input?.focus();
+  input?.select();
 }
 
-// Select item with ctrl key
-function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
-  if (event.ctrlKey) {
-    if (type === 'file') {
-      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
-      if (exists) {
-        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
-      } else {
-        selectedFiles.value.push(item as FileI);
-      }
-    } else if (type === 'folder') {
-      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
-      if (exists) {
-        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
-      } else {
-        selectedFolders.value.push(item as FolderI);
-      }
+// save name folder
+async function saveFolderName(folder: FolderI) {
+  const finalName = editedFolderName.value.trim();
+  if (!finalName) return;
+
+  try {
+    await store.dispatch('folders/changeFolderName', {
+      id: folder.id,
+      name: finalName,
+    });
+
+    await getFiles();
+    await getFolders();
+
+    await nextTick();
+
+    const updatedFolder = folderResults.value.data.find(
+      (f: FolderI) => f.id === folder.id,
+    );
+
+    if (updatedFolder) {
+      store.commit('folders/setSelectedFolders', [updatedFolder]);
     }
-    lastSelectedIndex.value = index;
-    return;
+  } catch (error) {
+    console.error(error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al cambiar el nombre de la carpeta',
+    });
+  } finally {
+    editingFolderId.value = null;
   }
-
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
-
-  if (type === 'file') {
-    store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
-    store.commit('folders/setSelectedFolders', [item as FolderI]);
-    console.log('selectedFolders', selectedFolders.value);
-  }
-  lastSelectedIndex.value = index;
 }
 
 // rename file
@@ -1211,7 +1308,7 @@ async function startEditingFile(currentFile: FileI) {
     input.select();
   }
 }
-
+// save rename file
 async function saveFileName(currentFile: FileI) {
   const finalName = editedFileName.value.trim();
   if (!finalName) return;
@@ -1313,32 +1410,33 @@ async function moveToFolder() {
 
 // copy link to clipboard
 const copyLink = async (file: FileI) => {
-  const url = await store.dispatch('files/getDownloadUrl', file);
-  await navigator.clipboard.writeText(url);
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
 
-  copied.value = true;
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      // fallback Safari
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
 
-  setTimeout(() => {
-    copied.value = false;
-  }, 2000);
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch (error) {
+    console.error('Error al copiar:', error);
+  }
 };
 
+// download buttom
 async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
-}
-
-async function startEditingFolder(folder: FolderI) {
-  editingFolderId.value = folder.id;
-  editedFolderName.value = folder.name;
-
-  await nextTick();
-
-  const input = document.querySelector(
-    `input[data-folder-id="${folder.id}"]`,
-  ) as HTMLInputElement | null;
-
-  input?.focus();
-  input?.select();
 }
 
 function onDragStart(type: string, item: FileI | FolderI) {
@@ -1397,39 +1495,7 @@ async function onDrop(folder: FolderI) {
   getFolders();
 }
 
-async function saveFolderName(folder: FolderI) {
-  const finalName = editedFolderName.value.trim();
-  if (!finalName) return;
-
-  try {
-    await store.dispatch('folders/changeFolderName', {
-      id: folder.id,
-      name: finalName,
-    });
-
-    await getFiles();
-    await getFolders();
-
-    await nextTick();
-
-    const updatedFolder = folderResults.value.data.find(
-      (f: FolderI) => f.id === folder.id,
-    );
-
-    if (updatedFolder) {
-      store.commit('folders/setSelectedFolders', [updatedFolder]);
-    }
-  } catch (error) {
-    console.error(error);
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: 'Error al cambiar el nombre de la carpeta',
-    });
-  } finally {
-    editingFolderId.value = null;
-  }
-}
-
+// delete
 async function moveToTrash() {
   if (selectedFiles.value.length > 0) {
     await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
