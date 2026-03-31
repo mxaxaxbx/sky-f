@@ -21,13 +21,16 @@
           text-left
           shadow-xl
         "
-        :class="{
+        :class="[
+          borderClass,
+          {
           'max-w-xs': size === 'xs',
           'max-w-sm': size === 'sm',
           'max-w-md': size === 'md',
           'max-w-lg': size === 'lg',
           'max-w-xl': size === 'xl',
-        }"
+        }
+        ]"
       >
         <!-- Header -->
         <div class="mb-4 border-b border-[var(--border)] px-4">
@@ -55,7 +58,7 @@
         </div>
 
         <!-- Footer -->
-        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-6">
+        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-4">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"
@@ -87,6 +90,10 @@ defineProps({
   size: {
     type: String,
     default: 'lg', // sm | md | lg
+  },
+  borderClass: {
+    type: String,
+    default: 'border-[var(--border)]',
   },
 });
 defineEmits(['update:modelValue']);

@@ -533,81 +533,28 @@
                     "
                   >
                     <!-- icons -->
-                    <img
-                      v-if="file.contentType === 'application/pdf'"
-                      src="/icon/icon-pdf.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/msword' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    <img v-if="file.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-10 w-10" />
+                    <img v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)" src="/icon/icon-png.svg" alt="png" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-10 w-10" />
+                    <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)" src="/icon/icon-img.svg" alt="img" class="h-10 w-10" />
+                    <img v-else-if="/^video\//.test(file.contentType)" src="/icon/icon-video.svg" alt="video" class="h-10 w-10" />
+                    <img v-else-if="/^audio\//.test(file.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-10 w-10" />
+                    <img v-else-if="
+                        file.name?.toLowerCase().endsWith('.zip') ||
+                        file.name?.toLowerCase().endsWith('.rar') ||
+                        file.name?.toLowerCase().endsWith('.7z') ||
+                        file.name?.toLowerCase().endsWith('.tar') ||
+                        file.name?.toLowerCase().endsWith('.gz') ||
+                        file.name?.toLowerCase().endsWith('.bz2')
                       "
-                      src="/icon/icon-doc.svg"
-                      alt="Word file icon"
+                      src="/icon/icon-compress.svg"
+                      alt="compressed file icon"
                       class="h-10 w-10"
                     />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/vnd.ms-excel' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                      "
-                      src="/icon/icon-excel.svg"
-                      alt="Word file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/vnd.ms-powerpoint' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                      "
-                      src="/icon/icon-ppt.svg"
-                      alt="PowerPoint file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
-                      src="/icon/icon-png.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="file.contentType === 'image/svg+xml'"
-                      src="/icon/icon-svg.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
-                      src="/icon/icon-img.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/^video\//.test(file.contentType)"
-                      src="/icon/icon-video.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="file.contentType === 'application/zip'"
-                      src="/icon/icon-zip.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/^audio\//.test(file.contentType)"
-                      src="/icon/icon-audio.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else
-                      src="/icon/icon-file.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
+                    <img v-else src="/icon/icon-file.svg" alt="file" class="h-10 w-10" />
                     <!-- title and date -->
                     <div class="flex-1 min-w-0">
                       <div>

@@ -460,8 +460,19 @@
                     <img v-else-if="file.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-10 w-10" />
                     <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)" src="/icon/icon-img.svg" alt="img" class="h-10 w-10" />
                     <img v-else-if="/^video\//.test(file.contentType)" src="/icon/icon-video.svg" alt="video" class="h-10 w-10" />
-                    <img v-else-if="file.contentType === 'application/zip'" src="/icon/icon-zip.svg" alt="zip" class="h-10 w-10" />
                     <img v-else-if="/^audio\//.test(file.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-10 w-10" />
+                    <img v-else-if="
+                        file.name?.toLowerCase().endsWith('.zip') ||
+                        file.name?.toLowerCase().endsWith('.rar') ||
+                        file.name?.toLowerCase().endsWith('.7z') ||
+                        file.name?.toLowerCase().endsWith('.tar') ||
+                        file.name?.toLowerCase().endsWith('.gz') ||
+                        file.name?.toLowerCase().endsWith('.bz2')
+                      "
+                      src="/icon/icon-compress.svg"
+                      alt="compressed file icon"
+                      class="h-10 w-10"
+                    />
                     <img v-else src="/icon/icon-file.svg" alt="file" class="h-10 w-10" />
 
                     <!-- name & date -->
@@ -601,7 +612,7 @@
     </template>
 
     <template #content>
-      <p class="text-sm text-[var(--text-terceary)] my-2 px-4">
+      <p class="text-[var(--text-terceary)] text-base my-2 px-4">
         <template v-if="selectedFiles.length + selectedFolders.length > 25">
           Are you sure you want to permanently delete
           <span class="font-semibold text-[var(--text)]">{{ selectedFiles.length + selectedFolders.length }} items </span>?
@@ -610,7 +621,7 @@
           Are you sure you want to permanently delete the following items
           <div class="my-4">
           <div v-if="selectedFolders.length" class="my-2">
-          <span class="text-md text-[var(--text)] font-normal">Folder ({{selectedFolders.length}})</span>
+          <span class="text-base text-[var(--text)] font-normal">Folder ({{selectedFolders.length}})</span>
           <ul class="grid grid-cols-2 list-disc list-inside mt-2 ml-2 font-light text-[var(--text-terceary)] text-sm">
             <li v-for="folder in selectedFolders" :key="folder.id" class="ml-2">
               {{ folder.name }}
@@ -618,7 +629,7 @@
           </ul>
         </div>
         <div v-if="selectedFiles.length" class="my-2">
-          <span class="text-md text-[var(--text)] font-normal">Files ({{selectedFiles.length}})</span>
+          <span class="text-base text-[var(--text)] font-normal">Files ({{selectedFiles.length}})</span>
           <ul class=" grid grid-cols-2 list-disc list-inside mt-2 ml-2 font-light text-[var(--text-terceary)] text-sm">
             <li v-for="file in selectedFiles" :key="file.id" class="ml-2 truncate">
               {{ file.name }}
