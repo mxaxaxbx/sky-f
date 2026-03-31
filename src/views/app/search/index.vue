@@ -554,7 +554,7 @@
             :class="selectedFolder === 0 ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
           >
             <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
-            <span class="text-sm text-left truncate w-full">
+            <span class="text-sm text-left font-semibold text-[var(--text)] truncate w-full">
               Cloud Drive
             </span>
           </button>
@@ -827,33 +827,37 @@ async function getFolders() {
 }
 
 function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
-  getFolders();
   if (event.ctrlKey) {
     if (type === 'file') {
       const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
       if (exists) {
         store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
       } else {
-        selectedFiles.value.push(item as FileI);
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
       }
-    } else if (type === 'folder') {
+    } else {
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
       } else {
-        selectedFolders.value.push(item as FolderI);
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
       }
     }
+
     lastSelectedIndex.value = index;
     return;
   }
 
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
+  } else {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
   }
+
   lastSelectedIndex.value = index;
 }
 

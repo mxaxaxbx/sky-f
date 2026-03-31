@@ -325,14 +325,14 @@
                 </button>
               </template>
 
-              <template #content="{ }">
+              <template #content="{ close }">
                 <div class="flex flex-col font-regular text-sm text-[#868686]">
 
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
                     <!--rename folder-->
                     <button
                       type="button"
-                      @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                      @click="() => { startEditingFolder(folder); close(); }"
                       class="flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
 
@@ -653,7 +653,7 @@
                   </button>
                 </template>
 
-                <template #content="{ }">
+                <template #content="{ close }">
                   <div class="flex flex-col font-regular text-sm text-[#868686]">
                     <!-- zone info-->
                     <div class="border-b border-[var(--border)] p-1 space-y-1">
@@ -676,7 +676,7 @@
                       <!-- rename -->
                       <button
                         type="button"
-                        @click="() => { startEditingFile(file); closeDropdown(); }"
+                        @click="() => { startEditingFile(file); close(); }"
                         class="
                           flex items-center justify-start w-full
                           rounded-xl px-3 py-1 border border-transparent
@@ -838,7 +838,7 @@
             :class="selectedFolder === 0 ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
           >
             <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
-            <span class="text-sm text-left truncate w-full">
+            <span class="text-sm text-left text-[var(--text)] font-semibold truncate w-full">
               Cloud Drive
             </span>
           </button>
@@ -1083,12 +1083,12 @@
 
 <script setup lang="ts">
 import {
-  ref,
-  computed,
-  onMounted,
-  watch,
-  nextTick,
   defineAsyncComponent,
+  onMounted,
+  computed,
+  nextTick,
+  watch,
+  ref,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -1189,31 +1189,31 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
       if (exists) {
         store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
       } else {
-        selectedFiles.value.push(item as FileI);
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
       }
-    } else if (type === 'folder') {
+    } else {
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
       } else {
-        selectedFolders.value.push(item as FolderI);
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
       }
     }
+
     lastSelectedIndex.value = index;
     return;
   }
 
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
 
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
+  } else {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
-    console.log('selectedFolders', selectedFolders.value);
   }
+
   lastSelectedIndex.value = index;
 }
 
