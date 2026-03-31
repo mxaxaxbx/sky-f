@@ -688,6 +688,12 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
         selectedFiles.value.push(item as FileI);
       }
     } else if (type === 'folder') {
+      store.dispatch('folders/filter', {
+        query: '',
+        page: 1,
+        folderId: null,
+      });
+
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
