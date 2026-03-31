@@ -1081,53 +1081,53 @@
 
 <script setup lang="ts">
 import {
-  ref,
-  computed,
-  onMounted,
-  onUnmounted,
-  nextTick,
   defineAsyncComponent,
+  onUnmounted,
+  onMounted,
+  computed,
+  nextTick,
+  ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import moment from 'moment';
 
-import { FileI, FilesResultI } from '@/store/files/state';
 import { FolderI, FoldersResultI } from '@/store/folders/state';
+import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
+const router = useRouter();
 const store = useStore();
 const route = useRoute();
-const router = useRouter();
 
+const draggedFolder = ref<number | string | null>(null);
+const selectedFolder = ref<number | string | null>(null);
+const editingFileId = ref<number | string | null>(null);
+const draggedItem = ref<FileI | FolderI | null>(null);
+const activeDropdown = ref<(() => void) | null>(null);
+const lastSelectedIndex = ref<number | null>(null);
+const editingFolderId = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
+const dropdownPosition = ref('top-8');
+const createFolderModal = ref(false);
+const moveToFolderModal = ref(false);
+const createShareModal = ref(false);
+const editedFolderName = ref('');
+const editedFileName = ref('');
+const showFolders = ref(true);
+const showFiles = ref(true);
+const folderName = ref('');
 const loading = ref(false);
 const copied = ref(false);
 const shareUrl = ref('');
-const dropdownPosition = ref('top-8');
-const activeDropdown = ref<(() => void) | null>(null);
-const showFolders = ref(true);
-const showFiles = ref(true);
-const draggedItem = ref<FileI | FolderI | null>(null);
-const draggedFolder = ref<number | string | null>(null);
-const lastSelectedIndex = ref<number | null>(null);
-const moveToFolderModal = ref(false);
-const createShareModal = ref(false);
-const createFolderModal = ref(false);
-const editingFileId = ref<number | string | null>(null);
-const editedFileName = ref('');
-const editingFolderId = ref<number | null>(null);
-const editedFolderName = ref('');
-const selectedFolder = ref<number | string | null>(null);
-const folderName = ref('');
 
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
-const folderId = computed<number>(() => Number(route.params.id as string));
-const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
+const folderId = computed<number>(() => Number(route.params.id as string));
 
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
