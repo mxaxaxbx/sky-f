@@ -41,14 +41,19 @@
           type="button"
           @click="$emit('update:modelValue', false)"
           class="
-            absolute right-3 top-1.5
-            text-md
+            absolute right-1.5 top-1.5 px-1 py-0.5
+            text-md border border-transparent rounded-xl
             text-[var(--text-terceary)]
-            hover:text-[var(--text)]
-            transition-colors duration-200
+            bg-[var(--bg-secondary)]
+            hover:text-[var(--color-primary)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--color-primary)]
+            hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+
+            transition-all duration-300
           "
         >
-        <i class="fa-solid fa-xmark"></i>
+        <i class="fa-solid fa-xmark m-1"></i>
         </button>
         </div>
 

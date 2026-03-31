@@ -77,7 +77,7 @@
             @click="clearSelection"
             class="
               text-s text-[var(--text-terceary)]
-              rounded-xl border border-transparent p-1
+              rounded-xl border border-transparent px-1 py-0.5
 
               hover:border-[var(--color-primary)] hover:text-[var(--text)]
               hover:bg-[var(--hover-bg)]

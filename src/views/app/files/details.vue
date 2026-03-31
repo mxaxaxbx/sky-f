@@ -21,14 +21,21 @@
       <button
         @click="$router.back()"
         class="
-          absolute right-3 top-1
-          text-md
-          text-[var(--text-terceary)]
-          hover:text-[var(--text)]
+          absolute right-2 top-2
+          px-1 py-0.5
+          text-md text-[var(--text-terceary)]
+          bg-[var(--bg-secondary)]
+          border border-transparent
+          rounded-xl
+
+          hover:bg-[var(--hover-bg)]
+          hover:border-[var(--color-primary)]
+          hover:text-[var(--color-primary)]
+          hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
           transition-colors duration-200
         "
       >
-        <i class="fa-solid fa-xmark"></i>
+        <i class="fa-solid fa-xmark m-1"></i>
       </button>
         <!-- Header section -->
         <div
@@ -120,14 +127,13 @@
           </div>
 
           <!-- File name and actions -->
-          <div class="flex-1 w-full">
-            <div class="flex items-start min-w-0 gap-1 overflow-hidden">
+          <div class="flex-1">
+            <div class="flex items-start mr-14 gap-1 overflow-hidden">
               <!-- MODO NORMAL -->
               <h1
                 v-if="editingFileId !== file.id"
                 class="
-                  flex-1
-                  min-w-0
+                  flex
                   text-lg md:text-2xl font-semibold
                   text-[var(--text)]
                   mb-2
@@ -160,7 +166,7 @@
               <button
                 class="
                   flex-shrink-0
-                  p-1
+                  p-1 mt-1
                   grayscale
                   border border-transparent
                   rounded-xl

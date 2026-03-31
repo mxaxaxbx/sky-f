@@ -537,21 +537,141 @@
     </template>
 
     <template #footer>
+      <div class="flex w-full items-center justify-between mt-2">
+        <!-- create a folder-->
+        <button
+          v-if="!hideBar"
+          @click="createFolderModal = true"
+          class="
+            flex items-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            text-[var(--text-terceary)] text-sm font-medium
+            pl-2 pr-2.5 py-0.5
+            grayscale
+            rounded-full
+
+            hover:grayscale-0
+            hover:text-[var(--text)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+            focus:border-[var(--hover-border)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:grayscale-0
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+          New folder
+        </button>
+        <div class=" flex gap-2">
+          <!-- cancel button -->
+          <button
+            type="button"
+            @click="moveToFolderModal = false; selectedFolder = null;"
+            class="
+              text-[var(--text-secondary)] text-sm
+              border border-[var(--border)] bg-[var(--bg-secondary)]
+              rounded-full
+              px-3
+
+              hover:border-[var(--text)]
+              hover:bg-[var(--bg)]
+              hover:text-[var(--text)]
+            ">
+            Cancel
+          </button>
+
+          <!-- move button -->
+          <button
+            type="submit"
+            form="move-to-folder-form"
+            class="
+              text-sm
+              border
+              rounded-full
+              px-3 py-0.5
+              transition
+            "
+            :class="selectedFolder === null
+              ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+              : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
+            "
+          >
+            Move
+          </button>
+        </div>
+      </div>
+    </template>
+  </Modal>
+
+  <Modal v-model="createFolderModal" size="xs">
+    <template #header>
+      <h3 class="">
+        New folder
+      </h3>
+    </template>
+    <template #content>
+      <div class="my-4">
+        <form @submit.prevent="createFolder" id="create-folder-form">
+          <label for="folder-name"></label>
+          <img
+            src="/icon/icon-folder.svg"
+            alt="icon"
+            class="h-5 mt-[1px] absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            v-model="folderName"
+            type="text"
+            placeholder="Folder name"
+            id="folder-name"
+            class="
+              w-full border
+              border-[var(--border)] bg-[var(--bg)]
+              text-sm text-[var(--text)]
+              my-2 pl-8 py-1
+              rounded-full
+
+              placeholder:text-[var(--text-terceary)]
+              placeholder:font-light
+              placeholder:text-sm
+
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--color-primary)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300 ease-in-out
+            "
+            name="folder-name"
+          />
+        </form>
+      </div>
+    </template>
+    <template #footer>
       <button
         type="button"
-        @click="moveToFolderModal = false; selectedFolder = null;"
+        @click="createFolderModal = false"
         class="
           text-[var(--text-secondary)] text-sm
           border border-[var(--border)] bg-[var(--bg)]
           rounded-full
-          px-3
-        "
-      >
+          px-3 py-0.5
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
+        ">
         Cancel
       </button>
       <button
         type="submit"
-        form="move-to-folder-form"
+        form="create-folder-form"
+        :disabled="!folderName || !folderName.trim()"
         class="
           text-[var(--text)] text-sm
           border
@@ -559,12 +679,11 @@
           px-3
           transition
         "
-        :class="selectedFolder === null
+        :class="!folderName || !folderName.trim()
           ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'
-        "
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
       >
-        Move
+        Create
       </button>
     </template>
   </Modal>
@@ -696,6 +815,8 @@ const lastSelectedIndex = ref<number | null>(null);
 const dropdownPosition = ref('top-8');
 const moveToFolderModal = ref(false);
 const createShareModal = ref(false);
+const createFolderModal = ref(false);
+const folderName = ref('');
 const loading = ref(false);
 const copied = ref(false);
 const shareUrl = ref('');
@@ -774,6 +895,61 @@ async function getFolders() {
     store.commit('notifications/addNotification', {
       type: 'error',
       message: 'Error al obtener las carpetas',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function getFolderDetails() {
+  loading.value = true;
+  console.log('folderId', folderId.value);
+  try {
+    await store.dispatch('folders/getFolderDetails', {
+      folderId: Number(folderId.value),
+    });
+  } catch (error) {
+    console.error('Error loading folder details:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener los detalles de la carpeta',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+// create new folder
+async function createFolder() {
+  // test folder name
+  if (!folderName.value) {
+    store.commit('notifications/addNotification', {
+      message: 'Folder name is required',
+      type: 'error',
+    });
+    return;
+  }
+  // strip folder name
+  const strippedFolderName = folderName.value.trim();
+  loading.value = true;
+  try {
+    await store.dispatch('folders/createFolder', {
+      name: strippedFolderName,
+      folderId: folderId.value,
+    });
+
+    createFolderModal.value = false;
+    folderName.value = '';
+
+    await getFolderDetails();
+    await getFolders();
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
     });
   } finally {
     loading.value = false;

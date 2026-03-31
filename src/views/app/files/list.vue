@@ -816,36 +816,74 @@
       </template>
 
       <template #footer>
-        <!-- cancel button -->
-        <button
-          type="button"
-          @click="moveToFolderModal = false; selectedFolder = null;"
-          class="
-            text-[var(--text-secondary)] text-sm
-            border border-[var(--border)] bg-[var(--bg)]
-            rounded-full
-            px-3
-          ">
-          Cancel
-        </button>
+        <div class="flex w-full items-center justify-between mt-2">
+          <!-- create a folder-->
+          <button
+            v-if="!hideBar"
+            @click="createFolderModal = true"
+            class="
+              flex items-center
+              bg-[var(--bg-secondary)]
+              border border-[var(--border)]
+              text-[var(--text-terceary)] text-sm font-medium
+              pl-2 pr-2.5 py-0.5
+              grayscale
+              rounded-full
 
-        <!-- move button -->
-        <button
-          type="submit"
-          form="move-to-folder-form"
-          class="
-            text-sm
-            border
-            rounded-full
-            px-3
-            transition
-          "
-          :class="!selectedFolder
-            ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-            : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'"
-        >
-          Move
-        </button>
+              hover:grayscale-0
+              hover:text-[var(--text)]
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--hover-border)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--hover-border)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:grayscale-0
+              transition-all duration-300 ease-in-out
+              cursor-pointer
+            "
+          >
+            <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+            New folder
+          </button>
+          <div class=" flex gap-2">
+            <!-- cancel button -->
+            <button
+              type="button"
+              @click="moveToFolderModal = false; selectedFolder = null;"
+              class="
+                text-[var(--text-secondary)] text-sm
+                border border-[var(--border)] bg-[var(--bg-secondary)]
+                rounded-full
+                px-3
+
+                hover:border-[var(--text)]
+                hover:bg-[var(--bg)]
+                hover:text-[var(--text)]
+              ">
+              Cancel
+            </button>
+
+            <!-- move button -->
+            <button
+              type="submit"
+              form="move-to-folder-form"
+              class="
+                text-sm
+                border
+                rounded-full
+                px-3 py-0.5
+                transition
+              "
+              :class="selectedFolder === null
+                ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+                : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
+              "
+            >
+              Move
+            </button>
+          </div>
+        </div>
       </template>
     </Modal>
 
