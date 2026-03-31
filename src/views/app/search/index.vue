@@ -154,21 +154,6 @@
                   <div class="flex flex-col font-regular text-sm text-[#868686]">
 
                     <div class="border-b border-[var(--border)] p-1 space-y-1">
-                      <!--rename folder-->
-                      <!-- <button
-                        type="button"
-                        @click="() => { startEditingFolder(folder); closeDropdown(); }"
-                        class="flex items-center justify-start w-full
-                          rounded-xl px-3 py-1 border border-transparent
-
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300"
-                      >
-                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                        <span>Rename</span>
-                      </button> -->
-
                       <!--move to folder-->
                       <button
                         type="button"
@@ -416,16 +401,13 @@
                       class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
-                        grayscale
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        focus:grayscale-0
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4"
+                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
                       />
                       <span>info</span>
                     </router-link>
@@ -434,23 +416,20 @@
                   <!-- zone actions -->
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
                     <!-- preview file -->
-                    <router-link
-                      :to="`/app/files/details/${file.id}`"
-                      class="
+                    <button
+                    @click="store.dispatch('files/previewFile', file)"
+                    class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
-                        grayscale
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        focus:grayscale-0
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4"/>
+                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
                       <span>Preview</span>
-                    </router-link>
+                    </button>
 
                     <!-- download -->
                     <button
@@ -498,16 +477,13 @@
                       class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
-                        grayscale
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        focus:grayscale-0
                         transition-all duration-300
                       "
                     >
-                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
+                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"
                       />
                       {{ copied ? 'Copied!' : 'Copy link' }}
                     </button>
@@ -621,6 +597,7 @@
       </button>
     </template>
   </Modal>
+
   <Modal v-model="createShareModal" size="md">
       <template #header>
         <h3 class=""> Copy link:
@@ -718,15 +695,15 @@
 
 <script setup lang="ts">
 import {
-  computed,
-  ref,
+  defineAsyncComponent,
   onMounted,
+  computed,
   nextTick,
   watch,
-  defineAsyncComponent,
+  ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { SearchResultI, FileI, FilesResultI } from '@/store/files/state';
@@ -735,35 +712,31 @@ import { FolderI, FoldersResultI } from '@/store/folders/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
+const router = useRouter();
 const store = useStore();
 const route = useRoute();
-const router = useRouter();
 
-const loading = ref(false);
+const selectedFolder = ref<number | string | null>(null);
+const draggedFolder = ref<number | string | null>(null);
+const activeDropdown = ref<(() => void) | null>(null);
+const draggedItem = ref<FileI | FolderI | null>(null);
+const lastSelectedIndex = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
+const dropdownPosition = ref('top-8');
+const moveToFolderModal = ref(false);
+const createShareModal = ref(false);
+const loading = ref(false);
 const copied = ref(false);
 const shareUrl = ref('');
-const createShareModal = ref(false);
-const dropdownPosition = ref('top-8');
-const activeDropdown = ref<(() => void) | null>(null);
-const moveToFolderModal = ref(false);
-const editingFileId = ref<number | string | null>(null);
-const editedFileName = ref('');
-const editingFolderId = ref<number | null>(null);
-const editedFolderName = ref('');
-const selectedFolder = ref<number | string | null>(null);
-const draggedItem = ref<FileI | FolderI | null>(null);
-const draggedFolder = ref<number | string | null>(null);
-const lastSelectedIndex = ref<number | null>(null);
 
+const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const searchResult = computed<SearchResultI>(() => store.state.files.searchResult);
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
-const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
 
-const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
 const searchQuery = computed(() => (
   typeof route.query.q === 'string' ? route.query.q : ''
@@ -840,7 +813,6 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
     console.log('selectedFiles', selectedFiles.value);
   } else if (type === 'folder') {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
-    console.log('selectedFolders', selectedFolders.value);
   }
   lastSelectedIndex.value = index;
 }
@@ -1004,53 +976,6 @@ const toggleDropdown = async (
   const y = event?.clientY || 0;
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
-
-// rename folder
-async function startEditingFolder(folder: FolderI) {
-  editingFolderId.value = folder.id;
-  editedFolderName.value = folder.name;
-
-  await nextTick();
-
-  const input = document.querySelector(
-    `input[data-folder-id="${folder.id}"]`,
-  ) as HTMLInputElement | null;
-
-  input?.focus();
-  input?.select();
-}
-
-async function saveFolderName(folder: FolderI) {
-  const finalName = editedFolderName.value.trim();
-  if (!finalName) return;
-
-  try {
-    await store.dispatch('folders/changeFolderName', {
-      id: folder.id,
-      name: finalName,
-    });
-
-    await store.dispatch('folders/filter', {
-      query: '',
-      page: 1,
-      folderId: '',
-    });
-
-    await nextTick();
-
-    const updatedFolder = folderResults.value.data.find(
-      (f: FolderI) => f.id === folder.id,
-    );
-
-    if (updatedFolder) {
-      store.commit('folders/setSelectedFolders', [updatedFolder]);
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    editingFolderId.value = null;
-  }
-}
 
 async function getFolders() {
   await store.dispatch('folders/filter', {
