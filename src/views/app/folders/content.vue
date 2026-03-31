@@ -854,10 +854,10 @@
             type="button"
             @click="moveToFolderModal = false; selectedFolder = null;"
             class="
-              text-[var(--text-secondary)] text-sm
+              text-[var(--text-secondary)] text-sm font-medium
               border border-[var(--border)] bg-[var(--bg-secondary)]
               rounded-full
-              px-3
+              px-3 py-0.5
 
               hover:border-[var(--text)]
               hover:bg-[var(--bg)]
@@ -872,9 +872,9 @@
             form="move-to-folder-form"
             class="
               text-sm
-              border
+              border font-medium
               rounded-full
-              px-3 py-0.5
+              px-3.5 py-0.5
               transition
             "
             :class="selectedFolder === null

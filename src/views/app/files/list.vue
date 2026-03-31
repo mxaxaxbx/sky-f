@@ -852,10 +852,10 @@
               type="button"
               @click="moveToFolderModal = false; selectedFolder = null;"
               class="
-                text-[var(--text-secondary)] text-sm
+                text-[var(--text-secondary)] text-sm font-medium
                 border border-[var(--border)] bg-[var(--bg-secondary)]
                 rounded-full
-                px-3
+                px-3 py-0.5
 
                 hover:border-[var(--text)]
                 hover:bg-[var(--bg)]
@@ -869,10 +869,10 @@
               type="submit"
               form="move-to-folder-form"
               class="
-                text-sm
+                text-sm font-medium
                 border
                 rounded-full
-                px-3 py-0.5
+                px-3.5 py-0.5
                 transition
               "
               :class="selectedFolder === null
@@ -936,10 +936,10 @@
           type="button"
           @click="createFolderModal = false"
           class="
-            text-[var(--text-secondary)] text-sm
+            text-[var(--text-secondary)] text-sm font-medium
             border border-[var(--border)] bg-[var(--bg)]
             rounded-full
-            px-3
+            px-3 py-0.5
 
             hover:border-[var(--text)]
             hover:bg-[var(--hover-bg-gray)]
@@ -953,10 +953,10 @@
           form="create-folder-form"
           :disabled="!folderName || !folderName.trim()"
           class="
-            text-[var(--text)] text-sm
+            text-[var(--text)] text-sm font-medium
             border
             rounded-full
-            px-3
+            px-3 py-0.5
             transition
           "
           :class="!folderName || !folderName.trim()
