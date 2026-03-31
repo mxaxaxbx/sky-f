@@ -621,6 +621,7 @@
       </button>
     </template>
   </Modal>
+
   <Modal v-model="createShareModal" size="md">
       <template #header>
         <h3 class=""> Copy link:
@@ -632,6 +633,7 @@
           </p>
         </h3>
       </template>
+
       <template #content>
         <div class="flex flex-col gap-3">
           <div
@@ -713,7 +715,7 @@
           </p>
         </div>
       </template>
-    </Modal>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -747,8 +749,6 @@ const createShareModal = ref(false);
 const dropdownPosition = ref('top-8');
 const activeDropdown = ref<(() => void) | null>(null);
 const moveToFolderModal = ref(false);
-const editingFileId = ref<number | string | null>(null);
-const editedFileName = ref('');
 const editingFolderId = ref<number | null>(null);
 const editedFolderName = ref('');
 const selectedFolder = ref<number | string | null>(null);
@@ -756,11 +756,10 @@ const draggedItem = ref<FileI | FolderI | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 
+const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const searchResult = computed<SearchResultI>(() => store.state.files.searchResult);
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
-const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
@@ -810,6 +809,27 @@ const files = computed(() => (
   searchResult.value.data.filter((item) => item.itemType === 'file')
 ));
 
+async function getFolders() {
+  console.log('getFolders');
+  loading.value = true;
+  try {
+    // Load all folders - filtering by folderId is done client-side
+    await store.dispatch('folders/filter', {
+      query: '',
+      page: 1,
+      folderId: null,
+    });
+  } catch (error) {
+    console.error('Error loading folders:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener las carpetas',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
   if (event.ctrlKey) {
     if (type === 'file') {
@@ -820,11 +840,7 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
         selectedFiles.value.push(item as FileI);
       }
     } else if (type === 'folder') {
-      store.dispatch('folders/filter', {
-        query: '',
-        page: 1,
-        folderId: null,
-      });
+      getFolders();
 
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
@@ -837,14 +853,11 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
     return;
   }
 
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
-
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
     console.log('selectedFiles', selectedFiles.value);
   } else if (type === 'folder') {
+    getFolders();
     store.commit('folders/setSelectedFolders', [item as FolderI]);
     console.log('selectedFolders', selectedFolders.value);
   }
@@ -1011,71 +1024,6 @@ const toggleDropdown = async (
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
 
-// rename folder
-async function startEditingFolder(folder: FolderI) {
-  editingFolderId.value = folder.id;
-  editedFolderName.value = folder.name;
-
-  await nextTick();
-
-  const input = document.querySelector(
-    `input[data-folder-id="${folder.id}"]`,
-  ) as HTMLInputElement | null;
-
-  input?.focus();
-  input?.select();
-}
-
-async function saveFolderName(folder: FolderI) {
-  const finalName = editedFolderName.value.trim();
-  if (!finalName) return;
-
-  try {
-    await store.dispatch('folders/changeFolderName', {
-      id: folder.id,
-      name: finalName,
-    });
-
-    await store.dispatch('folders/filter', {
-      query: '',
-      page: 1,
-      folderId: '',
-    });
-
-    await nextTick();
-
-    const updatedFolder = folderResults.value.data.find(
-      (f: FolderI) => f.id === folder.id,
-    );
-
-    if (updatedFolder) {
-      store.commit('folders/setSelectedFolders', [updatedFolder]);
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    editingFolderId.value = null;
-  }
-}
-
-async function getFolders() {
-  await store.dispatch('folders/filter', {
-    query: '',
-    page: 1,
-    folderId: '',
-  });
-}
-
-async function getFiles() {
-  await store.dispatch('files/filter', {
-    query: '',
-    page: 1,
-    orderBy: 'created',
-    order: sortOrder.value,
-    folderId: '',
-  });
-}
-
 async function moveToTrash() {
   if (selectedFiles.value.length > 0) {
     await store.dispatch('folders/moveFilesToTrash', selectedFiles.value);
@@ -1083,9 +1031,6 @@ async function moveToTrash() {
   if (selectedFolders.value.length > 0) {
     await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
   }
-
-  getFiles();
-  getFolders();
 }
 
 // Watch for route query changes
