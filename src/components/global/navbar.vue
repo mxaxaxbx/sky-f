@@ -88,47 +88,47 @@
 
       <Dropdown v-if="isAuth">
         <template #trigger="{ toggle }">
-          <button
-            @click="toggle"
-            class="
-              relative flex items-center justify-center
-              bg-[var(--color-primary)]
-              h-6 w-6
-              mr-0
-              rounded-full
-              text-white
-
-              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              transition-all duration-300 ease-in-out
-            ">
-            <!-- User initials -->
-            <span
-              v-if="!user.profilePhoto && user.firstName && user.lastName"
-              class="font-light text-sm uppercase">
-              {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
-            </span>
-
-            <!-- Profile photo -->
-            <img v-else-if="user.profilePhoto" :src="user.profilePhoto" alt="User profile photo"
-              class="h-8 rounded-full object-cover" />
-
-            <!-- Fallback icon -->
-            <i v-else class="fas fa-user text-white text-sm" aria-hidden="true"></i>
-
-            <!-- Optional status indicator -->
-            <span
+            <button
+              @click="toggle"
               class="
-                absolute
-                bottom-[-1.5px] right-[-3.5px]
-                block
-                h-[10px] w-[10px]
+                relative flex items-center justify-center
+                bg-[var(--color-primary)]
+                h-6 w-6
+                mr-0
                 rounded-full
-                bg-green-500
-                border-2 border-[var(--bg)]
-                ">
-            </span>
+                text-white
+
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                transition-all duration-300 ease-in-out
+              ">
+              <!-- User initials -->
+              <span
+                v-if="!user.profilePhoto && user.firstName && user.lastName"
+                class="font-light text-sm uppercase">
+                {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+              </span>
+
+              <!-- Profile photo -->
+              <img v-else-if="user.profilePhoto" :src="user.profilePhoto" alt="User profile photo"
+                class="h-8 rounded-full object-cover" />
+
+              <!-- Fallback icon -->
+              <i v-else class="fas fa-user text-white text-sm" aria-hidden="true"></i>
           </button>
+
+          <!-- Optional status indicator -->
+          <span
+            class="
+              absolute
+              bottom-[-1.5px] right-[-3.5px]
+              block
+              h-[10px] w-[10px]
+              rounded-full
+              bg-green-500
+              border-2 border-[var(--bg)]
+              ">
+          </span>
         </template>
 
         <template #content="{ }">

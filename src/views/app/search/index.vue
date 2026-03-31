@@ -155,7 +155,7 @@
 
                     <div class="border-b border-[var(--border)] p-1 space-y-1">
                       <!--rename folder-->
-                      <button
+                      <!-- <button
                         type="button"
                         @click="() => { startEditingFolder(folder); closeDropdown(); }"
                         class="flex items-center justify-start w-full
@@ -167,7 +167,7 @@
                       >
                         <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
                         <span>Rename</span>
-                      </button>
+                      </button> -->
 
                       <!--move to folder-->
                       <button
@@ -546,9 +546,13 @@
 
   <Modal v-model="moveToFolderModal" size="xl">
     <template #header>
-      <!-- <div class="border-b border-[var(--border)] w-full px-6 pb-4"> -->
-        <h3 class="text-lg font-light">Move:
-          <span class="text-lg font-light">"{{ file.name }}"</span>
+        <h3 class="">Move:
+          <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+            {{ file.name }}
+          </p>
+          <p class="font-normal text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+            {{ folder.name }}
+          </p>
         </h3>
       <!-- </div> -->
     </template>
@@ -617,6 +621,99 @@
       </button>
     </template>
   </Modal>
+  <Modal v-model="createShareModal" size="md">
+      <template #header>
+        <h3 class=""> Copy link:
+          <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+                {{ file.name }}
+          </p>
+          <p class="font-light text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+                "{{ folder.name }}"
+          </p>
+        </h3>
+      </template>
+      <template #content>
+        <div class="flex flex-col gap-3">
+          <div
+            class="
+              flex
+              group
+              p-0.5
+              bg-[var(--bg)]
+              border border-[var(--color-primary)]
+              rounded-xl
+
+              hover:bg-[var(--bg-hover)]
+              shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              transition-all duration-300 ease-in-out
+            "
+          >
+            <input
+              :value="shareUrl"
+              readonly
+              class="
+                w-full flex-1
+                text-xs text-[var(--text)]
+                pr-1 pl-2 py-1
+                bg-transparent
+                rounded-full
+                select-all
+                focus:outline-none
+              "
+              @focus="e => (e.target as HTMLInputElement).select()"
+            />
+            <button
+              type="button"
+              @click.stop="tryCopy"
+              class="
+                flex items-center
+                px-2 gap-1
+                text-[var(--text)] text-sm font-medium
+                bg-[var(--bg-secondary)]
+                border border-[var(--color-primary)]
+
+                hover:bg-[var(--color-primary)]
+                hover:text-white
+                hover:border-[var(--color-primary)]
+                hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
+                rounded-lg
+                transition-all duration-300 ease-in-out
+              "
+              :class="copied ? 'bg-[var(--color-primary)] text-white shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]' : ''
+              "
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
+                <mask id="mask0_1677_12" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <rect width="24" height="24"/>
+                </mask>
+                <g mask="url(#mask0_1677_12)">
+                <path d="M11 17H7C5.61667 17 4.4375 16.5125 3.4625 15.5375C2.4875 14.5625 2 13.3833 2 12C2 10.6167
+                  2.4875 9.4375 3.4625 8.4625C4.4375 7.4875 5.61667 7 7 7H11V9H7C6.16667 9 5.45833 9.29167
+                  4.875 9.875C4.29167 10.4583 4 11.1667 4 12C4 12.8333 4.29167 13.5417 4.875 14.125C5.45833
+                  14.7083 6.16667 15 7 15H11V17ZM8 13V11H16V13H8ZM13 17V15H17C17.8333 15 18.5417
+                  14.7083 19.125 14.125C19.7083 13.5417 20 12.8333 20 12C20 11.1667 19.7083 10.4583
+                  19.125 9.875C18.5417 9.29167 17.8333 9 17 9H13V7H17C18.3833 7 19.5625 7.4875 20.5375
+                  8.4625C21.5125 9.4375 22 10.6167 22 12C22 13.3833 21.5125 14.5625 20.5375 15.5375C19.5625
+                  16.5125 18.3833 17 17 17H13Z"/>
+                </g>
+              </svg>
+              {{ copied ? 'Copied!' : 'Copy link' }}
+            </button>
+          </div>
+          <p class="
+            flex items-center
+            font-light text-xs text-center text-[var(--text-terceary)]
+            py-2 mx-2 gap-2
+
+            sm:text-sm
+            "
+          >
+            <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-5"/>
+            Anyone with the link will be able to download the file.
+          </p>
+        </div>
+      </template>
+    </Modal>
 </template>
 
 <script setup lang="ts">
@@ -644,6 +741,9 @@ const router = useRouter();
 
 const loading = ref(false);
 const sortOrder = ref<'desc' | 'asc'>('desc');
+const copied = ref(false);
+const shareUrl = ref('');
+const createShareModal = ref(false);
 const dropdownPosition = ref('top-8');
 const activeDropdown = ref<(() => void) | null>(null);
 const moveToFolderModal = ref(false);
@@ -668,6 +768,38 @@ const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: Folde
 const searchQuery = computed(() => (
   typeof route.query.q === 'string' ? route.query.q : ''
 ));
+
+const tryCopy = async () => {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareUrl.value);
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl.value;
+      textArea.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch (error) {
+    console.error('Error al copiar:', error);
+  }
+};
+
+const copyLink = async (file: FileI) => {
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
+    shareUrl.value = url;
+    createShareModal.value = true;
+    tryCopy();
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 
 // Separate folders and files
 const folders = computed(() => (
@@ -803,23 +935,48 @@ async function onDrop(folder: FolderI) {
 }
 
 async function moveToFolder() {
-  if (!selectedFolder.value) {
+  console.log('selectedFolder', selectedFolder.value);
+  if (selectedFolder.value === null) {
     return;
   }
 
   try {
     loading.value = true;
-    await store.dispatch('files/moveFilesToFolder', selectedFiles.value);
+    console.log('selectedFiles', selectedFiles.value);
+    const payloadFiles: FileI[] = selectedFiles.value.map((file: FileI) => ({
+      ...file,
+      folderId: selectedFolder.value,
+    }));
+    console.log('payload', payloadFiles);
+
+    if (payloadFiles.length > 0) {
+      await store.dispatch('files/moveFilesToFolder', payloadFiles);
+      await store.dispatch('files/filter', {
+        query: '',
+        page: 1,
+        orderBy: 'created',
+        order: 'desc',
+        folderId: '',
+      });
+    }
+
+    const payloadFolders: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
+      ...folder,
+      folderId: selectedFolder.value,
+    }));
+    console.log('payload', payloadFolders);
+
+    if (payloadFolders.length > 0) {
+      await store.dispatch('folders/moveFoldersToFolder', payloadFolders);
+      await store.dispatch('folders/filter', {
+        query: '',
+        page: 1,
+        folderId: '',
+      });
+    }
+
     moveToFolderModal.value = false;
     selectedFolder.value = null;
-
-    await store.dispatch('files/filter', {
-      query: '',
-      page: 1,
-      orderBy: 'created',
-      order: 'desc',
-      folderId: '',
-    });
   } catch (error: unknown) {
     console.error(error);
     const errorResponse = error as { response?: { data?: { error?: string } } };
