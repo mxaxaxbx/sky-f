@@ -609,6 +609,7 @@
           </p>
         </h3>
       </template>
+
       <template #content>
         <div class="flex flex-col gap-3">
           <div
@@ -690,7 +691,7 @@
           </p>
         </div>
       </template>
-    </Modal>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -783,6 +784,27 @@ const files = computed(() => (
   searchResult.value.data.filter((item) => item.itemType === 'file')
 ));
 
+async function getFolders() {
+  console.log('getFolders');
+  loading.value = true;
+  try {
+    // Load all folders - filtering by folderId is done client-side
+    await store.dispatch('folders/filter', {
+      query: '',
+      page: 1,
+      folderId: null,
+    });
+  } catch (error) {
+    console.error('Error loading folders:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener las carpetas',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
   if (event.ctrlKey) {
     if (type === 'file') {
@@ -793,6 +815,8 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
         selectedFiles.value.push(item as FileI);
       }
     } else if (type === 'folder') {
+      getFolders();
+
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
@@ -804,14 +828,11 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
     return;
   }
 
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
-
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
     console.log('selectedFiles', selectedFiles.value);
   } else if (type === 'folder') {
+    getFolders();
     store.commit('folders/setSelectedFolders', [item as FolderI]);
   }
   lastSelectedIndex.value = index;
@@ -1002,9 +1023,6 @@ async function moveToTrash() {
   if (selectedFolders.value.length > 0) {
     await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
   }
-
-  getFiles();
-  getFolders();
 }
 
 // Watch for route query changes
