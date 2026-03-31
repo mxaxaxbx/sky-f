@@ -567,16 +567,18 @@
               flex items-center justify-start
               px-2 py-0.5 gap-1.5
               rounded-xl
-              border border-transparent
+              border
               text-[var(--text-terceary)]
+              opacity-80
 
               hover:bg-[var(--hover-bg)]
+              hover:opacity-100
               hover:border-[var(--color-primary)]
               hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
               hover:text-[var(--text)]
               transition
             "
-            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
+            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : 'border-transparent'"
           >
             <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
             <span class="text-sm text-left truncate w-full">
@@ -795,6 +797,11 @@ const copyLink = async (file: FileI) => {
     console.error('Error:', error);
   }
 };
+
+// download buttom
+async function downloadFile(file: FileI) {
+  await store.dispatch('files/downloadFile', file);
+}
 
 // Separate folders and files
 const folders = computed(() => (
