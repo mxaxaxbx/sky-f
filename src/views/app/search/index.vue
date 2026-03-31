@@ -537,6 +537,28 @@
       <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
         <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
           <button
+            type="button"
+            @click="selectedFolder = 0"
+            class="
+              flex items-center justify-start
+              px-2 py-0.5 gap-1.5
+              rounded-xl
+              border
+              text-[var(--text-terceary)]
+
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--color-primary)]
+              hover:text-[var(--text)]
+              transition
+            "
+            :class="selectedFolder === 0 ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
+          >
+            <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
+            <span class="text-sm text-left truncate w-full">
+              Cloud Drive
+            </span>
+          </button>
+          <button
             v-for="folder in folderResults.data"
             :key="folder.id"
             type="button"
@@ -588,7 +610,7 @@
           px-3
           transition
         "
-        :class="!selectedFolder
+        :class="selectedFolder === null
           ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
           : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'
         "
@@ -722,7 +744,6 @@ const draggedFolder = ref<number | string | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
-const sortOrder = ref<'desc' | 'asc'>('desc');
 const dropdownPosition = ref('top-8');
 const moveToFolderModal = ref(false);
 const createShareModal = ref(false);
@@ -734,7 +755,7 @@ const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFo
 const searchResult = computed<SearchResultI>(() => store.state.files.searchResult);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
+const folderId = computed<number>(() => Number(route.params.id as string));
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -806,6 +827,7 @@ async function getFolders() {
 }
 
 function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  getFolders();
   if (event.ctrlKey) {
     if (type === 'file') {
       const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
@@ -815,8 +837,6 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
         selectedFiles.value.push(item as FileI);
       }
     } else if (type === 'folder') {
-      getFolders();
-
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
@@ -832,7 +852,6 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
     store.commit('files/setSelectedFiles', [item as FileI]);
     console.log('selectedFiles', selectedFiles.value);
   } else if (type === 'folder') {
-    getFolders();
     store.commit('folders/setSelectedFolders', [item as FolderI]);
   }
   lastSelectedIndex.value = index;
@@ -922,43 +941,53 @@ async function onDrop(folder: FolderI) {
 }
 
 async function moveToFolder() {
-  console.log('selectedFolder', selectedFolder.value);
   if (selectedFolder.value === null) {
     return;
+  }
+
+  if (selectedFolder.value === 0) {
+    selectedFolder.value = null;
   }
 
   try {
     loading.value = true;
     console.log('selectedFiles', selectedFiles.value);
-    const payloadFiles: FileI[] = selectedFiles.value.map((file: FileI) => ({
-      ...file,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payloadFiles);
+    if (selectedFiles.value.length > 0) {
+      const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+        ...file,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFiles', payload);
 
-    if (payloadFiles.length > 0) {
-      await store.dispatch('files/moveFilesToFolder', payloadFiles);
+      if (payload.length > 0) {
+        await store.dispatch('files/moveFilesToFolder', payload);
+      }
+
       await store.dispatch('files/filter', {
         query: '',
         page: 1,
         orderBy: 'created',
         order: 'desc',
-        folderId: '',
+        folderId: folderId.value,
       });
     }
 
-    const payloadFolders: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
-      ...folder,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payloadFolders);
+    console.log('selectedFolders', selectedFolders.value);
+    if (selectedFolders.value.length > 0) {
+      const payload: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
+        ...folder,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFolders', payload);
 
-    if (payloadFolders.length > 0) {
-      await store.dispatch('folders/moveFoldersToFolder', payloadFolders);
+      if (payload.length > 0) {
+        await store.dispatch('folders/moveFoldersToFolder', payload);
+      }
+
       await store.dispatch('folders/filter', {
         query: '',
         page: 1,
-        folderId: '',
+        folderId: folderId.value,
       });
     }
 
@@ -997,24 +1026,6 @@ const toggleDropdown = async (
   const y = event?.clientY || 0;
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
 };
-
-async function getFolders() {
-  await store.dispatch('folders/filter', {
-    query: '',
-    page: 1,
-    folderId: '',
-  });
-}
-
-async function getFiles() {
-  await store.dispatch('files/filter', {
-    query: '',
-    page: 1,
-    orderBy: 'created',
-    order: sortOrder.value,
-    folderId: '',
-  });
-}
 
 async function moveToTrash() {
   if (selectedFiles.value.length > 0) {
