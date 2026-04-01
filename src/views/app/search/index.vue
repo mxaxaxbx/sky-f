@@ -941,7 +941,6 @@ async function createFolder() {
     createFolderModal.value = false;
     folderName.value = '';
 
-    await getFolderDetails();
     await getFolders();
   } catch (error: unknown) {
     console.error(error);

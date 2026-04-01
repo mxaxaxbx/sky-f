@@ -488,7 +488,9 @@
             sm:grid-cols-2
             md:grid-cols-3
             lg:grid-cols-4
-            xl:grid-cols-6
+            xl:grid-cols-5
+            2xl:grid-cols-7
+            3xl:grid-cols-9
           "
         >
           <div
@@ -578,7 +580,9 @@
                         </h3>
                       </div>
                       <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                        {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
+                        <span class="hidden md:inline lg:hidden">{{ moment(file.created * 1000).format('DD/MM/YY') }}</span>
+                        <span class="md:hidden lg:inline">{{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }}</span>
+                        {{ formatFileSize(file.size) }}
                       </p>
                     </div>
                   </div>
