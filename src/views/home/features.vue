@@ -323,7 +323,7 @@
     </div>
   </section>
 </template>
-<script setup>
+<script setup lang="ts">
 import {
   reactive,
   onMounted,
@@ -378,36 +378,23 @@ onMounted(() => {
   const svgObject = document.getElementById('Welcome');
   if (!svgObject) return;
 
-  let started = false;
-
-  const startAnimation = () => {
-    if (started) return;
-    started = true;
-
-    const doc = svgObject.contentDocument;
-    if (!doc) return;
-
-    const svg = doc.querySelector('svg');
-    if (!svg) return;
-
-    // Primera animación rápida
+  const runAnimation = () => {
     gsap.fromTo(
-      svg,
+      svgObject,
       { x: '0%' },
       {
         x: '-10%',
         duration: 1.5,
         ease: 'power2.out',
         onComplete: () => {
-          // Animación infinita lenta
           gsap.fromTo(
-            svg,
+            svgObject,
             { x: '-10%' },
             {
               x: '-100%',
               duration: 130,
               ease: 'linear',
-              repeat: 1,
+              repeat: -1, // -1 para infinito, no 1
             },
           );
         },
@@ -415,39 +402,11 @@ onMounted(() => {
     );
   };
 
-  const initSvg = () => {
-    if (svgObject.contentDocument?.readyState === 'complete') {
-      startAnimation();
-    } else {
-      svgObject.addEventListener('load', startAnimation, { once: true });
-    }
-  };
-
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          initSvg();
-          obs.unobserve(svgObject);
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px',
-    },
-  );
-
-  observer.observe(svgObject);
-
-  // 🔥 Fallback: por si ya está visible al cargar
-  setTimeout(() => {
-    const rect = svgObject.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      initSvg();
-      observer.unobserve(svgObject);
-    }
-  }, 100);
+  if ((svgObject as HTMLObjectElement).contentDocument) {
+    runAnimation();
+  } else {
+    svgObject.addEventListener('load', runAnimation, { once: true });
+  }
 });
 
 // end Welcome animation
