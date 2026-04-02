@@ -8,7 +8,7 @@
     ></div>
 
     <!-- Modal -->
-    <div class="flex min-h-full items-center justify-center mx-2">
+    <div class="flex min-h-full items-center justify-center mx-2  sm:items-start sm:pt-[20vh]">
       <div
         class="
           relative
@@ -21,13 +21,16 @@
           text-left
           shadow-xl
         "
-        :class="{
+        :class="[
+          borderClass,
+          {
           'max-w-xs': size === 'xs',
           'max-w-sm': size === 'sm',
           'max-w-md': size === 'md',
           'max-w-lg': size === 'lg',
           'max-w-xl': size === 'xl',
-        }"
+        }
+        ]"
       >
         <!-- Header -->
         <div class="mb-4 border-b border-[var(--border)] px-4">
@@ -38,14 +41,19 @@
           type="button"
           @click="$emit('update:modelValue', false)"
           class="
-            absolute right-3 top-1.5
-            text-md
+            absolute right-1.5 top-1.5 px-1 py-0.5
+            text-md border border-transparent rounded-xl
             text-[var(--text-terceary)]
-            hover:text-[var(--text)]
-            transition-colors duration-200
+            bg-[var(--bg-secondary)]
+            hover:text-[var(--color-primary)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--color-primary)]
+            hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+
+            transition-all duration-300
           "
         >
-        <i class="fa-solid fa-xmark"></i>
+        <i class="fa-solid fa-xmark m-1"></i>
         </button>
         </div>
 
@@ -55,7 +63,7 @@
         </div>
 
         <!-- Footer -->
-        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-6">
+        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-4">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"
@@ -87,6 +95,10 @@ defineProps({
   size: {
     type: String,
     default: 'lg', // sm | md | lg
+  },
+  borderClass: {
+    type: String,
+    default: 'border-[var(--border)]',
   },
 });
 defineEmits(['update:modelValue']);

@@ -325,14 +325,14 @@
                 </button>
               </template>
 
-              <template #content="{ }">
+              <template #content="{ close }">
                 <div class="flex flex-col font-regular text-sm text-[#868686]">
 
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
                     <!--rename folder-->
                     <button
                       type="button"
-                      @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                      @click="() => { startEditingFolder(folder); close(); }"
                       class="flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
 
@@ -512,82 +512,29 @@
                   "
                 >
                   <!-- icons -->
-                  <img
-                    v-if="file.contentType === 'application/pdf'"
-                    src="/icon/icon-pdf.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="
-                      file.contentType === 'application/msword' ||
-                      file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                  <img v-if="file.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-10 w-10" />
+                  <img v-else-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-10 w-10" />
+                  <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-10 w-10" />
+                  <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-10 w-10" />
+                  <img v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)" src="/icon/icon-png.svg" alt="png" class="h-10 w-10" />
+                  <img v-else-if="file.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-10 w-10" />
+                  <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)" src="/icon/icon-img.svg" alt="img" class="h-10 w-10" />
+                  <img v-else-if="/^video\//.test(file.contentType)" src="/icon/icon-video.svg" alt="video" class="h-10 w-10" />
+                  <img v-else-if="/^audio\//.test(file.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-10 w-10" />
+                  <img v-else-if="
+                      file.name?.toLowerCase().endsWith('.zip') ||
+                      file.name?.toLowerCase().endsWith('.rar') ||
+                      file.name?.toLowerCase().endsWith('.7z') ||
+                      file.name?.toLowerCase().endsWith('.tar') ||
+                      file.name?.toLowerCase().endsWith('.gz') ||
+                      file.name?.toLowerCase().endsWith('.bz2')
                     "
-                    src="/icon/icon-doc.svg"
-                    alt="Word file icon"
+                    src="/icon/icon-compress.svg"
+                    alt="compressed file icon"
                     class="h-10 w-10"
                   />
-                  <img
-                    v-else-if="
-                      file.contentType === 'application/vnd.ms-excel' ||
-                      file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                    "
-                    src="/icon/icon-excel.svg"
-                    alt="Word file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="
-                      file.contentType === 'application/vnd.ms-powerpoint' ||
-                      file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                    "
-                    src="/icon/icon-ppt.svg"
-                    alt="PowerPoint file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
-                    src="/icon/icon-png.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="file.contentType === 'image/svg+xml'"
-                    src="/icon/icon-svg.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
-                    src="/icon/icon-img.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="/^video\//.test(file.contentType)"
-                    src="/icon/icon-video.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="file.contentType === 'application/zip'"
-                    src="/icon/icon-zip.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else-if="/^audio\//.test(file.contentType)"
-                    src="/icon/icon-audio.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <img
-                    v-else
-                    src="/icon/icon-file.svg"
-                    alt="image file icon"
-                    class="h-10 w-10"
-                  />
-                  <!-- title and date -->
+                  <img v-else src="/icon/icon-file.svg" alt="file" class="h-10 w-10" />
+                <!-- title and date -->
                   <div class="flex-1 min-w-0">
                     <div>
                       <input
@@ -653,7 +600,7 @@
                   </button>
                 </template>
 
-                <template #content="{ }">
+                <template #content="{ close }">
                   <div class="flex flex-col font-regular text-sm text-[#868686]">
                     <!-- zone info-->
                     <div class="border-b border-[var(--border)] p-1 space-y-1">
@@ -676,7 +623,7 @@
                       <!-- rename -->
                       <button
                         type="button"
-                        @click="() => { startEditingFile(file); closeDropdown(); }"
+                        @click="() => { startEditingFile(file); close(); }"
                         class="
                           flex items-center justify-start w-full
                           rounded-xl px-3 py-1 border border-transparent
@@ -808,10 +755,10 @@
   <Modal v-model="moveToFolderModal" size="xl">
     <template #header>
       <h3 class="">Move:
-        <p class="font-light text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+        <p class="text-[var(--text)] font-light text-base mt-2" v-for="file in selectedFiles" :key="file.id">
           {{ file.name }}
         </p>
-        <p class="font-normal text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+        <p class="text-[var(--text)] font-light text-base mt-2" v-for="folder in selectedFolders" :key="folder.id">
           {{ folder.name }}
         </p>
       </h3>
@@ -838,7 +785,7 @@
             :class="selectedFolder === 0 ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
           >
             <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
-            <span class="text-sm text-left truncate w-full">
+            <span class="text-sm text-left text-[var(--text)] font-semibold truncate w-full">
               Cloud Drive
             </span>
           </button>
@@ -871,37 +818,74 @@
     </template>
 
     <template #footer>
-      <!-- cancel button -->
-      <button
-        type="button"
-        @click="moveToFolderModal = false; selectedFolder = null;"
-        class="
-          text-[var(--text-secondary)] text-sm
-          border border-[var(--border)] bg-[var(--bg)]
-          rounded-full
-          px-3
-        ">
-        Cancel
-      </button>
+      <div class="flex w-full items-center justify-between mt-2">
+        <!-- create a folder-->
+        <button
+          v-if="!hideBar"
+          @click="createFolderModal = true"
+          class="
+            flex items-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            text-[var(--text-terceary)] text-sm font-medium
+            pl-2 pr-2.5 py-0.5
+            grayscale
+            rounded-full
 
-      <!-- move button -->
-      <button
-        type="submit"
-        form="move-to-folder-form"
-        class="
-          text-sm
-          border
-          rounded-full
-          px-3
-          transition
-        "
-        :class="selectedFolder === null
-          ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-          : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
-        "
-      >
-        Move
-      </button>
+            hover:grayscale-0
+            hover:text-[var(--text)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+            focus:border-[var(--hover-border)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:grayscale-0
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+          New folder
+        </button>
+        <div class=" flex gap-2">
+          <!-- cancel button -->
+          <button
+            type="button"
+            @click="moveToFolderModal = false; selectedFolder = null;"
+            class="
+              text-[var(--text-secondary)] text-sm font-medium
+              border border-[var(--border)] bg-[var(--bg-secondary)]
+              rounded-full
+              px-3 py-0.5
+
+              hover:border-[var(--text)]
+              hover:bg-[var(--bg)]
+              hover:text-[var(--text)]
+            ">
+            Cancel
+          </button>
+
+          <!-- move button -->
+          <button
+            type="submit"
+            form="move-to-folder-form"
+            class="
+              text-sm
+              border font-medium
+              rounded-full
+              px-3.5 py-0.5
+              transition
+            "
+            :class="selectedFolder === null
+              ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+              : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
+            "
+          >
+            Move
+          </button>
+        </div>
+      </div>
     </template>
   </Modal>
 
@@ -957,7 +941,7 @@
           text-[var(--text-secondary)] text-sm
           border border-[var(--border)] bg-[var(--bg)]
           rounded-full
-          px-3
+          px-3 py-0.5
 
           hover:border-[var(--text)]
           hover:bg-[var(--hover-bg-gray)]
@@ -988,10 +972,10 @@
   <Modal v-model="createShareModal" size="md">
     <template #header>
       <h3 class=""> Copy link:
-        <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
+        <p class="text-[var(--text)] font-light text-base mt-2" v-for="file in selectedFiles" :key="file.id">
           {{ file.name }}
         </p>
-        <p class="font-light text-sm mt-2" v-for="folder in selectedFolders" :key="folder.id">
+        <p class="text-[var(--text)] font-light text-base mt-2" v-for="folder in selectedFolders" :key="folder.id">
           {{ folder.name }}
         </p>
       </h3>
@@ -1083,12 +1067,12 @@
 
 <script setup lang="ts">
 import {
-  ref,
-  computed,
-  onMounted,
-  watch,
-  nextTick,
   defineAsyncComponent,
+  onMounted,
+  computed,
+  nextTick,
+  watch,
+  ref,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -1189,31 +1173,31 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
       if (exists) {
         store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
       } else {
-        selectedFiles.value.push(item as FileI);
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
       }
-    } else if (type === 'folder') {
+    } else {
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
       } else {
-        selectedFolders.value.push(item as FolderI);
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
       }
     }
+
     lastSelectedIndex.value = index;
     return;
   }
 
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
 
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
+  } else {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
-    console.log('selectedFolders', selectedFolders.value);
   }
+
   lastSelectedIndex.value = index;
 }
 

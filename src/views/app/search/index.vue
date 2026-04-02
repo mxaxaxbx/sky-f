@@ -154,21 +154,6 @@
                   <div class="flex flex-col font-regular text-sm text-[#868686]">
 
                     <div class="border-b border-[var(--border)] p-1 space-y-1">
-                      <!--rename folder-->
-                      <!-- <button
-                        type="button"
-                        @click="() => { startEditingFolder(folder); closeDropdown(); }"
-                        class="flex items-center justify-start w-full
-                          rounded-xl px-3 py-1 border border-transparent
-
-                          hover:bg-[var(--hover-bg)]
-                          hover:border-[var(--color-primary)]
-                          transition-colors duration-300"
-                      >
-                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                        <span>Rename</span>
-                      </button> -->
-
                       <!--move to folder-->
                       <button
                         type="button"
@@ -280,81 +265,28 @@
                 "
               >
                 <!-- icons -->
-                <img
-                  v-if="file.contentType === 'application/pdf'"
-                  src="/icon/icon-pdf.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="
-                    file.contentType === 'application/msword' ||
-                    file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                <img v-if="file.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-10 w-10" />
+                <img v-else-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-10 w-10" />
+                <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-10 w-10" />
+                <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-10 w-10" />
+                <img v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)" src="/icon/icon-png.svg" alt="png" class="h-10 w-10" />
+                <img v-else-if="file.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-10 w-10" />
+                <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)" src="/icon/icon-img.svg" alt="img" class="h-10 w-10" />
+                <img v-else-if="/^video\//.test(file.contentType)" src="/icon/icon-video.svg" alt="video" class="h-10 w-10" />
+                <img v-else-if="/^audio\//.test(file.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-10 w-10" />
+                <img v-else-if="
+                    file.name?.toLowerCase().endsWith('.zip') ||
+                    file.name?.toLowerCase().endsWith('.rar') ||
+                    file.name?.toLowerCase().endsWith('.7z') ||
+                    file.name?.toLowerCase().endsWith('.tar') ||
+                    file.name?.toLowerCase().endsWith('.gz') ||
+                    file.name?.toLowerCase().endsWith('.bz2')
                   "
-                  src="/icon/icon-doc.svg"
-                  alt="Word file icon"
+                  src="/icon/icon-compress.svg"
+                  alt="compressed file icon"
                   class="h-10 w-10"
                 />
-                <img
-                  v-else-if="
-                    file.contentType === 'application/vnd.ms-excel' ||
-                    file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                  "
-                  src="/icon/icon-excel.svg"
-                  alt="Word file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="
-                    file.contentType === 'application/vnd.ms-powerpoint' ||
-                    file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                  "
-                  src="/icon/icon-ppt.svg"
-                  alt="PowerPoint file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
-                  src="/icon/icon-png.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="file.contentType === 'image/svg+xml'"
-                  src="/icon/icon-svg.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
-                  src="/icon/icon-img.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/^video\//.test(file.contentType)"
-                  src="/icon/icon-video.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="file.contentType === 'application/zip'"
-                  src="/icon/icon-zip.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else-if="/^audio\//.test(file.contentType)"
-                  src="/icon/icon-audio.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
-                <img
-                  v-else
-                  src="/icon/icon-file.svg"
-                  alt="image file icon"
-                  class="h-10 w-10"
-                />
+                    <img v-else src="/icon/icon-file.svg" alt="file" class="h-10 w-10" />
                 <!-- title and date -->
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-[var(--text)] text-xs sm:text-sm truncate text-left">
@@ -416,16 +348,13 @@
                       class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
-                        grayscale
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        focus:grayscale-0
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4"
+                      <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
                       />
                       <span>info</span>
                     </router-link>
@@ -434,23 +363,20 @@
                   <!-- zone actions -->
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
                     <!-- preview file -->
-                    <router-link
-                      :to="`/app/files/details/${file.id}`"
-                      class="
+                    <button
+                    @click="store.dispatch('files/previewFile', file)"
+                    class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
-                        grayscale
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        focus:grayscale-0
                         transition-colors duration-300
                       "
                     >
-                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4"/>
+                      <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
                       <span>Preview</span>
-                    </router-link>
+                    </button>
 
                     <!-- download -->
                     <button
@@ -498,16 +424,13 @@
                       class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
-                        grayscale
 
                         hover:bg-[var(--hover-bg)]
                         hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        focus:grayscale-0
                         transition-all duration-300
                       "
                     >
-                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4"
+                      <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 grayscale"
                       />
                       {{ copied ? 'Copied!' : 'Copy link' }}
                     </button>
@@ -561,6 +484,28 @@
       <form @submit.prevent="moveToFolder" id="move-to-folder-form" class="my-2">
         <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
           <button
+            type="button"
+            @click="selectedFolder = 0"
+            class="
+              flex items-center justify-start
+              px-2 py-0.5 gap-1.5
+              rounded-xl
+              border
+              text-[var(--text-terceary)]
+
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--color-primary)]
+              hover:text-[var(--text)]
+              transition
+            "
+            :class="selectedFolder === 0 ? 'bg-[var(--hover-bg)] border-[var(--color-primary)] shadow-[0_0_3px_3px_rgba(10,119,243,0.3)]' : 'border-transparent'"
+          >
+            <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-6"/>
+            <span class="text-sm text-left font-semibold text-[var(--text)] truncate w-full">
+              Cloud Drive
+            </span>
+          </button>
+          <button
             v-for="folder in folderResults.data"
             :key="folder.id"
             type="button"
@@ -569,16 +514,18 @@
               flex items-center justify-start
               px-2 py-0.5 gap-1.5
               rounded-xl
-              border border-transparent
+              border
               text-[var(--text-terceary)]
+              opacity-80
 
               hover:bg-[var(--hover-bg)]
+              hover:opacity-100
               hover:border-[var(--color-primary)]
               hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
               hover:text-[var(--text)]
               transition
             "
-            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : ''"
+            :class="selectedFolder === folder.id ? 'bg-[var(--hover-bg)] border-[var(--color-primary)]' : 'border-transparent'"
           >
             <img src="/icon/icon-folder.svg" alt="folder" class="h-4.5"/>
             <span class="text-sm text-left truncate w-full">
@@ -590,21 +537,141 @@
     </template>
 
     <template #footer>
+      <div class="flex w-full items-center justify-between mt-2">
+        <!-- create a folder-->
+        <button
+          v-if="!hideBar"
+          @click="createFolderModal = true"
+          class="
+            flex items-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            text-[var(--text-terceary)] text-sm font-medium
+            pl-2 pr-2.5 py-0.5
+            grayscale
+            rounded-full
+
+            hover:grayscale-0
+            hover:text-[var(--text)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+            focus:border-[var(--hover-border)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:grayscale-0
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+          New folder
+        </button>
+        <div class=" flex gap-2">
+          <!-- cancel button -->
+          <button
+            type="button"
+            @click="moveToFolderModal = false; selectedFolder = null;"
+            class="
+              text-[var(--text-secondary)] text-sm
+              border border-[var(--border)] bg-[var(--bg-secondary)]
+              rounded-full
+              px-3
+
+              hover:border-[var(--text)]
+              hover:bg-[var(--bg)]
+              hover:text-[var(--text)]
+            ">
+            Cancel
+          </button>
+
+          <!-- move button -->
+          <button
+            type="submit"
+            form="move-to-folder-form"
+            class="
+              text-sm
+              border
+              rounded-full
+              px-3 py-0.5
+              transition
+            "
+            :class="selectedFolder === null
+              ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+              : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
+            "
+          >
+            Move
+          </button>
+        </div>
+      </div>
+    </template>
+  </Modal>
+
+  <Modal v-model="createFolderModal" size="xs">
+    <template #header>
+      <h3 class="">
+        New folder
+      </h3>
+    </template>
+    <template #content>
+      <div class="my-4">
+        <form @submit.prevent="createFolder" id="create-folder-form">
+          <label for="folder-name"></label>
+          <img
+            src="/icon/icon-folder.svg"
+            alt="icon"
+            class="h-5 mt-[1px] absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            v-model="folderName"
+            type="text"
+            placeholder="Folder name"
+            id="folder-name"
+            class="
+              w-full border
+              border-[var(--border)] bg-[var(--bg)]
+              text-sm text-[var(--text)]
+              my-2 pl-8 py-1
+              rounded-full
+
+              placeholder:text-[var(--text-terceary)]
+              placeholder:font-light
+              placeholder:text-sm
+
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--color-primary)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300 ease-in-out
+            "
+            name="folder-name"
+          />
+        </form>
+      </div>
+    </template>
+    <template #footer>
       <button
         type="button"
-        @click="moveToFolderModal = false; selectedFolder = null;"
+        @click="createFolderModal = false"
         class="
           text-[var(--text-secondary)] text-sm
           border border-[var(--border)] bg-[var(--bg)]
           rounded-full
-          px-3
-        "
-      >
+          px-3 py-0.5
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
+        ">
         Cancel
       </button>
       <button
         type="submit"
-        form="move-to-folder-form"
+        form="create-folder-form"
+        :disabled="!folderName || !folderName.trim()"
         class="
           text-[var(--text)] text-sm
           border
@@ -612,12 +679,11 @@
           px-3
           transition
         "
-        :class="!selectedFolder
+        :class="!folderName || !folderName.trim()
           ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'
-        "
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
       >
-        Move
+        Create
       </button>
     </template>
   </Modal>
@@ -720,15 +786,15 @@
 
 <script setup lang="ts">
 import {
-  computed,
-  ref,
+  defineAsyncComponent,
   onMounted,
+  computed,
   nextTick,
   watch,
-  defineAsyncComponent,
+  ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import moment from 'moment';
 
 import { SearchResultI, FileI, FilesResultI } from '@/store/files/state';
@@ -737,32 +803,32 @@ import { FolderI, FoldersResultI } from '@/store/folders/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
+const router = useRouter();
 const store = useStore();
 const route = useRoute();
-const router = useRouter();
 
+const selectedFolder = ref<number | string | null>(null);
+const draggedFolder = ref<number | string | null>(null);
+const activeDropdown = ref<(() => void) | null>(null);
+const draggedItem = ref<FileI | FolderI | null>(null);
+const lastSelectedIndex = ref<number | null>(null);
+const dropdownPosition = ref('top-8');
+const moveToFolderModal = ref(false);
+const createShareModal = ref(false);
+const createFolderModal = ref(false);
+const folderName = ref('');
 const loading = ref(false);
-const sortOrder = ref<'desc' | 'asc'>('desc');
 const copied = ref(false);
 const shareUrl = ref('');
-const createShareModal = ref(false);
-const dropdownPosition = ref('top-8');
-const activeDropdown = ref<(() => void) | null>(null);
-const moveToFolderModal = ref(false);
-const editingFolderId = ref<number | null>(null);
-const editedFolderName = ref('');
-const selectedFolder = ref<number | string | null>(null);
-const draggedItem = ref<FileI | FolderI | null>(null);
-const draggedFolder = ref<number | string | null>(null);
-const lastSelectedIndex = ref<number | null>(null);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const searchResult = computed<SearchResultI>(() => store.state.files.searchResult);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const folderId = computed<number>(() => Number(route.params.id as string));
 
-const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
 const searchQuery = computed(() => (
   typeof route.query.q === 'string' ? route.query.q : ''
@@ -800,6 +866,11 @@ const copyLink = async (file: FileI) => {
   }
 };
 
+// download buttom
+async function downloadFile(file: FileI) {
+  await store.dispatch('files/downloadFile', file);
+}
+
 // Separate folders and files
 const folders = computed(() => (
   searchResult.value.data.filter((item) => item.itemType === 'folder')
@@ -830,6 +901,60 @@ async function getFolders() {
   }
 }
 
+async function getFolderDetails() {
+  loading.value = true;
+  console.log('folderId', folderId.value);
+  try {
+    await store.dispatch('folders/getFolderDetails', {
+      folderId: Number(folderId.value),
+    });
+  } catch (error) {
+    console.error('Error loading folder details:', error);
+    store.commit('notifications/addNotification', {
+      type: 'error',
+      message: 'Error al obtener los detalles de la carpeta',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+// create new folder
+async function createFolder() {
+  // test folder name
+  if (!folderName.value) {
+    store.commit('notifications/addNotification', {
+      message: 'Folder name is required',
+      type: 'error',
+    });
+    return;
+  }
+  // strip folder name
+  const strippedFolderName = folderName.value.trim();
+  loading.value = true;
+  try {
+    await store.dispatch('folders/createFolder', {
+      name: strippedFolderName,
+      folderId: folderId.value,
+    });
+
+    createFolderModal.value = false;
+    folderName.value = '';
+
+    await getFolders();
+  } catch (error: unknown) {
+    console.error(error);
+    const errorResponse = error as { response?: { data?: { error?: string } } };
+    const msg = errorResponse?.response?.data?.error || 'Error al crear la carpeta';
+    store.commit('notifications/addNotification', {
+      message: msg,
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
   if (event.ctrlKey) {
     if (type === 'file') {
@@ -837,30 +962,31 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
       if (exists) {
         store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
       } else {
-        selectedFiles.value.push(item as FileI);
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
       }
-    } else if (type === 'folder') {
-      getFolders();
-
+    } else {
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
       } else {
-        selectedFolders.value.push(item as FolderI);
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
       }
     }
+
     lastSelectedIndex.value = index;
     return;
   }
 
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
-    getFolders();
+  } else {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
-    console.log('selectedFolders', selectedFolders.value);
   }
+
   lastSelectedIndex.value = index;
 }
 
@@ -948,43 +1074,53 @@ async function onDrop(folder: FolderI) {
 }
 
 async function moveToFolder() {
-  console.log('selectedFolder', selectedFolder.value);
   if (selectedFolder.value === null) {
     return;
+  }
+
+  if (selectedFolder.value === 0) {
+    selectedFolder.value = null;
   }
 
   try {
     loading.value = true;
     console.log('selectedFiles', selectedFiles.value);
-    const payloadFiles: FileI[] = selectedFiles.value.map((file: FileI) => ({
-      ...file,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payloadFiles);
+    if (selectedFiles.value.length > 0) {
+      const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+        ...file,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFiles', payload);
 
-    if (payloadFiles.length > 0) {
-      await store.dispatch('files/moveFilesToFolder', payloadFiles);
+      if (payload.length > 0) {
+        await store.dispatch('files/moveFilesToFolder', payload);
+      }
+
       await store.dispatch('files/filter', {
         query: '',
         page: 1,
         orderBy: 'created',
         order: 'desc',
-        folderId: '',
+        folderId: folderId.value,
       });
     }
 
-    const payloadFolders: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
-      ...folder,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payloadFolders);
+    console.log('selectedFolders', selectedFolders.value);
+    if (selectedFolders.value.length > 0) {
+      const payload: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
+        ...folder,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFolders', payload);
 
-    if (payloadFolders.length > 0) {
-      await store.dispatch('folders/moveFoldersToFolder', payloadFolders);
+      if (payload.length > 0) {
+        await store.dispatch('folders/moveFoldersToFolder', payload);
+      }
+
       await store.dispatch('folders/filter', {
         query: '',
         page: 1,
-        folderId: '',
+        folderId: folderId.value,
       });
     }
 

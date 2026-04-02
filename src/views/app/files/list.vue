@@ -345,14 +345,14 @@
                     </button>
                   </template>
 
-                  <template #content="{ }">
+                  <template #content="{ close }">
                     <div class="flex flex-col font-regular text-sm text-[#868686]">
 
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
                       <!--rename folder-->
                         <button
                           type="button"
-                          @click="() => { startEditingFolder(folder); closeDropdown(); }"
+                          @click="() => { startEditingFolder(folder); close(); }"
                           class="flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
 
@@ -488,7 +488,9 @@
             sm:grid-cols-2
             md:grid-cols-3
             lg:grid-cols-4
-            xl:grid-cols-6
+            xl:grid-cols-5
+            2xl:grid-cols-7
+            3xl:grid-cols-9
           "
         >
           <div
@@ -533,81 +535,28 @@
                     "
                   >
                     <!-- icons -->
-                    <img
-                      v-if="file.contentType === 'application/pdf'"
-                      src="/icon/icon-pdf.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/msword' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    <img v-if="file.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-10 w-10" />
+                    <img v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)" src="/icon/icon-png.svg" alt="png" class="h-10 w-10" />
+                    <img v-else-if="file.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-10 w-10" />
+                    <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)" src="/icon/icon-img.svg" alt="img" class="h-10 w-10" />
+                    <img v-else-if="/^video\//.test(file.contentType)" src="/icon/icon-video.svg" alt="video" class="h-10 w-10" />
+                    <img v-else-if="/^audio\//.test(file.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-10 w-10" />
+                    <img v-else-if="
+                        file.name?.toLowerCase().endsWith('.zip') ||
+                        file.name?.toLowerCase().endsWith('.rar') ||
+                        file.name?.toLowerCase().endsWith('.7z') ||
+                        file.name?.toLowerCase().endsWith('.tar') ||
+                        file.name?.toLowerCase().endsWith('.gz') ||
+                        file.name?.toLowerCase().endsWith('.bz2')
                       "
-                      src="/icon/icon-doc.svg"
-                      alt="Word file icon"
+                      src="/icon/icon-compress.svg"
+                      alt="compressed file icon"
                       class="h-10 w-10"
                     />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/vnd.ms-excel' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                      "
-                      src="/icon/icon-excel.svg"
-                      alt="Word file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="
-                        file.contentType === 'application/vnd.ms-powerpoint' ||
-                        file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                      "
-                      src="/icon/icon-ppt.svg"
-                      alt="PowerPoint file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/image\/(png|webp|gif|avif)/.test(file.contentType)"
-                      src="/icon/icon-png.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="file.contentType === 'image/svg+xml'"
-                      src="/icon/icon-svg.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(file.contentType)"
-                      src="/icon/icon-img.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/^video\//.test(file.contentType)"
-                      src="/icon/icon-video.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="file.contentType === 'application/zip'"
-                      src="/icon/icon-zip.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else-if="/^audio\//.test(file.contentType)"
-                      src="/icon/icon-audio.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
-                    <img
-                      v-else
-                      src="/icon/icon-file.svg"
-                      alt="image file icon"
-                      class="h-10 w-10"
-                    />
+                    <img v-else src="/icon/icon-file.svg" alt="file" class="h-10 w-10" />
                     <!-- title and date -->
                     <div class="flex-1 min-w-0">
                       <div>
@@ -631,7 +580,9 @@
                         </h3>
                       </div>
                       <p class="text-[0.7rem] text-[var(--text-terceary)] font-light">
-                        {{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }} - {{ formatFileSize(file.size) }}
+                        <span class="hidden md:inline lg:hidden">{{ moment(file.created * 1000).format('DD/MM/YY') }}</span>
+                        <span class="md:hidden lg:inline">{{ moment(file.created * 1000).format('DD/MM/YY HH:mm') }}</span>
+                        {{ formatFileSize(file.size) }}
                       </p>
                     </div>
                   </div>
@@ -674,7 +625,7 @@
                     </button>
                   </template>
 
-                  <template #content="{ }">
+                  <template #content="{ close }">
                     <div class="flex flex-col font-regular text-sm text-[#868686]">
                       <!--actions info-->
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
@@ -697,7 +648,7 @@
                         <!-- rename -->
                         <button
                           type="button"
-                          @click="() => { startEditingFile(file); closeDropdown(); }"
+                          @click="() => { startEditingFile(file), close(); }"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -869,36 +820,74 @@
       </template>
 
       <template #footer>
-        <!-- cancel button -->
-        <button
-          type="button"
-          @click="moveToFolderModal = false; selectedFolder = null;"
-          class="
-            text-[var(--text-secondary)] text-sm
-            border border-[var(--border)] bg-[var(--bg)]
-            rounded-full
-            px-3
-          ">
-          Cancel
-        </button>
+        <div class="flex w-full items-center justify-between mt-2">
+          <!-- create a folder-->
+          <button
+            v-if="!hideBar"
+            @click="createFolderModal = true"
+            class="
+              flex items-center
+              bg-[var(--bg-secondary)]
+              border border-[var(--border)]
+              text-[var(--text-terceary)] text-sm font-medium
+              pl-2 pr-2.5 py-0.5
+              grayscale
+              rounded-full
 
-        <!-- move button -->
-        <button
-          type="submit"
-          form="move-to-folder-form"
-          class="
-            text-sm
-            border
-            rounded-full
-            px-3
-            transition
-          "
-          :class="!selectedFolder
-            ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
-            : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'"
-        >
-          Move
-        </button>
+              hover:grayscale-0
+              hover:text-[var(--text)]
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--hover-border)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--hover-border)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:grayscale-0
+              transition-all duration-300 ease-in-out
+              cursor-pointer
+            "
+          >
+            <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+            New folder
+          </button>
+          <div class=" flex gap-2">
+            <!-- cancel button -->
+            <button
+              type="button"
+              @click="moveToFolderModal = false; selectedFolder = null;"
+              class="
+                text-[var(--text-secondary)] text-sm font-medium
+                border border-[var(--border)] bg-[var(--bg-secondary)]
+                rounded-full
+                px-3 py-0.5
+
+                hover:border-[var(--text)]
+                hover:bg-[var(--bg)]
+                hover:text-[var(--text)]
+              ">
+              Cancel
+            </button>
+
+            <!-- move button -->
+            <button
+              type="submit"
+              form="move-to-folder-form"
+              class="
+                text-sm font-medium
+                border
+                rounded-full
+                px-3.5 py-0.5
+                transition
+              "
+              :class="selectedFolder === null
+                ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+                : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
+              "
+            >
+              Move
+            </button>
+          </div>
+        </div>
       </template>
     </Modal>
 
@@ -951,10 +940,10 @@
           type="button"
           @click="createFolderModal = false"
           class="
-            text-[var(--text-secondary)] text-sm
+            text-[var(--text-secondary)] text-sm font-medium
             border border-[var(--border)] bg-[var(--bg)]
             rounded-full
-            px-3
+            px-3 py-0.5
 
             hover:border-[var(--text)]
             hover:bg-[var(--hover-bg-gray)]
@@ -968,10 +957,10 @@
           form="create-folder-form"
           :disabled="!folderName || !folderName.trim()"
           class="
-            text-[var(--text)] text-sm
+            text-[var(--text)] text-sm font-medium
             border
             rounded-full
-            px-3
+            px-3 py-0.5
             transition
           "
           :class="!folderName || !folderName.trim()
@@ -1081,56 +1070,56 @@
 
 <script setup lang="ts">
 import {
-  ref,
-  computed,
-  onMounted,
-  onUnmounted,
-  nextTick,
   defineAsyncComponent,
+  onUnmounted,
+  onMounted,
+  computed,
+  nextTick,
+  ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import moment from 'moment';
 
-import { FileI, FilesResultI } from '@/store/files/state';
 import { FolderI, FoldersResultI } from '@/store/folders/state';
+import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 
+const router = useRouter();
 const store = useStore();
 const route = useRoute();
-const router = useRouter();
 
+const draggedFolder = ref<number | string | null>(null);
+const selectedFolder = ref<number | string | null>(null);
+const editingFileId = ref<number | string | null>(null);
+const draggedItem = ref<FileI | FolderI | null>(null);
+const activeDropdown = ref<(() => void) | null>(null);
+const lastSelectedIndex = ref<number | null>(null);
+const editingFolderId = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
+const dropdownPosition = ref('top-8');
+const createFolderModal = ref(false);
+const moveToFolderModal = ref(false);
+const createShareModal = ref(false);
+const editedFolderName = ref('');
+const editedFileName = ref('');
+const showFolders = ref(true);
+const showFiles = ref(true);
+const folderName = ref('');
 const loading = ref(false);
 const copied = ref(false);
 const shareUrl = ref('');
-const dropdownPosition = ref('top-8');
-const activeDropdown = ref<(() => void) | null>(null);
-const showFolders = ref(true);
-const showFiles = ref(true);
-const draggedItem = ref<FileI | FolderI | null>(null);
-const draggedFolder = ref<number | string | null>(null);
-const lastSelectedIndex = ref<number | null>(null);
-const moveToFolderModal = ref(false);
-const createShareModal = ref(false);
-const createFolderModal = ref(false);
-const editingFileId = ref<number | string | null>(null);
-const editedFileName = ref('');
-const editingFolderId = ref<number | null>(null);
-const editedFolderName = ref('');
-const selectedFolder = ref<number | string | null>(null);
-const folderName = ref('');
 
-const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
-const folderId = computed<number>(() => Number(route.params.id as string));
-const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
+const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
+const folderId = computed<number>(() => Number(route.params.id as string));
 
-const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
+const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
@@ -1257,30 +1246,31 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
       if (exists) {
         store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
       } else {
-        selectedFiles.value.push(item as FileI);
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
       }
-    } else if (type === 'folder') {
+    } else {
       const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
       if (exists) {
         store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
       } else {
-        selectedFolders.value.push(item as FolderI);
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
       }
     }
+
     lastSelectedIndex.value = index;
     return;
   }
 
-  console.log('item', item);
-  console.log('type', type);
-  console.log('index', index);
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
 
   if (type === 'file') {
     store.commit('files/setSelectedFiles', [item as FileI]);
-    console.log('selectedFiles', selectedFiles.value);
-  } else if (type === 'folder') {
+  } else {
     store.commit('folders/setSelectedFolders', [item as FolderI]);
   }
+
   lastSelectedIndex.value = index;
 }
 
