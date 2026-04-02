@@ -1031,6 +1031,8 @@ async function moveToTrash() {
   if (selectedFolders.value.length > 0) {
     await store.dispatch('folders/moveFoldersToTrash', selectedFolders.value);
   }
+
+  getSearchResult();
 }
 
 // Watch for route query changes
