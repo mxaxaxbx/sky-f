@@ -20,15 +20,21 @@
       <div
         class="
           container
-          flex flex-row items-center justify-center
-          mx-auto my-8 px-2 gap-4 sm:gap-20
-        ">
+          flex flex-row items-center justify-center w-full
+          mx-auto my-8 gap-4
+          sm:gap-2
+          md:gap-0
+          lg:gap-12 lg:mx-auto
+        "
+      >
         <h2
           id="animated-heading"
           class="
-            text-2xl text-left mb-4 font-semibold
+            text-3xl text-left mb-4 font-semibold mx-2
 
-            md:text-3xl lg:text-5xl">
+            sm:text-2xl lg:text-5xl
+          "
+        >
             We built a private cloud<br>
             that puts you in control,<br>
             with a fast, intuitive,<br>
@@ -38,21 +44,24 @@
 
         <!--data rain-->
       <div id="wrapper2"
-        class="opacity-50 hidden md:block"
-        ref="wrapper2">
-        <canvas ref="canvas2" class="block"></canvas>
+        class="opacity-50 hidden md:inline"
+        ref="wrapper2
+        "
+      >
+        <canvas ref="canvas2" class="block md:w-72 lg:w-96"></canvas>
       </div>
     </div>
 
       <!-- Tarjetas de características -->
     <div
-        class="
-          container w-full
-          flex flex-col items-center justify-center
-          mx-auto gap-4 my-12
+      class="
+        container w-full
+        flex flex-col items-center justify-center
+        mx-auto gap-4 my-12 px-4
 
-          sm:flex-row
-          ">
+        sm:flex-row md:px-0 sm:gap-2 md:gap-4 lg:px-4
+      "
+    >
 
         <!-- seguridad -->
         <a
@@ -64,7 +73,7 @@
             flex flex-col items-center
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            h-96 w-80 sm:w-72 pt-6
+            h-96 w-full sm:w-72 md:w-72 pt-6
             rounded-2xl
             cursor-pointer
             overflow-hidden
@@ -142,7 +151,7 @@
               flex flex-col
               bg-[var(--bg-secondary)]
               border border-[var(--border)]
-              h-96 w-80 sm:w-72 pt-6
+              h-96 w-full sm:w-72 pt-6
               rounded-2xl
               cursor-pointer
               overflow-hidden
@@ -219,8 +228,11 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             pt-6 h-96 overflow-hidden
-            rounded-2xl w-80 sm:w-auto
+            rounded-2xl w-full
             cursor-pointer
+
+            sm:w-auto
+            lg:w-full md:max-w-[550px]
 
             hover:border-[var(--color-primary)]
             hover:bg-[var(--hover-bg)]
