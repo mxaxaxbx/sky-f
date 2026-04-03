@@ -15,11 +15,11 @@
         </span>
       </h2>
       <p class="
-        text-md font-base
+        text-xs font-base
         text-[var(--text-secondary)] font-sans
         my-8
 
-        md:text-md
+        sm:text-lg md:text-xl lg:text-2xl
         ">
         <span
           class="block opacity-0 animate-fadeInUp"

@@ -59,7 +59,7 @@
         flex flex-col items-center justify-center
         mx-auto gap-4 my-12 px-4
 
-        sm:flex-row md:px-0 sm:gap-2 md:gap-4 lg:px-4
+        sm:flex-row md:px-2 sm:gap-2 md:gap-4 lg:px-4
       "
     >
 

@@ -29,12 +29,13 @@
     </div>
 
     <!-- if not results -->
-    <div v-else-if="!fileResults.data.length && !folderResults.data.length" class="px-8 mx-auto w-full mt-4">
+    <div v-else-if="!fileResults.data.length && !folderResults.data.length"
+      class="flex items center px-0 mx-auto w-full mt-4 sm:px-8">
       <div
         class="
           group
           flex flex-col gap-8 justify-center items-center
-          w-full h-[calc(100vh-150px)] ml-2
+          w-full h-[calc(100vh-170px)] ml-2 mx-2 px-4
           border-2 border-[var(--border)] border-dashed
           rounded-2xl
 
@@ -109,7 +110,7 @@
             </g>
           </g>
         </svg>
-        <p class="text-[var(--text-terceary)] font-regular text-lg">
+        <p class="text-[var(--text-terceary)] text-center font-semibold text-xl">
           Your space is waiting for something awesome.
         </p>
         <!-- actions desktop-->
@@ -246,7 +247,9 @@
             data-selectable
 
             :draggable="true"
-            @dragstart="onDragStart('folder', folder)"
+            @dragstart="onDragStart('folder', folder, $event)"
+            @drag="onDragMove($event)"
+            @dragend="onDragEndCleanup()"
             @click="selectItem($event, 'folder', folder, index)"
             @keydown.enter="selectItem($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
@@ -499,7 +502,9 @@
             data-selectable
 
             :draggable="true"
-            @dragstart="onDragStart('file', file)"
+            @dragstart="onDragStart('file', file, $event)"
+            @drag="onDragMove($event)"
+            @dragend="onDragEndCleanup()"
             @click="selectItem($event, 'file', file, index)"
             @keydown.enter="selectItem($event, 'file', file, index)"
             @dblclick="router.push(`/app/files/details/${file.id}`);"
@@ -1065,6 +1070,33 @@
         </div>
       </template>
     </Modal>
+    <Teleport to="body">
+      <div
+        v-if="ghostVisible"
+        class="fixed pointer-events-none z-[9999] translate-x-2 translate-y-1"
+        :style="{ top: ghostY + 'px', left: ghostX + 'px' }"
+      >
+        <div
+          class="
+            flex items-center
+            gap-1 px-2.5 py-1
+            bg-[var(--hover-bg)]
+            border border-[var(--color-primary)]
+            rounded-full
+            text-sm font-medium text-[var(--text)]
+            shadow-md whitespace-nowrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
+              <mask id="mask0_1361_8" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+              <rect width="24" height="24" fill="#0A77F3"/>
+              </mask>
+              <g mask="url(#mask0_1361_8)">
+              <path d="M14.4541 2C16.0537 2.00007 17.5562 2.76591 18.4971 4.05957L20.0439 6.18555C20.6653 7.04006 21 8.06945 21 9.12598V17C21 19.7614 18.7614 22 16 22H8C5.23858 22 3 19.7614 3 17V7C3 4.23858 5.23858 2 8 2H14.4541ZM8 4C6.34315 4 5 5.34315 5 7V17C5 18.6569 6.34315 20 8 20H16C17.6569 20 19 18.6569 19 17V11H16C14.3431 11 13 9.65685 13 8V4H8ZM15 8C15 8.55228 15.4477 9 16 9H18.9951C18.9703 8.41045 18.7739 7.84004 18.4258 7.36133L16.8799 5.23535C16.4241 4.60872 15.7485 4.18846 15 4.0498V8Z" fill="#0A77F3"/>
+              </g>
+            </svg>
+          Moving {{ totalSelected }} {{ totalSelected === 1 ? 'element' : 'elements' }}
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1111,12 +1143,16 @@ const folderName = ref('');
 const loading = ref(false);
 const copied = ref(false);
 const shareUrl = ref('');
+const ghostVisible = ref(false);
+const ghostX = ref(0);
+const ghostY = ref(0);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
+const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -1287,18 +1323,38 @@ function handleContainerClick(event: MouseEvent | KeyboardEvent) {
   clearSelection();
 }
 
-function onDragStart(type: string, item: FileI | FolderI) {
-  if (type === 'file') {
-    if (!isSelectedFile(item)) {
-      store.commit('files/setSelectedFiles', [item]);
-    }
-  } else if (type === 'folder') {
-    if (!isSelectedFolder(item)) {
-      store.commit('folders/setSelectedFolders', [item]);
-    }
+function onDragStart(type: string, item: FileI | FolderI, event: DragEvent) {
+  if (type === 'file' && !isSelectedFile(item as FileI)) {
+    store.commit('files/setSelectedFiles', [item]);
+    store.commit('folders/setSelectedFolders', []);
+  } else if (type !== 'file' && !isSelectedFolder(item as FolderI)) {
+    store.commit('folders/setSelectedFolders', [item]);
+    store.commit('files/setSelectedFiles', []);
   }
 
   draggedItem.value = item;
+
+  const blank = document.createElement('div');
+  blank.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+  document.body.appendChild(blank);
+  event.dataTransfer?.setDragImage(blank, 0, 0);
+  setTimeout(() => document.body.removeChild(blank), 0);
+
+  ghostVisible.value = true;
+  ghostX.value = event.clientX;
+  ghostY.value = event.clientY;
+}
+
+function onDragMove(event: DragEvent) {
+  if (!draggedItem.value || (event.clientX === 0 && event.clientY === 0)) return;
+  ghostX.value = event.clientX;
+  ghostY.value = event.clientY;
+}
+
+function onDragEndCleanup() {
+  ghostVisible.value = false;
+  draggedItem.value = null;
+  draggedFolder.value = null;
 }
 
 function onDragEnter(targetFolderId: number | string) {
@@ -1362,12 +1418,11 @@ async function onDrop(folder: FolderI) {
       folderId: targetFolderId,
     }));
 
-  console.log('foldersPayload', foldersPayload);
-
   await store.dispatch('folders/moveFoldersToFolder', foldersPayload);
 
   draggedItem.value = null;
   draggedFolder.value = null;
+  ghostVisible.value = false; // 👈 único cambio
 
   getFiles();
   getFolders();
