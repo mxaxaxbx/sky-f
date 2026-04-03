@@ -242,7 +242,7 @@
 
             @dragover.prevent
             @dragenter="onDragEnter(folder.id)"
-            @dragleave="onDragLeave"
+            @dragleave="onDragLeave($event, folder.id)"
             @drop="onDrop(folder)"
             data-selectable
 
@@ -253,169 +253,160 @@
             @click="selectItem($event, 'folder', folder, index)"
             @keydown.enter="selectItem($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
-
-            class="
-              group
-              flex items-center justify-between
-              w-full
-              bg-[var(--bg-secondary)]
-              border border-[var(--border)]
-              rounded-2xl min-w-0
-              hover:bg-[var(--hover-bg)]
-              hover:border-[var(--hover-border)]
-              transition-all duration-300
-            "
-            :class="[
+                        :class="[
               'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-              isSelectedFolder(folder) ?
-                'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]' :
-                'border-[var(--border)]'
+              'bg-[var(--bg-secondary)] transition-all duration-300',
+              isSelectedFolder(folder)
+                ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+                : draggedFolder === folder.id
+                  ? 'border-[var(--color-primary)] bg-[var(--hover-bg)]'
+                  : 'border-[var(--border)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
             ]"
-          >
-            <div
-              :to="`/app/folders/${folder.id}`"
-              class="flex-1 min-w-0"
             >
-              <div class="flex items center justify-between p-1">
-                <div
-                    class="
-                      flex items-center
-                      space-x-2
-                      min-w-0 w-full overflow-hidden
-                    "
-                  >
-                  <img src="/icon/icon-folder.svg" alt="folder" class="h-8"/>
+              <div
+                :to="`/app/folders/${folder.id}`"
+                class="flex-1 min-w-0"
+              >
+                <div class="flex items center justify-between p-1">
+                  <div
+                      class="
+                        flex items-center
+                        space-x-2
+                        min-w-0 w-full overflow-hidden
+                      "
+                    >
+                    <img src="/icon/icon-folder.svg" alt="folder" class="h-8"/>
 
-                  <!-- title and date -->
-                  <div class="flex-1 min-w-0">
-                    <div>
-                      <input
-                        v-if="editingFolderId === folder.id"
-                        v-model="editedFolderName"
-                        @keyup.enter="saveFolderName(folder)"
-                        :data-folder-id="folder.id"
-                        @blur="editingFolderId = null"
-                        class="
-                          bg-transparent
-                          border-b border-[var(--color-primary)]
-                          outline-none text-xs sm:text-sm w-full"
-                      />
+                    <!-- title and date -->
+                    <div class="flex-1 min-w-0">
+                      <div>
+                        <input
+                          v-if="editingFolderId === folder.id"
+                          v-model="editedFolderName"
+                          @keyup.enter="saveFolderName(folder)"
+                          :data-folder-id="folder.id"
+                          @blur="editingFolderId = null"
+                          class="
+                            bg-transparent
+                            border-b border-[var(--color-primary)]
+                            outline-none text-xs sm:text-sm w-full"
+                        />
 
-                      <h3
-                        v-else
-                        class="font-semibold text-xs sm:text-sm truncate text-left"
-                      >
-                        {{ folder.name }}
-                      </h3>
+                        <h3
+                          v-else
+                          class="font-semibold text-xs sm:text-sm truncate text-left"
+                        >
+                          {{ folder.name }}
+                        </h3>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="
-                flex items-center justify-center
-                border-l border-[var(--border)]
-                w-6 py-2
+              <div
+                class="
+                  flex items-center justify-center
+                  border-l border-[var(--border)]
+                  w-6 py-2
 
-                group-hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-                <Dropdown
-                  :classes="[
-                    'bg-[var(--bg-secondary)]',
-                    'border border-[var(--border)]',
-                    'rounded-2xl','shadow-md',
-                    'absolute','-right-0', 'z-20',
-                    dropdownPosition,
-                    'w-48',
-                    'sm:-right-2'
-                  ]"
-                >
-                  <template #trigger="{ toggle, close }">
-                    <button
-                      @click="toggleDropdown(toggle, close, $event)"
-                      class="
-                        text-[var(--text-terceary)]
-                        w-6 h-auto
+                  group-hover:border-[var(--color-primary)]
+                  transition-colors duration-300
+                "
+              >
+                  <Dropdown
+                    :classes="[
+                      'bg-[var(--bg-secondary)]',
+                      'border border-[var(--border)]',
+                      'rounded-2xl','shadow-md',
+                      'absolute','-right-0', 'z-20',
+                      dropdownPosition,
+                      'w-48',
+                      'sm:-right-2'
+                    ]"
+                  >
+                    <template #trigger="{ toggle, close }">
+                      <button
+                        @click="toggleDropdown(toggle, close, $event)"
+                        class="
+                          text-[var(--text-terceary)]
+                          w-6 h-auto
 
-                        hover:text-[var(--text)]
-                        transition-colors duration-300
-                      "
-                    >
-                      <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                  </template>
+                          hover:text-[var(--text)]
+                          transition-colors duration-300
+                        "
+                      >
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                    </template>
 
-                  <template #content="{ close }">
-                    <div class="flex flex-col font-regular text-sm text-[#868686]">
+                    <template #content="{ close }">
+                      <div class="flex flex-col font-regular text-sm text-[#868686]">
 
-                      <div class="border-b border-[var(--border)] p-1 space-y-1">
-                      <!--rename folder-->
-                        <button
-                          type="button"
-                          @click="() => { startEditingFolder(folder); close(); }"
-                          class="flex items-center justify-start w-full
-                            rounded-xl px-3 py-1 border border-transparent
+                        <div class="border-b border-[var(--border)] p-1 space-y-1">
+                        <!--rename folder-->
+                          <button
+                            type="button"
+                            @click="() => { startEditingFolder(folder); close(); }"
+                            class="flex items-center justify-start w-full
+                              rounded-xl px-3 py-1 border border-transparent
 
-                            hover:bg-[var(--hover-bg)]
-                            hover:border-[var(--color-primary)]
-                            transition-colors duration-300"
-                        >
-                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-                          <span>Rename</span>
-                        </button>
-                        <!--move to folder-->
-                        <button
-                          type="button"
-                          @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
-                          class="
-                            flex items-center justify-start w-full
-                            rounded-xl px-3 py-1 border border-transparent
+                              hover:bg-[var(--hover-bg)]
+                              hover:border-[var(--color-primary)]
+                              transition-colors duration-300"
+                          >
+                            <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                            <span>Rename</span>
+                          </button>
+                          <!--move to folder-->
+                          <button
+                            type="button"
+                            @click="selectItem($event, 'folder', folder, index); moveToFolderModal = true;"
+                            class="
+                              flex items-center justify-start w-full
+                              rounded-xl px-3 py-1 border border-transparent
 
-                            hover:bg-[var(--hover-bg)]
-                            hover:border-[var(--color-primary)]
-                            transition-colors duration-300
-                          "
-                        >
-                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-                          <span>Move to folder</span>
-                        </button>
+                              hover:bg-[var(--hover-bg)]
+                              hover:border-[var(--color-primary)]
+                              transition-colors duration-300
+                            "
+                          >
+                            <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                            <span>Move to folder</span>
+                          </button>
+                        </div>
+                        <div class="p-1">
+                          <!-- delete folder -->
+                          <button
+                            @click="selectItem($event, 'folder', folder, index); moveToTrash();"
+                            class="
+                              flex items-center justify-start w-full
+                              rounded-xl px-3 py-1 border border-transparent
+                              grayscale text-[var(--delete-color)] opacity-60
+
+                              hover:bg-[var(--delete-bg)]
+                              hover:text-[var(--delete-color)]
+                              hover:border-[var(--delete-color)]
+                              hover:grayscale-0 hover:opacity-100
+                              transition-colors duration-300
+                            "
+                          >
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+                                <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                                <rect width="24" height="24" fill="#FFC506"/>
+                                </mask>
+                                <g mask="url(#mask0_1676_2)">
+                                <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
+                                  3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
+                                  4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+                                </g>
+                              </svg>
+                            <span>Send to the Void</span>
+                          </button>
+                        </div>
                       </div>
-                      <div class="p-1">
-                        <!-- delete folder -->
-                        <button
-                          @click="selectItem($event, 'folder', folder, index); moveToTrash();"
-                          class="
-                            flex items-center justify-start w-full
-                            rounded-xl px-3 py-1 border border-transparent
-                            grayscale text-[var(--delete-color)] opacity-60
-
-                            hover:bg-[var(--delete-bg)]
-                            hover:text-[var(--delete-color)]
-                            hover:border-[var(--delete-color)]
-                            hover:grayscale-0 hover:opacity-100
-                            transition-colors duration-300
-                          "
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
-                              <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-                              <rect width="24" height="24" fill="#FFC506"/>
-                              </mask>
-                              <g mask="url(#mask0_1676_2)">
-                              <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639
-                                3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12
-                                4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
-                              </g>
-                            </svg>
-                          <span>Send to the Void</span>
-                        </button>
-                      </div>
-                    </div>
-                  </template>
-                </Dropdown>
-            </div>
+                    </template>
+                  </Dropdown>
+              </div>
           </div>
         </div>
       </Transition>
@@ -1070,10 +1061,55 @@
         </div>
       </template>
     </Modal>
-    <Teleport to="body">
+
+    <Modal v-model="showPreviewModal" size="xl" @update:model-value="showPreviewModal = $event; if (!$event) previewFile = null">
+      <template #header>
+        <h3>{{ previewFile.name }}</h3>
+      </template>
+      <template #content>
+        <div class="flex flex-col gap-4 p-4 min-w-[320px] max-w-2xl w-full">
+          <!-- preview -->
+          <div class="flex items-center justify-center bg-[var(--bg-secondary)] rounded-xl overflow-hidden min-h-[200px]">
+            <!-- imagen -->
+            <img
+              v-if="previewFile.contentType?.startsWith('image/')"
+              :src="previewFile.r2Url"
+              :alt="previewFile.name"
+              class="max-w-full max-h-[60vh] object-contain"
+            />
+
+            <!-- video -->
+            <video
+              v-else-if="previewFile.contentType?.startsWith('video/')"
+              :src="previewFile.r2Url"
+              controls
+              class="max-w-full max-h-[60vh]"
+            >
+              <track kind="captions" />
+            </video>
+
+            <!-- pdf -->
+            <iframe
+              v-else-if="previewFile.contentType === 'application/pdf'"
+              :src="previewFile.r2Url"
+              title="PDF preview"
+              class="w-full h-[60vh]"
+            />
+
+            <!-- sin preview -->
+            <div v-else class="flex flex-col items-center gap-2 p-8 text-[var(--text-terceary)]">
+              <i class="fas fa-file text-4xl"></i>
+              <span class="text-sm">No preview available</span>
+            </div>
+          </div>
+        </div>
+      </template>
+    </Modal>
+
+  <Teleport to="body">
       <div
         v-if="ghostVisible"
-        class="fixed pointer-events-none z-[9999] translate-x-2 translate-y-1"
+        class="fixed pointer-events-none z-[9999] translate-x-3 translate-y-3"
         :style="{ top: ghostY + 'px', left: ghostX + 'px' }"
       >
         <div
@@ -1084,7 +1120,7 @@
             border border-[var(--color-primary)]
             rounded-full
             text-sm font-medium text-[var(--text)]
-            shadow-md whitespace-nowrap">
+            shadow-[0_0_4px_3px_rgba(10,119,243,0.5)] whitespace-nowrap">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
               <mask id="mask0_1361_8" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
               <rect width="24" height="24" fill="#0A77F3"/>
@@ -1107,6 +1143,7 @@ import {
   onMounted,
   computed,
   nextTick,
+  watch,
   ref,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -1123,6 +1160,7 @@ const router = useRouter();
 const store = useStore();
 const route = useRoute();
 
+const dragLeaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const selectedFolder = ref<number | string | null>(null);
 const editingFileId = ref<number | string | null>(null);
@@ -1131,6 +1169,8 @@ const activeDropdown = ref<(() => void) | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const editingFolderId = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
+const previewFile = ref<FileI | null>(null);
+const showPreviewModal = ref(false);
 const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
 const moveToFolderModal = ref(false);
@@ -1156,6 +1196,10 @@ const totalSelected = computed(() => selectedFiles.value.length + selectedFolder
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
+
+watch(previewFile, (val) => {
+  console.log('previewFile:', val);
+});
 
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
@@ -1357,11 +1401,21 @@ function onDragEndCleanup() {
   draggedFolder.value = null;
 }
 
+function onDragOver(event: DragEvent) {
+  event.preventDefault();
+}
+
 function onDragEnter(targetFolderId: number | string) {
+  if (dragLeaveTimeout.value) clearTimeout(dragLeaveTimeout.value);
   draggedFolder.value = targetFolderId;
 }
 
-function onDragLeave() {
+function onDragLeave(event: DragEvent, targetId: number | string) {
+  const related = event.relatedTarget as HTMLElement | null;
+  const currentTarget = event.currentTarget as HTMLElement;
+
+  if (related && currentTarget.contains(related)) return;
+
   draggedFolder.value = null;
 }
 
