@@ -1336,7 +1336,9 @@
             </div>
           </div>
           <!-- zoom controls -->
-          <div class="flex items-center justify-center gap-6 px-1 mx-4">
+          <div class="flex items-center justify-center px-1 w-full mx-4">
+            <div class="flex-1 w-full h-full"></div>
+            <div class="flex-2 space-x-6 ">
             <button
               @click="zoomOut"
               :disabled="zoomLevel <= 0.25"
@@ -1381,12 +1383,14 @@
             >
               <i class="fas fa-plus text-sm m-1"></i>
             </button>
+          </div>
+          <div class="flex-1 items-center w-full">
             <button
               @click="toggleFullscreen"
               class="
                 border border-transparent
                 text-[var(--color-primary)] font-medium text-sm
-                p-1 rounded-xl grayscale
+                p-1 rounded-xl grayscale mx-2
                 hover:text-[var(--text)]
                 hover:border-[var(--color-primary)]
                 hover:grayscale-0
@@ -1400,6 +1404,7 @@
                 alt="fullscreen"
                 class="w-5 h-5"/>
             </button>
+          </div>
           </div>
         </div>
       </div>
