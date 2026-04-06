@@ -114,15 +114,7 @@
           Your space is waiting for something awesome.
         </p>
         <!-- actions desktop-->
-        <label for="fileInputBtn"></label>
-        <input
-          id="fileInputBtn"
-          type="file"
-          class="hidden"
-          ref="fileInputBtn"
-          @change="uploadFile"
-          :multiple="true"
-        />
+
         <div class="flex items-center gap-3">
 
           <!-- Upload button -->

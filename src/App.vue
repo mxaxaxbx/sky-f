@@ -10,6 +10,19 @@
     <!-- menu -->
     <Notifications />
     <Navbar />
+
+    <!-- global file input -->
+    <label for="fileInputBtn"></label>
+    <input
+      id="fileInputBtn"
+      type="file"
+      class="-hidden bg-red-500 text-white z-[1000]"
+      ref="fileInputBtn"
+      @change="uploadFile"
+      multiple
+      :key="inputKey"
+      @click="() => { if (fileInputBtn) fileInputBtn.value = '' }"
+    />
     <!-- search box movil-->
     <div
       v-if="!hideBar"
@@ -97,15 +110,15 @@
 
     <!-- content -->
     <div
-  class="overflow-y-auto transition-[padding] duration-300"
-  :class="
-    !isAuth || isHome
-      ? 'pl-0'
-      : store.state.sidebar
-        ? 'sm:pl-64'
-        : 'sm:pl-10'
-  "
->
+      class="overflow-y-auto transition-[padding] duration-300"
+      :class="
+        !isAuth || isHome
+          ? 'pl-0'
+          : store.state.sidebar
+            ? 'sm:pl-64'
+            : 'sm:pl-10'
+      "
+    >
       <div class="flex-1 flex flex-col">
         <div class="min-h-screen">
           <router-view />
@@ -280,13 +293,49 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import router from '@/router';
 
-const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
-const Notifications = defineAsyncComponent(() => import('@/components/global/notifications.vue'));
-const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
-
 const store = useStore();
 const route = useRoute();
+
+const Notifications = defineAsyncComponent(() => import('@/components/global/notifications.vue'));
+const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
+const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
+
 let searchTimeout: number | undefined;
+
+const fileInputBtn = ref<HTMLInputElement | null>(null);
+const inputKey = ref(0);
+
+async function uploadFile(): Promise<void> {
+  const input = fileInputBtn.value;
+  if (!input || !input.files || input.files.length === 0) return;
+
+  const filesArray = Array.from(input.files);
+
+  const formData = new FormData();
+  filesArray.forEach((fileItem) => {
+    console.log('fileItem->', fileItem);
+    formData.append('file', fileItem);
+  });
+
+  let currentFolderId: number | null = null;
+  if (route.name === 'folder-details' || route.path.includes('/app/folders/')) {
+    currentFolderId = route.params.id ? Number(route.params.id) : null;
+  }
+
+  try {
+    console.log('formData->', formData);
+    await store.dispatch('files/upload', { formData, folderId: currentFolderId });
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    if (fileInputBtn.value) {
+      fileInputBtn.value.value = '';
+    }
+
+    // eslint-disable-next-line no-plusplus
+    inputKey.value++;
+  }
+}
 
 const { VUE_APP_DG_USERS_APP } = process.env;
 

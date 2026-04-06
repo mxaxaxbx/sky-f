@@ -96,15 +96,7 @@
           This folder is waiting for something awesome.
       </p>
       <!-- actions desktop-->
-      <label for="fileInputBtn"></label>
-      <input
-        id="fileInputBtn"
-        type="file"
-        class="hidden"
-        ref="fileInputBtn"
-        @change="uploadFile"
-        :multiple="true"
-      />
+
       <div class="flex items-center gap-2">
       <!-- Upload button -->
       <label
@@ -1096,7 +1088,6 @@ const shareUrl = ref('');
 
 const editingFolderId = ref<number | string | null>(null);
 const draggedFolder = ref<number | string | null>(null);
-const fileInputBtn = ref<HTMLInputElement | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const selectedFolder = ref<number | string | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
@@ -1127,42 +1118,6 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
-}
-
-// Upload multiple files in a single request
-async function uploadFile(ev: Event): Promise<void> {
-  const target = ev.target as HTMLInputElement;
-  if (!target.files || target.files.length === 0) {
-    return;
-  }
-
-  // Convert FileList to array
-  const filesArray = Array.from(target.files);
-
-  const formData = new FormData();
-  // Append all files to FormData (most backends accept multiple files with same field name)
-  filesArray.forEach((fileItem) => {
-    formData.append('file', fileItem);
-  });
-
-  console.log('formData', formData);
-
-  try {
-    await store.dispatch('files/upload', { formData, folderId: folderId.value });
-  } catch (error: unknown) {
-    console.error(error);
-    const errorResponse = error as { response?: { data?: { error?: string } } };
-    const msg = errorResponse?.response?.data?.error || 'Error al subir los archivos';
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: msg,
-    });
-  } finally {
-    // Clear selected files
-    if (fileInputBtn.value) {
-      fileInputBtn.value.value = '';
-    }
-  }
 }
 
 // Select item with ctrl key

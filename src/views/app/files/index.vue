@@ -15,15 +15,6 @@
         sm:pt-6
       "
     >
-      <label for="fileInputBtn"></label>
-      <input
-        id="fileInputBtn"
-        type="file"
-        class="hidden"
-        ref="fileInputBtn"
-        @change="uploadFile"
-        :multiple="true"
-      />
 
       <!-- actions desktop-->
       <div class="flex items-center w-full gap-2 px-8">
@@ -274,7 +265,6 @@ const activeDropdownToggle = ref<(() => void) | null>(null);
 const createFolderModal = ref(false);
 const folderName = ref('');
 const moveToFolderModal = ref(false);
-const fileInputBtn = ref<HTMLInputElement | null>(null);
 
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
@@ -309,7 +299,7 @@ let scrollTarget: Window | Element = window;
 
 // Show FAB on mobile
 const handleScroll = () => {
-  const current = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
+  const current = scrollTarget === window ? window.scrollY : (scrollTarget as Element).scrollTop;
   const threshold = 10;
   const offset = 50;
 
@@ -350,42 +340,6 @@ async function createFolder() {
     });
   } finally {
     loading.value = false;
-  }
-}
-
-// Upload multiple files in a single request
-async function uploadFile(ev: Event): Promise<void> {
-  const target = ev.target as HTMLInputElement;
-  if (!target.files || target.files.length === 0) {
-    return;
-  }
-
-  // Convert FileList to array
-  const filesArray = Array.from(target.files);
-
-  const formData = new FormData();
-  // Append all files to FormData (most backends accept multiple files with same field name)
-  filesArray.forEach((fileItem) => {
-    formData.append('file', fileItem);
-  });
-
-  console.log('formData', formData);
-
-  try {
-    await store.dispatch('files/upload', { formData, folderId: null });
-  } catch (error: unknown) {
-    console.error(error);
-    const errorResponse = error as { response?: { data?: { error?: string } } };
-    const msg = errorResponse?.response?.data?.error || 'Error al subir los archivos';
-    store.commit('notifications/addNotification', {
-      type: 'error',
-      message: msg,
-    });
-  } finally {
-    // Clear selected files
-    if (fileInputBtn.value) {
-      fileInputBtn.value.value = '';
-    }
   }
 }
 
