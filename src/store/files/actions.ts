@@ -36,24 +36,26 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   async upload(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: {
-      formData: FormData,
-      folderId: number | string | null,
+      formData: FormData;
+      folderId: number | string | null;
     },
   ): Promise<void> {
     const completedFiles: FileI[] = [];
 
     try {
-      // get the files from the payload
-      const files = payload.formData.getAll('file');
+      // extract files ONCE
+      const files = payload.formData.getAll('file') as File[];
 
-      files.forEach((file: FormDataEntryValue) => {
-        const fileObj = file as File;
-        console.log('fileObj', fileObj);
+      // eslint-disable-next-line no-param-reassign
+      context.state.uploadFiles = [];
+
+      // populate UI state
+      files.forEach((file) => {
         context.state.uploadFiles.push({
           id: 0,
-          name: fileObj.name,
-          size: fileObj.size,
-          contentType: fileObj.type,
+          name: file.name,
+          size: file.size,
+          contentType: file.type,
           userId: 0,
           r2Key: '',
           r2Url: '',
@@ -65,50 +67,63 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
         });
       });
 
-      const { data } = await storageClient.post('/api/storage/generate-upload-url', camelToSnake(context.state.uploadFiles));
+      // request upload URLs
+      const { data } = await storageClient.post(
+        '/api/storage/generate-upload-url',
+        camelToSnake(context.state.uploadFiles),
+      );
 
       const dataArray: FileI[] = snakeToCamel(data);
 
-      await dataArray.forEach(async (item: FileI) => {
-        if (item.r2Url) {
-          // get file from formdata payload by name
-          const file = payload.formData.getAll('file')
-            .find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
-          if (file) {
-            try {
-              const headers = new Headers();
-              headers.set('Content-Type', (file as File).type || 'application/octet-stream');
-              const response = await fetch(item.r2Url, {
-                method: 'PUT',
-                body: file,
-                redirect: 'follow',
-                headers,
-              });
-              console.log('response', response);
-              if (response.ok) {
-                completedFiles.push(item);
-              }
-            } catch (error: unknown) {
-              // eslint-disable-next-line no-param-reassign
-              (item as FileI).error = error as string;
-              console.error(error);
-            }
-          }
-        }
+      // upload all files in parallel
+      await Promise.all(
+        dataArray.map(async (item: FileI, index: number) => {
+          const file = files[index];
+          if (!file || !item.r2Url) return;
 
-        const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
-        console.log('confirmedData', confirmedData);
-        if (confirmedData && confirmedData.length > 0) {
-          confirmedData.forEach((file: FileI) => {
-            context.dispatch('saveCacheFile', file);
-          });
-        }
-        // TODO: validate current page and query through route query params
-        context.dispatch('filter', {
-          query: '',
-          page: 1,
-          folderId: payload.folderId,
+          try {
+            const response = await fetch(item.r2Url, {
+              method: 'PUT',
+              body: file,
+              headers: {
+                'Content-Type': file.type || 'application/octet-stream',
+              },
+            });
+
+            if (response.ok) {
+              // eslint-disable-next-line no-param-reassign
+              item.uploadCompleted = true;
+              completedFiles.push(item);
+            } else {
+              // eslint-disable-next-line no-param-reassign
+              item.error = `Upload failed (${response.status})`;
+            }
+          } catch (error: unknown) {
+            // eslint-disable-next-line no-param-reassign
+            item.error = String(error);
+          }
+        }),
+      );
+
+      // confirm uploads ONCE
+      if (completedFiles.length > 0) {
+        const { data: confirmedData } = await storageClient.post(
+          '/api/storage/confirm-uploads',
+          camelToSnake(completedFiles),
+        );
+
+        const confirmed: FileI[] = snakeToCamel(confirmedData);
+
+        confirmed.forEach((file) => {
+          context.dispatch('saveCacheFile', file);
         });
+      }
+
+      // refresh list
+      await context.dispatch('filter', {
+        query: '',
+        page: 1,
+        folderId: payload.folderId,
       });
     } catch (error) {
       console.error(error);
