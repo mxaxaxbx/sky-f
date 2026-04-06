@@ -498,7 +498,7 @@
             @dragend="onDragEndCleanup()"
             @click="selectItem($event, 'file', file, index)"
             @keydown.enter="selectItem($event, 'file', file, index)"
-            @dblclick="router.push(`/app/files/details/${file.id}`);"
+            @dblclick="previewFile = file"
 
             class="
               group
@@ -662,7 +662,7 @@
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
                         <!-- preview file -->
                         <button
-                          @click="store.dispatch('files/previewFile', file)"
+                          @click="previewFile = file"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -1062,51 +1062,7 @@
       </template>
     </Modal>
 
-    <Modal v-model="showPreviewModal" size="xl" @update:model-value="showPreviewModal = $event; if (!$event) previewFile = null">
-      <template #header>
-        <h3>{{ previewFile.name }}</h3>
-      </template>
-      <template #content>
-        <div class="flex flex-col gap-4 p-4 min-w-[320px] max-w-2xl w-full">
-          <!-- preview -->
-          <div class="flex items-center justify-center bg-[var(--bg-secondary)] rounded-xl overflow-hidden min-h-[200px]">
-            <!-- imagen -->
-            <img
-              v-if="previewFile.contentType?.startsWith('image/')"
-              :src="previewFile.r2Url"
-              :alt="previewFile.name"
-              class="max-w-full max-h-[60vh] object-contain"
-            />
-
-            <!-- video -->
-            <video
-              v-else-if="previewFile.contentType?.startsWith('video/')"
-              :src="previewFile.r2Url"
-              controls
-              class="max-w-full max-h-[60vh]"
-            >
-              <track kind="captions" />
-            </video>
-
-            <!-- pdf -->
-            <iframe
-              v-else-if="previewFile.contentType === 'application/pdf'"
-              :src="previewFile.r2Url"
-              title="PDF preview"
-              class="w-full h-[60vh]"
-            />
-
-            <!-- sin preview -->
-            <div v-else class="flex flex-col items-center gap-2 p-8 text-[var(--text-terceary)]">
-              <i class="fas fa-file text-4xl"></i>
-              <span class="text-sm">No preview available</span>
-            </div>
-          </div>
-        </div>
-      </template>
-    </Modal>
-
-  <Teleport to="body">
+    <Teleport to="body">
       <div
         v-if="ghostVisible"
         class="fixed pointer-events-none z-[9999] translate-x-3 translate-y-3"
@@ -1120,16 +1076,200 @@
             border border-[var(--color-primary)]
             rounded-full
             text-sm font-medium text-[var(--text)]
-            shadow-[0_0_4px_3px_rgba(10,119,243,0.5)] whitespace-nowrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
+            shadow-[0_0_4px_3px_rgba(10,119,243,0.5)] whitespace-nowrap
+          "
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
               <mask id="mask0_1361_8" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
               <rect width="24" height="24" fill="#0A77F3"/>
               </mask>
               <g mask="url(#mask0_1361_8)">
               <path d="M14.4541 2C16.0537 2.00007 17.5562 2.76591 18.4971 4.05957L20.0439 6.18555C20.6653 7.04006 21 8.06945 21 9.12598V17C21 19.7614 18.7614 22 16 22H8C5.23858 22 3 19.7614 3 17V7C3 4.23858 5.23858 2 8 2H14.4541ZM8 4C6.34315 4 5 5.34315 5 7V17C5 18.6569 6.34315 20 8 20H16C17.6569 20 19 18.6569 19 17V11H16C14.3431 11 13 9.65685 13 8V4H8ZM15 8C15 8.55228 15.4477 9 16 9H18.9951C18.9703 8.41045 18.7739 7.84004 18.4258 7.36133L16.8799 5.23535C16.4241 4.60872 15.7485 4.18846 15 4.0498V8Z" fill="#0A77F3"/>
               </g>
-            </svg>
+          </svg>
           Moving {{ totalSelected }} {{ totalSelected === 1 ? 'element' : 'elements' }}
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- preview modal -->
+    <Teleport to="body">
+      <div
+        v-if="previewFile"
+        class="fixed inset-0 z-[9999] bg-black/90 flex flex-col"
+        @click.self="previewFile = null"
+        @keydown.esc="previewFile = null"
+        tabindex="0"
+      >
+        <!-- header -->
+        <div class="flex items-center justify-between px-6 pt-6 pb-2">
+          <span class="flex-1 text-white text-md truncate font-mediumborder">{{ previewFile.name }}</span>
+
+          <div class="flex-2 items center space-x-6 mx-4">
+            <!-- flecha izquierda -->
+            <button
+              @click="previewPrev"
+              :disabled="currentPreviewIndex === 0"
+              class="
+                flex-shrink-0
+                text-md border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                px-1.5 py-0.5
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+
+                transition-all duration-300
+                disabled:opacity-20 disabled:cursor-not-allowed
+              "
+            >
+              <i class="fas fa-chevron-left text-sm m-1"></i>
+            </button>
+            <span class="text-white text-base font-lg mx-2">
+                {{ currentPreviewIndex + 1 }} <span class="mx-1 text-[var(--text-terceary)] text-sm">of</span> {{ fileResults.data.length }}
+            </span>
+              <!-- flecha derecha -->
+            <button
+              @click="previewNext"
+              :disabled="currentPreviewIndex === fileResults.data.length - 1"
+              class="
+                flex-shrink-0
+                text-md border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                px-1.5 py-0.5
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+
+                transition-all duration-300
+                disabled:opacity-20 disabled:cursor-not-allowed
+              "
+            >
+              <i class="fas fa-chevron-right text-sm m-1"></i>
+            </button>
+          </div>
+
+          <div class="flex flex-1 items-center justify-end gap-4">
+            <router-link
+              :to="`/app/files/details/${previewFile.id}`"
+              class="
+                inline-flex items-center gap-1
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <img src="/icon/icon_details.svg" alt="download" class="h-6"/>
+            </router-link>
+            <!-- Copy link button -->
+            <button
+              @click="copyLink(previewFile!)"
+              class="
+                inline-flex items-center gap-1
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <img src="/icon/icon-link.svg" alt="download" class="h-6 -rotate-45"/>
+            </button>
+            <button
+              @click="downloadFile(previewFile!)"
+              class="
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <i v-if="downloading" class="fas fa-spinner fa-spin text-white"></i>
+              <img src="/icon/icon_download_2.svg" alt="download" class="h-6"/>
+            </button>
+            <button
+              @click="previewFile = null"
+              class="
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                px-2 py-0.5
+                rounded-xl grayscale
+
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+            <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- contenido + flechas -->
+        <div class="flex-1 flex items-center gap-4 overflow-hidden px-4">
+          <!-- preview -->
+          <div class="flex-1 flex items-center justify-center overflow-hidden h-full">
+            <img
+              v-if="previewFile.contentType?.startsWith('image/')"
+              :src="previewFile.r2Url"
+              :alt="previewFile.name"
+              class="max-w-full max-h-full object-contain"
+            />
+            <video
+              v-else-if="previewFile.contentType?.startsWith('video/')"
+              :src="previewFile.r2Url"
+              controls
+              class="max-w-full max-h-full"
+            >
+              <track kind="captions" />
+            </video>
+            <iframe
+              v-else-if="previewFile.contentType === 'application/pdf'"
+              :src="previewFile.r2Url"
+              title="PDF preview"
+              class="w-full h-full rounded-xl"
+            />
+            <div v-else class="flex flex-col items-center gap-3 text-white/40">
+              <i class="fas fa-file text-5xl"></i>
+              <span class="text-sm">No preview available</span>
+            </div>
+          </div>
         </div>
       </div>
     </Teleport>
@@ -1143,7 +1283,6 @@ import {
   onMounted,
   computed,
   nextTick,
-  watch,
   ref,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -1170,7 +1309,6 @@ const lastSelectedIndex = ref<number | null>(null);
 const editingFolderId = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const previewFile = ref<FileI | null>(null);
-const showPreviewModal = ref(false);
 const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
 const moveToFolderModal = ref(false);
@@ -1193,13 +1331,20 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
+const currentPreviewIndex = computed(() => fileResults.value.data.findIndex((f: FileI) => f.id === previewFile.value?.id));
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
-watch(previewFile, (val) => {
-  console.log('previewFile:', val);
-});
+function previewNext() {
+  const next = fileResults.value.data[currentPreviewIndex.value + 1];
+  if (next) previewFile.value = next;
+}
+
+function previewPrev() {
+  const prev = fileResults.value.data[currentPreviewIndex.value - 1];
+  if (prev) previewFile.value = prev;
+}
 
 async function moveToFolder() {
   console.log('selectedFolder', selectedFolder.value);
@@ -1644,18 +1789,20 @@ onUnmounted(() => {
 });
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key !== 'F2') return;
+  if (previewFile.value) {
+    if (e.key === 'Escape') { previewFile.value = null; return; }
+    if (e.key === 'ArrowRight') { previewNext(); return; }
+    if (e.key === 'ArrowLeft') { previewPrev(); return; }
+  }
 
-  // Si ya está editando algo, no hacer nada
+  if (e.key !== 'F2') return;
   if (editingFileId.value || editingFolderId.value) return;
 
-  // Prioridad: archivo seleccionado
   if (selectedFiles.value.length === 1) {
     startEditingFile(selectedFiles.value[0]);
     return;
   }
 
-  // Si no hay archivo pero hay carpeta
   if (selectedFolders.value.length === 1) {
     startEditingFolder(selectedFolders.value[0]);
   }

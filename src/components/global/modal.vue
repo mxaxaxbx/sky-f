@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 overflow-y-auto">
+  <div v-if="modelValue" class="fixed inset-0 z-[99999] overflow-y-auto">
     <!-- Backdrop -->
     <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
     <div
@@ -88,19 +88,38 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import {
+  defineProps,
+  defineEmits,
+  onMounted,
+  onUnmounted,
+} from 'vue';
 
-defineProps({
+const props = defineProps({
   modelValue: Boolean,
   size: {
     type: String,
-    default: 'lg', // sm | md | lg
+    default: 'lg',
   },
   borderClass: {
     type: String,
     default: 'border-[var(--border)]',
   },
 });
-defineEmits(['update:modelValue']);
 
+const emit = defineEmits(['update:modelValue']);
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && props.modelValue) {
+    emit('update:modelValue', false);
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
 </script>
