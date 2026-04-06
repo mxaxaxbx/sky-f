@@ -5,13 +5,13 @@
   </div>
 
   <!-- if not results -->
-  <div v-if="!fileResults.data.length && !folderResults.data.length" class="w-full px-0 mx-auto sm:px-8 z-50">
+  <div v-if="!fileResults.data.length && !folderResults.data.length" class="w-full px-0 mx-auto sm:px-8">
     <div
       class="
         group
         flex flex-col
         justify-center items-center
-        h-[calc(100vh-190px)]
+        h-[calc(100vh-200px)]
         ml-2 mx-2 gap-8
         border-2 border-[var(--border)] border-dashed
         bg-[var(--bg)]
@@ -21,7 +21,7 @@
         hover:shadow-[0_0_8px_2px_rgba(10,119,243,0.5)]
         transition-colors duration-300
 
-        sm:h-[calc(100vh-160px)]
+        sm:h-[calc(100vh-170px)]
         sm:ml-2 sm:mx-0
         "
       >
