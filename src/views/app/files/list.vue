@@ -1280,33 +1280,59 @@
               class="flex flex-1 flex-col items-center justify-center gap-2 p-4
               "
             >
-              <img v-if="previewFile.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-30 w-30"/>
-              <img v-else-if="previewFile.contentType === 'application/msword' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-30 w-30" />
-              <img v-else-if="previewFile.contentType === 'application/vnd.ms-excel' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-30 w-30" />
-              <img v-else-if="previewFile.contentType === 'application/vnd.ms-powerpoint' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-30 w-30" />
-              <img v-else-if="/image\/(png|webp|gif|avif)/.test(previewFile.contentType)" src="/icon/icon-png.svg" alt="png" class="h-30 w-30" />
-              <img v-else-if="previewFile.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-30 w-30" />
-              <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(previewFile.contentType)" src="/icon/icon-img.svg" alt="img" class="h-30 w-30" />
-              <img v-else-if="/^video\//.test(previewFile.contentType)" src="/icon/icon-video.svg" alt="video" class="h-30 w-30" />
-              <img v-else-if="/^audio\//.test(previewFile.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-30 w-30" />
-              <img v-else-if="
-                  previewFile.name?.toLowerCase().endsWith('.zip') ||
-                  previewFile.name?.toLowerCase().endsWith('.rar') ||
-                  previewFile.name?.toLowerCase().endsWith('.7z') ||
-                  previewFile.name?.toLowerCase().endsWith('.tar') ||
-                  previewFile.name?.toLowerCase().endsWith('.gz') ||
-                  previewFile.name?.toLowerCase().endsWith('.bz2')
-                "
-                src="/icon/icon-compress.svg"
-                alt="compressed file icon"
-                class="h-30 w-30"
+              <!-- images -->
+              <img
+                v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
+                :src="currentBlobURL"
+                :alt="previewFile.name"
+                class="w-full h-full object-contain"
               />
-              <img v-else src="/icon/icon-file.svg" alt="file" class="h-30 w-30" />
-              <span class="text-[var(--text-terceary)] text-lg truncate font-medium">{{ previewFile.name }}</span>
-              <div class="flex items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
+              <!-- pdf -->
+              <iframe
+                v-else-if="currentBlobURL && previewFile.contentType === 'application/pdf'"
+                :src="currentBlobURL"
+                :title="`PDF preview of ${previewFile.name || 'document'}`"
+                class="w-full h-full object-contain"
+              />
+              <!-- audio -->
+              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+              <audio
+                v-else-if="currentBlobURL && previewFile.contentType.startsWith('audio/')"
+                :src="currentBlobURL"
+                :title="`Audio preview of ${previewFile.name || 'audio'}`"
+                class="w-full h-full object-contain"
+                controls
+              />
+              <!-- video -->
+              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+              <video
+                v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')"
+                :src="currentBlobURL"
+                :title="`Video preview of ${previewFile.name || 'video'}`"
+                class="w-full h-full object-contain"
+                controls
+              />
+              <!-- text -->
+              <pre
+                v-else-if="currentBlobURL && previewFile.contentType.startsWith('text/')"
+                class="w-full h-full object-contain"
+              >
+                {{ currentBlobURL }}
+              </pre>
+              <!-- code -->
+              <pre
+                v-else-if="currentBlobURL && previewFile.contentType.startsWith('application/json')"
+                class="w-full h-full object-contain"
+              >
+                {{ currentBlobURL }}
+              </pre>
+              <!-- other -->
+              <div v-else class="flex items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
+                <img src="/icon/icon-file.svg" alt="file" class="h-30 w-30" />
                 <i class="fas fa-eye-slash text-xs"></i>
                 <span>No se admite la vista previa para este tipo de archivo.</span>
               </div>
+              <span class="text-[var(--text-terceary)] text-lg truncate font-medium">{{ previewFile.name }}</span>
             </div>
           </div>
           <!-- zoom controls -->
@@ -1389,6 +1415,7 @@ import {
   computed,
   nextTick,
   ref,
+  watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -1440,9 +1467,28 @@ const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
 const currentPreviewIndex = computed(() => fileResults.value.data.findIndex((f: FileI) => f.id === previewFile.value?.id));
+const currentBlobURL = ref<string | null>(null);
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
+
+async function getBase64(file: FileI) {
+  const base64 = await store.dispatch('files/getCacheFile', {
+    id: file.id,
+  });
+
+  if (base64) {
+    // create blob url
+    const blob = await fetch(base64).then((r) => r.blob());
+    const url = URL.createObjectURL(blob);
+    currentBlobURL.value = url;
+    return url;
+  }
+
+  await store.dispatch('files/saveCacheFile', file);
+
+  return '';
+}
 
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
@@ -1904,6 +1950,7 @@ async function startEditingFolder(folder: FolderI) {
   input?.focus();
   input?.select();
 }
+
 // save
 async function saveFolderName(folder: FolderI) {
   const finalName = editedFolderName.value.trim();
@@ -1973,6 +2020,13 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
 });
+
+watch(previewFile, async (file: FileI | null) => {
+  if (file) {
+    getBase64(file);
+  }
+});
+
 </script>
 
 <style scoped>

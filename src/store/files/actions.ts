@@ -9,7 +9,6 @@ import { FileI, FilesStateI } from './state';
 import { FolderI } from '../folders/state';
 
 export const actions: ActionTree<FilesStateI, RootStateI> = {
-
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: {
