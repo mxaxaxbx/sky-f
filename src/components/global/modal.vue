@@ -112,14 +112,16 @@ const emit = defineEmits(['update:modelValue']);
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape' && props.modelValue) {
     emit('update:modelValue', false);
+    e.stopImmediatePropagation();
   }
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('keydown', handleKeydown, true);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('keydown', handleKeydown, true);
 });
+
 </script>

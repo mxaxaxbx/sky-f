@@ -1096,15 +1096,46 @@
     <Teleport to="body">
       <div
         v-if="previewFile"
-        class="fixed inset-0 z-[9999] bg-black/90 flex flex-col"
+        class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex flex-col"
         @click.self="previewFile = null"
         @keydown.esc="previewFile = null"
+        @mousemove="onPreviewMouseMove"
         tabindex="0"
       >
         <!-- header -->
-        <div class="flex items-center justify-between px-6 pt-6 pb-2">
-          <span class="flex-1 text-white text-md truncate font-mediumborder">{{ previewFile.name }}</span>
+        <div
+          class="flex items-center justify-between px-6 pt-6 pb-2 transition-all duration-300"
+          :class="showPreviewHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'"
+        >
+          <!-- icons + title-->
+          <diV class="flex flex-1 items-center gap-2">
+            <img v-if="previewFile.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'application/msword' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'application/vnd.ms-excel' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'application/vnd.ms-powerpoint' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-8 w-8" />
+            <img v-else-if="/image\/(png|webp|gif|avif)/.test(previewFile.contentType)" src="/icon/icon-png.svg" alt="png" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-8 w-8" />
+            <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(previewFile.contentType)" src="/icon/icon-img.svg" alt="img" class="h-8 w-8" />
+            <img v-else-if="/^video\//.test(previewFile.contentType)" src="/icon/icon-video.svg" alt="video" class="h-8 w-8" />
+            <img v-else-if="/^audio\//.test(previewFile.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-8 w-8" />
+            <img v-else-if="
+                previewFile.name?.toLowerCase().endsWith('.zip') ||
+                previewFile.name?.toLowerCase().endsWith('.rar') ||
+                previewFile.name?.toLowerCase().endsWith('.7z') ||
+                previewFile.name?.toLowerCase().endsWith('.tar') ||
+                previewFile.name?.toLowerCase().endsWith('.gz') ||
+                previewFile.name?.toLowerCase().endsWith('.bz2')
+              "
+              src="/icon/icon-compress.svg"
+              alt="compressed file icon"
+              class="h-8 w-8"
+            />
+            <img v-else src="/icon/icon-file.svg" alt="file" class="h-8 w-8" />
 
+            <span class="text-white text-lg truncate font-medium">{{ previewFile.name }}</span>
+          </diV>
+
+          <!-- navigation -->
           <div class="flex-2 items center space-x-6 mx-4">
             <!-- flecha izquierda -->
             <button
@@ -1149,7 +1180,9 @@
             </button>
           </div>
 
+          <!-- actions-->
           <div class="flex flex-1 items-center justify-end gap-4">
+            <!-- info -->
             <router-link
               :to="`/app/files/details/${previewFile.id}`"
               class="
@@ -1172,6 +1205,7 @@
             >
               <img src="/icon/icon_details.svg" alt="download" class="h-6"/>
             </router-link>
+
             <!-- Copy link button -->
             <button
               @click="copyLink(previewFile!)"
@@ -1195,6 +1229,8 @@
             >
               <img src="/icon/icon-link.svg" alt="download" class="h-6 -rotate-45"/>
             </button>
+
+            <!--download-->
             <button
               @click="downloadFile(previewFile!)"
               class="
@@ -1217,8 +1253,10 @@
               <i v-if="downloading" class="fas fa-spinner fa-spin text-white"></i>
               <img src="/icon/icon_download_2.svg" alt="download" class="h-6"/>
             </button>
+
+            <!--close-->
             <button
-              @click="previewFile = null"
+              @click="() => { if (isFullscreen) toggleFullscreen(); previewFile = null; }"
               class="
                 border border-transparent
                 text-[var(--color-primary)] font-medium text-sm
@@ -1241,34 +1279,109 @@
           </div>
         </div>
 
-        <!-- contenido + flechas -->
-        <div class="flex-1 flex items-center gap-4 overflow-hidden px-4">
+        <!-- content -->
+        <div class="flex-1 flex flex-col  items-center overflow-hidden px-4 pb-2">
           <!-- preview -->
-          <div class="flex-1 flex items-center justify-center overflow-hidden h-full">
-            <img
-              v-if="previewFile.contentType?.startsWith('image/')"
-              :src="previewFile.r2Url"
-              :alt="previewFile.name"
-              class="max-w-full max-h-full object-contain"
-            />
-            <video
-              v-else-if="previewFile.contentType?.startsWith('video/')"
-              :src="previewFile.r2Url"
-              controls
-              class="max-w-full max-h-full"
+          <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full rounded-2xl bg-white/0">
+            <div
+              @wheel="onWheelZoom"
+              class="flex flex-1 flex-col items-center justify-center gap-2 p-4
+              "
             >
-              <track kind="captions" />
-            </video>
-            <iframe
-              v-else-if="previewFile.contentType === 'application/pdf'"
-              :src="previewFile.r2Url"
-              title="PDF preview"
-              class="w-full h-full rounded-xl"
-            />
-            <div v-else class="flex flex-col items-center gap-3 text-white/40">
-              <i class="fas fa-file text-5xl"></i>
-              <span class="text-sm">No preview available</span>
+              <img v-if="previewFile.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-30 w-30"/>
+              <img v-else-if="previewFile.contentType === 'application/msword' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-30 w-30" />
+              <img v-else-if="previewFile.contentType === 'application/vnd.ms-excel' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-30 w-30" />
+              <img v-else-if="previewFile.contentType === 'application/vnd.ms-powerpoint' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-30 w-30" />
+              <img v-else-if="/image\/(png|webp|gif|avif)/.test(previewFile.contentType)" src="/icon/icon-png.svg" alt="png" class="h-30 w-30" />
+              <img v-else-if="previewFile.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-30 w-30" />
+              <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(previewFile.contentType)" src="/icon/icon-img.svg" alt="img" class="h-30 w-30" />
+              <img v-else-if="/^video\//.test(previewFile.contentType)" src="/icon/icon-video.svg" alt="video" class="h-30 w-30" />
+              <img v-else-if="/^audio\//.test(previewFile.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-30 w-30" />
+              <img v-else-if="
+                  previewFile.name?.toLowerCase().endsWith('.zip') ||
+                  previewFile.name?.toLowerCase().endsWith('.rar') ||
+                  previewFile.name?.toLowerCase().endsWith('.7z') ||
+                  previewFile.name?.toLowerCase().endsWith('.tar') ||
+                  previewFile.name?.toLowerCase().endsWith('.gz') ||
+                  previewFile.name?.toLowerCase().endsWith('.bz2')
+                "
+                src="/icon/icon-compress.svg"
+                alt="compressed file icon"
+                class="h-30 w-30"
+              />
+              <img v-else src="/icon/icon-file.svg" alt="file" class="h-30 w-30" />
+              <span class="text-[var(--text-terceary)] text-lg truncate font-medium">{{ previewFile.name }}</span>
+              <div class="flex items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
+                <i class="fas fa-eye-slash text-xs"></i>
+                <span>No se admite la vista previa para este tipo de archivo.</span>
+              </div>
             </div>
+          </div>
+          <!-- zoom controls -->
+          <div class="flex items-center justify-center gap-6 px-1 mx-4">
+            <button
+              @click="zoomOut"
+              :disabled="zoomLevel <= 0.25"
+              class="
+                flex-shrink-0
+                text-md border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                px-1.5 py-0.5
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+
+                transition-all duration-300
+                disabled:opacity-20 disabled:cursor-not-allowed
+              "
+            >
+              <i class="fas fa-minus text-sm m-1"></i>
+            </button>
+            <span
+              class="text-white text-md truncate font-base text-center cursor-pointer"
+              @click="resetZoom"
+              @keydown.enter="resetZoom"
+              tabindex="0"
+            >
+              {{ Math.round(zoomLevel * 100) }}%
+            </span>
+            <button
+              @click="zoomIn"
+              :disabled="zoomLevel >= 4"
+              class="
+              flex-shrink-0
+              text-md border border-transparent rounded-xl
+              text-[var(--text-terceary)]
+              px-1.5 py-0.5
+              hover:text-[var(--color-primary)]
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+
+              transition-all duration-300
+              disabled:opacity-20 disabled:cursor-not-allowed
+            "
+            >
+              <i class="fas fa-plus text-sm m-1"></i>
+            </button>
+            <button
+              @click="toggleFullscreen"
+              class="
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1 rounded-xl grayscale
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                transition-all duration-300
+              "
+            >
+              <img
+                :src="isFullscreen
+                ? '/icon/icon-fullscreen-close.svg' : '/icon/icon-fullscreen.svg'"
+                alt="fullscreen"
+                class="w-5 h-5"/>
+            </button>
           </div>
         </div>
       </div>
@@ -1313,6 +1426,7 @@ const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
 const moveToFolderModal = ref(false);
 const createShareModal = ref(false);
+const showPreviewHeader = ref(true);
 const editedFolderName = ref('');
 const editedFileName = ref('');
 const showFolders = ref(true);
@@ -1324,6 +1438,8 @@ const shareUrl = ref('');
 const ghostVisible = ref(false);
 const ghostX = ref(0);
 const ghostY = ref(0);
+const zoomLevel = ref(1);
+const isFullscreen = ref(false);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1336,14 +1452,67 @@ const currentPreviewIndex = computed(() => fileResults.value.data.findIndex((f: 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
+function zoomIn() {
+  zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
+}
+
+function zoomOut() {
+  zoomLevel.value = Math.max(zoomLevel.value - 0.10, 0.10);
+}
+
+function resetZoom() {
+  zoomLevel.value = 1;
+}
+
+function onWheelZoom(e: WheelEvent) {
+  if (!previewFile.value?.contentType?.startsWith('image/')) return;
+  e.preventDefault();
+  if (e.deltaY < 0) zoomIn();
+  else zoomOut();
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    isFullscreen.value = true;
+  } else {
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
+}
+
+let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement;
+  if (!isFullscreen.value) {
+    showPreviewHeader.value = true;
+    if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
+  }
+}
+
+function onPreviewMouseMove(e: MouseEvent) {
+  if (!isFullscreen.value) return;
+
+  if (e.clientY < 80) {
+    showPreviewHeader.value = true;
+    if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
+  } else {
+    if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
+    hideHeaderTimeout = setTimeout(() => {
+      showPreviewHeader.value = false;
+    }, 1500);
+  }
+}
+
 function previewNext() {
   const next = fileResults.value.data[currentPreviewIndex.value + 1];
-  if (next) previewFile.value = next;
+  if (next) { previewFile.value = next; resetZoom(); }
 }
 
 function previewPrev() {
   const prev = fileResults.value.data[currentPreviewIndex.value - 1];
-  if (prev) previewFile.value = prev;
+  if (prev) { previewFile.value = prev; resetZoom(); }
 }
 
 async function moveToFolder() {
@@ -1776,23 +1945,16 @@ async function saveFolderName(folder: FolderI) {
   }
 }
 
-onMounted(() => {
-  getFolders();
-  getFiles();
-  // when scrolling to bottom, load more results
-  // window.addEventListener('scroll', getMoreResults);
-});
-
-onUnmounted(() => {
-  // TODO: validate pagination
-  // window.removeEventListener('scroll', getMoreResults);
-});
-
 function handleKeydown(e: KeyboardEvent) {
   if (previewFile.value) {
-    if (e.key === 'Escape') { previewFile.value = null; return; }
+    if (e.key === 'Escape') {
+      previewFile.value = null;
+      e.stopImmediatePropagation();
+      return;
+    }
     if (e.key === 'ArrowRight') { previewNext(); return; }
     if (e.key === 'ArrowLeft') { previewPrev(); return; }
+    if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); return; }
   }
 
   if (e.key !== 'F2') return;
@@ -1811,14 +1973,14 @@ function handleKeydown(e: KeyboardEvent) {
 onMounted(() => {
   getFolders();
   getFiles();
-
   window.addEventListener('keydown', handleKeydown);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
 });
-
 </script>
 
 <style scoped>
