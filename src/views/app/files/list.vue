@@ -1100,7 +1100,7 @@
           :class="showPreviewHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'"
         >
           <!-- icons + title-->
-          <diV class="flex flex-1 items-center gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-1 max-w-[30%]">
             <img v-if="previewFile.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-8 w-8" />
             <img v-else-if="previewFile.contentType === 'application/msword' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-8 w-8" />
             <img v-else-if="previewFile.contentType === 'application/vnd.ms-excel' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-8 w-8" />
@@ -1173,7 +1173,7 @@
           </div>
 
           <!-- actions-->
-          <div class="flex flex-1 items-center justify-end gap-4">
+          <div class="flex items-centern justify-end gap-4 min-w-0 flex-1 max-w-[30%]">
             <!-- info -->
             <router-link
               :to="`/app/files/details/${previewFile.id}`"
@@ -1275,18 +1275,116 @@
         <div class="flex-1 flex flex-col  items-center overflow-hidden px-4 pb-2">
           <!-- preview -->
           <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full rounded-2xl bg-white/0">
-            <div
-              @wheel="onWheelZoom"
-              class="flex flex-1 flex-col items-center justify-center gap-2 p-4
-              "
-            >
+            <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full">
               <!-- images -->
               <img
                 v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
                 :src="currentBlobURL"
                 :alt="previewFile.name"
-                class="w-full h-full object-contain"
-              />
+                :style="{ transform: `scale(${zoomLevel})`, transition: 'transform 0.15s ease', transformOrigin: 'center' }"
+                @wheel.prevent="onWheelZoom"
+                class="max-w-full max-h-full object-contain"
+/>
+              <!-- video -->
+              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+              <template v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')">
+                <div class="flex flex-col items-center justify-start w-full h-full rounded-2xl overflow-hidden bg-gradient-to-t from-black to-transparent">
+                  <!-- video -->
+                  <video
+                    :src="currentBlobURL"
+                    :title="`Video preview of ${previewFile.name || 'video'}`"
+                    class="max-w-full max-h-full flex-1 min-h-0"
+                    ref="videoRef"
+                    @timeupdate="onTimeUpdate"
+                    @loadedmetadata="onLoadedMetadata"
+                    @ended="isPlaying = false"
+                  >
+                    <track kind="captions" />
+                  </video>
+
+                  <!-- controles -->
+                  <div class="w-full px-2 flex flex-col gap-2 flex-shrink-0">
+                    <!-- barra de progreso -->
+                    <div
+                      @click="seek"
+                      @keydown="seek"
+                      role="slider"
+                      tabindex="0"
+                      :aria-valuenow="Math.round(progressPercent)"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      class="relative mx-2 h-1 bg-[var(--text-terceary)] rounded-full cursor-pointer"
+                    >
+                      <div class="absolute top-0 left-0 h-full rounded-full bg-[var(--color-primary)]" :style="{ width: progressPercent + '%' }" />
+                      <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[var(--color-primary)]" :style="{ left: progressPercent + '%' }" />
+                    </div>
+
+                    <!-- botones -->
+                    <div class="flex items-center gap-3 mb-1">
+                      <button
+                        @click="togglePlay"
+                        class="
+                          border border-transparent
+                          text-[var(--color-primary)] font-medium text-sm
+                          p-1 rounded-xl grayscale
+                          hover:text-[var(--text)]
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-all duration-300
+                        "
+                      >
+                        <img v-if="isPlaying" src="/icon/icon-pause.svg" alt="Pause" class="h-6 w-6" />
+                        <img v-else src="/icon/icon-play.svg" alt="Play" class="h-6 w-6" />
+                      </button>
+                      <button
+                        @click="toggleMute"
+                        class="
+                          border border-transparent
+                          text-[var(--color-primary)] font-medium text-sm
+                          p-1 rounded-xl grayscale
+                          hover:text-[var(--text)]
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-all duration-300
+                        "
+                      >
+                        <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
+                        <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
+                      </button>
+                      <label class="sr-only" for="volume-slider">Volumen</label>
+                      <input type="range" min="0" max="1" step="0.01" :value="volume" @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
+                        class="
+                        volume-slider w-24"
+                        :style="{
+                          background: `linear-gradient(to right, var(--color-primary) ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
+                        }"
+                      />
+
+                      <div class="flex-1 flex items-center justify-end w-full">
+                      <button
+                        @click="toggleFullscreen"
+                        class="
+                          border border-transparent
+                          text-[var(--color-primary)] font-medium text-sm
+                          p-1 rounded-xl grayscale
+                          hover:text-[var(--text)]
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-all duration-300
+                        "
+                      >
+                        <img
+                          :src="isFullscreen
+                          ? '/icon/icon-fullscreen-close.svg' : '/icon/icon-fullscreen.svg'"
+                          alt="fullscreen"
+                          class="w-6 h-6"/>
+                      </button>
+                    </div>
+                    </div>
+                  </div>
+
+                </div>
+              </template>
               <!-- pdf -->
               <iframe
                 v-else-if="currentBlobURL && previewFile.contentType === 'application/pdf'"
@@ -1300,15 +1398,6 @@
                 v-else-if="currentBlobURL && previewFile.contentType.startsWith('audio/')"
                 :src="currentBlobURL"
                 :title="`Audio preview of ${previewFile.name || 'audio'}`"
-                class="w-full h-full object-contain"
-                controls
-              />
-              <!-- video -->
-              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
-              <video
-                v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')"
-                :src="currentBlobURL"
-                :title="`Video preview of ${previewFile.name || 'video'}`"
                 class="w-full h-full object-contain"
                 controls
               />
@@ -1332,11 +1421,10 @@
                 <i class="fas fa-eye-slash text-xs"></i>
                 <span>No se admite la vista previa para este tipo de archivo.</span>
               </div>
-              <span class="text-[var(--text-terceary)] text-lg truncate font-medium">{{ previewFile.name }}</span>
             </div>
           </div>
           <!-- zoom controls -->
-          <div class="flex items-center justify-center px-1 w-full mx-4">
+          <div v-if="previewFile.contentType?.startsWith('image/')" class="flex items-center justify-center px-1 w-full mx-4">
             <div class="flex-1 w-full h-full"></div>
             <div class="flex-2 space-x-6 ">
             <button
@@ -1444,6 +1532,7 @@ const draggedItem = ref<FileI | FolderI | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const editingFolderId = ref<number | null>(null);
+const currentBlobURL = ref<string | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
@@ -1464,6 +1553,14 @@ const ghostX = ref(0);
 const ghostY = ref(0);
 const zoomLevel = ref(1);
 const isFullscreen = ref(false);
+const videoRef = ref(null);
+const isPlaying = ref(false);
+const currentTime = ref(0);
+const duration = ref(0);
+const volume = ref(0.8);
+const isMuted = ref(false);
+const controlsVisible = ref(true);
+const hideTimer: ReturnType<typeof setTimeout> | null = null;
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1472,7 +1569,8 @@ const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
 const currentPreviewIndex = computed(() => fileResults.value.data.findIndex((f: FileI) => f.id === previewFile.value?.id));
-const currentBlobURL = ref<string | null>(null);
+
+const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -1495,6 +1593,36 @@ async function getBase64(file: FileI) {
   return '';
 }
 
+function togglePlay() {
+  const v = videoRef.value;
+  if (!v) return;
+  if (isPlaying.value) { v.pause(); isPlaying.value = false; } else { v.play(); isPlaying.value = true; }
+}
+
+function onTimeUpdate() {
+  currentTime.value = videoRef.value?.currentTime ?? 0;
+}
+
+function onLoadedMetadata() {
+  duration.value = videoRef.value?.duration ?? 0;
+  videoRef.value.volume = volume.value;
+}
+
+function seek(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  videoRef.value.currentTime = ratio * duration.value;
+}
+
+function toggleMute() {
+  isMuted.value = !isMuted.value;
+  videoRef.value.muted = isMuted.value;
+}
+
+function onVolumeChange() {
+  if (videoRef.value) videoRef.value.volume = volume.value;
+  isMuted.value = volume.value === 0;
+}
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
 }
@@ -2189,5 +2317,60 @@ watch(previewFile, async (file: FileI | null) => {
   50%  { transform: translate(-6px, 18px) rotate(10deg); }
   75%  { transform: translate(-8px, -8px) rotate(8deg); }
   100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+input[type='range'].volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--text-terceary);
+  border-radius: 9999px;
+  outline: none;
+}
+
+input[type='range'].volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+input[type='range'].volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+}
+input[type='range'].progress-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 9999px;
+  outline: none;
+}
+
+input[type='range'].progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+input[type='range'].progress-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
 }
 </style>
