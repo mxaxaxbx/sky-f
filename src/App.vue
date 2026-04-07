@@ -16,7 +16,7 @@
     <input
       id="fileInputBtn"
       type="file"
-      class="hidden bg-red-100 text-white z-[1000]"
+      class="-hidden bg-red-500 text-white z-[1000]"
       ref="fileInputBtn"
       @change="uploadFile"
       multiple
