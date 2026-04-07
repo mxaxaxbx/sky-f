@@ -1274,13 +1274,26 @@
           <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full rounded-2xl bg-white/0">
             <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full">
               <!-- images -->
+              <!-- eslint-disable-next-line vuejs-accessibility/mouse-events-have-key-events -->
               <img
+                ref="imageRef"
                 v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
                 :src="currentBlobURL"
                 :alt="previewFile.name"
-                :style="{ transform: `scale(${zoomLevel})`, transition: 'transform 0.15s ease', transformOrigin: 'center' }"
+                :style="{
+                  transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+                  transition: isPanning ? 'none' : 'transform 0.15s ease',
+                  transformOrigin: 'center',
+                  cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+                }"
                 @wheel.prevent="onWheelZoom"
-                class="max-w-full max-h-full object-contain"
+                @mousedown="onPanStart"
+                @mousemove="onPanMove"
+                @mouseup="onPanEnd"
+                @mouseleave="onPanEnd"
+                @blur="onPanEnd"
+                @load="fitImageToContainer"
+                class="full object-contain select-none"
               />
               <!-- video -->
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
@@ -1764,6 +1777,10 @@ const audioCover = ref<string | null>(null);
 const textContent = ref<string | null>(null);
 const controlsVisible = ref(true);
 const hideTimer: ReturnType<typeof setTimeout> | null = null;
+const isPanning = ref(false);
+const panOffset = ref({ x: 0, y: 0 });
+const panStart = ref({ x: 0, y: 0 });
+const imageRef = ref<HTMLImageElement | null>(null);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1934,16 +1951,110 @@ function onVolumeChange() {
   isMuted.value = volume.value === 0;
 }
 
+function getRenderedImageSize() {
+  const img = imageRef.value;
+  if (!img) return { w: 0, h: 0 };
+
+  const rect = img.getBoundingClientRect();
+  return {
+    w: rect.width / zoomLevel.value,
+    h: rect.height / zoomLevel.value,
+  };
+}
+
+function clampPan(zoom: number) {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+
+  const { w, h } = getRenderedImageSize();
+
+  const scaledW = w * zoom;
+  const scaledH = h * zoom;
+
+  const maxX = Math.max(0, (scaledW - containerW) / 2);
+  const maxY = Math.max(0, (scaledH - containerH) / 2);
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, panOffset.value.x)),
+    y: Math.min(maxY, Math.max(-maxY, panOffset.value.y)),
+  };
+}
+
+function onPanStart(e: MouseEvent) {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const { w, h } = getRenderedImageSize();
+  const scaledW = w * zoomLevel.value;
+  const scaledH = h * zoomLevel.value;
+
+  const hasOverflow = scaledW > container.clientWidth || scaledH > container.clientHeight;
+  if (!hasOverflow) return;
+
+  isPanning.value = true;
+  panStart.value = {
+    x: e.clientX - panOffset.value.x,
+    y: e.clientY - panOffset.value.y,
+  };
+  e.preventDefault();
+}
+
+function onPanMove(e: MouseEvent) {
+  if (!isPanning.value) return;
+
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+
+  const { w, h } = getRenderedImageSize();
+
+  const scaledW = w * zoomLevel.value;
+  const scaledH = h * zoomLevel.value;
+
+  // Cuanto sobresale la imagen del contenedor a cada lado
+  const maxX = Math.max(0, (scaledW - containerW) / 2);
+  const maxY = Math.max(0, (scaledH - containerH) / 2);
+
+  const rawX = e.clientX - panStart.value.x;
+  const rawY = e.clientY - panStart.value.y;
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, rawX)),
+    y: Math.min(maxY, Math.max(-maxY, rawY)),
+  };
+}
+
+function onPanEnd() {
+  isPanning.value = false;
+}
+
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
+  clampPan(zoomLevel.value);
 }
 
 function zoomOut() {
   zoomLevel.value = Math.max(zoomLevel.value - 0.10, 0.10);
+  clampPan(zoomLevel.value);
 }
 
 function resetZoom() {
   zoomLevel.value = 1;
+  panOffset.value = { x: 0, y: 0 };
 }
 
 function onWheelZoom(e: WheelEvent) {
@@ -1951,6 +2062,27 @@ function onWheelZoom(e: WheelEvent) {
   e.preventDefault();
   if (e.deltaY < 0) zoomIn();
   else zoomOut();
+}
+
+function fitImageToContainer() {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+  const naturalW = img.naturalWidth;
+  const naturalH = img.naturalHeight;
+
+  if (!naturalW || !naturalH) return;
+
+  const scaleX = containerW / naturalW;
+  const scaleY = containerH / naturalH;
+
+  zoomLevel.value = Math.min(scaleX, scaleY, 1) * 1.1;
+  panOffset.value = { x: 0, y: 0 };
 }
 
 function toggleFullscreen() {
@@ -2001,43 +2133,53 @@ function previewPrev() {
 }
 
 async function moveToFolder() {
-  console.log('selectedFolder', selectedFolder.value);
   if (selectedFolder.value === null) {
     return;
+  }
+
+  if (selectedFolder.value === 0) {
+    selectedFolder.value = null;
   }
 
   try {
     loading.value = true;
     console.log('selectedFiles', selectedFiles.value);
-    const payloadFiles: FileI[] = selectedFiles.value.map((file: FileI) => ({
-      ...file,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payloadFiles);
+    if (selectedFiles.value.length > 0) {
+      const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
+        ...file,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFiles', payload);
 
-    if (payloadFiles.length > 0) {
-      await store.dispatch('files/moveFilesToFolder', payloadFiles);
+      if (payload.length > 0) {
+        await store.dispatch('files/moveFilesToFolder', payload);
+      }
+
       await store.dispatch('files/filter', {
         query: '',
         page: 1,
         orderBy: 'created',
         order: 'desc',
-        folderId: '',
+        folderId: folderId.value,
       });
     }
 
-    const payloadFolders: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
-      ...folder,
-      folderId: selectedFolder.value,
-    }));
-    console.log('payload', payloadFolders);
+    console.log('selectedFolders', selectedFolders.value);
+    if (selectedFolders.value.length > 0) {
+      const payload: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
+        ...folder,
+        folderId: selectedFolder.value,
+      }));
+      console.log('payloadFolders', payload);
 
-    if (payloadFolders.length > 0) {
-      await store.dispatch('folders/moveFoldersToFolder', payloadFolders);
+      if (payload.length > 0) {
+        await store.dispatch('folders/moveFoldersToFolder', payload);
+      }
+
       await store.dispatch('folders/filter', {
         query: '',
         page: 1,
-        folderId: '',
+        folderId: folderId.value,
       });
     }
 
@@ -2505,6 +2647,9 @@ watch(previewFile, async (file: FileI | null) => {
   isMuted.value = false;
   previousVolume.value = 1;
   audioCover.value = null;
+  panOffset.value = { x: 0, y: 0 };
+  isPanning.value = false;
+  zoomLevel.value = 1;
 
   if (file) {
     getBase64(file);

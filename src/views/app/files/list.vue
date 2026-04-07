@@ -1271,24 +1271,25 @@
               <!-- images -->
                <!-- eslint-disable-next-line vuejs-accessibility/mouse-events-have-key-events -->
               <img
-              ref="imageRef"
-  v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
-  :src="currentBlobURL"
-  :alt="previewFile.name"
-  :style="{
-    transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
-    transition: isPanning ? 'none' : 'transform 0.15s ease',
-    transformOrigin: 'center',
-    cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
-  }"
-  @wheel.prevent="onWheelZoom"
-  @mousedown="onPanStart"
-  @mousemove="onPanMove"
-  @mouseup="onPanEnd"
-  @mouseleave="onPanEnd"
-  @blur="onPanEnd"
-  class="full object-contain select-none"
-/>
+                ref="imageRef"
+                v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
+                :src="currentBlobURL"
+                :alt="previewFile.name"
+                :style="{
+                  transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+                  transition: isPanning ? 'none' : 'transform 0.15s ease',
+                  transformOrigin: 'center',
+                  cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+                }"
+                @wheel.prevent="onWheelZoom"
+                @mousedown="onPanStart"
+                @mousemove="onPanMove"
+                @mouseup="onPanEnd"
+                @mouseleave="onPanEnd"
+                @blur="onPanEnd"
+                @load="fitImageToContainer"
+                class="full object-contain select-none"
+              />
               <!-- video -->
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
               <template v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')">
@@ -1929,8 +1930,55 @@ function onVolumeChange() {
   isMuted.value = volume.value === 0;
 }
 
+function getRenderedImageSize() {
+  const img = imageRef.value;
+  if (!img) return { w: 0, h: 0 };
+
+  const rect = img.getBoundingClientRect();
+  return {
+    w: rect.width / zoomLevel.value,
+    h: rect.height / zoomLevel.value,
+  };
+}
+
+function clampPan(zoom: number) {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+
+  const { w, h } = getRenderedImageSize();
+
+  const scaledW = w * zoom;
+  const scaledH = h * zoom;
+
+  const maxX = Math.max(0, (scaledW - containerW) / 2);
+  const maxY = Math.max(0, (scaledH - containerH) / 2);
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, panOffset.value.x)),
+    y: Math.min(maxY, Math.max(-maxY, panOffset.value.y)),
+  };
+}
+
 function onPanStart(e: MouseEvent) {
-  if (zoomLevel.value <= 1) return;
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const { w, h } = getRenderedImageSize();
+  const scaledW = w * zoomLevel.value;
+  const scaledH = h * zoomLevel.value;
+
+  const hasOverflow = scaledW > container.clientWidth || scaledH > container.clientHeight;
+  if (!hasOverflow) return;
+
   isPanning.value = true;
   panStart.value = {
     x: e.clientX - panOffset.value.x,
@@ -1948,17 +1996,17 @@ function onPanMove(e: MouseEvent) {
   const container = img.parentElement;
   if (!container) return;
 
-  // Tamaño visible de la imagen (sin zoom)
-  const imgW = img.offsetWidth;
-  const imgH = img.offsetHeight;
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
 
-  // Cuánto se expande con el zoom
-  const scaledW = imgW * zoomLevel.value;
-  const scaledH = imgH * zoomLevel.value;
+  const { w, h } = getRenderedImageSize();
 
-  // Máximo desplazamiento permitido
-  const maxX = Math.max(0, (scaledW - imgW) / 2);
-  const maxY = Math.max(0, (scaledH - imgH) / 2);
+  const scaledW = w * zoomLevel.value;
+  const scaledH = h * zoomLevel.value;
+
+  // Cuanto sobresale la imagen del contenedor a cada lado
+  const maxX = Math.max(0, (scaledW - containerW) / 2);
+  const maxY = Math.max(0, (scaledH - containerH) / 2);
 
   const rawX = e.clientX - panStart.value.x;
   const rawY = e.clientY - panStart.value.y;
@@ -1971,25 +2019,6 @@ function onPanMove(e: MouseEvent) {
 
 function onPanEnd() {
   isPanning.value = false;
-}
-
-function clampPan(zoom: number) {
-  const img = imageRef.value;
-  if (!img) return;
-
-  const imgW = img.offsetWidth;
-  const imgH = img.offsetHeight;
-
-  const scaledW = imgW * zoom;
-  const scaledH = imgH * zoom;
-
-  const maxX = Math.max(0, (scaledW - imgW) / 2);
-  const maxY = Math.max(0, (scaledH - imgH) / 2);
-
-  panOffset.value = {
-    x: Math.min(maxX, Math.max(-maxX, panOffset.value.x)),
-    y: Math.min(maxY, Math.max(-maxY, panOffset.value.y)),
-  };
 }
 
 function zoomIn() {
@@ -2012,6 +2041,27 @@ function onWheelZoom(e: WheelEvent) {
   e.preventDefault();
   if (e.deltaY < 0) zoomIn();
   else zoomOut();
+}
+
+function fitImageToContainer() {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+  const naturalW = img.naturalWidth;
+  const naturalH = img.naturalHeight;
+
+  if (!naturalW || !naturalH) return;
+
+  const scaleX = containerW / naturalW;
+  const scaleY = containerH / naturalH;
+
+  zoomLevel.value = Math.min(scaleX, scaleY, 1) * 1.1;
+  panOffset.value = { x: 0, y: 0 };
 }
 
 function toggleFullscreen() {
@@ -2544,6 +2594,7 @@ watch(previewFile, async (file: FileI | null) => {
   audioCover.value = null;
   panOffset.value = { x: 0, y: 0 };
   isPanning.value = false;
+  zoomLevel.value = 1;
 
   if (file) {
     getBase64(file);
