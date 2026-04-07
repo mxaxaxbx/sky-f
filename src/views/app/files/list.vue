@@ -1084,7 +1084,7 @@
       </div>
     </Teleport>
 
-    <!-- preview modal -->
+    <!-- preview files -->
     <Teleport to="body">
       <div
         v-if="previewFile"
@@ -1288,22 +1288,46 @@
               <!-- video -->
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
               <template v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')">
-                <div class="flex flex-col items-center justify-start w-full h-full rounded-2xl overflow-hidden bg-gradient-to-t from-black to-transparent">
+                <div
+                  class="
+                    relative
+                    flex flex-col
+                    items-center justify-center
+                    w-full h-full
+                    rounded-2xl
+                    bg-gradient-to-t from-black to-transparent
+                  "
+                >
                   <!-- video -->
                   <video
                     :src="currentBlobURL"
                     :title="`Video preview of ${previewFile.name || 'video'}`"
-                    class="max-w-full max-h-full flex-1 min-h-0"
+                    class="max-w-full h-full object-contain cursor-pointer"
                     ref="videoRef"
                     @timeupdate="onTimeUpdate"
                     @loadedmetadata="onLoadedMetadata"
                     @ended="isPlaying = false"
+                    @click="togglePlay"
+                    @keydown.space.prevent="togglePlay"
                   >
                     <track kind="captions" />
                   </video>
 
                   <!-- controles -->
-                  <div class="w-full px-2 flex flex-col gap-2 flex-shrink-0">
+                  <div
+                    class="
+                      absolute bottom-0 left-0 right-0
+                      flex flex-col
+                      px-4 pb-2 pt-8 gap-2
+                      transtion-all duration-300
+                    "
+                    :class="isFullscreen
+                      ? (showPreviewHeader ? 'opacity-100'
+                      : 'opacity-0 pointer-events-none') : 'opacity-100'
+                    "
+                    style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%)
+                    "
+                  >
                     <!-- barra de progreso -->
                     <div
                       @click="seek"
@@ -1336,6 +1360,8 @@
                         <img v-if="isPlaying" src="/icon/icon-pause.svg" alt="Pause" class="h-6 w-6" />
                         <img v-else src="/icon/icon-play.svg" alt="Play" class="h-6 w-6" />
                       </button>
+
+                      <!--volumen-->
                       <button
                         @click="toggleMute"
                         class="
@@ -1559,6 +1585,7 @@ const currentTime = ref(0);
 const duration = ref(0);
 const volume = ref(0.8);
 const isMuted = ref(false);
+const previousVolume = ref(1);
 const controlsVisible = ref(true);
 const hideTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -1616,7 +1643,17 @@ function seek(e) {
 
 function toggleMute() {
   isMuted.value = !isMuted.value;
-  videoRef.value.muted = isMuted.value;
+
+  if (isMuted.value) {
+    previousVolume.value = volume.value || 1;
+    volume.value = 0;
+    videoRef.value.volume = 0;
+    videoRef.value.muted = true;
+  } else {
+    volume.value = previousVolume.value;
+    videoRef.value.volume = previousVolume.value;
+    videoRef.value.muted = false;
+  }
 }
 
 function onVolumeChange() {
@@ -1665,14 +1702,17 @@ function onFullscreenChange() {
 function onPreviewMouseMove(e: MouseEvent) {
   if (!isFullscreen.value) return;
 
-  if (e.clientY < 80) {
+  const nearTop = e.clientY < 200;
+  const nearBottom = e.clientY > window.innerHeight - 200;
+
+  if (nearTop || nearBottom) {
     showPreviewHeader.value = true;
     if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
   } else {
     if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
     hideHeaderTimeout = setTimeout(() => {
       showPreviewHeader.value = false;
-    }, 1500);
+    }, 800);
   }
 }
 
@@ -2127,6 +2167,12 @@ function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'ArrowRight') { previewNext(); return; }
     if (e.key === 'ArrowLeft') { previewPrev(); return; }
     if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); return; }
+    if (e.key === 'm' || e.key === 'M') { toggleMute(); return; }
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      togglePlay();
+      e.preventDefault();
+      return;
+    }
   }
 
   if (e.key !== 'F2') return;
@@ -2155,6 +2201,12 @@ onUnmounted(() => {
 });
 
 watch(previewFile, async (file: FileI | null) => {
+  isPlaying.value = false;
+  progressPercent.value = 0;
+  volume.value = 1;
+  isMuted.value = false;
+  previousVolume.value = 1;
+
   if (file) {
     getBase64(file);
   }
