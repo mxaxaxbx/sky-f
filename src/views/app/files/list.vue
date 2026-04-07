@@ -1269,14 +1269,26 @@
           <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full rounded-2xl bg-white/0">
             <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full">
               <!-- images -->
+               <!-- eslint-disable-next-line vuejs-accessibility/mouse-events-have-key-events -->
               <img
-                v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
-                :src="currentBlobURL"
-                :alt="previewFile.name"
-                :style="{ transform: `scale(${zoomLevel})`, transition: 'transform 0.15s ease', transformOrigin: 'center' }"
-                @wheel.prevent="onWheelZoom"
-                class="max-w-full max-h-full object-contain"
-              />
+              ref="imageRef"
+  v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
+  :src="currentBlobURL"
+  :alt="previewFile.name"
+  :style="{
+    transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+    transition: isPanning ? 'none' : 'transform 0.15s ease',
+    transformOrigin: 'center',
+    cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+  }"
+  @wheel.prevent="onWheelZoom"
+  @mousedown="onPanStart"
+  @mousemove="onPanMove"
+  @mouseup="onPanEnd"
+  @mouseleave="onPanEnd"
+  @blur="onPanEnd"
+  class="full object-contain select-none"
+/>
               <!-- video -->
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
               <template v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')">
@@ -1604,7 +1616,7 @@
                 class="w-full h-full rounded-2xl"
               />
               <!-- other -->
-              <div v-else class="flex items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
+              <div v-else class="flex flex-col items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
                 <img src="/icon/icon-file.svg" alt="file" class="h-30 w-30" />
                 <i class="fas fa-eye-slash text-xs"></i>
                 <span>No se admite la vista previa para este tipo de archivo.</span>
@@ -1760,6 +1772,10 @@ const audioCover = ref<string | null>(null);
 const textContent = ref<string | null>(null);
 const controlsVisible = ref(true);
 const hideTimer: ReturnType<typeof setTimeout> | null = null;
+const isPanning = ref(false);
+const panOffset = ref({ x: 0, y: 0 });
+const panStart = ref({ x: 0, y: 0 });
+const imageRef = ref<HTMLImageElement | null>(null);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1913,16 +1929,82 @@ function onVolumeChange() {
   isMuted.value = volume.value === 0;
 }
 
+function onPanStart(e: MouseEvent) {
+  if (zoomLevel.value <= 1) return;
+  isPanning.value = true;
+  panStart.value = {
+    x: e.clientX - panOffset.value.x,
+    y: e.clientY - panOffset.value.y,
+  };
+  e.preventDefault();
+}
+
+function onPanMove(e: MouseEvent) {
+  if (!isPanning.value) return;
+
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  // Tamaño visible de la imagen (sin zoom)
+  const imgW = img.offsetWidth;
+  const imgH = img.offsetHeight;
+
+  // Cuánto se expande con el zoom
+  const scaledW = imgW * zoomLevel.value;
+  const scaledH = imgH * zoomLevel.value;
+
+  // Máximo desplazamiento permitido
+  const maxX = Math.max(0, (scaledW - imgW) / 2);
+  const maxY = Math.max(0, (scaledH - imgH) / 2);
+
+  const rawX = e.clientX - panStart.value.x;
+  const rawY = e.clientY - panStart.value.y;
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, rawX)),
+    y: Math.min(maxY, Math.max(-maxY, rawY)),
+  };
+}
+
+function onPanEnd() {
+  isPanning.value = false;
+}
+
+function clampPan(zoom: number) {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const imgW = img.offsetWidth;
+  const imgH = img.offsetHeight;
+
+  const scaledW = imgW * zoom;
+  const scaledH = imgH * zoom;
+
+  const maxX = Math.max(0, (scaledW - imgW) / 2);
+  const maxY = Math.max(0, (scaledH - imgH) / 2);
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, panOffset.value.x)),
+    y: Math.min(maxY, Math.max(-maxY, panOffset.value.y)),
+  };
+}
+
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
+  clampPan(zoomLevel.value);
 }
 
 function zoomOut() {
   zoomLevel.value = Math.max(zoomLevel.value - 0.10, 0.10);
+  clampPan(zoomLevel.value);
 }
 
 function resetZoom() {
   zoomLevel.value = 1;
+  panOffset.value = { x: 0, y: 0 };
 }
 
 function onWheelZoom(e: WheelEvent) {
@@ -2460,6 +2542,8 @@ watch(previewFile, async (file: FileI | null) => {
   isMuted.value = false;
   previousVolume.value = 1;
   audioCover.value = null;
+  panOffset.value = { x: 0, y: 0 };
+  isPanning.value = false;
 
   if (file) {
     getBase64(file);

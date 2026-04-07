@@ -186,31 +186,6 @@
               </button>
             </div>
             <div class="flex flex-wrap items-center gap-2 mt-2">
-              <!--preview buttom-->
-              <button
-                @click="store.dispatch('files/previewFile', file)"
-                class="
-                  inline-flex items-center gap-1
-                  bg-[var(--bg-secondary)]
-                  border border-[var(--color-primary)]
-                  text-[var(--color-primary)] text-sm font-medium
-                  p-1
-                  rounded-xl grayscale
-
-                  hover:bg-[var(--hover-bg)]
-                  hover:grayscale-0
-                  hover:text-[var(--text)]
-                  hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-
-                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                  focus:grayscale-0
-                  transition-all duration-300
-                "
-              >
-                <img src="/icon/icon-preview.svg" alt="download" class="h-5"/>
-                <span class="hidden md:inline pr-1">Preview</span>
-              </button>
-
               <!-- Copy link button -->
               <button
                 @click="copyLink(file)"
