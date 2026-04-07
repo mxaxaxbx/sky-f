@@ -113,8 +113,8 @@
         <p class="text-[var(--text-terceary)] text-center font-semibold text-xl">
           Your space is waiting for something awesome.
         </p>
-        <!-- actions desktop-->
 
+        <!-- actions desktop-->
         <div class="flex items-center gap-3">
 
           <!-- Upload button -->
@@ -515,13 +515,7 @@
             <div class="flex w-full h-auto items-center justify-between relative">
               <div class="flex-1 min-w-0">
                 <div class="flex items center justify-between p-1">
-                  <div
-                    class="
-                      flex items-center
-                      space-x-2
-                      min-w-0 w-full overflow-hidden
-                    "
-                  >
+                  <div class="flex items-center space-x-2 min-w-0 w-full overflow-hidden">
                     <!-- icons -->
                     <img v-if="file.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-10 w-10" />
                     <img v-else-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-10 w-10" />
@@ -1125,7 +1119,7 @@
             <img v-else src="/icon/icon-file.svg" alt="file" class="h-8 w-8" />
 
             <span class="text-white text-lg truncate font-medium">{{ previewFile.name }}</span>
-          </diV>
+          </div>
 
           <!-- navigation -->
           <div class="flex-2 items center space-x-6 mx-4">
@@ -1140,7 +1134,6 @@
                 px-1.5 py-0.5
                 hover:text-[var(--color-primary)]
                 hover:border-[var(--color-primary)]
-                hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
 
                 transition-all duration-300
                 disabled:opacity-20 disabled:cursor-not-allowed
@@ -1162,7 +1155,6 @@
                 px-1.5 py-0.5
                 hover:text-[var(--color-primary)]
                 hover:border-[var(--color-primary)]
-                hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
 
                 transition-all duration-300
                 disabled:opacity-20 disabled:cursor-not-allowed
@@ -1284,7 +1276,7 @@
                 :style="{ transform: `scale(${zoomLevel})`, transition: 'transform 0.15s ease', transformOrigin: 'center' }"
                 @wheel.prevent="onWheelZoom"
                 class="max-w-full max-h-full object-contain"
-/>
+              />
               <!-- video -->
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
               <template v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')">
@@ -1302,7 +1294,7 @@
                   <video
                     :src="currentBlobURL"
                     :title="`Video preview of ${previewFile.name || 'video'}`"
-                    class="max-w-full h-full object-contain cursor-pointer"
+                    class="max-w-full max-h-full object-contain cursor-pointer"
                     ref="videoRef"
                     @timeupdate="onTimeUpdate"
                     @loadedmetadata="onLoadedMetadata"
@@ -1344,7 +1336,7 @@
                     </div>
 
                     <!-- botones -->
-                    <div class="flex items-center gap-3 mb-1">
+                    <div class="flex items-center gap-2 mb-1">
                       <button
                         @click="togglePlay"
                         class="
@@ -1362,29 +1354,45 @@
                       </button>
 
                       <!--volumen-->
-                      <button
-                        @click="toggleMute"
+                      <!--volumen-->
+                      <div
                         class="
-                          border border-transparent
-                          text-[var(--color-primary)] font-medium text-sm
-                          p-1 rounded-xl grayscale
-                          hover:text-[var(--text)]
+                          group
+                          relative flex items-center
+                          border border-transparent gap-2
+                          py-1 px-1.5 rounded-xl grayscale
+
                           hover:border-[var(--color-primary)]
                           hover:grayscale-0
                           transition-all duration-300
                         "
                       >
-                        <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
-                        <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
-                      </button>
-                      <label class="sr-only" for="volume-slider">Volumen</label>
-                      <input type="range" min="0" max="1" step="0.01" :value="volume" @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
-                        class="
-                        volume-slider w-24"
-                        :style="{
-                          background: `linear-gradient(to right, var(--color-primary) ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
-                        }"
-                      />
+                        <!-- Botón volumen -->
+                        <button @click="toggleMute">
+                          <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
+                          <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
+                        </button>
+
+                        <!-- Slider: oculto por defecto, visible al hacer hover en el grupo -->
+                        <div class="
+                          w-0 h-5 overflow-hidden opacity-0 flex items-center justify-center
+                          group-hover:w-24 group-hover:opacity-100
+                          transition-all duration-300 ease-in-out
+                        ">
+                          <label class="sr-only" for="volume-slider">Volumen</label>
+                          <input
+                            id="volume-slider"
+                            type="range" min="0" max="1" step="0.01"
+                            :value="volume"
+                            @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
+                            class="volume-slider w-24"
+                            :style="{
+                              background: `linear-gradient(to right, var(--color-primary)
+                              ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
+                            }"
+                          />
+                        </div>
+                      </div>
 
                       <div class="flex-1 flex items-center justify-end w-full">
                       <button
@@ -1411,36 +1419,190 @@
 
                 </div>
               </template>
-              <!-- pdf -->
-              <iframe
-                v-else-if="currentBlobURL && previewFile.contentType === 'application/pdf'"
-                :src="currentBlobURL"
-                :title="`PDF preview of ${previewFile.name || 'document'}`"
-                class="w-full h-full object-contain"
-              />
+
               <!-- audio -->
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
-              <audio
+              <div
                 v-else-if="currentBlobURL && previewFile.contentType.startsWith('audio/')"
-                :src="currentBlobURL"
-                :title="`Audio preview of ${previewFile.name || 'audio'}`"
-                class="w-full h-full object-contain"
-                controls
-              />
+                class="
+                  relative
+                  flex flex-col items-center justify-center
+                  w-full h-full
+                  bg-gradient-to-t from-black to-transparent
+                  rounded-2xl gap-4"
+              >
+                <div
+                  :class="['relative w-96 h-96', isPlaying ? 'vinil-spin' : 'vinil-paused']">
+                  <img
+                    src="/icon/icon-vinil.svg"
+                    alt="vinil"
+                    class="w-full h-full"
+                  />
+                  <div class="absolute inset-0 flex items-center justify-center overflow-hidden">
+                    <img
+                      v-if="audioCover"
+                      :src="audioCover"
+                      alt="Audio cover"
+                      class="w-40 h-40 scale-[1.2] object-cover rounded-full shadow-lg border-2 border-white/60"
+                    />
+                    <div
+                    v-else
+                    class="
+                      w-44 h-44 rounded-full overflow-hidden flex items-center justify-center
+                      bg-gradient-to-b from-pink-900 to-pink-900
+                      shadow-lg border-4 border-white/70">
+                    <img
+                      src="/icon/icon-audio.svg"
+                      alt="Audio"
+                      class="w-full h-full scale-[1.35]"
+                    />
+                  </div>
+                  </div>
+                  <div class="absolute inset-0 flex items-center justify-center z-10">
+                    <div class="w-4 h-4 bg-black rounded-full"></div>
+                  </div>
+                </div>
+                <audio
+                  ref="audioRef"
+                  :src="currentBlobURL"
+                  class="w-full"
+                  @play="isPlaying = true"
+                  @pause="isPlaying = false"
+                  @ended="isPlaying = false"
+                  @timeupdate="onTimeUpdate"
+                  @loadedmetadata="onLoadedMetadata"
+                >
+                  <track kind="captions" />
+                </audio>
+                <!-- controles -->
+                <div
+                  class="
+                    absolute bottom-0 left-0 right-0
+                    flex flex-col
+                    px-4 pb-2 pt-8 gap-2
+                    transtion-all duration-300
+                  "
+                  :class="isFullscreen
+                    ? (showPreviewHeader ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none') : 'opacity-100'
+                  "
+                  style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%)
+                  "
+                >
+                  <!-- barra de progreso -->
+                  <div
+                    @click="seek"
+                    @keydown="seek"
+                    role="slider"
+                    tabindex="0"
+                    :aria-valuenow="Math.round(progressPercent)"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    class="relative mx-2 h-1 bg-[var(--text-terceary)] rounded-full cursor-pointer"
+                  >
+                    <div class="absolute top-0 left-0 h-full rounded-full bg-[var(--color-primary)]" :style="{ width: progressPercent + '%' }" />
+                    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[var(--color-primary)]" :style="{ left: progressPercent + '%' }" />
+                  </div>
+
+                  <!-- botones -->
+                  <div class="flex items-center gap-2 mb-1">
+                    <button
+                      @click="togglePlay"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-400
+                      "
+                    >
+                      <img v-if="isPlaying" src="/icon/icon-pause.svg" alt="Pause" class="h-6 w-6" />
+                      <img v-else src="/icon/icon-play.svg" alt="Play" class="h-6 w-6" />
+                    </button>
+
+                    <!--volumen-->
+                    <div
+                      class="
+                        group
+                        relative flex items-center
+                        border border-transparent gap-2
+                        py-1 px-1.5 rounded-xl grayscale
+
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <!-- Botón volumen -->
+                      <button @click="toggleMute">
+                        <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
+                        <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
+                      </button>
+
+                      <!-- Slider: oculto por defecto, visible al hacer hover en el grupo -->
+                      <div class="
+                        w-0 h-5 overflow-hidden opacity-0 flex items-center justify-center
+                        group-hover:w-24 group-hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      ">
+                        <label class="sr-only" for="volume-slider">Volumen</label>
+                        <input
+                          id="volume-slider"
+                          type="range" min="0" max="1" step="0.01"
+                          :value="volume"
+                          @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
+                          class="volume-slider w-24"
+                          :style="{
+                            background: `linear-gradient(to right, var(--color-primary)
+                            ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
+                          }"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- text -->
               <pre
                 v-else-if="currentBlobURL && previewFile.contentType.startsWith('text/')"
-                class="w-full h-full object-contain"
-              >
-                {{ currentBlobURL }}
-              </pre>
+                class="
+                  w-full h-full overflow-auto
+                  text-sm text-white font-mono
+                  bg-white/5 rounded-2xl
+                  p-6 leading-relaxed
+                  whitespace-pre-wrap break-words
+                "
+              >{{ textContent }}</pre>
+
               <!-- code -->
               <pre
-                v-else-if="currentBlobURL && previewFile.contentType.startsWith('application/json')"
-                class="w-full h-full object-contain"
-              >
-                {{ currentBlobURL }}
+              v-else-if="currentBlobURL && (
+                previewFile.contentType.startsWith('text/') ||
+                previewFile.name?.endsWith('.vue') ||
+                previewFile.name?.endsWith('.ts') ||
+                previewFile.name?.endsWith('.js') ||
+                previewFile.name?.endsWith('.py')
+              )"
+                class="
+                  w-full h-full overflow-auto
+                  text-sm text-emerald-300 font-mono
+                  bg-white/5 rounded-2xl
+                  p-6 leading-relaxed
+                  whitespace-pre-wrap break-words
+                "
+              >{{ textContent }}
               </pre>
+
+              <!-- pdf -->
+              <embed
+                v-else-if="currentBlobURL && previewFile.contentType === 'application/pdf'"
+                :src="currentBlobURL"
+                type="application/pdf"
+                class="w-full h-full rounded-2xl"
+              />
               <!-- other -->
               <div v-else class="flex items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
                 <img src="/icon/icon-file.svg" alt="file" class="h-30 w-30" />
@@ -1450,26 +1612,29 @@
             </div>
           </div>
           <!-- zoom controls -->
-          <div v-if="previewFile.contentType?.startsWith('image/')" class="flex items-center justify-center px-1 w-full mx-4">
+          <div v-if="previewFile.contentType?.startsWith('image/')" class="flex items-center justify-center px-1 w-full mx-4 mt-1">
             <div class="flex-1 w-full h-full"></div>
-            <div class="flex-2 space-x-6 ">
+            <div class="flex-2 space-x-6 flex items-center">
             <button
               @click="zoomOut"
               :disabled="zoomLevel <= 0.25"
               class="
                 flex-shrink-0
-                text-md border border-transparent rounded-xl
+                text-md
                 text-[var(--text-terceary)]
-                px-1.5 py-0.5
+                border border-transparent
+                rounded-xl
+                p-1 grayscale
+
                 hover:text-[var(--color-primary)]
+                hover:grayscale-0
                 hover:border-[var(--color-primary)]
-                hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
 
                 transition-all duration-300
                 disabled:opacity-20 disabled:cursor-not-allowed
               "
             >
-              <i class="fas fa-minus text-sm m-1"></i>
+              <img src="/icon/icon-less.svg" alt="plus" class="w-5"/>
             </button>
             <span
               class="text-white text-md truncate font-base text-center cursor-pointer"
@@ -1484,18 +1649,21 @@
               :disabled="zoomLevel >= 4"
               class="
               flex-shrink-0
-              text-md border border-transparent rounded-xl
+              text-md
               text-[var(--text-terceary)]
-              px-1.5 py-0.5
+              border border-transparent
+              rounded-xl
+              p-1 grayscale
+
               hover:text-[var(--color-primary)]
+              hover:grayscale-0
               hover:border-[var(--color-primary)]
-              hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
 
               transition-all duration-300
               disabled:opacity-20 disabled:cursor-not-allowed
             "
             >
-              <i class="fas fa-plus text-sm m-1"></i>
+            <img src="/icon/icon-plus.svg" alt="plus" class="w-5"/>
             </button>
           </div>
           <div class="flex-1 items-center w-full">
@@ -1504,11 +1672,12 @@
               class="
                 border border-transparent
                 text-[var(--color-primary)] font-medium text-sm
-                p-1 rounded-xl grayscale mx-2
+                p-1 mx-2
+                rounded-xl grayscale
+
                 hover:text-[var(--text)]
                 hover:border-[var(--color-primary)]
                 hover:grayscale-0
-                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
                 transition-all duration-300
               "
             >
@@ -1533,8 +1702,8 @@ import {
   onMounted,
   computed,
   nextTick,
-  ref,
   watch,
+  ref,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -1559,6 +1728,7 @@ const activeDropdown = ref<(() => void) | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const editingFolderId = ref<number | null>(null);
 const currentBlobURL = ref<string | null>(null);
+const audioRef = ref<HTMLAudioElement | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
@@ -1586,6 +1756,8 @@ const duration = ref(0);
 const volume = ref(0.8);
 const isMuted = ref(false);
 const previousVolume = ref(1);
+const audioCover = ref<string | null>(null);
+const textContent = ref<string | null>(null);
 const controlsVisible = ref(true);
 const hideTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -1602,64 +1774,145 @@ const progressPercent = computed(() => (duration.value ? (currentTime.value / du
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
+async function extractAudioCover(blob: Blob) {
+  audioCover.value = null;
+  try {
+    const buffer = await blob.arrayBuffer();
+    const view = new DataView(buffer);
+
+    const id3 = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2));
+    if (id3 !== 'ID3') return;
+
+    let offset = 10;
+    const end = Math.min(buffer.byteLength, 500000);
+
+    while (offset < end) {
+      const frameId = String.fromCharCode(
+        view.getUint8(offset),
+        view.getUint8(offset + 1),
+        view.getUint8(offset + 2),
+        view.getUint8(offset + 3),
+      );
+
+      const frameSize = view.getUint32(offset + 4);
+      if (frameSize === 0) break;
+
+      if (frameId === 'APIC') {
+        let pos = offset + 10;
+
+        pos += 1; // encoding byte
+
+        while (view.getUint8(pos) !== 0) pos += 1; // mime type
+        pos += 1; // null byte
+
+        pos += 1; // picture type
+
+        while (view.getUint8(pos) !== 0) pos += 1; // description
+        pos += 1; // null byte
+
+        const imageData = new Uint8Array(buffer, pos, offset + 10 + frameSize - pos);
+        const imageBlob = new Blob([imageData]);
+        audioCover.value = URL.createObjectURL(imageBlob);
+        return;
+      }
+
+      offset += 10 + frameSize;
+    }
+  } catch (e) {
+    console.warn('No se pudo extraer la portada:', e);
+  }
+}
+
 async function getBase64(file: FileI) {
-  const base64 = await store.dispatch('files/getCacheFile', {
-    id: file.id,
-  });
+  const base64 = await store.dispatch('files/getCacheFile', { id: file.id });
 
   if (base64) {
-    // create blob url
     const blob = await fetch(base64).then((r) => r.blob());
     const url = URL.createObjectURL(blob);
     currentBlobURL.value = url;
+
+    if (file.contentType.startsWith('audio/')) {
+      await extractAudioCover(blob);
+    }
+
+    if (
+      file.contentType.startsWith('text/') || file.name?.endsWith('.vue') || file.name?.endsWith('.ts') || file.name?.endsWith('.js') || file.name?.endsWith('.py')
+    ) {
+      textContent.value = await blob.text();
+    }
+
+    if (file.contentType.startsWith('application/json')) {
+      try {
+        const raw = await blob.text();
+        textContent.value = JSON.stringify(JSON.parse(raw), null, 2);
+      } catch {
+        textContent.value = await blob.text();
+      }
+    }
+
     return url;
   }
 
   await store.dispatch('files/saveCacheFile', file);
-
   return '';
 }
 
 function togglePlay() {
-  const v = videoRef.value;
-  if (!v) return;
-  if (isPlaying.value) { v.pause(); isPlaying.value = false; } else { v.play(); isPlaying.value = true; }
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+  if (isPlaying.value) {
+    media.pause(); isPlaying.value = false;
+  } else {
+    media.play(); isPlaying.value = true;
+  }
 }
 
 function onTimeUpdate() {
-  currentTime.value = videoRef.value?.currentTime ?? 0;
+  const media = videoRef.value || audioRef.value;
+  currentTime.value = media?.currentTime ?? 0;
 }
 
 function onLoadedMetadata() {
-  duration.value = videoRef.value?.duration ?? 0;
-  videoRef.value.volume = volume.value;
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+  duration.value = media.duration;
+  media.volume = volume.value;
 }
 
 function seek(e) {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+
   const rect = e.currentTarget.getBoundingClientRect();
   const ratio = (e.clientX - rect.left) / rect.width;
-  videoRef.value.currentTime = ratio * duration.value;
+  media.currentTime = ratio * media.duration;
 }
 
 function toggleMute() {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+
   isMuted.value = !isMuted.value;
 
   if (isMuted.value) {
     previousVolume.value = volume.value || 1;
     volume.value = 0;
-    videoRef.value.volume = 0;
-    videoRef.value.muted = true;
+    media.volume = 0;
+    media.muted = true;
   } else {
     volume.value = previousVolume.value;
-    videoRef.value.volume = previousVolume.value;
-    videoRef.value.muted = false;
+    media.volume = previousVolume.value;
+    media.muted = false;
   }
 }
 
 function onVolumeChange() {
-  if (videoRef.value) videoRef.value.volume = volume.value;
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+  media.volume = volume.value;
   isMuted.value = volume.value === 0;
 }
+
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
 }
@@ -2206,6 +2459,7 @@ watch(previewFile, async (file: FileI | null) => {
   volume.value = 1;
   isMuted.value = false;
   previousVolume.value = 1;
+  audioCover.value = null;
 
   if (file) {
     getBase64(file);
@@ -2424,5 +2678,18 @@ input[type='range'].progress-slider::-moz-range-thumb {
   background: var(--color-primary);
   cursor: pointer;
   border: none;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.vinil-spin {
+  animation: spin-slow 10s linear infinite;
+}
+
+.vinil-paused {
+  animation: spin-slow 10s linear paused;
 }
 </style>

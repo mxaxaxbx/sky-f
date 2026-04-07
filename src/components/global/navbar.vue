@@ -1,7 +1,7 @@
 <template>
   <nav
     class="
-      fixed z-50
+      fixed z-50 top-0
       font-alexandria font-sans
       bg-[var(--bg)]
       border-b border-[var(--border)]
