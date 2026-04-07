@@ -1626,7 +1626,27 @@
           </div>
           <!-- zoom controls -->
           <div v-if="previewFile.contentType?.startsWith('image/')" class="flex items-center justify-center px-1 w-full mx-4 mt-1">
-            <div class="flex-1 w-full h-full"></div>
+            <div class="flex flex-1 w-full h-full justify-end">
+              <button
+                @click="fitImageToContainer"
+                class="
+                  border border-transparent
+                  text-[var(--color-primary)] font-medium text-sm
+                  p-1 mx-2
+                  rounded-xl grayscale
+
+                  hover:text-[var(--text)]
+                  hover:border-[var(--color-primary)]
+                  hover:grayscale-0
+                  transition-all duration-300
+                "
+              >
+                <img
+                  src="/icon/icon-reset-zoom.svg"
+                  alt="reset zoom"
+                  class="w-5 h-5"/>
+              </button>
+            </div>
             <div class="flex-2 space-x-6 flex items-center">
             <button
               @click="zoomOut"
