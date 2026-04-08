@@ -3,7 +3,7 @@
     <!-- Backdrop -->
     <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
     <div
-      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm"
       @click="$emit('update:modelValue', false)"
     ></div>
 
