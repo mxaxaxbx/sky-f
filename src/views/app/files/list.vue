@@ -1625,7 +1625,8 @@
             </div>
           </div>
           <!-- zoom controls -->
-          <div v-if="previewFile.contentType?.startsWith('image/')" class="flex items-center justify-center px-1 w-full mx-4 mt-1">
+          <div v-if="previewFile.contentType?.startsWith('image/')"
+            class="flex items-center justify-center px-1 w-full mx-4 mt-1">
             <div class="flex flex-1 w-full h-full justify-end">
               <button
                 @click="fitImageToContainer"
@@ -2080,7 +2081,7 @@ function fitImageToContainer() {
   const scaleX = containerW / naturalW;
   const scaleY = containerH / naturalH;
 
-  zoomLevel.value = Math.min(scaleX, scaleY, 1) * 1.1;
+  zoomLevel.value = Math.min(scaleX, scaleY, 1) * 1.2;
   panOffset.value = { x: 0, y: 0 };
 }
 
