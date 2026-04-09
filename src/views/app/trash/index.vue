@@ -9,7 +9,7 @@
     <div
       class="
         flex flex-col gap-6 justify-center items-center
-        w-full h-[calc(100vh-120px)]
+        w-full h-[calc(100vh-100px)] mt-16
         border-2 border-[var(--text-terceary)] border-dashed
         rounded-2xl
         hover:border-[var(--color-primary)]

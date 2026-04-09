@@ -292,8 +292,8 @@
           </div>
         </template>
       </Dropdown>
+      </div>
     </div>
-  </div>
   </nav>
 </template>
 
