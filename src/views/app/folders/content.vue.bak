@@ -1084,15 +1084,651 @@
       </div>
     </Teleport>
     <!-- preview files -->
-    <PreviewModal
-      v-if="previewFile"
-      v-model="previewFile"
-      :files="fileResults.data"
-      @close="previewFile = null"
-      @open-info="$event ? router.push(`/app/files/details/${$event.id}`) : null"
-      @copy-link="copyLink($event)"
-      @download="downloadFile($event)"
-    />
+    <Teleport to="body">
+      <div
+        v-if="previewFile"
+        class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex flex-col"
+        @click.self="previewFile = null"
+        @keydown.esc="previewFile = null"
+        @mousemove="onPreviewMouseMove"
+        tabindex="0"
+      >
+        <!-- header -->
+        <div
+          class="flex items-center justify-between px-6 pt-6 pb-2 transition-all duration-300"
+          :class="showPreviewHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'"
+        >
+          <!-- icons + title-->
+          <div class="flex items-center gap-2 min-w-0 flex-1 max-w-[30%]">
+            <img v-if="previewFile.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'application/msword' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'application/vnd.ms-excel' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'application/vnd.ms-powerpoint' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-8 w-8" />
+            <img v-else-if="/image\/(png|webp|gif|avif)/.test(previewFile.contentType)" src="/icon/icon-png.svg" alt="png" class="h-8 w-8" />
+            <img v-else-if="previewFile.contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-8 w-8" />
+            <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(previewFile.contentType)" src="/icon/icon-img.svg" alt="img" class="h-8 w-8" />
+            <img v-else-if="/^video\//.test(previewFile.contentType)" src="/icon/icon-video.svg" alt="video" class="h-8 w-8" />
+            <img v-else-if="/^audio\//.test(previewFile.contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-8 w-8" />
+            <img v-else-if="
+                previewFile.name?.toLowerCase().endsWith('.zip') ||
+                previewFile.name?.toLowerCase().endsWith('.rar') ||
+                previewFile.name?.toLowerCase().endsWith('.7z') ||
+                previewFile.name?.toLowerCase().endsWith('.tar') ||
+                previewFile.name?.toLowerCase().endsWith('.gz') ||
+                previewFile.name?.toLowerCase().endsWith('.bz2')
+              "
+              src="/icon/icon-compress.svg"
+              alt="compressed file icon"
+              class="h-8 w-8"
+            />
+            <img v-else src="/icon/icon-file.svg" alt="file" class="h-8 w-8" />
+
+            <span class="text-white text-lg truncate font-medium">{{ previewFile.name }}</span>
+          </div>
+
+          <!-- navigation -->
+          <div class="flex-2 items center space-x-6 mx-4">
+            <!-- flecha izquierda -->
+            <button
+              @click="previewPrev"
+              :disabled="currentPreviewIndex === 0"
+              class="
+                flex-shrink-0
+                text-md border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                px-1.5 py-0.5
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+
+                transition-all duration-300
+                disabled:opacity-20 disabled:cursor-not-allowed
+              "
+            >
+              <i class="fas fa-chevron-left text-sm m-1"></i>
+            </button>
+            <span class="text-white text-base font-lg mx-2">
+                {{ currentPreviewIndex + 1 }} <span class="mx-1 text-[var(--text-terceary)] text-sm">of</span> {{ fileResults.data.length }}
+            </span>
+              <!-- flecha derecha -->
+            <button
+              @click="previewNext"
+              :disabled="currentPreviewIndex === fileResults.data.length - 1"
+              class="
+                flex-shrink-0
+                text-md border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                px-1.5 py-0.5
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+
+                transition-all duration-300
+                disabled:opacity-20 disabled:cursor-not-allowed
+              "
+            >
+              <i class="fas fa-chevron-right text-sm m-1"></i>
+            </button>
+          </div>
+
+          <!-- actions-->
+          <div class="flex items-centern justify-end gap-4 min-w-0 flex-1 max-w-[30%]">
+            <!-- info -->
+            <router-link
+              :to="`/app/files/details/${previewFile.id}`"
+              class="
+                inline-flex items-center gap-1
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <img src="/icon/icon_details.svg" alt="download" class="h-6"/>
+            </router-link>
+
+            <!-- Copy link button -->
+            <button
+              @click="copyLink(previewFile!)"
+              class="
+                inline-flex items-center gap-1
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <img src="/icon/icon-link.svg" alt="download" class="h-6 -rotate-45"/>
+            </button>
+
+            <!--download-->
+            <button
+              @click="downloadFile(previewFile!)"
+              class="
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <i v-if="downloading" class="fas fa-spinner fa-spin text-white"></i>
+              <img src="/icon/icon_download_2.svg" alt="download" class="h-6"/>
+            </button>
+
+            <!--close-->
+            <button
+              @click="() => { if (isFullscreen) toggleFullscreen(); previewFile = null; }"
+              class="
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                px-2 py-0.5
+                rounded-xl grayscale
+
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:hover:border-[var(--color-primary)]
+                focus:grayscale-0
+                transition-all duration-300
+              "
+            >
+            <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- content -->
+        <div class="flex-1 flex flex-col  items-center overflow-hidden px-4 pb-2">
+          <!-- preview -->
+          <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full rounded-2xl bg-white/0">
+            <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full">
+              <!-- images -->
+              <!-- eslint-disable-next-line vuejs-accessibility/mouse-events-have-key-events -->
+              <img
+                ref="imageRef"
+                v-if="currentBlobURL && previewFile.contentType.startsWith('image/')"
+                :src="currentBlobURL"
+                :alt="previewFile.name"
+                :style="{
+                  transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+                  transition: isPanning ? 'none' : 'transform 0.15s ease',
+                  transformOrigin: 'center',
+                  cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+                }"
+                @wheel.prevent="onWheelZoom"
+                @mousedown="onPanStart"
+                @mousemove="onPanMove"
+                @mouseup="onPanEnd"
+                @mouseleave="onPanEnd"
+                @blur="onPanEnd"
+                @load="fitImageToContainer"
+                class="full object-contain select-none"
+              />
+              <!-- video -->
+              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+              <template v-else-if="currentBlobURL && previewFile.contentType.startsWith('video/')">
+                <div
+                  class="
+                    relative
+                    flex flex-col
+                    items-center justify-center
+                    w-full h-full
+                    rounded-2xl
+                    bg-gradient-to-t from-black to-transparent
+                  "
+                >
+                  <!-- video -->
+                  <video
+                    :src="currentBlobURL"
+                    :title="`Video preview of ${previewFile.name || 'video'}`"
+                    class="max-w-full max-h-full object-contain cursor-pointer"
+                    ref="videoRef"
+                    @timeupdate="onTimeUpdate"
+                    @loadedmetadata="onLoadedMetadata"
+                    @ended="isPlaying = false"
+                    @click="togglePlay"
+                    @keydown.space.prevent="togglePlay"
+                  >
+                    <track kind="captions" />
+                  </video>
+
+                  <!-- controles -->
+                  <div
+                    class="
+                      absolute bottom-0 left-0 right-0
+                      flex flex-col
+                      px-4 pb-2 pt-8 gap-2
+                      transtion-all duration-300
+                    "
+                    :class="isFullscreen
+                      ? (showPreviewHeader ? 'opacity-100'
+                      : 'opacity-0 pointer-events-none') : 'opacity-100'
+                    "
+                    style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%)
+                    "
+                  >
+                    <!-- barra de progreso -->
+                    <div
+                      @click="seek"
+                      @keydown="seek"
+                      role="slider"
+                      tabindex="0"
+                      :aria-valuenow="Math.round(progressPercent)"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      class="relative mx-2 h-1 bg-[var(--text-terceary)] rounded-full cursor-pointer"
+                    >
+                      <div class="absolute top-0 left-0 h-full rounded-full bg-[var(--color-primary)]" :style="{ width: progressPercent + '%' }" />
+                      <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[var(--color-primary)]" :style="{ left: progressPercent + '%' }" />
+                    </div>
+
+                    <!-- botones -->
+                    <div class="flex items-center gap-2 mb-1">
+                      <button
+                        @click="togglePlay"
+                        class="
+                          border border-transparent
+                          text-[var(--color-primary)] font-medium text-sm
+                          p-1 rounded-xl grayscale
+                          hover:text-[var(--text)]
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-all duration-300
+                        "
+                      >
+                        <img v-if="isPlaying" src="/icon/icon-pause.svg" alt="Pause" class="h-6 w-6" />
+                        <img v-else src="/icon/icon-play.svg" alt="Play" class="h-6 w-6" />
+                      </button>
+
+                      <!--volumen-->
+                      <div
+                        class="
+                          group
+                          relative flex items-center
+                          border border-transparent gap-2
+                          py-1 px-1.5 rounded-xl grayscale
+
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-all duration-300
+                        "
+                      >
+                        <!-- Botón volumen -->
+                        <button @click="toggleMute">
+                          <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
+                          <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
+                        </button>
+
+                        <!-- Slider: oculto por defecto, visible al hacer hover en el grupo -->
+                        <div class="
+                          w-0 h-5 overflow-hidden opacity-0 flex items-center justify-center
+                          group-hover:w-24 group-hover:opacity-100
+                          transition-all duration-300 ease-in-out
+                        ">
+                          <label class="sr-only" for="volume-slider">Volumen</label>
+                          <input
+                            id="volume-slider"
+                            type="range" min="0" max="1" step="0.01"
+                            :value="volume"
+                            @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
+                            class="volume-slider w-24"
+                            :style="{
+                              background: `linear-gradient(to right, var(--color-primary)
+                              ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
+                            }"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="flex-1 flex items-center justify-end w-full">
+                      <button
+                        @click="toggleFullscreen"
+                        class="
+                          border border-transparent
+                          text-[var(--color-primary)] font-medium text-sm
+                          p-1 rounded-xl grayscale
+                          hover:text-[var(--text)]
+                          hover:border-[var(--color-primary)]
+                          hover:grayscale-0
+                          transition-all duration-300
+                        "
+                      >
+                        <img
+                          :src="isFullscreen
+                          ? '/icon/icon-fullscreen-close.svg' : '/icon/icon-fullscreen.svg'"
+                          alt="fullscreen"
+                          class="w-6 h-6"/>
+                      </button>
+                    </div>
+                    </div>
+                  </div>
+
+                </div>
+              </template>
+
+              <!-- audio -->
+              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+              <div
+                v-else-if="currentBlobURL && previewFile.contentType.startsWith('audio/')"
+                class="
+                  relative
+                  flex flex-col items-center justify-center
+                  w-full h-full
+                  bg-gradient-to-t from-black to-transparent
+                  rounded-2xl gap-4"
+              >
+                <div
+                  :class="['relative w-96 h-96', isPlaying ? 'vinil-spin' : 'vinil-paused']">
+                  <img
+                    src="/icon/icon-vinil.svg"
+                    alt="vinil"
+                    class="w-full h-full"
+                  />
+                  <div class="absolute inset-0 flex items-center justify-center overflow-hidden">
+                    <img
+                      v-if="audioCover"
+                      :src="audioCover"
+                      alt="Audio cover"
+                      class="w-40 h-40 scale-[1.2] object-cover rounded-full shadow-lg border-2 border-white/60"
+                    />
+                    <div
+                    v-else
+                    class="
+                      w-44 h-44 rounded-full overflow-hidden flex items-center justify-center
+                      bg-gradient-to-b from-pink-900 to-pink-900
+                      shadow-lg border-4 border-white/70">
+                    <img
+                      src="/icon/icon-audio.svg"
+                      alt="Audio"
+                      class="w-full h-full scale-[1.35]"
+                    />
+                  </div>
+                  </div>
+                  <div class="absolute inset-0 flex items-center justify-center z-10">
+                    <div class="w-4 h-4 bg-black rounded-full"></div>
+                  </div>
+                </div>
+                <audio
+                  ref="audioRef"
+                  :src="currentBlobURL"
+                  class="w-full"
+                  @play="isPlaying = true"
+                  @pause="isPlaying = false"
+                  @ended="isPlaying = false"
+                  @timeupdate="onTimeUpdate"
+                  @loadedmetadata="onLoadedMetadata"
+                >
+                  <track kind="captions" />
+                </audio>
+                <!-- controles -->
+                <div
+                  class="
+                    absolute bottom-0 left-0 right-0
+                    flex flex-col
+                    px-4 pb-2 pt-8 gap-2
+                    transtion-all duration-300
+                  "
+                  :class="isFullscreen
+                    ? (showPreviewHeader ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none') : 'opacity-100'
+                  "
+                  style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%)
+                  "
+                >
+                  <!-- barra de progreso -->
+                  <div
+                    @click="seek"
+                    @keydown="seek"
+                    role="slider"
+                    tabindex="0"
+                    :aria-valuenow="Math.round(progressPercent)"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    class="relative mx-2 h-1 bg-[var(--text-terceary)] rounded-full cursor-pointer"
+                  >
+                    <div class="absolute top-0 left-0 h-full rounded-full bg-[var(--color-primary)]" :style="{ width: progressPercent + '%' }" />
+                    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[var(--color-primary)]" :style="{ left: progressPercent + '%' }" />
+                  </div>
+
+                  <!-- botones -->
+                  <div class="flex items-center gap-2 mb-1">
+                    <button
+                      @click="togglePlay"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-400
+                      "
+                    >
+                      <img v-if="isPlaying" src="/icon/icon-pause.svg" alt="Pause" class="h-6 w-6" />
+                      <img v-else src="/icon/icon-play.svg" alt="Play" class="h-6 w-6" />
+                    </button>
+
+                    <!--volumen-->
+                    <div
+                      class="
+                        group
+                        relative flex items-center
+                        border border-transparent gap-2
+                        py-1 px-1.5 rounded-xl grayscale
+
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <!-- Botón volumen -->
+                      <button @click="toggleMute">
+                        <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
+                        <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
+                      </button>
+
+                      <!-- Slider: oculto por defecto, visible al hacer hover en el grupo -->
+                      <div class="
+                        w-0 h-5 overflow-hidden opacity-0 flex items-center justify-center
+                        group-hover:w-24 group-hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      ">
+                        <label class="sr-only" for="volume-slider">Volumen</label>
+                        <input
+                          id="volume-slider"
+                          type="range" min="0" max="1" step="0.01"
+                          :value="volume"
+                          @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
+                          class="volume-slider w-24"
+                          :style="{
+                            background: `linear-gradient(to right, var(--color-primary)
+                            ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
+                          }"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- text -->
+              <pre
+                v-else-if="currentBlobURL && previewFile.contentType.startsWith('text/')"
+                class="
+                  w-full h-full overflow-auto
+                  text-sm text-white font-mono
+                  bg-white/5 rounded-2xl
+                  p-6 leading-relaxed
+                  whitespace-pre-wrap break-words
+                "
+              >{{ textContent }}</pre>
+
+              <!-- code -->
+              <pre
+              v-else-if="currentBlobURL && (
+                previewFile.contentType.startsWith('text/') ||
+                previewFile.name?.endsWith('.vue') ||
+                previewFile.name?.endsWith('.ts') ||
+                previewFile.name?.endsWith('.js') ||
+                previewFile.name?.endsWith('.py')
+              )"
+                class="
+                  w-full h-full overflow-auto
+                  text-sm text-emerald-300 font-mono
+                  bg-white/5 rounded-2xl
+                  p-6 leading-relaxed
+                  whitespace-pre-wrap break-words
+                "
+              >{{ textContent }}
+              </pre>
+
+              <!-- pdf -->
+              <embed
+                v-else-if="currentBlobURL && previewFile.contentType === 'application/pdf'"
+                :src="currentBlobURL"
+                type="application/pdf"
+                class="w-full h-full rounded-2xl"
+              />
+              <!-- other -->
+              <div v-else class="flex items-center gap-2 text-[var(--text-terceary)] text-sm mt-1">
+                <img src="/icon/icon-file.svg" alt="file" class="h-30 w-30" />
+                <i class="fas fa-eye-slash text-xs"></i>
+                <span>No se admite la vista previa para este tipo de archivo.</span>
+              </div>
+            </div>
+          </div>
+          <!-- zoom controls -->
+          <div v-if="previewFile.contentType?.startsWith('image/')" class="flex items-center justify-center px-1 w-full mx-4 mt-1">
+            <div class="flex flex-1 w-full h-full justify-end">
+              <button
+                @click="fitImageToContainer"
+                class="
+                  border border-transparent
+                  text-[var(--color-primary)] font-medium text-sm
+                  p-1 mx-2
+                  rounded-xl grayscale
+
+                  hover:text-[var(--text)]
+                  hover:border-[var(--color-primary)]
+                  hover:grayscale-0
+                  transition-all duration-300
+                "
+              >
+                <img
+                  src="/icon/icon-reset-zoom.svg"
+                  alt="reset zoom"
+                  class="w-5 h-5"/>
+              </button>
+            </div>
+            <div class="flex-2 space-x-6 flex items-center">
+            <button
+              @click="zoomOut"
+              :disabled="zoomLevel <= 0.25"
+              class="
+                flex-shrink-0
+                text-md
+                text-[var(--text-terceary)]
+                border border-transparent
+                rounded-xl
+                p-1 grayscale
+
+                hover:text-[var(--color-primary)]
+                hover:grayscale-0
+                hover:border-[var(--color-primary)]
+
+                transition-all duration-300
+                disabled:opacity-20 disabled:cursor-not-allowed
+              "
+            >
+              <img src="/icon/icon-less.svg" alt="plus" class="w-5"/>
+            </button>
+            <span
+              class="text-white text-md truncate font-base text-center cursor-pointer"
+              @click="resetZoom"
+              @keydown.enter="resetZoom"
+              tabindex="0"
+            >
+              {{ Math.round(zoomLevel * 100) }}%
+            </span>
+            <button
+              @click="zoomIn"
+              :disabled="zoomLevel >= 4"
+              class="
+              flex-shrink-0
+              text-md
+              text-[var(--text-terceary)]
+              border border-transparent
+              rounded-xl
+              p-1 grayscale
+
+              hover:text-[var(--color-primary)]
+              hover:grayscale-0
+              hover:border-[var(--color-primary)]
+
+              transition-all duration-300
+              disabled:opacity-20 disabled:cursor-not-allowed
+            "
+            >
+            <img src="/icon/icon-plus.svg" alt="plus" class="w-5"/>
+            </button>
+          </div>
+          <div class="flex-1 items-center w-full">
+            <button
+              @click="toggleFullscreen"
+              class="
+                border border-transparent
+                text-[var(--color-primary)] font-medium text-sm
+                p-1 mx-2
+                rounded-xl grayscale
+
+                hover:text-[var(--text)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                transition-all duration-300
+              "
+            >
+              <img
+                :src="isFullscreen
+                ? '/icon/icon-fullscreen-close.svg' : '/icon/icon-fullscreen.svg'"
+                alt="fullscreen"
+                class="w-5 h-5"/>
+            </button>
+          </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1115,7 +1751,6 @@ import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
-const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 
 const router = useRouter();
 const store = useStore();
@@ -1129,12 +1764,15 @@ const draggedItem = ref<FileI | FolderI | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
 const editingFolderId = ref<number | string | null>(null);
+const currentBlobURL = ref<string | null>(null);
+const audioRef = ref<HTMLAudioElement | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
 const moveToFolderModal = ref(false);
 const createShareModal = ref(false);
+const showPreviewHeader = ref(true);
 const editedFolderName = ref('');
 const editedFileName = ref('');
 const showFolders = ref(true);
@@ -1146,6 +1784,23 @@ const shareUrl = ref('');
 const ghostVisible = ref(false);
 const ghostX = ref(0);
 const ghostY = ref(0);
+const zoomLevel = ref(1);
+const isFullscreen = ref(false);
+const videoRef = ref(null);
+const isPlaying = ref(false);
+const currentTime = ref(0);
+const duration = ref(0);
+const volume = ref(0.8);
+const isMuted = ref(false);
+const previousVolume = ref(1);
+const audioCover = ref<string | null>(null);
+const textContent = ref<string | null>(null);
+const controlsVisible = ref(true);
+const hideTimer: ReturnType<typeof setTimeout> | null = null;
+const isPanning = ref(false);
+const panOffset = ref({ x: 0, y: 0 });
+const panStart = ref({ x: 0, y: 0 });
+const imageRef = ref<HTMLImageElement | null>(null);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1153,6 +1808,8 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
+const currentPreviewIndex = computed(() => fileResults.value.data.findIndex((f: FileI) => f.id === previewFile.value?.id));
+const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -1173,6 +1830,326 @@ async function getFolderDetails() {
   } finally {
     loading.value = false;
   }
+}
+
+async function extractAudioCover(blob: Blob) {
+  audioCover.value = null;
+  try {
+    const buffer = await blob.arrayBuffer();
+    const view = new DataView(buffer);
+
+    const id3 = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2));
+    if (id3 !== 'ID3') return;
+
+    let offset = 10;
+    const end = Math.min(buffer.byteLength, 500000);
+
+    while (offset < end) {
+      const frameId = String.fromCharCode(
+        view.getUint8(offset),
+        view.getUint8(offset + 1),
+        view.getUint8(offset + 2),
+        view.getUint8(offset + 3),
+      );
+
+      const frameSize = view.getUint32(offset + 4);
+      if (frameSize === 0) break;
+
+      if (frameId === 'APIC') {
+        let pos = offset + 10;
+
+        pos += 1; // encoding byte
+
+        while (view.getUint8(pos) !== 0) pos += 1; // mime type
+        pos += 1; // null byte
+
+        pos += 1; // picture type
+
+        while (view.getUint8(pos) !== 0) pos += 1; // description
+        pos += 1; // null byte
+
+        const imageData = new Uint8Array(buffer, pos, offset + 10 + frameSize - pos);
+        const imageBlob = new Blob([imageData]);
+        audioCover.value = URL.createObjectURL(imageBlob);
+        return;
+      }
+
+      offset += 10 + frameSize;
+    }
+  } catch (e) {
+    console.warn('No se pudo extraer la portada:', e);
+  }
+}
+
+async function getBase64(file: FileI) {
+  const base64 = await store.dispatch('files/getCacheFile', { id: file.id });
+
+  if (base64) {
+    const blob = await fetch(base64).then((r) => r.blob());
+    const url = URL.createObjectURL(blob);
+    currentBlobURL.value = url;
+
+    if (file.contentType.startsWith('audio/')) {
+      await extractAudioCover(blob);
+    }
+
+    if (
+      file.contentType.startsWith('text/') || file.name?.endsWith('.vue') || file.name?.endsWith('.ts') || file.name?.endsWith('.js') || file.name?.endsWith('.py')
+    ) {
+      textContent.value = await blob.text();
+    }
+
+    if (file.contentType.startsWith('application/json')) {
+      try {
+        const raw = await blob.text();
+        textContent.value = JSON.stringify(JSON.parse(raw), null, 2);
+      } catch {
+        textContent.value = await blob.text();
+      }
+    }
+
+    return url;
+  }
+
+  await store.dispatch('files/saveCacheFile', file);
+  return '';
+}
+
+function togglePlay() {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+  if (isPlaying.value) {
+    media.pause(); isPlaying.value = false;
+  } else {
+    media.play(); isPlaying.value = true;
+  }
+}
+
+function onTimeUpdate() {
+  const media = videoRef.value || audioRef.value;
+  currentTime.value = media?.currentTime ?? 0;
+}
+
+function onLoadedMetadata() {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+  duration.value = media.duration;
+  media.volume = volume.value;
+}
+
+function seek(e) {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  media.currentTime = ratio * media.duration;
+}
+
+function toggleMute() {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+
+  isMuted.value = !isMuted.value;
+
+  if (isMuted.value) {
+    previousVolume.value = volume.value || 1;
+    volume.value = 0;
+    media.volume = 0;
+    media.muted = true;
+  } else {
+    volume.value = previousVolume.value;
+    media.volume = previousVolume.value;
+    media.muted = false;
+  }
+}
+
+function onVolumeChange() {
+  const media = videoRef.value || audioRef.value;
+  if (!media) return;
+  media.volume = volume.value;
+  isMuted.value = volume.value === 0;
+}
+
+function getRenderedImageSize() {
+  const img = imageRef.value;
+  if (!img) return { w: 0, h: 0 };
+
+  const rect = img.getBoundingClientRect();
+  return {
+    w: rect.width / zoomLevel.value,
+    h: rect.height / zoomLevel.value,
+  };
+}
+
+function clampPan(zoom: number) {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+
+  const { w, h } = getRenderedImageSize();
+
+  const scaledW = w * zoom;
+  const scaledH = h * zoom;
+
+  const maxX = Math.max(0, (scaledW - containerW) / 2);
+  const maxY = Math.max(0, (scaledH - containerH) / 2);
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, panOffset.value.x)),
+    y: Math.min(maxY, Math.max(-maxY, panOffset.value.y)),
+  };
+}
+
+function onPanStart(e: MouseEvent) {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const { w, h } = getRenderedImageSize();
+  const scaledW = w * zoomLevel.value;
+  const scaledH = h * zoomLevel.value;
+
+  const hasOverflow = scaledW > container.clientWidth || scaledH > container.clientHeight;
+  if (!hasOverflow) return;
+
+  isPanning.value = true;
+  panStart.value = {
+    x: e.clientX - panOffset.value.x,
+    y: e.clientY - panOffset.value.y,
+  };
+  e.preventDefault();
+}
+
+function onPanMove(e: MouseEvent) {
+  if (!isPanning.value) return;
+
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+
+  const { w, h } = getRenderedImageSize();
+
+  const scaledW = w * zoomLevel.value;
+  const scaledH = h * zoomLevel.value;
+
+  // Cuanto sobresale la imagen del contenedor a cada lado
+  const maxX = Math.max(0, (scaledW - containerW) / 2);
+  const maxY = Math.max(0, (scaledH - containerH) / 2);
+
+  const rawX = e.clientX - panStart.value.x;
+  const rawY = e.clientY - panStart.value.y;
+
+  panOffset.value = {
+    x: Math.min(maxX, Math.max(-maxX, rawX)),
+    y: Math.min(maxY, Math.max(-maxY, rawY)),
+  };
+}
+
+function onPanEnd() {
+  isPanning.value = false;
+}
+
+function zoomIn() {
+  zoomLevel.value = Math.min(zoomLevel.value + 0.10, 4);
+  clampPan(zoomLevel.value);
+}
+
+function zoomOut() {
+  zoomLevel.value = Math.max(zoomLevel.value - 0.10, 0.10);
+  clampPan(zoomLevel.value);
+}
+
+function resetZoom() {
+  zoomLevel.value = 1;
+  panOffset.value = { x: 0, y: 0 };
+}
+
+function onWheelZoom(e: WheelEvent) {
+  if (!previewFile.value?.contentType?.startsWith('image/')) return;
+  e.preventDefault();
+  if (e.deltaY < 0) zoomIn();
+  else zoomOut();
+}
+
+function fitImageToContainer() {
+  const img = imageRef.value;
+  if (!img) return;
+
+  const container = img.parentElement;
+  if (!container) return;
+
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+  const naturalW = img.naturalWidth;
+  const naturalH = img.naturalHeight;
+
+  if (!naturalW || !naturalH) return;
+
+  const scaleX = containerW / naturalW;
+  const scaleY = containerH / naturalH;
+
+  zoomLevel.value = Math.min(scaleX, scaleY, 1) * 1.1;
+  panOffset.value = { x: 0, y: 0 };
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    isFullscreen.value = true;
+  } else {
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
+}
+
+let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement;
+  if (!isFullscreen.value) {
+    showPreviewHeader.value = true;
+    if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
+  }
+}
+
+function onPreviewMouseMove(e: MouseEvent) {
+  if (!isFullscreen.value) return;
+
+  const nearTop = e.clientY < 200;
+  const nearBottom = e.clientY > window.innerHeight - 200;
+
+  if (nearTop || nearBottom) {
+    showPreviewHeader.value = true;
+    if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
+  } else {
+    if (hideHeaderTimeout) clearTimeout(hideHeaderTimeout);
+    hideHeaderTimeout = setTimeout(() => {
+      showPreviewHeader.value = false;
+    }, 800);
+  }
+}
+
+function previewNext() {
+  const next = fileResults.value.data[currentPreviewIndex.value + 1];
+  if (next) { previewFile.value = next; resetZoom(); }
+}
+
+function previewPrev() {
+  const prev = fileResults.value.data[currentPreviewIndex.value - 1];
+  if (prev) { previewFile.value = prev; resetZoom(); }
 }
 
 async function moveToFolder() {
@@ -1641,6 +2618,23 @@ async function saveFileName(currentFile: FileI) {
 }
 
 function handleKeydown(e: KeyboardEvent) {
+  if (previewFile.value) {
+    if (e.key === 'Escape') {
+      previewFile.value = null;
+      e.stopImmediatePropagation();
+      return;
+    }
+    if (e.key === 'ArrowRight') { previewNext(); return; }
+    if (e.key === 'ArrowLeft') { previewPrev(); return; }
+    if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); return; }
+    if (e.key === 'm' || e.key === 'M') { toggleMute(); return; }
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      togglePlay();
+      e.preventDefault();
+      return;
+    }
+  }
+
   if (e.key !== 'F2') return;
   if (editingFileId.value || editingFolderId.value) return;
 
@@ -1658,16 +2652,34 @@ onMounted(() => {
   getFolders();
   getFiles();
   window.addEventListener('keydown', handleKeydown);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
 });
 
+watch(previewFile, async (file: FileI | null) => {
+  isPlaying.value = false;
+  progressPercent.value = 0;
+  volume.value = 1;
+  isMuted.value = false;
+  previousVolume.value = 1;
+  audioCover.value = null;
+  panOffset.value = { x: 0, y: 0 };
+  isPanning.value = false;
+  zoomLevel.value = 1;
+
+  if (file) {
+    getBase64(file);
+  }
+});
 watch(() => route.params.id, () => {
   getFolders();
   getFiles();
   previewFile.value = null;
+  currentBlobURL.value = null;
 }, { immediate: true });
 
 </script>

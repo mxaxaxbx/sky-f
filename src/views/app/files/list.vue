@@ -1224,7 +1224,7 @@ import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
-const PreviewModal = defineAsyncComponent(() => import('./preview-modal.vue'));
+const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 
 const router = useRouter();
 const store = useStore();
