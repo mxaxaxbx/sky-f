@@ -30,7 +30,7 @@
         fixed top-10
         flex flex-col justify-center
         w-full px-2 pt-2
-        bg-[var(--bg)] z-40
+        bg-[var(--bg)] z-20
 
         sm:hidden
       "
