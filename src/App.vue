@@ -6,7 +6,8 @@
       class="fixed inset-0 bg-black opacity-50 z-30 hidden"
       @click="toggleSidebar"
       @keydown="toggleSidebar"
-      ></div>
+      >
+    </div>
     <!-- menu -->
     <Notifications />
     <Navbar />
@@ -130,9 +131,11 @@
           <div class="w-full h-px bg-line"></div>
           <div
             class="
-            container mx-auto px-12 text-center
+              container mx-auto px-12 text-center
 
-            sm:px-24">
+              sm:px-24
+            "
+          >
             <div
               class="
                 flex flex-col
@@ -141,12 +144,14 @@
                 py-16 mb-8
 
                 sm:flex-row sm:items-start
-              ">
+              "
+              >
               <a
                 :href="`${usersLink}`"
                 target="_blank"
-                class="mb-10 sm:mb-0"
-                >
+                class="mb-10 sm:mb-0
+                "
+              >
                 <img
                   :src="isLight
                   ? '/img/logo-digi-light.svg'
@@ -168,7 +173,8 @@
 
                   sm:mr-20 sm:mx-0
                   sm:space-x-20
-                ">
+                "
+              >
               <div class="text-left">
                 <h3 class="text-sm text-[var(--text)] font-regular mb-4">Products</h3>
                 <ul
@@ -176,35 +182,53 @@
                     space-y-2
                     text-xs text-[var(--text)] font-light
                     pl-1
-                  ">
-                  <li><router-link
-                    :to="isAuth ? '/app' : '/'"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">
-                      Sky</router-link></li>
-                  <li><a
-                    href="https://fireweb.digiapps.com.co/"
-                    target="_blank"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">Fireweb</a></li>
-                  <li><a
-                    href="#"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">Care
+                  "
+                >
+                  <li>
+                    <router-link
+                      :to="isAuth ? '/app' : '/'"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Sky
+                    </router-link>
+                  </li>
+                  <li>
+                    <a
+                      href="https://fireweb.digiapps.com.co/"
+                      target="_blank"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Fireweb
                     </a>
                   </li>
-                  <li><a
-                    href="#"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">Utils
+                  <li>
+                    <a
+                      href="https://care.digiapps.com.co/"
+                      target="_blank"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Care
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://utils.digiapps.com.co/"
+                      target="_blank"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Utils
                     </a>
                   </li>
                 </ul>
@@ -216,22 +240,32 @@
                     space-y-2
                     text-xs text-[var(--text)] font-light
                     pl-1
-                  ">
-                  <li><a
-                    href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
-                    target="_blank"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">
-                      Help Center</a></li>
-                  <li><a
-                    href="https://discord.gg/n8NHa6sJbc"
-                    target="_blank"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">Discord</a></li>
+                  "
+                >
+                  <li>
+                    <a
+                      href="https://mail.google.com/mail/?view=cm&fs=1&to=support@digiapps.com.co"
+                      target="_blank"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Help Center
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://discord.gg/n8NHa6sJbc"
+                      target="_blank"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Discord
+                    </a>
+                  </li>
                 </ul>
               </div>
               <div class="text-left">
@@ -241,39 +275,46 @@
                     space-y-2
                     text-xs text-[var(--text)] font-light
                     pl-1
-                  ">
-                  <li><a
-                    :href="`${usersLink}/privacy-policy`"
-                    target="_blank"
-                    class="
-                      opacity-50 hover:opacity-100
-                      transition-all duration-300 ease-in-out
-                      ">
-                      Privacy Policy</a></li>
+                  "
+                >
+                  <li>
+                    <a
+                      :href="`${usersLink}/privacy-policy`"
+                      target="_blank"
+                      class="
+                        opacity-50 hover:opacity-100
+                        transition-all duration-300 ease-in-out
+                      "
+                    >
+                      Privacy Policy
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
             </div>
+
             <div
               class="
                 flex justify-between items-center
                 border-t border-[var(--border)]
                 pt-8
                 pb-20
-              ">
-            <p class="text-xs text-[var(--text-secondary)] font-light">&copy;
-              {{ currentYear }} digi systems All rights reserved.</p>
+              "
+            >
+              <p class="text-xs text-[var(--text-secondary)] font-light">&copy;
+                {{ currentYear }} digi systems All rights reserved.</p>
               <button
-              @click="toggleTheme"
-              class="
-              rounded-full">
-              <img
-                :src="isLight
-                ? '/icon/icon-light.svg'
-                : '/icon/icon-dark.svg'"
-                alt="theme toggle"
-                class="w-5 h-5 opacity-70 hover:opacity-100 transition" />
-            </button>
+                @click="toggleTheme"
+                class="rounded-full">
+                <img
+                  :src="isLight
+                  ? '/icon/icon-light.svg'
+                  : '/icon/icon-dark.svg'"
+                  alt="theme toggle"
+                  class="w-5 h-5 opacity-70 hover:opacity-100 transition"
+                />
+              </button>
             </div>
           </div>
         </footer>

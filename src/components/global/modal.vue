@@ -5,7 +5,8 @@
     <div
       class="fixed inset-0 bg-black/60 backdrop-blur-sm"
       @click="$emit('update:modelValue', false)"
-    ></div>
+    >
+    </div>
 
     <!-- Modal -->
     <div class="flex min-h-full items-center justify-center mx-2  sm:items-start sm:pt-[20vh]">
@@ -29,8 +30,9 @@
           'max-w-md': size === 'md',
           'max-w-lg': size === 'lg',
           'max-w-xl': size === 'xl',
-        }
-        ]"
+          }
+          ]
+        "
       >
         <!-- Header -->
         <div class="mb-4 border-b border-[var(--border)] px-4">
@@ -38,27 +40,27 @@
             <slot name="header">Modal Title</slot>
           </h3>
           <button
-          type="button"
-          @click="$emit('update:modelValue', false)"
-          class="
-            absolute right-1.5 top-1.5 px-1 py-0.5
-            text-md border border-transparent rounded-xl
-            text-[var(--text-terceary)]
-            bg-[var(--bg-secondary)]
-            hover:text-[var(--color-primary)]
-            hover:bg-[var(--hover-bg)]
-            hover:border-[var(--color-primary)]
-            hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
+            type="button"
+            @click="$emit('update:modelValue', false)"
+            class="
+              absolute right-1.5 top-1.5 px-1 py-0.5
+              text-md border border-transparent rounded-xl
+              text-[var(--text-terceary)]
+              bg-[var(--bg-secondary)]
+              hover:text-[var(--color-primary)]
+              hover:bg-[var(--hover-bg)]
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]
 
-            transition-all duration-300
-          "
-        >
-        <i class="fa-solid fa-xmark m-1"></i>
-        </button>
+              transition-all duration-300
+            "
+          >
+            <i class="fa-solid fa-xmark m-1"></i>
+          </button>
         </div>
 
         <!-- Content -->
-        <div class="mt-2 text-[#7f7f7f] text-sm px-4">
+        <div class="mt-2 text-[var(--text-terceary)] text-sm px-4">
           <slot name="content">Default content goes here</slot>
         </div>
 
