@@ -758,7 +758,7 @@
       </Transition>
     </div>
 
-    <Modal v-model="moveToFolderModal" size="xl">
+    <Modal v-model="moveToFolderModal" size="xl" @click.stop>
       <template #header>
         <h3 class="">Move:
           <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
@@ -873,7 +873,7 @@
       </template>
     </Modal>
 
-    <Modal v-model="createFolderModal" size="xs">
+    <Modal v-model="createFolderModal" size="xs" @click.stop>
       <template #header>
         <h3 class="">
         New folder
@@ -954,7 +954,7 @@
       </template>
     </Modal>
 
-    <Modal v-model="createShareModal" size="md">
+    <Modal v-model="createShareModal" size="md" @click.stop>
       <template #header>
         <h3 class=""> Copy link:
           <p class="font-normal text-sm mt-2">
@@ -1048,7 +1048,7 @@
       </template>
     </Modal>
 
-    <Modal v-model="infoModal" size="xl">
+    <Modal v-model="infoModal" size="xl" @click.stop>
       <template #header>
         <div v-if="selectedFiles.length > 0" class="w-full">
         <div class="flex items-center w-full gap-2">
@@ -1104,7 +1104,7 @@
           <div class="flex-col items-center justify-between gap-2">
             <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Type:</h3>
             <p class="text-xl font-light text-[var(--text)]">
-              {{ selectedFiles[0].contentType }}
+              {{ formatContentType(selectedFiles[0].contentType, selectedFiles[0].name) }}
             </p>
           </div>
           <div class="flex-col items-center justify-between gap-2">
@@ -1196,17 +1196,17 @@
 
             isFullscreen
               ? 'fixed top-0 z-50 w-full rounded-t-2xl'
-              : 'relative px-6 pb-2 pt-6'
+              : 'relative px-3 pb-2 pt-4 sm:px-6 sm:pt-6'
           ]"
         >
           <div
-            class="flex justify-between transition-all duration-300"
+            class="flex flex-col justify-between gap-2 transition-all duration-300 sm:gap-0 sm:flex-row"
             :class=" isFullscreen
               ? 'rounded-t-2xl bg-gradient-to-b from-black/100 via-black/50 to-transparent p-2 h-40 items-start'
               : 'bg-transparent items-center' "
             >
           <!-- icons + title-->
-          <div class="flex items-center gap-2 min-w-0 flex-1 max-w-[30%]">
+          <div class="flex items-center gap-2 min-w-0 flex-1 w-full">
             <img v-if="previewFile.contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-8 w-8" />
             <img v-else-if="previewFile.contentType === 'application/msword' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-8 w-8" />
             <img v-else-if="previewFile.contentType === 'application/vnd.ms-excel' || previewFile.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-8 w-8" />
@@ -1277,7 +1277,7 @@
           </div>
 
           <!-- actions-->
-          <div class="flex items-centern justify-end gap-4 min-w-0 flex-1 max-w-[30%]">
+          <div class="flex items-center px-6 justify-between gap-4 min-w-0 flex-1 w-full sm:px-0 sm:justify-end">
             <!-- info -->
             <button
               @click="() => { store.commit('files/setSelectedFiles', [previewFile]); infoModal = true; }"
@@ -1783,7 +1783,7 @@
               ? 'opacity-100 -translate-y-0'
               : 'opacity-0 translate-y-full pointer-events-none',
             isFullscreen
-              ?'mb-0'
+              ?'mb-1'
               :''
             ]"
           >
@@ -2300,7 +2300,7 @@ function fitImageToContainer() {
   const scaleX = containerW / naturalW;
   const scaleY = containerH / naturalH;
 
-  zoomLevel.value = Math.min(scaleX, scaleY, 1) * 1.2;
+  zoomLevel.value = Math.min(scaleX, scaleY, 1);
   panOffset.value = { x: 0, y: 0 };
 }
 
@@ -2789,6 +2789,52 @@ async function saveFolderName(folder: FolderI) {
   } finally {
     editingFolderId.value = null;
   }
+}
+
+function formatContentType(contentType: string, name?: string): string {
+  const map: Record<string, string> = {
+    'application/pdf': 'PDF Document',
+    'application/msword': 'Microsoft Word',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Microsoft Word (OpenXML)',
+    'application/vnd.ms-excel': 'Microsoft Excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Microsoft Excel (OpenXML)',
+    'application/vnd.ms-powerpoint': 'Microsoft PowerPoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'Microsoft PowerPoint (OpenXML)',
+    'image/jpeg': 'JPEG Image',
+    'image/jpg': 'JPG Image',
+    'image/png': 'PNG Image',
+    'image/gif': 'GIF Image',
+    'image/webp': 'WebP Image',
+    'image/svg+xml': 'SVG Image',
+    'image/bmp': 'BMP Image',
+    'image/tiff': 'TIFF Image',
+    'image/heic': 'HEIC Image',
+    'image/heif': 'HEIF Image',
+    'video/mp4': 'MP4 Video',
+    'video/webm': 'WebM Video',
+    'video/ogg': 'OGG Video',
+    'video/quicktime': 'QuickTime Video',
+    'audio/mpeg': 'MP3 Audio',
+    'audio/ogg': 'OGG Audio',
+    'audio/wav': 'WAV Audio',
+    'audio/flac': 'FLAC Audio',
+    'audio/aac': 'AAC Audio',
+    'text/plain': 'Plain Text',
+    'text/html': 'HTML Document',
+    'text/css': 'CSS File',
+    'text/javascript': 'JavaScript File',
+    'application/json': 'JSON File',
+    'application/zip': 'ZIP Archive',
+    'application/x-rar-compressed': 'RAR Archive',
+    'application/x-7z-compressed': '7-Zip Archive',
+  };
+
+  if (map[contentType]) return map[contentType];
+
+  const ext = name?.split('.').pop()?.toUpperCase();
+  if (ext) return `${ext} File`;
+
+  return contentType;
 }
 
 function handleKeydown(e: KeyboardEvent) {
