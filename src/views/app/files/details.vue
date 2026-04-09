@@ -400,6 +400,7 @@
       </p>
     </div>
   </div>
+
   <Modal v-model="createShareModal" size="md">
     <template #header>
       <h3 class=""> Copy link:

@@ -217,11 +217,11 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   async getCacheFile(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: { id: number | string },
-  ): Promise<string | null> {
+  ): Promise<string> {
     const db = await getDB();
 
     // Skip if not supported
-    if (!db) return null;
+    if (!db) return '';
 
     const tx = db.transaction('files', 'readonly');
     const store = tx.objectStore('files');
@@ -233,7 +233,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
         if (request.result) {
           resolve(request.result.base64);
         } else {
-          resolve(null);
+          resolve('');
         }
       };
 
