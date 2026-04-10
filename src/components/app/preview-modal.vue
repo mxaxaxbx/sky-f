@@ -104,7 +104,8 @@
           <div class="flex items-center px-6 justify-between gap-4 min-w-0 flex-1 w-full sm:px-0 sm:justify-end">
             <!-- info -->
             <button
-              @click="$emit('open-info', file)"
+              @click="emit('open-info', file, imageDimensions, duration)"
+              @touchend.prevent="emit('open-info', file, imageDimensions, duration)"
               class="
                 border border-transparent
                 text-[var(--color-primary)] font-medium text-sm

@@ -1154,7 +1154,7 @@
               {{ formatTime(duration) }}
             </p>
             <p class="text-sm font-light text-[var(--text-terceary)]">
-              Segunds
+              Minutes
             </p>
           </div>
         </div>

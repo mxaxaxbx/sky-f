@@ -233,7 +233,7 @@
           @dragstart="onDragStart('file', file)"
           @click="selectItem($event, 'file', file, index)"
           @keydown.enter="selectItem($event, 'file', file, index)"
-          @dblclick="router.push(`/app/files/details/${file.id}`);"
+          @dblclick="previewFile = file"
 
           class="
             group
@@ -343,8 +343,8 @@
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
 
                     <!-- info file-->
-                    <router-link
-                      :to="`/app/files/details/${file.id}`"
+                    <button
+                      @click="infoModal = true"
                       class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
@@ -357,14 +357,14 @@
                       <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
                       />
                       <span>info</span>
-                    </router-link>
+                    </button>
                   </div>
 
                   <!-- zone actions -->
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
                     <!-- preview file -->
                     <button
-                    @click="store.dispatch('files/previewFile', file)"
+                    @click="previewFile = file"
                     class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
@@ -467,7 +467,7 @@
     </div>
   </div>
 
-  <Modal v-model="moveToFolderModal" size="xl">
+  <Modal v-model="moveToFolderModal" size="xl" @click.stop>
     <template #header>
         <h3 class="">Move:
           <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
@@ -508,6 +508,7 @@
           <button
             v-for="folder in folderResults.data"
             :key="folder.id"
+            v-show="!selectedFolders.map((f: FolderI) => f.id == folder.id).includes(true)"
             type="button"
             @click="selectedFolder = folder.id"
             class="
@@ -608,7 +609,7 @@
     </template>
   </Modal>
 
-  <Modal v-model="createFolderModal" size="xs">
+  <Modal v-model="createFolderModal" size="xs" @click.stop>
     <template #header>
       <h3 class="">
         New folder
@@ -688,7 +689,7 @@
     </template>
   </Modal>
 
-  <Modal v-model="createShareModal" size="md">
+  <Modal v-model="createShareModal" size="md" @click.stop>
       <template #header>
         <h3 class=""> Copy link:
           <p class="font-normal text-sm mt-2" v-for="file in selectedFiles" :key="file.id">
@@ -782,6 +783,135 @@
         </div>
       </template>
   </Modal>
+
+  <Modal v-model="infoModal" size="xl" @click.stop>
+      <template #header>
+        <div v-if="selectedFiles.length > 0" class="w-full">
+          <!-- icons + title -->
+          <div class="flex items-center w-[90%] gap-2">
+            <img v-if="selectedFiles[0].contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-12 w-12" />
+            <img v-else-if="selectedFiles[0].contentType === 'application/msword' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-12" />
+            <img v-else-if="selectedFiles[0].contentType === 'application/vnd.ms-excel' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-12" />
+            <img v-else-if="selectedFiles[0].contentType === 'application/vnd.ms-powerpoint' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-12" />
+            <img v-else-if="/image\/(png|webp|gif|avif)/.test(selectedFiles[0].contentType)" src="/icon/icon-png.svg" alt="png" class="h-12 w-12" />
+            <img v-else-if="selectedFiles[0].contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-12 w-12" />
+            <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(selectedFiles[0].contentType)" src="/icon/icon-img.svg" alt="img" class="h-12" />
+            <img v-else-if="/^video\//.test(selectedFiles[0].contentType)" src="/icon/icon-video.svg" alt="video" class="h-12" />
+            <img v-else-if="/^audio\//.test(selectedFiles[0].contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-12" />
+            <img v-else-if="
+                selectedFiles[0].name?.toLowerCase().endsWith('.zip') ||
+                selectedFiles[0].name?.toLowerCase().endsWith('.rar') ||
+                selectedFiles[0].name?.toLowerCase().endsWith('.7z') ||
+                selectedFiles[0].name?.toLowerCase().endsWith('.tar') ||
+                selectedFiles[0].name?.toLowerCase().endsWith('.gz') ||
+                selectedFiles[0].name?.toLowerCase().endsWith('.bz2')
+              "
+              src="/icon/icon-compress.svg"
+              alt="compressed file icon"
+              class="h-12 w-12"
+            />
+            <img v-else src="/icon/icon-file.svg" alt="file" class="h-12 w-12" />
+
+            <!-- titel -->
+            <h3 v-if="selectedFiles[0].id" class="font-regular text-white text-lg w-[90%] break-all sm:text-xl">
+              {{ selectedFiles[0].name }}
+            </h3>
+          </div>
+        </div>
+      </template>
+
+      <template #content>
+        <div
+          v-if="selectedFiles.length > 0"
+          class="
+            grid grid-cols-1 pb-2 px-3
+            gap-3
+
+            sm:grid-cols-2 sm:gap-6
+          "
+        >
+          <!-- size -->
+          <div class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Size:</h3>
+            <p class="text-xl font-light text-[var(--text)]">
+              {{ formatFileSize(Number(selectedFiles[0].size)) }}
+            </p>
+          </div>
+          <!-- Type -->
+          <div class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Type:</h3>
+            <p class="text-xl font-light text-[var(--text)]">
+              {{ formatContentType(selectedFiles[0].contentType, selectedFiles[0].name) }}
+            </p>
+          </div>
+          <!-- Date uploaded -->
+          <div class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
+              Date uploaded:
+            </h3>
+            <p class="text-xl font-light text-[var(--text)]">
+              {{ moment(selectedFiles[0].created * 1000).format('DD/MM/YYYY HH:mm a') }}
+            </p>
+            <p class="text-sm font-light text-[var(--text-terceary)]">
+              {{ moment(selectedFiles[0].created * 1000).fromNow() }}
+            </p>
+          </div>
+          <!-- Last modification -->
+          <div class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
+              Last modification:
+              </h3>
+            <p class="text-xl font-light text-[var(--text)]">
+              {{ moment(selectedFiles[0].updated * 1000).format('DD/MM/YYYY HH:mm a') }}
+            </p>
+            <p class="text-sm font-light text-[var(--text-terceary)]">
+              {{ moment(selectedFiles[0].updated* 1000).fromNow() }}
+            </p>
+          </div>
+          <!-- Dimensions -->
+          <div v-if="imageDimensions" class="flex-col items-center justify-between gap-2">
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Dimensions:</h3>
+            <p class="text-xl font-light text-[var(--text)]">
+              {{ imageDimensions.width }} x {{ imageDimensions.height }}
+            </p>
+            <p class="text-sm font-light text-[var(--text-terceary)]">
+              Pixels
+            </p>
+          </div>
+          <!-- Duration -->
+          <div
+            v-if="selectedFiles[0].contentType?.startsWith('video/') || selectedFiles[0].contentType?.startsWith('audio/')"
+            class="flex-col items-center justify-between gap-2
+            "
+          >
+            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Duration:</h3>
+            <p class="text-xl font-light text-[var(--text)]">
+              {{ formatTime(duration) }}
+            </p>
+            <p class="text-sm font-light text-[var(--text-terceary)]">
+              Minutes
+            </p>
+          </div>
+        </div>
+      </template>
+  </Modal>
+
+  <!-- preview files -->
+  <PreviewModal
+  v-if="previewFile"
+  v-model="previewFile"
+  :files="files"
+  :disable-navigation="infoModal || createShareModal || moveToFolderModal || createFolderModal"
+  @close="previewFile = null"
+  @copy-link="copyLink($event)"
+  @download="downloadFile($event)"
+  @open-info="(f, dims, dur) => {
+  store.commit('files/setSelectedFiles', [f]);
+  imageDimensions = dims;
+  duration = dur;
+  infoModal = true;
+}"
+/>
 </template>
 
 <script setup lang="ts">
@@ -802,28 +932,34 @@ import { FolderI, FoldersResultI } from '@/store/folders/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
+const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 
 const router = useRouter();
 const store = useStore();
 const route = useRoute();
 
+const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const selectedFolder = ref<number | string | null>(null);
 const draggedFolder = ref<number | string | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
+const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
 const moveToFolderModal = ref(false);
 const createShareModal = ref(false);
 const createFolderModal = ref(false);
+const infoModal = ref(false);
 const folderName = ref('');
 const loading = ref(false);
 const copied = ref(false);
 const shareUrl = ref('');
+const duration = ref(0);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const searchResult = computed<SearchResultI>(() => store.state.files.searchResult);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const folderId = computed<number>(() => Number(route.params.id as string));
 
@@ -1000,6 +1136,13 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / (k ** i)).toFixed(2))} ${sizes[i]}`;
 }
 
+function formatTime(seconds: number): string {
+  if (!seconds || !Number.isFinite(seconds)) return '00:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
 function onDragStart(type: string, item: FileI | FolderI) {
   if (type === 'file') {
     if (!isSelectedFile(item as FileI)) {
@@ -1171,10 +1314,38 @@ async function moveToTrash() {
   getSearchResult();
 }
 
+function formatContentType(contentType: string, name?: string): string {
+  const map: Record<string, string> = {
+    'application/pdf': 'PDF Document',
+    'application/msword': 'Microsoft Word',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Microsoft Word (OpenXML)',
+    'application/vnd.ms-excel': 'Microsoft Excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Microsoft Excel (OpenXML)',
+    'application/vnd.ms-powerpoint': 'Microsoft PowerPoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'Microsoft PowerPoint (OpenXML)',
+    'image/jpeg': 'JPEG Image',
+    'image/png': 'PNG Image',
+    'image/gif': 'GIF Image',
+    'image/webp': 'WebP Image',
+    'image/svg+xml': 'SVG Image',
+    'video/mp4': 'MP4 Video',
+    'audio/mpeg': 'MP3 Audio',
+    'audio/wav': 'WAV Audio',
+    'text/plain': 'Plain Text',
+    'application/json': 'JSON File',
+    'application/zip': 'ZIP Archive',
+  };
+  if (map[contentType]) return map[contentType];
+  const ext = name?.split('.').pop()?.toUpperCase();
+  if (ext) return `${ext} File`;
+  return contentType;
+}
+
 // Watch for route query changes
 watch(() => route.query.q, () => {
   getSearchResult();
-});
+  previewFile.value = null;
+}, { immediate: true });
 
 onMounted(() => {
   getSearchResult();
