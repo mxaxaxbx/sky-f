@@ -1,7 +1,7 @@
 <template>
   <nav
     class="
-      fixed z-50
+      fixed z-50 top-0
       font-alexandria font-sans
       bg-[var(--bg)]
       border-b border-[var(--border)]
@@ -43,11 +43,12 @@
           <input
             v-model="query"
             @input="handleInput"
+            @keydown.esc.prevent="handleEsc"
             type="text"
             placeholder="Search everything"
             class="
               w-full
-              pl-10 pr-4 py-1
+              pl-7 pr-2 py-1
               bg-[var(--bg-secondary)]
               border border-[#0B77F3]/50
               rounded-full
@@ -56,13 +57,14 @@
               hover:shadow-[0_0_2px_2px_rgba(10,119,243,0.5)]
               hover:border-[var(--hover-border)]
               focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:border-[var(--hover-border)]
               focus:outline-none
               transition-all duration-300
             "/>
 
             <!-- Ícono dentro del input -->
             <img src="/icon/icon-search.svg" alt="Search Icon"
-              class="absolute left-3 top-1/2 -translate-y-1/2 h-4 pointer-events-none" />
+              class="absolute left-2 top-1/2 -translate-y-1/2 h-4 pointer-events-none" />
          </form>
       </div>
 
@@ -88,47 +90,47 @@
 
       <Dropdown v-if="isAuth">
         <template #trigger="{ toggle }">
-          <button
-            @click="toggle"
-            class="
-              relative flex items-center justify-center
-              bg-[var(--color-primary)]
-              h-6 w-6
-              mr-0
-              rounded-full
-              text-white
-
-              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              transition-all duration-300 ease-in-out
-            ">
-            <!-- User initials -->
-            <span
-              v-if="!user.profilePhoto && user.firstName && user.lastName"
-              class="font-light text-sm uppercase">
-              {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
-            </span>
-
-            <!-- Profile photo -->
-            <img v-else-if="user.profilePhoto" :src="user.profilePhoto" alt="User profile photo"
-              class="h-8 rounded-full object-cover" />
-
-            <!-- Fallback icon -->
-            <i v-else class="fas fa-user text-white text-sm" aria-hidden="true"></i>
-
-            <!-- Optional status indicator -->
-            <span
+            <button
+              @click="toggle"
               class="
-                absolute
-                bottom-[-1.5px] right-[-3.5px]
-                block
-                h-[10px] w-[10px]
+                relative flex items-center justify-center
+                bg-[var(--color-primary)]
+                h-6 w-6
+                mr-0
                 rounded-full
-                bg-green-500
-                border-2 border-[var(--bg)]
-                ">
-            </span>
+                text-white
+
+                hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                transition-all duration-300 ease-in-out
+              ">
+              <!-- User initials -->
+              <span
+                v-if="!user.profilePhoto && user.firstName && user.lastName"
+                class="font-light text-sm uppercase">
+                {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+              </span>
+
+              <!-- Profile photo -->
+              <img v-else-if="user.profilePhoto" :src="user.profilePhoto" alt="User profile photo"
+                class="h-8 rounded-full object-cover" />
+
+              <!-- Fallback icon -->
+              <i v-else class="fas fa-user text-white text-sm" aria-hidden="true"></i>
           </button>
+
+          <!-- Optional status indicator -->
+          <span
+            class="
+              absolute
+              bottom-[-1.5px] right-[-3.5px]
+              block
+              h-[10px] w-[10px]
+              rounded-full
+              bg-green-500
+              border-2 border-[var(--bg)]
+              ">
+          </span>
         </template>
 
         <template #content="{ }">
@@ -196,7 +198,7 @@
                 ">Community
             </h1>
 
-            <a href="https://discord.com/invite/UsGXbTkJSE"
+            <a href="https://discord.gg/n8NHa6sJbc"
               target="_blank"
               class="
                 flex items-center justify-between
@@ -290,22 +292,22 @@
           </div>
         </template>
       </Dropdown>
+      </div>
     </div>
-  </div>
   </nav>
 </template>
 
 <script setup lang="ts">
 import {
-  ref,
-  watch,
   defineAsyncComponent,
-  computed,
-  onMounted,
   onUnmounted,
+  onMounted,
+  computed,
+  watch,
+  ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 import router from '@/router';
 
 import { UserI } from '@/store/auth/state';
@@ -313,10 +315,10 @@ import { UserI } from '@/store/auth/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const store = useStore();
 const route = useRoute();
-let searchTimeout: number | undefined;
 
 const { VUE_APP_DG_USERS_APP } = process.env;
 let scrollHandler: (() => void) | null = null;
+let searchTimeout: number | undefined;
 let timeout: number | undefined;
 
 const isMobileMenuOpen = ref(false);
@@ -326,9 +328,17 @@ const isRising = ref(false);
 const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 const query = ref<string>('');
 
-const isAuth = computed(() => store.getters['auth/isAuth']);
-const user = computed<UserI>(() => store.getters['auth/user']);
 const isLight = computed(() => store.state.theme.theme === 'light');
+const user = computed<UserI>(() => store.getters['auth/user']);
+const isAuth = computed(() => store.getters['auth/isAuth']);
+
+const handleEsc = () => {
+  if (query.value.trim()) {
+    query.value = '';
+  } else {
+    router.replace('/app/files');
+  }
+};
 
 function onImageError(event: Event) {
   const target = event.target as HTMLImageElement;
@@ -338,7 +348,7 @@ function onImageError(event: Event) {
 async function handleSearch() {
   const payload = {
     page: 1,
-    query: query.value,
+    q: query.value,
   };
 
   await store.dispatch('files/filter', payload);
@@ -347,10 +357,13 @@ async function handleSearch() {
       ...payload,
     },
   });
-  // if current route is not /app/files, redirect to /app/files
-  if (route.path !== '/app/files') {
-    router.push('/app/files');
-  }
+
+  router.push({
+    path: '/app/search',
+    query: {
+      ...payload,
+    },
+  });
 }
 
 async function handleInput() {

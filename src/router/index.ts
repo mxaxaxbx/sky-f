@@ -49,16 +49,17 @@ const routes: Array<RouteRecordRaw> = [
         name: 'app-home',
         // component: () => import('../views/app/home.vue'),
         meta: {
-          title: 'Inicio',
+          title: 'Home',
         },
         redirect: { name: 'app-files-list' },
       },
+      // files
       {
         path: 'files',
         name: 'app-files',
         component: () => import('../views/app/files/index.vue'),
         meta: {
-          title: 'Archivos',
+          title: 'Cloud Drive',
           requiresAuth: true,
         },
         children: [
@@ -67,7 +68,7 @@ const routes: Array<RouteRecordRaw> = [
             name: 'app-files-list',
             component: () => import('../views/app/files/list.vue'),
             meta: {
-              title: 'Archivos',
+              title: 'Cloud Drive',
             },
           },
           {
@@ -75,10 +76,50 @@ const routes: Array<RouteRecordRaw> = [
             name: 'app-files-details',
             component: () => import('../views/app/files/details.vue'),
             meta: {
-              title: 'Detalles del archivo',
+              title: 'Details',
             },
           },
         ],
+      },
+      // search
+      {
+        path: 'search',
+        name: 'app-search',
+        component: () => import('../views/app/search/index.vue'),
+        meta: {
+          title: 'Search',
+          requiresAuth: true,
+        },
+      },
+      // folders
+      {
+        path: 'folders',
+        name: 'app-folders',
+        component: () => import('../views/app/folders/index.vue'),
+        meta: {
+          title: 'Folders',
+          requiresAuth: true,
+        },
+        children: [
+          {
+            path: ':id',
+            name: 'app-folders-content',
+            component: () => import('../views/app/folders/content.vue'),
+            meta: {
+              title: 'Contenido de la carpeta',
+            },
+          },
+        ],
+      },
+      // trash
+      {
+        path: 'trash',
+        name: 'app-trash',
+        component: () => import('../views/app/trash/index.vue'),
+        meta: {
+          title: 'Event Horizon',
+          requiresAuth: true,
+        },
       },
     ],
   },

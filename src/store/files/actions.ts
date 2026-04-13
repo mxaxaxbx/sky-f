@@ -2,23 +2,29 @@ import { ActionTree, ActionContext } from 'vuex';
 
 import { storageClient } from '@/http-client';
 import { snakeToCamel, camelToSnake } from '@/utils';
+import { getDB } from '@/utils/indexeddb';
 
 import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
+import { FolderI } from '../folders/state';
 
 export const actions: ActionTree<FilesStateI, RootStateI> = {
-
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: {
       query: string;
       page: number;
+      orderBy: string;
+      order: string;
+      folderId: number | string | null;
     },
   ): Promise<void> {
     // convert the payload to url query params
     let params = '';
 
-    Object.entries(payload).forEach(([key, value]) => {
+    const payloadData = camelToSnake(payload);
+
+    Object.entries(payloadData).forEach(([key, value]) => {
       params += `${key}=${value}&`;
     });
 
@@ -28,22 +34,27 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async upload(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FormData,
+    payload: {
+      formData: FormData;
+      folderId: number | string | null;
+    },
   ): Promise<void> {
-    // Clear previous upload files and reset progress
-    context.commit('clearUploadFiles');
+    const completedFiles: FileI[] = [];
 
     try {
-      // get the files from the payload
-      const files = payload.getAll('file');
+      // extract files ONCE
+      const files = payload.formData.getAll('file') as File[];
 
-      files.forEach((file: FormDataEntryValue) => {
-        const fileObj = file as File;
+      // eslint-disable-next-line no-param-reassign
+      context.state.uploadFiles = [];
+
+      // populate UI state
+      files.forEach((file) => {
         context.state.uploadFiles.push({
           id: 0,
-          name: fileObj.name,
-          size: fileObj.size,
-          contentType: fileObj.type,
+          name: file.name,
+          size: file.size,
+          contentType: file.type,
           userId: 0,
           r2Key: '',
           r2Url: '',
@@ -51,66 +62,71 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           error: '',
           created: 0,
           updated: 0,
+          folderId: payload.folderId,
         });
       });
 
-      const { data } = await storageClient.post('/api/storage/generate-upload-url', camelToSnake(context.state.uploadFiles));
+      // request upload URLs
+      const { data } = await storageClient.post(
+        '/api/storage/generate-upload-url',
+        camelToSnake(context.state.uploadFiles),
+      );
 
       const dataArray: FileI[] = snakeToCamel(data);
 
-      const completedFiles: FileI[] = [];
+      // upload all files in parallel
+      await Promise.all(
+        dataArray.map(async (item: FileI, index: number) => {
+          const file = files[index];
+          if (!file || !item.r2Url) return;
 
-      dataArray.forEach(async (item: FileI) => {
-        if (item.r2Url) {
-          // get file from formdata payload by name
-          const file = payload.getAll('file').find((fileItem: FormDataEntryValue) => (fileItem as File).name === item.name);
-          if (file) {
-            try {
-              const response = await fetch(item.r2Url, {
-                method: 'PUT',
-                body: file,
-              });
-              console.log('response', response);
-              if (response.ok) {
-                completedFiles.push(item);
-              }
-            } catch (error: unknown) {
+          try {
+            const response = await fetch(item.r2Url, {
+              method: 'PUT',
+              body: file,
+              headers: {
+                'Content-Type': file.type || 'application/octet-stream',
+              },
+            });
+
+            if (response.ok) {
               // eslint-disable-next-line no-param-reassign
-              (item as FileI).error = error as string;
-              console.error(error);
+              item.uploadCompleted = true;
+              completedFiles.push(item);
+            } else {
+              // eslint-disable-next-line no-param-reassign
+              item.error = `Upload failed (${response.status})`;
             }
+          } catch (error: unknown) {
+            // eslint-disable-next-line no-param-reassign
+            item.error = String(error);
           }
-        }
+        }),
+      );
 
-        const { data: confirmedData } = await storageClient.post('/api/storage/confirm-uploads', camelToSnake(completedFiles));
-        console.log('confirmedData', confirmedData);
-        // TODO: validate current page and query through route query params
-        context.dispatch('filter', {
-          query: '',
-          page: 1,
+      // confirm uploads ONCE
+      if (completedFiles.length > 0) {
+        const { data: confirmedData } = await storageClient.post(
+          '/api/storage/confirm-uploads',
+          camelToSnake(completedFiles),
+        );
+
+        const confirmed: FileI[] = snakeToCamel(confirmedData);
+
+        confirmed.forEach((file) => {
+          context.dispatch('saveCacheFile', file);
         });
-      });
-    } finally {
-      // Always clear upload files and reset progress after upload completes or fails
-      context.commit('clearUploadFiles');
-    }
-  },
+      }
 
-  async download(
-    context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI,
-  ): Promise<void> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No token found');
+      // refresh list
+      await context.dispatch('filter', {
+        query: '',
+        page: 1,
+        folderId: payload.folderId,
+      });
+    } catch (error) {
+      console.error(error);
     }
-    const DG_STORAGE = process.env.VUE_APP_DG_SKY_SVC;
-    const link = `${DG_STORAGE}/api/storage/getfile/${payload.id}?token=${token}`;
-    const linkel = document.createElement('a');
-    linkel.href = link;
-    linkel.target = '_blank';
-    linkel.click();
-    linkel.remove();
   },
 
   async getFileDetails(
@@ -119,35 +135,189 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   ): Promise<void> {
     const { data } = await storageClient.get(`/api/storage/filedetails/${payload}`);
     context.commit('setFile', snakeToCamel(data));
+    context.dispatch('saveCacheFile', snakeToCamel(data));
   },
 
   async downloadFile(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
+    const cached = await context.dispatch('getCacheFile', {
+      id: payload.id,
+    });
+
+    if (cached) {
+      console.log('Loaded from cache');
+
+      const link = document.createElement('a');
+      link.href = cached;
+      link.download = payload.name;
+      link.click();
+
+      return;
+    }
+
+    console.log('Downloading and caching');
+
+    await context.dispatch('saveCacheFile', payload);
+
+    const base64 = await context.dispatch('getCacheFile', {
+      id: payload.id,
+    });
+
+    if (base64) {
+      const link = document.createElement('a');
+      link.href = base64;
+      link.download = payload.name;
+      link.click();
+      return;
+    }
+
+    console.log('Error downloading file');
+  },
+
+  async saveCacheFile(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
+    console.log('saveCacheFile', payload);
+    const db = await getDB();
+    // Skip if not supported
+    if (!db) return;
+
+    const { data } = await storageClient.get(
+      `/api/storage/get-download-url/${payload.id}`,
+    );
+
+    const { url } = data;
+
+    const blob = await fetch(url).then((r) => r.blob());
+
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const tx = db.transaction('files', 'readwrite');
+    const store = tx.objectStore('files');
+
+    store.put({
+      id: payload.id,
+      base64,
+      name: payload.name,
+      type: payload.contentType,
+    });
+
+    // eslint-disable-next-line no-return-await
+    await new Promise((resolve) => { tx.oncomplete = resolve; });
+  },
+
+  async getCacheFile(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: { id: number | string },
+  ): Promise<string> {
+    const db = await getDB();
+
+    // Skip if not supported
+    if (!db) return '';
+
+    const tx = db.transaction('files', 'readonly');
+    const store = tx.objectStore('files');
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(payload.id);
+
+      request.onsuccess = () => {
+        if (request.result) {
+          resolve(request.result.base64);
+        } else {
+          resolve('');
+        }
+      };
+
+      request.onerror = reject;
+    });
+  },
+
+  async previewFile(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI,
+  ): Promise<void> {
+    // Abrir la ventana ANTES del await — Safari requiere que sea síncrono
+    const win = window.open('', '_blank');
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
     );
     const { url } = data;
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = payload.name; // fallback only
-    a.style.display = 'none';
-
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    a.remove();
+    if (win) {
+      win.location.href = url;
+    } else {
+      // fallback por si el popup fue bloqueado
+      const linkEl = document.createElement('a');
+      linkEl.href = url;
+      linkEl.target = '_blank';
+      linkEl.click();
+      linkEl.remove();
+    }
+    await context.dispatch('saveCacheFile', payload);
   },
 
   async getDownloadUrl(
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
-  ): Promise<void> {
+  ): Promise<string> {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
+    context.dispatch('saveCacheFile', payload);
     return url;
+  },
+
+  async search(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: {
+      q: string,
+      page: number,
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/storage/search?q=${payload.q}&page=${payload.page}`);
+    context.commit('setSearchResult', snakeToCamel(data));
+  },
+
+  async moveFilesToFolder(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/files/move-files-to-folder', camelToSnake(payload));
+    context.commit('setFiles', snakeToCamel(data));
+  },
+
+  async changeFileName(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: {
+      id: number | string,
+      name: string,
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.put('/api/files/change-file-name', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async restoreFiles(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/restore-files-in-root-folder', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async removeFilesFromTrash(
+    context: ActionContext<FilesStateI, RootStateI>,
+    payload: FileI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/remove-files-definitely', camelToSnake(payload));
+    console.log('data', data);
   },
 
 };

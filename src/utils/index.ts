@@ -1,6 +1,10 @@
 import { toRaw } from 'vue';
 
 const camelToSnake = (value: any): any => {
+  // if (typeof value === 'string') {
+  //   return value.replace(/([A-Z])/g, '_$1').toLowerCase();
+  // }
+
   if (Array.isArray(value)) {
     return value.map(camelToSnake);
   }
@@ -55,6 +59,10 @@ const snakeToCamel = (value: any): any => {
   if (Array.isArray(normalized)) {
     return normalized.map(snakeToCamel);
   }
+
+  // if (typeof normalized === 'string') {
+  //   return normalized.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+  // }
 
   if (normalized && typeof normalized === 'object') {
     const obj: any = {};

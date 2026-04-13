@@ -1,3 +1,25 @@
+export interface SearchItemI {
+  id: string | number;
+  name: string;
+  itemType: string;
+  size: number;
+  contentType: string;
+  userId: string | number;
+  folderId: null | number;
+  isTrash: boolean;
+  uploadCompleted: boolean;
+  created: number;
+  updated: number;
+}
+
+export interface SearchResultI {
+  data: SearchItemI[];
+  page: number;
+  perPage: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface FileI {
   id: string | number;
   name: string;
@@ -8,6 +30,7 @@ export interface FileI {
   r2Url: string;
   uploadCompleted: boolean;
   error: string;
+  folderId: null | number | string;
   created: number;
   updated: number;
 }
@@ -25,6 +48,8 @@ export interface FilesStateI {
   uploadProgress: number;
   uploadFiles: FileI[];
   file: FileI;
+  searchResult: SearchResultI;
+  selectedFiles: FileI[];
 }
 
 export const state: FilesStateI = {
@@ -47,7 +72,16 @@ export const state: FilesStateI = {
     r2Url: '',
     uploadCompleted: false,
     error: '',
+    folderId: null,
     created: 0,
     updated: 0,
   },
+  searchResult: {
+    data: [],
+    page: 1,
+    perPage: 0,
+    total: 0,
+    totalPages: 0,
+  },
+  selectedFiles: [],
 };

@@ -20,15 +20,21 @@
       <div
         class="
           container
-          flex flex-row items-center justify-center
-          mx-auto my-8 px-2 gap-4 sm:gap-20
-        ">
+          flex flex-row items-center justify-center w-full
+          mx-auto my-8 gap-4
+          sm:gap-2
+          md:gap-0
+          lg:gap-12 lg:mx-auto
+        "
+      >
         <h2
           id="animated-heading"
           class="
-            text-2xl text-left mb-4 font-semibold
+            text-3xl text-left mb-4 font-semibold mx-2
 
-            md:text-3xl lg:text-5xl">
+            sm:text-2xl lg:text-5xl
+          "
+        >
             We built a private cloud<br>
             that puts you in control,<br>
             with a fast, intuitive,<br>
@@ -38,21 +44,24 @@
 
         <!--data rain-->
       <div id="wrapper2"
-        class="opacity-50 hidden md:block"
-        ref="wrapper2">
-        <canvas ref="canvas2" class="block"></canvas>
+        class="opacity-50 hidden md:inline"
+        ref="wrapper2
+        "
+      >
+        <canvas ref="canvas2" class="block md:w-72 lg:w-96"></canvas>
       </div>
     </div>
 
       <!-- Tarjetas de características -->
     <div
-        class="
-          container w-full
-          flex flex-col items-center justify-center
-          mx-auto gap-4 my-12
+      class="
+        container w-full
+        flex flex-col items-center justify-center
+        mx-auto gap-4 my-12 px-4
 
-          sm:flex-row
-          ">
+        sm:flex-row md:px-2 sm:gap-2 md:gap-4 lg:px-4
+      "
+    >
 
         <!-- seguridad -->
         <a
@@ -64,7 +73,7 @@
             flex flex-col items-center
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            h-96 w-80 sm:w-72 pt-6
+            h-96 w-full sm:w-72 md:w-72 pt-6
             rounded-2xl
             cursor-pointer
             overflow-hidden
@@ -142,7 +151,7 @@
               flex flex-col
               bg-[var(--bg-secondary)]
               border border-[var(--border)]
-              h-96 w-80 sm:w-72 pt-6
+              h-96 w-full sm:w-72 pt-6
               rounded-2xl
               cursor-pointer
               overflow-hidden
@@ -219,8 +228,11 @@
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
             pt-6 h-96 overflow-hidden
-            rounded-2xl w-80 sm:w-auto
+            rounded-2xl w-full
             cursor-pointer
+
+            sm:w-auto
+            lg:w-full md:max-w-[550px]
 
             hover:border-[var(--color-primary)]
             hover:bg-[var(--hover-bg)]
@@ -323,7 +335,7 @@
     </div>
   </section>
 </template>
-<script setup>
+<script setup lang="ts">
 import {
   reactive,
   onMounted,
@@ -378,36 +390,23 @@ onMounted(() => {
   const svgObject = document.getElementById('Welcome');
   if (!svgObject) return;
 
-  let started = false;
-
-  const startAnimation = () => {
-    if (started) return;
-    started = true;
-
-    const doc = svgObject.contentDocument;
-    if (!doc) return;
-
-    const svg = doc.querySelector('svg');
-    if (!svg) return;
-
-    // Primera animación rápida
+  const runAnimation = () => {
     gsap.fromTo(
-      svg,
+      svgObject,
       { x: '0%' },
       {
         x: '-10%',
         duration: 1.5,
         ease: 'power2.out',
         onComplete: () => {
-          // Animación infinita lenta
           gsap.fromTo(
-            svg,
+            svgObject,
             { x: '-10%' },
             {
               x: '-100%',
               duration: 130,
               ease: 'linear',
-              repeat: 1,
+              repeat: -1, // -1 para infinito, no 1
             },
           );
         },
@@ -415,39 +414,11 @@ onMounted(() => {
     );
   };
 
-  const initSvg = () => {
-    if (svgObject.contentDocument?.readyState === 'complete') {
-      startAnimation();
-    } else {
-      svgObject.addEventListener('load', startAnimation, { once: true });
-    }
-  };
-
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          initSvg();
-          obs.unobserve(svgObject);
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px',
-    },
-  );
-
-  observer.observe(svgObject);
-
-  // 🔥 Fallback: por si ya está visible al cargar
-  setTimeout(() => {
-    const rect = svgObject.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      initSvg();
-      observer.unobserve(svgObject);
-    }
-  }, 100);
+  if ((svgObject as HTMLObjectElement).contentDocument) {
+    runAnimation();
+  } else {
+    svgObject.addEventListener('load', runAnimation, { once: true });
+  }
 });
 
 // end Welcome animation

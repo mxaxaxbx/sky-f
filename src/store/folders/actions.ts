@@ -1,0 +1,119 @@
+import { ActionTree, ActionContext } from 'vuex';
+
+import { storageClient } from '@/http-client';
+import { snakeToCamel, camelToSnake } from '@/utils';
+
+import { RootStateI } from '../state';
+import { FolderI, FoldersStateI } from './state';
+import { FileI } from '../files/state';
+
+export const actions: ActionTree<FoldersStateI, RootStateI> = {
+
+  async getTrashFolder(
+    context: ActionContext<FoldersStateI, RootStateI>,
+  ): Promise<void> {
+    const { data } = await storageClient.get('/api/folders/get-trash-folder');
+    context.commit('setTrashFolder', snakeToCamel(data));
+  },
+
+  async createFolder(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI,
+  ): Promise<void> {
+    console.log('payload', payload);
+    const { data } = await storageClient.post('/api/folders/create-folder', camelToSnake(payload));
+    context.commit('setFolder', snakeToCamel(data));
+
+    await context.dispatch('filter', {
+      query: '',
+      page: 1,
+      folderId: payload.folderId,
+    });
+  },
+
+  async filter(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: {
+      query: string;
+      page: number;
+      folderId: number | string | null;
+    },
+  ): Promise<void> {
+    // convert the payload to url query params
+    let params = '';
+
+    const payloadData = camelToSnake(payload);
+
+    Object.entries(payloadData).forEach(([key, value]) => {
+      params += `${key}=${value}&`;
+    });
+
+    console.log('params', params);
+
+    const { data } = await storageClient.get(`/api/folders/list-folders?${params}`);
+    console.log('data', data);
+    context.commit('setResult', snakeToCamel(data));
+  },
+
+  async getFolderDetails(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: {
+      folderId: number;
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.get(`/api/folders/get-folder-details/${payload.folderId}`);
+    context.commit('setFolder', snakeToCamel(data));
+  },
+
+  async moveFoldersToFolder(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/folders/move-folders-to-folder', camelToSnake(payload));
+    context.commit('setResult', snakeToCamel(data));
+  },
+
+  async changeFolderName(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: {
+      id: number | string,
+      name: string,
+    },
+  ): Promise<void> {
+    const { data } = await storageClient.put('/api/folders/change-folder-name', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async moveFoldersToTrash(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/move-folders-to-trash', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async moveFilesToTrash(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FileI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/move-files-to-trash', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async restoreFolders(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/restore-folders-in-root-folder', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+  async removeFoldersFromTrash(
+    context: ActionContext<FoldersStateI, RootStateI>,
+    payload: FolderI[],
+  ): Promise<void> {
+    const { data } = await storageClient.post('/api/trash/remove-folders-definitely', camelToSnake(payload));
+    console.log('data', data);
+  },
+
+};
