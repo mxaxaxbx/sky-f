@@ -3,6 +3,8 @@
     class="w-full h-screen focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
+    @dragover.prevent
+    @drop="onDropToRoot($event)"
     tabindex="0"
   >
     <!-- loading -->
@@ -220,7 +222,7 @@
             @dragover.prevent
             @dragenter="onDragEnter(folder.id)"
             @dragleave="onDragLeave"
-            @drop="onDrop(folder)"
+            @drop="onDrop(folder, $event)"
             data-selectable
 
             :draggable="true"
@@ -1281,7 +1283,6 @@ const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f
 
 async function getFolderDetails() {
   loading.value = true;
-  console.log('folderId', folderId.value);
   try {
     await store.dispatch('folders/getFolderDetails', {
       folderId: Number(folderId.value),
@@ -1308,13 +1309,11 @@ async function moveToFolder() {
 
   try {
     loading.value = true;
-    console.log('selectedFiles', selectedFiles.value);
     if (selectedFiles.value.length > 0) {
       const payload: FileI[] = selectedFiles.value.map((file: FileI) => ({
         ...file,
         folderId: selectedFolder.value,
       }));
-      console.log('payloadFiles', payload);
 
       if (payload.length > 0) {
         await store.dispatch('files/moveFilesToFolder', payload);
@@ -1329,13 +1328,11 @@ async function moveToFolder() {
       });
     }
 
-    console.log('selectedFolders', selectedFolders.value);
     if (selectedFolders.value.length > 0) {
       const payload: FolderI[] = selectedFolders.value.map((folder: FolderI) => ({
         ...folder,
         folderId: selectedFolder.value,
       }));
-      console.log('payloadFolders', payload);
 
       if (payload.length > 0) {
         await store.dispatch('folders/moveFoldersToFolder', payload);
@@ -1515,10 +1512,6 @@ function onDragEndCleanup() {
   draggedFolder.value = null;
 }
 
-function onDragOver(event: DragEvent) {
-  event.preventDefault();
-}
-
 function onDragEnter(fId: number | string) {
   if (dragLeaveTimeout.value) clearTimeout(dragLeaveTimeout.value);
   draggedFolder.value = fId;
@@ -1586,9 +1579,28 @@ async function moveToTrash() {
   getFolders();
 }
 
-async function onDrop(folder: FolderI) {
-  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
+async function uploadFilesFromDrop(files: FileList, targetFolderId: number | null) {
+  const formData = new FormData();
+  Array.from(files).forEach((f) => formData.append('file', f));
+  await store.dispatch('files/upload', { formData, folderId: targetFolderId });
+  getFiles();
+  getFolders();
+}
 
+async function onDropToRoot(event: DragEvent) {
+  if (!event.dataTransfer?.files?.length) return;
+  await uploadFilesFromDrop(event.dataTransfer.files, folderId.value);
+  draggedFolder.value = null;
+}
+
+async function onDrop(folder: FolderI, event: DragEvent) {
+  if (event.dataTransfer?.files?.length) {
+    await uploadFilesFromDrop(event.dataTransfer.files, folder.id as number);
+    draggedFolder.value = null;
+    return;
+  }
+
+  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
   if (!draggedItem.value) return;
 
   const targetFolderId = folder.id as number;
@@ -1599,7 +1611,6 @@ async function onDrop(folder: FolderI) {
   }));
 
   await store.dispatch('files/moveFilesToFolder', filesPayload);
-
   store.commit('files/setSelectedFiles', []);
 
   const foldersPayload: FolderI[] = selectedFolders.value
@@ -1613,7 +1624,7 @@ async function onDrop(folder: FolderI) {
 
   draggedItem.value = null;
   draggedFolder.value = null;
-  ghostVisible.value = false; // 👈 único cambio
+  ghostVisible.value = false;
 
   getFiles();
   getFolders();
