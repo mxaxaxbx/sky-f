@@ -392,6 +392,8 @@ const showSidebar = computed(() => isAuth.value && route.name !== 'home');
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const showSidebarMovil = computed(() => showSidebarState.value);
 
+const currentYear = new Date().getFullYear();
+
 const clickOutside = () => {
   if (showSidebar.value) store.commit('toggleSidebar');
 };
