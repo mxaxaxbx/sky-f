@@ -589,7 +589,7 @@
             frameborder="0"
             title="Visor de PDF"
           />
-                    <!-- other -->
+          <!-- other -->
           <div v-else class="flex flex-col pb-10 items-center text-[var(--text-terceary)] text-xs text-center sm:text-md">
             <span class="font-semibold text-[var(--text-terceary)] text-5xl mb-8 ">Ups! :(</span>
             <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" />
