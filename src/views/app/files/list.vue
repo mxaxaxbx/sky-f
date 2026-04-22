@@ -3,6 +3,8 @@
     class="w-full h-full focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
+    @dragover.prevent
+    @drop="onDropToRoot($event)"
     tabindex="0"
   >
     <h1
@@ -14,13 +16,13 @@
         hidden sm:block
       "
     >
-      Could Drive
+      Cloud Drive
     </h1>
     <h1 class="
       text-left text-lg font-semibold
       text-[var(--text)]
       mx-4 mt-14 sm:hidden block">
-      Could Drive
+      Cloud Drive
     </h1>
 
     <!-- loading -->
@@ -43,6 +45,8 @@
           hover:shadow-[0_0_8px_2px_rgba(10,119,243,0.5)]
           transition-colors duration-300
           "
+        @dragover.prevent
+        @drop="onDropToRoot($event)"
       >
         <svg width="300" height="260" viewBox="0 0 220 260" fill="#fffff" xmlns="http://www.w3.org/2000/svg">
           <!-- luz -->
@@ -235,7 +239,7 @@
             @dragover.prevent
             @dragenter="onDragEnter(folder.id)"
             @dragleave="onDragLeave($event, folder.id)"
-            @drop="onDrop(folder)"
+            @drop="onDrop(folder, $event)"
             data-selectable
 
             :draggable="true"
@@ -1260,7 +1264,7 @@ const ghostX = ref(0);
 const ghostY = ref(0);
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderId = computed<number>(() => Number(route.params.id as string));
+const folderId = computed<string | ''>(() => (route.params.id ? Number(route.params.id as string) : ''));
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
@@ -1270,19 +1274,16 @@ const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: Folde
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
 
 async function moveToFolder() {
-  console.log('selectedFolder', selectedFolder.value);
   if (selectedFolder.value === null) {
     return;
   }
 
   try {
     loading.value = true;
-    console.log('selectedFiles', selectedFiles.value);
     const payloadFiles: FileI[] = selectedFiles.value.map((file: FileI) => ({
       ...file,
       folderId: selectedFolder.value,
     }));
-    console.log('payload', payloadFiles);
 
     if (payloadFiles.length > 0) {
       await store.dispatch('files/moveFilesToFolder', payloadFiles);
@@ -1299,7 +1300,6 @@ async function moveToFolder() {
       ...folder,
       folderId: selectedFolder.value,
     }));
-    console.log('payload', payloadFolders);
 
     if (payloadFolders.length > 0) {
       await store.dispatch('folders/moveFoldersToFolder', payloadFolders);
@@ -1476,10 +1476,6 @@ function onDragEndCleanup() {
   draggedFolder.value = null;
 }
 
-function onDragOver(event: DragEvent) {
-  event.preventDefault();
-}
-
 function onDragEnter(targetFolderId: number | string) {
   if (dragLeaveTimeout.value) clearTimeout(dragLeaveTimeout.value);
   draggedFolder.value = targetFolderId;
@@ -1524,9 +1520,28 @@ async function moveToTrash() {
   getFolders();
 }
 
-async function onDrop(folder: FolderI) {
-  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
+async function uploadFilesFromDrop(files: FileList, targetFolderId: number | null) {
+  const formData = new FormData();
+  Array.from(files).forEach((f) => formData.append('file', f));
+  await store.dispatch('files/upload', { formData, folderId: targetFolderId });
+  getFiles();
+  getFolders();
+}
 
+async function onDropToRoot(event: DragEvent) {
+  if (!event.dataTransfer?.files?.length) return;
+  await uploadFilesFromDrop(event.dataTransfer.files, null);
+  draggedFolder.value = null;
+}
+
+async function onDrop(folder: FolderI, event: DragEvent) {
+  if (event.dataTransfer?.files?.length) {
+    await uploadFilesFromDrop(event.dataTransfer.files, folder.id as number);
+    draggedFolder.value = null;
+    return;
+  }
+
+  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
   if (!draggedItem.value) return;
 
   const targetFolderId = folder.id as number;
@@ -1537,7 +1552,6 @@ async function onDrop(folder: FolderI) {
   }));
 
   await store.dispatch('files/moveFilesToFolder', filesPayload);
-
   store.commit('files/setSelectedFiles', []);
 
   const foldersPayload: FolderI[] = selectedFolders.value
@@ -1551,7 +1565,7 @@ async function onDrop(folder: FolderI) {
 
   draggedItem.value = null;
   draggedFolder.value = null;
-  ghostVisible.value = false; // 👈 único cambio
+  ghostVisible.value = false;
 
   getFiles();
   getFolders();
@@ -1575,8 +1589,6 @@ async function createFolder() {
   const strippedFolderName = folderName.value.trim();
   loading.value = true;
   try {
-    console.log('strippedFolderName', strippedFolderName);
-    console.log('folderId', folderId.value);
     await store.dispatch('folders/createFolder', {
       name: strippedFolderName,
       folderId: folderId.value,
