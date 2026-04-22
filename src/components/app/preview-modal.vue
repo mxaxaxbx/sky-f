@@ -583,12 +583,12 @@
 
           <!-- pdf -->
           <iframe
-  v-else-if="pdfDownloadUrl && file.contentType === 'application/pdf'"
-  :src="`https://saldefrutitas.github.io/pdf-viewer/?file=${encodeURIComponent(pdfDownloadUrl)}`"
-  class="w-full h-full rounded-2xl"
-  frameborder="0"
-  title="Visor de PDF"
-/>
+            v-else-if="pdfDownloadUrl && file.contentType === 'application/pdf'"
+            :src="`https://saldefrutitas.github.io/pdf-viewer/?file=${encodeURIComponent(pdfDownloadUrl)}`"
+            class="w-full h-full rounded-2xl"
+            frameborder="0"
+            title="Visor de PDF"
+          />
                     <!-- other -->
           <div v-else class="flex flex-col pb-10 items-center text-[var(--text-terceary)] text-xs text-center sm:text-md">
             <span class="font-semibold text-[var(--text-terceary)] text-5xl mb-8 ">Ups! :(</span>
