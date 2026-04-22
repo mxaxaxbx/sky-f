@@ -582,13 +582,14 @@
           </pre>
 
           <!-- pdf -->
-          <embed
-            v-else-if="currentBlobURL && file.contentType === 'application/pdf'"
-            :src="currentBlobURL"
-            type="application/pdf"
-            class="w-full h-full rounded-2xl"
-          />
-          <!-- other -->
+          <iframe
+  v-else-if="pdfDownloadUrl && file.contentType === 'application/pdf'"
+  :src="`https://saldefrutitas.github.io/pdf-viewer/?file=${encodeURIComponent(pdfDownloadUrl)}`"
+  class="w-full h-full rounded-2xl"
+  frameborder="0"
+  title="Visor de PDF"
+/>
+                    <!-- other -->
           <div v-else class="flex flex-col pb-10 items-center text-[var(--text-terceary)] text-xs text-center sm:text-md">
             <span class="font-semibold text-[var(--text-terceary)] text-5xl mb-8 ">Ups! :(</span>
             <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" />
@@ -775,6 +776,7 @@ const currentPreviewIndex = computed(() => files.value.findIndex((f) => f.id ===
 const audioCover = ref<string | null>(null);
 const currentBlobURL = ref<string | null>(null);
 const textContent = ref<string | null>(null);
+const pdfDownloadUrl = ref<string | null>(null);
 const isPlaying = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
@@ -1207,10 +1209,15 @@ watch(() => props.modelValue, async (newFile) => {
   zoomLevel.value = 1;
   imageDimensions.value = null;
   duration.value = 0;
+  pdfDownloadUrl.value = null; // 👈 reset
 
   if (!newFile) return;
 
   getBase64(newFile);
+
+  if (newFile.contentType === 'application/pdf') { // 👈 añade esto
+    pdfDownloadUrl.value = await store.dispatch('files/getDownloadUrl', newFile);
+  }
 
   if (newFile.contentType?.startsWith('image/')) {
     const base64 = await store.dispatch('files/getCacheFile', { id: newFile.id });
