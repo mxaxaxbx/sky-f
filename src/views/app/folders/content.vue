@@ -1220,218 +1220,14 @@
       }"
     />
 
-    <!-- General context menu -->
-    <Teleport to="body">
-      <div
-        v-if="contextMenuVisible"
-        class="
-          fixed z-20
-          bg-[var(--bg-secondary)]
-          border border-[var(--border)]
-          rounded-2xl shadow-md
-          w-48 p-1
-          flex flex-col font-regular text-sm text-[#868686]
-        "
-        :style="{ top: contextMenuY + 'px', left: contextMenuX + 'px' }"
-        @click.stop
-        @contextmenu.prevent
-      >
-        <!-- Single File actions -->
-        <template v-if="totalSelected === 1 && selectedFiles.length === 1">
-          <!-- Section 1: info & Rename -->
-          <div class="border-b border-[var(--border)] p-1 space-y-1">
-            <button
-              @click="infoModal = true; closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon_details.svg" alt="details" class="h-5 mr-4 grayscale" />
-              <span>info</span>
-            </button>
-            <button
-              @click="startEditingFile(selectedFiles[0]); closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-              <span>Rename</span>
-            </button>
-          </div>
-
-          <!-- Section 2: Preview & Download -->
-          <div class="border-b border-[var(--border)] p-1 space-y-1">
-            <button
-              @click="previewFile = selectedFiles[0]; closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
-              <span>Preview</span>
-            </button>
-            <button
-              @click="downloadFile(selectedFiles[0]); closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                grayscale
-                hover:bg-[var(--hover-bg)]
-                hover:text-[var(--color-primary)]
-                hover:border-[var(--color-primary)]
-                hover:grayscale-0
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4" />
-              <span>Download</span>
-            </button>
-          </div>
-
-          <!-- Section 3: Move to folder & Copy link -->
-          <div class="border-b border-[var(--border)] p-1 space-y-1">
-            <button
-              @click="moveToFolderModal = true; closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-              <span>Move to folder</span>
-            </button>
-            <button
-              @click="copyLink(selectedFiles[0]); closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-all duration-300
-              "
-            >
-              <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
-              <span>Copy link</span>
-            </button>
-          </div>
-        </template>
-
-        <!-- Single Folder actions -->
-        <template v-else-if="totalSelected === 1 && selectedFolders.length === 1">
-          <div class="border-b border-[var(--border)] p-1 space-y-1">
-            <!-- rename folder -->
-            <button
-              @click="startEditingFolder(selectedFolders[0]); closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
-              <span>Rename</span>
-            </button>
-          </div>
-          <div class="border-b border-[var(--border)] p-1 space-y-1">
-            <!-- move to folder -->
-            <button
-              @click="moveToFolderModal = true; closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-              <span>Move to folder</span>
-            </button>
-          </div>
-        </template>
-
-        <!-- Multi-select actions -->
-        <template v-else-if="totalSelected > 1">
-          <div class="border-b border-[var(--border)] p-1 space-y-1">
-            <button
-              @click="moveToFolderModal = true; closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                hover:bg-[var(--hover-bg)]
-                hover:border-[var(--color-primary)]
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
-              <span>Move to folder</span>
-            </button>
-            <button
-              v-if="selectedFiles.length > 0"
-              @click="downloadSelected(); closeContextMenu();"
-              class="
-                flex items-center justify-start w-full
-                rounded-xl px-3 py-1 border border-transparent
-                grayscale
-                hover:bg-[var(--hover-bg)]
-                hover:text-[var(--color-primary)]
-                hover:border-[var(--color-primary)]
-                hover:grayscale-0
-                transition-colors duration-300
-              "
-            >
-              <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4" />
-              <span>Download</span>
-            </button>
-          </div>
-        </template>
-
-        <!-- Final Section: Send to the Void -->
-        <div class="p-1" v-if="totalSelected > 0">
-          <button
-            @click="moveToTrash(); closeContextMenu();"
-            class="
-              flex items-center justify-start w-full
-              rounded-xl px-3 py-1 border border-transparent
-              grayscale text-[var(--delete-color)] opacity-60
-              hover:bg-[var(--delete-bg)]
-              hover:text-[var(--delete-color)]
-              hover:border-[var(--delete-color)]
-              hover:grayscale-0 hover:opacity-100
-              transition-colors duration-300
-            "
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
-              <mask id="mask_ctx_delete" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-                <rect width="24" height="24" fill="#FFC506"/>
-              </mask>
-              <g mask="url(#mask_ctx_delete)">
-                <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639 3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12 4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
-              </g>
-            </svg>
-            <span>Send to the Void</span>
-          </button>
-        </div>
-      </div>
-    </Teleport>
+    <ContextMenu
+      v-model="contextMenuVisible"
+      :x="contextMenuX"
+      :y="contextMenuY"
+      :selected-files="selectedFiles"
+      :selected-folders="selectedFolders"
+      @action="handleMenuAction"
+    />
   </div>
 </template>
 
@@ -1455,6 +1251,7 @@ import { FileI, FilesResultI } from '@/store/files/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
+const ContextMenu = defineAsyncComponent(() => import('@/components/app/context-menu.vue'));
 
 const router = useRouter();
 const store = useStore();
@@ -1658,25 +1455,40 @@ function selectItem(event: MouseEvent | KeyboardEvent, type: 'file' | 'folder', 
   lastSelectedType.value = type;
 }
 
+function clearSelection() {
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+  lastSelectedIndex.value = null;
+  lastSelectedType.value = null;
+}
+
+function handleContainerClick(event: MouseEvent | KeyboardEvent) {
+  const target = event.target as HTMLElement;
+  if (target.closest('[data-selectable]')) return;
+  if (moveToFolderModal.value) return;
+  clearSelection();
+}
+
 function closeContextMenu() {
   contextMenuVisible.value = false;
 }
 
 function handleContextMenu(event: MouseEvent) {
-  if (selectedFiles.value.length > 0 || selectedFolders.value.length > 0) {
-    event.preventDefault();
+  event.preventDefault();
 
-    if (activeDropdown.value) {
-      activeDropdown.value();
-      activeDropdown.value = null;
-    }
-
-    contextMenuX.value = event.clientX;
-    contextMenuY.value = event.clientY;
-    contextMenuVisible.value = true;
-  } else {
-    contextMenuVisible.value = false;
+  if (activeDropdown.value) {
+    activeDropdown.value();
+    activeDropdown.value = null;
   }
+
+  const target = event.target as HTMLElement;
+  if (!target.closest('[data-selectable]')) {
+    clearSelection();
+  }
+
+  contextMenuX.value = event.clientX;
+  contextMenuY.value = event.clientY;
+  contextMenuVisible.value = true;
 }
 
 function onItemContextMenu(event: MouseEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
@@ -1751,20 +1563,6 @@ const copyLink = async (file: FileI) => {
     console.error('Error:', error);
   }
 };
-
-function clearSelection() {
-  store.commit('files/setSelectedFiles', []);
-  store.commit('folders/setSelectedFolders', []);
-  lastSelectedIndex.value = null;
-  lastSelectedType.value = null;
-}
-
-function handleContainerClick(event: MouseEvent | KeyboardEvent) {
-  const target = event.target as HTMLElement;
-  if (target.closest('[data-selectable]')) return;
-  if (moveToFolderModal.value) return;
-  clearSelection();
-}
 
 function onDragStart(type: string, item: FileI | FolderI, event: DragEvent) {
   if (type === 'file' && !isSelectedFile(item as FileI)) {
@@ -2120,6 +1918,49 @@ function formatContentType(contentType: string, name?: string): string {
   if (ext) return `${ext} File`;
 
   return contentType;
+}
+
+function handleMenuAction(action: string) {
+  const [firstFile] = selectedFiles.value;
+  const [firstFolder] = selectedFolders.value;
+
+  switch (action) {
+    case 'info':
+      infoModal.value = true;
+      break;
+    case 'rename-file':
+      if (firstFile) startEditingFile(firstFile);
+      break;
+    case 'rename-folder':
+      if (firstFolder) startEditingFolder(firstFolder);
+      break;
+    case 'preview':
+      if (firstFile) previewFile.value = firstFile;
+      break;
+    case 'download':
+      if (firstFile) downloadFile(firstFile);
+      break;
+    case 'download-selected':
+      downloadSelected();
+      break;
+    case 'move':
+      moveToFolderModal.value = true;
+      break;
+    case 'copy-link':
+      if (firstFile) copyLink(firstFile);
+      break;
+    case 'trash':
+      moveToTrash();
+      break;
+    case 'upload':
+      document.getElementById('fileInputBtn')?.click();
+      break;
+    case 'create-folder':
+      createFolderModal.value = true;
+      break;
+    default:
+      break;
+  }
 }
 
 function handleKeydown(e: KeyboardEvent) {
