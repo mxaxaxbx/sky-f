@@ -3,6 +3,7 @@
     class="w-full h-screen focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
+    @contextmenu="handleContextMenu"
     @dragover.prevent
     @drop="onDropToRoot($event)"
     tabindex="0"
@@ -229,6 +230,7 @@
             @dragstart="onDragStart('folder', folder)"
             @click="selectItem($event, 'folder', folder, index)"
             @keydown.enter="selectItem($event, 'folder', folder, index)"
+            @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
 
             class="
@@ -476,6 +478,7 @@
             @dragend="onDragEndCleanup()"
             @click="selectItem($event, 'file', file, index)"
             @keydown.enter="selectItem($event, 'file', file, index)"
+            @contextmenu.stop.prevent="onItemContextMenu($event, 'file', file, index)"
             @dblclick="previewFile = file"
 
             class="
@@ -1216,6 +1219,219 @@
         infoModal = true;
       }"
     />
+
+    <!-- General context menu -->
+    <Teleport to="body">
+      <div
+        v-if="contextMenuVisible"
+        class="
+          fixed z-20
+          bg-[var(--bg-secondary)]
+          border border-[var(--border)]
+          rounded-2xl shadow-md
+          w-48 p-1
+          flex flex-col font-regular text-sm text-[#868686]
+        "
+        :style="{ top: contextMenuY + 'px', left: contextMenuX + 'px' }"
+        @click.stop
+        @contextmenu.prevent
+      >
+        <!-- Single File actions -->
+        <template v-if="totalSelected === 1 && selectedFiles.length === 1">
+          <!-- Section 1: info & Rename -->
+          <div class="border-b border-[var(--border)] p-1 space-y-1">
+            <button
+              @click="infoModal = true; closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon_details.svg" alt="details" class="h-5 mr-4 grayscale" />
+              <span>info</span>
+            </button>
+            <button
+              @click="startEditingFile(selectedFiles[0]); closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+              <span>Rename</span>
+            </button>
+          </div>
+
+          <!-- Section 2: Preview & Download -->
+          <div class="border-b border-[var(--border)] p-1 space-y-1">
+            <button
+              @click="previewFile = selectedFiles[0]; closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
+              <span>Preview</span>
+            </button>
+            <button
+              @click="downloadFile(selectedFiles[0]); closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                grayscale
+                hover:bg-[var(--hover-bg)]
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4" />
+              <span>Download</span>
+            </button>
+          </div>
+
+          <!-- Section 3: Move to folder & Copy link -->
+          <div class="border-b border-[var(--border)] p-1 space-y-1">
+            <button
+              @click="moveToFolderModal = true; closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+              <span>Move to folder</span>
+            </button>
+            <button
+              @click="copyLink(selectedFiles[0]); closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-all duration-300
+              "
+            >
+              <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
+              <span>Copy link</span>
+            </button>
+          </div>
+        </template>
+
+        <!-- Single Folder actions -->
+        <template v-else-if="totalSelected === 1 && selectedFolders.length === 1">
+          <div class="border-b border-[var(--border)] p-1 space-y-1">
+            <!-- rename folder -->
+            <button
+              @click="startEditingFolder(selectedFolders[0]); closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+              <span>Rename</span>
+            </button>
+          </div>
+          <div class="border-b border-[var(--border)] p-1 space-y-1">
+            <!-- move to folder -->
+            <button
+              @click="moveToFolderModal = true; closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+              <span>Move to folder</span>
+            </button>
+          </div>
+        </template>
+
+        <!-- Multi-select actions -->
+        <template v-else-if="totalSelected > 1">
+          <div class="border-b border-[var(--border)] p-1 space-y-1">
+            <button
+              @click="moveToFolderModal = true; closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                hover:bg-[var(--hover-bg)]
+                hover:border-[var(--color-primary)]
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+              <span>Move to folder</span>
+            </button>
+            <button
+              v-if="selectedFiles.length > 0"
+              @click="downloadSelected(); closeContextMenu();"
+              class="
+                flex items-center justify-start w-full
+                rounded-xl px-3 py-1 border border-transparent
+                grayscale
+                hover:bg-[var(--hover-bg)]
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+                hover:grayscale-0
+                transition-colors duration-300
+              "
+            >
+              <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4" />
+              <span>Download</span>
+            </button>
+          </div>
+        </template>
+
+        <!-- Final Section: Send to the Void -->
+        <div class="p-1" v-if="totalSelected > 0">
+          <button
+            @click="moveToTrash(); closeContextMenu();"
+            class="
+              flex items-center justify-start w-full
+              rounded-xl px-3 py-1 border border-transparent
+              grayscale text-[var(--delete-color)] opacity-60
+              hover:bg-[var(--delete-bg)]
+              hover:text-[var(--delete-color)]
+              hover:border-[var(--delete-color)]
+              hover:grayscale-0 hover:opacity-100
+              transition-colors duration-300
+            "
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+              <mask id="mask_ctx_delete" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <rect width="24" height="24" fill="#FFC506"/>
+              </mask>
+              <g mask="url(#mask_ctx_delete)">
+                <path d="M12 2C14.4189 2 16.4361 3.71782 16.8994 6H22V8H20V17C20 19.7614 17.7614 22 15 22H9C6.23858 22 4 19.7614 4 17V8H2V6H7.10059C7.5639 3.71782 9.58108 2 12 2ZM6 17C6 18.6569 7.34315 20 9 20H15C16.6569 20 18 18.6569 18 17V8H6V17ZM11 18H9V10H11V18ZM15 18H13V10H15V18ZM12 4C10.6941 4 9.58594 4.83532 9.17383 6H14.8262C14.4141 4.83532 13.3059 4 12 4Z" fill="var(--delete-color)"/>
+              </g>
+            </svg>
+            <span>Send to the Void</span>
+          </button>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1251,6 +1467,7 @@ const editingFileId = ref<number | string | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
+const lastSelectedType = ref<'file' | 'folder' | null>(null);
 const editingFolderId = ref<number | string | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const previewFile = ref<FileI | null>(null);
@@ -1270,6 +1487,9 @@ const shareUrl = ref('');
 const ghostVisible = ref(false);
 const ghostX = ref(0);
 const ghostY = ref(0);
+const contextMenuVisible = ref(false);
+const contextMenuX = ref(0);
+const contextMenuY = ref(0);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1377,11 +1597,113 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function selectItem(event: MouseEvent | KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  const isShift = event.shiftKey;
+  const isCtrl = event.ctrlKey || (event as any).metaKey;
+
+  if (isShift && lastSelectedIndex.value !== null && lastSelectedType.value !== null) {
+    const allFolders = folderResults.value.data;
+    const allFiles = fileResults.value.data;
+    const allItems = [...allFolders, ...allFiles];
+
+    let startIdx = lastSelectedType.value === 'folder' ? lastSelectedIndex.value : allFolders.length + lastSelectedIndex.value;
+    let endIdx = type === 'folder' ? index : allFolders.length + index;
+
+    if (startIdx > endIdx) {
+      [startIdx, endIdx] = [endIdx, startIdx];
+    }
+
+    const rangeItems = allItems.slice(startIdx, endIdx + 1);
+    const rangeFiles = rangeItems.filter((i) => 'contentType' in i) as FileI[];
+    const rangeFolders = rangeItems.filter((i) => !('contentType' in i)) as FolderI[];
+
+    store.commit('files/setSelectedFiles', rangeFiles);
+    store.commit('folders/setSelectedFolders', rangeFolders);
+    return;
+  }
+
+  if (isCtrl) {
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
+      }
+    } else {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
+      }
+    }
+
+    lastSelectedIndex.value = index;
+    lastSelectedType.value = type;
+    return;
+  }
+
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+  } else {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+  }
+
+  lastSelectedIndex.value = index;
+  lastSelectedType.value = type;
+}
+
+function closeContextMenu() {
+  contextMenuVisible.value = false;
+}
+
+function handleContextMenu(event: MouseEvent) {
+  if (selectedFiles.value.length > 0 || selectedFolders.value.length > 0) {
+    event.preventDefault();
+
+    if (activeDropdown.value) {
+      activeDropdown.value();
+      activeDropdown.value = null;
+    }
+
+    contextMenuX.value = event.clientX;
+    contextMenuY.value = event.clientY;
+    contextMenuVisible.value = true;
+  } else {
+    contextMenuVisible.value = false;
+  }
+}
+
+function onItemContextMenu(event: MouseEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  if (activeDropdown.value) {
+    activeDropdown.value();
+    activeDropdown.value = null;
+  }
+
+  if (type === 'file' && !isSelectedFile(item as FileI)) {
+    selectItem(event as any, 'file', item, index);
+  } else if (type === 'folder' && !isSelectedFolder(item as FolderI)) {
+    selectItem(event as any, 'folder', item, index);
+  }
+
+  nextTick(() => {
+    contextMenuX.value = event.clientX;
+    contextMenuY.value = event.clientY;
+    contextMenuVisible.value = true;
+  });
+}
+
 const toggleDropdown = async (
   toggle: () => void,
   close: () => void,
   event?: MouseEvent,
 ) => {
+  closeContextMenu();
   if (event) event.stopPropagation();
 
   if (activeDropdown.value && activeDropdown.value !== close) {
@@ -1430,45 +1752,11 @@ const copyLink = async (file: FileI) => {
   }
 };
 
-function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
-  if (event.ctrlKey) {
-    if (type === 'file') {
-      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
-      if (exists) {
-        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
-      } else {
-        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
-      }
-    } else {
-      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
-      if (exists) {
-        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
-      } else {
-        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
-      }
-    }
-
-    lastSelectedIndex.value = index;
-    return;
-  }
-
-  // LIMPIAR AMBAS SELECCIONES
-  store.commit('files/setSelectedFiles', []);
-  store.commit('folders/setSelectedFolders', []);
-
-  if (type === 'file') {
-    store.commit('files/setSelectedFiles', [item as FileI]);
-  } else {
-    store.commit('folders/setSelectedFolders', [item as FolderI]);
-  }
-
-  lastSelectedIndex.value = index;
-}
-
 function clearSelection() {
   store.commit('files/setSelectedFiles', []);
   store.commit('folders/setSelectedFolders', []);
   lastSelectedIndex.value = null;
+  lastSelectedType.value = null;
 }
 
 function handleContainerClick(event: MouseEvent | KeyboardEvent) {
@@ -1633,6 +1921,14 @@ async function onDrop(folder: FolderI, event: DragEvent) {
 // download buttom
 async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
+}
+
+async function downloadSelected() {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const file of selectedFiles.value) {
+    // eslint-disable-next-line no-await-in-loop
+    await store.dispatch('files/downloadFile', file);
+  }
 }
 
 // create new folder
@@ -1844,10 +2140,14 @@ onMounted(() => {
   getFolders();
   getFiles();
   window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('click', closeContextMenu);
+  window.addEventListener('scroll', closeContextMenu, true);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('click', closeContextMenu);
+  window.removeEventListener('scroll', closeContextMenu, true);
 });
 
 watch(() => route.params.id, () => {
