@@ -2063,6 +2063,14 @@ function formatContentType(contentType: string, name?: string): string {
 }
 
 function handleKeydown(e: KeyboardEvent) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+    if (editingFileId.value || editingFolderId.value) return;
+    e.preventDefault();
+    store.commit('files/setSelectedFiles', fileResults.value.data);
+    store.commit('folders/setSelectedFolders', []);
+    return;
+  }
+
   if (e.key !== 'F2') return;
   if (editingFileId.value || editingFolderId.value) return;
 
