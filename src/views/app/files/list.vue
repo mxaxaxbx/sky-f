@@ -1282,7 +1282,7 @@ const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderId = computed<string | ''>(() => (route.params.id ? Number(route.params.id as string) : ''));
+const folderId = computed<number | null>(() => (route.params.id ? Number(route.params.id as string) : null));
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
