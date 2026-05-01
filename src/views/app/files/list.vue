@@ -3,6 +3,7 @@
     class="w-full h-full focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
+    @contextmenu="handleContextMenu"
     @dragover.prevent
     @drop="onDropToRoot($event)"
     tabindex="0"
@@ -249,6 +250,7 @@
             @click="selectItem($event, 'folder', folder, index)"
             @keydown.enter="selectItem($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
+            @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
                         :class="[
               'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
               'bg-[var(--bg-secondary)] transition-all duration-300',
@@ -495,6 +497,7 @@
             @click="selectItem($event, 'file', file, index)"
             @keydown.enter="selectItem($event, 'file', file, index)"
             @dblclick="previewFile = file"
+            @contextmenu.stop.prevent="onItemContextMenu($event, 'file', file, index)"
 
             class="
               group
@@ -1206,6 +1209,15 @@
       @copy-link="copyLink($event)"
       @download="downloadFile($event)"
     />
+
+    <ContextMenu
+      v-model="contextMenuVisible"
+      :x="contextMenuX"
+      :y="contextMenuY"
+      :selected-files="selectedFiles"
+      :selected-folders="selectedFolders"
+      @action="handleMenuAction"
+    />
   </div>
 </template>
 
@@ -1229,6 +1241,7 @@ import { FileI, FilesResultI } from '@/store/files/state';
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
+const ContextMenu = defineAsyncComponent(() => import('@/components/app/context-menu.vue'));
 
 const router = useRouter();
 const store = useStore();
@@ -1242,6 +1255,7 @@ const editingFileId = ref<number | string | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
+const lastSelectedType = ref<'file' | 'folder' | null>(null);
 const editingFolderId = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const previewFile = ref<FileI | null>(null);
@@ -1263,8 +1277,12 @@ const duration = ref(0);
 const ghostX = ref(0);
 const ghostY = ref(0);
 
+const contextMenuVisible = ref(false);
+const contextMenuX = ref(0);
+const contextMenuY = ref(0);
+
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
-const folderId = computed<string | ''>(() => (route.params.id ? Number(route.params.id as string) : ''));
+const folderId = computed<number | null>(() => (route.params.id ? Number(route.params.id as string) : null));
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
@@ -1342,11 +1360,128 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function clearSelection() {
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+  lastSelectedIndex.value = null;
+  lastSelectedType.value = null;
+}
+
+function handleContainerClick(event: MouseEvent | KeyboardEvent) {
+  const target = event.target as HTMLElement;
+  if (target.closest('[data-selectable]')) return;
+  if (moveToFolderModal.value) return;
+  clearSelection();
+}
+
+function closeContextMenu() {
+  contextMenuVisible.value = false;
+}
+
+function handleContextMenu(event: MouseEvent) {
+  event.preventDefault();
+
+  if (activeDropdown.value) {
+    activeDropdown.value();
+    activeDropdown.value = null;
+  }
+
+  const target = event.target as HTMLElement;
+  if (!target.closest('[data-selectable]')) {
+    clearSelection();
+  }
+
+  contextMenuX.value = event.clientX;
+  contextMenuY.value = event.clientY;
+  contextMenuVisible.value = true;
+}
+
+function selectItem(event: MouseEvent | KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  const isShift = event.shiftKey;
+  const isCtrl = event.ctrlKey || (event as any).metaKey;
+
+  if (isShift && lastSelectedIndex.value !== null && lastSelectedType.value !== null) {
+    const allFolders = folderResults.value.data;
+    const allFiles = fileResults.value.data;
+    const allItems = [...allFolders, ...allFiles];
+
+    let startIdx = lastSelectedType.value === 'folder' ? lastSelectedIndex.value : allFolders.length + lastSelectedIndex.value;
+    let endIdx = type === 'folder' ? index : allFolders.length + index;
+
+    if (startIdx > endIdx) {
+      [startIdx, endIdx] = [endIdx, startIdx];
+    }
+
+    const rangeItems = allItems.slice(startIdx, endIdx + 1);
+    const rangeFiles = rangeItems.filter((i) => 'contentType' in i) as FileI[];
+    const rangeFolders = rangeItems.filter((i) => !('contentType' in i)) as FolderI[];
+
+    store.commit('files/setSelectedFiles', rangeFiles);
+    store.commit('folders/setSelectedFolders', rangeFolders);
+    return;
+  }
+
+  if (isCtrl) {
+    if (type === 'file') {
+      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
+      if (exists) {
+        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
+      } else {
+        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
+      }
+    } else {
+      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
+      if (exists) {
+        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
+      } else {
+        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
+      }
+    }
+
+    lastSelectedIndex.value = index;
+    lastSelectedType.value = type;
+    return;
+  }
+
+  // LIMPIAR AMBAS SELECCIONES
+  store.commit('files/setSelectedFiles', []);
+  store.commit('folders/setSelectedFolders', []);
+
+  if (type === 'file') {
+    store.commit('files/setSelectedFiles', [item as FileI]);
+  } else {
+    store.commit('folders/setSelectedFolders', [item as FolderI]);
+  }
+
+  lastSelectedIndex.value = index;
+  lastSelectedType.value = type;
+}
+
+function onItemContextMenu(event: MouseEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
+  if (activeDropdown.value) {
+    activeDropdown.value();
+    activeDropdown.value = null;
+  }
+
+  if (type === 'file' && !isSelectedFile(item as FileI)) {
+    selectItem(event as any, 'file', item, index);
+  } else if (type === 'folder' && !isSelectedFolder(item as FolderI)) {
+    selectItem(event as any, 'folder', item, index);
+  }
+
+  nextTick(() => {
+    contextMenuX.value = event.clientX;
+    contextMenuY.value = event.clientY;
+    contextMenuVisible.value = true;
+  });
+}
+
 const toggleDropdown = async (
   toggle: () => void,
   close: () => void,
   event?: MouseEvent,
 ) => {
+  closeContextMenu();
   if (event) event.stopPropagation();
 
   if (activeDropdown.value && activeDropdown.value !== close) {
@@ -1393,54 +1528,6 @@ const copyLink = async (file: FileI) => {
     console.error('Error:', error);
   }
 };
-
-function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI | FolderI, index: number) {
-  if (event.ctrlKey) {
-    if (type === 'file') {
-      const exists = selectedFiles.value.find((f: FileI) => f.id === item.id);
-      if (exists) {
-        store.commit('files/setSelectedFiles', selectedFiles.value.filter((f: FileI) => f.id !== item.id));
-      } else {
-        store.commit('files/setSelectedFiles', [...selectedFiles.value, item as FileI]);
-      }
-    } else {
-      const exists = selectedFolders.value.find((f: FolderI) => f.id === item.id);
-      if (exists) {
-        store.commit('folders/setSelectedFolders', selectedFolders.value.filter((f: FolderI) => f.id !== item.id));
-      } else {
-        store.commit('folders/setSelectedFolders', [...selectedFolders.value, item as FolderI]);
-      }
-    }
-
-    lastSelectedIndex.value = index;
-    return;
-  }
-
-  // LIMPIAR AMBAS SELECCIONES
-  store.commit('files/setSelectedFiles', []);
-  store.commit('folders/setSelectedFolders', []);
-
-  if (type === 'file') {
-    store.commit('files/setSelectedFiles', [item as FileI]);
-  } else {
-    store.commit('folders/setSelectedFolders', [item as FolderI]);
-  }
-
-  lastSelectedIndex.value = index;
-}
-
-function clearSelection() {
-  store.commit('files/setSelectedFiles', []);
-  store.commit('folders/setSelectedFolders', []);
-  lastSelectedIndex.value = null;
-}
-
-function handleContainerClick(event: MouseEvent | KeyboardEvent) {
-  const target = event.target as HTMLElement;
-  if (target.closest('[data-selectable]')) return;
-  if (moveToFolderModal.value) return;
-  clearSelection();
-}
 
 function onDragStart(type: string, item: FileI | FolderI, event: DragEvent) {
   if (type === 'file' && !isSelectedFile(item as FileI)) {
@@ -1573,6 +1660,14 @@ async function onDrop(folder: FolderI, event: DragEvent) {
 
 async function downloadFile(file: FileI) {
   await store.dispatch('files/downloadFile', file);
+}
+
+async function downloadSelected() {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const file of selectedFiles.value) {
+    // eslint-disable-next-line no-await-in-loop
+    await store.dispatch('files/downloadFile', file);
+  }
 }
 
 // create new folder
@@ -1765,7 +1860,58 @@ function formatContentType(contentType: string, name?: string): string {
   return contentType;
 }
 
+function handleMenuAction(action: string) {
+  const [firstFile] = selectedFiles.value;
+  const [firstFolder] = selectedFolders.value;
+
+  switch (action) {
+    case 'info':
+      infoModal.value = true;
+      break;
+    case 'rename-file':
+      if (firstFile) startEditingFile(firstFile);
+      break;
+    case 'rename-folder':
+      if (firstFolder) startEditingFolder(firstFolder);
+      break;
+    case 'preview':
+      if (firstFile) previewFile.value = firstFile;
+      break;
+    case 'download':
+      if (firstFile) downloadFile(firstFile);
+      break;
+    case 'download-selected':
+      downloadSelected();
+      break;
+    case 'move':
+      moveToFolderModal.value = true;
+      break;
+    case 'copy-link':
+      if (firstFile) copyLink(firstFile);
+      break;
+    case 'trash':
+      moveToTrash();
+      break;
+    case 'upload':
+      document.getElementById('fileInputBtn')?.click();
+      break;
+    case 'create-folder':
+      createFolderModal.value = true;
+      break;
+    default:
+      break;
+  }
+}
+
 function handleKeydown(e: KeyboardEvent) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+    if (editingFileId.value || editingFolderId.value) return;
+    e.preventDefault();
+    store.commit('files/setSelectedFiles', fileResults.value.data);
+    store.commit('folders/setSelectedFolders', []);
+    return;
+  }
+
   if (e.key !== 'F2') return;
   if (editingFileId.value || editingFolderId.value) return;
 
@@ -1778,15 +1924,18 @@ function handleKeydown(e: KeyboardEvent) {
     startEditingFolder(selectedFolders.value[0]);
   }
 }
-
 onMounted(() => {
   getFolders();
   getFiles();
   window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('click', closeContextMenu);
+  window.addEventListener('scroll', closeContextMenu, true);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('click', closeContextMenu);
+  window.removeEventListener('scroll', closeContextMenu, true);
 });
 
 watch([selectedFiles, previewFile], async ([files, preview]) => {
