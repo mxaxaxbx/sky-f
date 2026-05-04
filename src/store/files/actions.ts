@@ -185,6 +185,12 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     // Skip if not supported
     if (!db) return;
 
+    // if file is more than 10MB, skip caching
+    if (payload.size > 10 * 1024 * 1024) {
+      console.log('File too large to cache');
+      return;
+    }
+
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
     );
