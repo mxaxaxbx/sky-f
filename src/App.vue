@@ -10,6 +10,7 @@
     </div>
     <!-- menu -->
     <Notifications />
+    <UploadStatusPanel />
     <Navbar />
 
     <!-- global file input -->
@@ -338,6 +339,7 @@ const store = useStore();
 const route = useRoute();
 
 const Notifications = defineAsyncComponent(() => import('@/components/global/notifications.vue'));
+const UploadStatusPanel = defineAsyncComponent(() => import('@/components/global/upload-status-panel.vue'));
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
 

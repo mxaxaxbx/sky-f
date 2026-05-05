@@ -1218,7 +1218,7 @@ watch(() => props.modelValue, async (newFile) => {
   zoomLevel.value = 1;
   imageDimensions.value = null;
   duration.value = 0;
-  pdfDownloadUrl.value = null; // 👈 reset
+  pdfDownloadUrl.value = null;
   docxDownloadUrl.value = null;
 
   if (!newFile) return;
