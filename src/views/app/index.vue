@@ -5,14 +5,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
 
 const store = useStore();
 
+const isAuth = computed(() => store.getters['auth/isAuth']);
+
 onMounted(() => {
-  const isAuth = store.getters['auth/isAuth'];
-  if (!isAuth) {
+  if (!isAuth.value) {
     store.dispatch('auth/logout');
   }
 });

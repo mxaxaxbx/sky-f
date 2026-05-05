@@ -63,6 +63,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           created: 0,
           updated: 0,
           folderId: payload.folderId,
+          percentage: 0,
         });
       });
 
@@ -80,27 +81,42 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
           const file = files[index];
           if (!file || !item.r2Url) return;
 
-          try {
-            const response = await fetch(item.r2Url, {
-              method: 'PUT',
-              body: file,
-              headers: {
-                'Content-Type': file.type || 'application/octet-stream',
-              },
-            });
+          await new Promise<void>((resolve) => {
+            const xhr = new XMLHttpRequest();
 
-            if (response.ok) {
+            xhr.upload.onprogress = (event) => {
+              if (event.lengthComputable) {
+                // eslint-disable-next-line no-param-reassign
+                context.state.uploadFiles[index].percentage = Math.round(
+                  (event.loaded / event.total) * 100,
+                );
+              }
+            };
+
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                // eslint-disable-next-line no-param-reassign
+                context.state.uploadFiles[index].percentage = 100;
+                // eslint-disable-next-line no-param-reassign
+                item.uploadCompleted = true;
+                completedFiles.push(item);
+              } else {
+                // eslint-disable-next-line no-param-reassign
+                item.error = `Upload failed (${xhr.status})`;
+              }
+              resolve();
+            };
+
+            xhr.onerror = () => {
               // eslint-disable-next-line no-param-reassign
-              item.uploadCompleted = true;
-              completedFiles.push(item);
-            } else {
-              // eslint-disable-next-line no-param-reassign
-              item.error = `Upload failed (${response.status})`;
-            }
-          } catch (error: unknown) {
-            // eslint-disable-next-line no-param-reassign
-            item.error = String(error);
-          }
+              item.error = 'Network error during upload';
+              resolve();
+            };
+
+            xhr.open('PUT', item.r2Url);
+            xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+            xhr.send(file);
+          });
         }),
       );
 

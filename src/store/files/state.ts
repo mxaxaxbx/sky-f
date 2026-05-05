@@ -35,6 +35,10 @@ export interface FileI {
   updated: number;
 }
 
+export interface UplaodFileI extends FileI {
+  percentage: number;
+}
+
 export interface FilesResultI {
   data: FileI[];
   page: number;
@@ -46,7 +50,7 @@ export interface FilesResultI {
 export interface FilesStateI {
   result: FilesResultI;
   uploadProgress: number;
-  uploadFiles: FileI[];
+  uploadFiles: UplaodFileI[];
   file: FileI;
   searchResult: SearchResultI;
   selectedFiles: FileI[];

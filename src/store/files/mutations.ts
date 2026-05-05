@@ -42,4 +42,8 @@ export const mutations: MutationTree<FilesStateI> = {
     state.selectedFiles = payload;
   },
 
+  clearUploadFiles(state: FilesStateI) {
+    state.uploadFiles = [];
+  },
+
 };
