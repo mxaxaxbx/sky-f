@@ -5,6 +5,7 @@
 /* Tema base (dark) */
 :root {
     --bg: #1d1d1d;
+    --bg-modal: rgba(0, 0, 0, 0.6);
     --bg-secondary: #252525;
     --color-primary: #0A77F3;
     --text: #ffffff;
@@ -39,6 +40,7 @@
   /* Tema claro */
 .light {
   --bg: #f5f5f5;
+  --bg-modal: rgba(255, 255, 255, 0.6);
   --bg-secondary: #Fbfbfb;
   --text: #1d1d1d;
   --text-secondary: #3d3d3d;

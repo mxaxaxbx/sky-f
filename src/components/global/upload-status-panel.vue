@@ -2,7 +2,7 @@
   <Transition name="slide-up">
     <div
       v-if="visible"
-      class="upload-panel-container fixed bottom-4 right-4 z-50 w-[400px] rounded-2xl shadow-xl bg-black/60 backdrop-blur-sm divide-y divide-[var(--border)] overflow-hidden"
+      class="upload-panel-container fixed bottom-4 right-4 z-50 w-[400px] rounded-2xl shadow-lg border border-[var(--border)] bg-[var(--bg-modal)] backdrop-blur-md divide-y divide-[var(--border)] overflow-hidden"
       style="view-transition-name: upload-panel"
     >
       <!-- Header -->
@@ -167,7 +167,7 @@
                     alt="file icon"
                     class="h-8 w-8"
                   />
-                  <div class="absolute -bottom-1 -right-1 bg-black rounded-full border border-black shadow-sm">
+                  <div class="absolute bottom-0 -right-0.5 bg-[var(--bg)] rounded-full shadow-sm">
                     <img src="/icon/icon-success.svg" alt="done" class="h-3.5 w-3.5" />
                   </div>
                 </div>
@@ -183,8 +183,8 @@
         </div>
 
         <!-- Failed Section -->
-        <div v-if="failedFiles.length > 0" class="flex flex-col">
-          <div class="bg-transparent px-4 pt-3 pb-1 text-sm tracking-wider text-red-500 font-semibold">
+        <div v-if="failedFiles.length > 0" class="flex flex-col mb-2">
+          <div class="bg-transparent px-4 pt-3 text-sm tracking-wider text-red-500 font-semibold">
             Failed to upload
           </div>
           <div
@@ -209,10 +209,10 @@
                   <img
                     :src="getFileIcon(file)"
                     alt="file icon"
-                    class="h-8 w-8 opacity-50"
+                    class="h-8 w-8 opacity-50 grayscale"
                   />
-                  <div class="absolute -bottom-1 -right-1 bg-black rounded-full border border-black shadow-sm">
-                    <img src="/icon/icon-warning.svg" alt="error" class="h-3.5 w-3.5" />
+                  <div class="absolute bottom-0 -right-0.5 bg-[var(--bg)] rounded-full shadow-sm">
+                    <img src="/icon/icon-error.svg" alt="error" class="h-3.5 w-3.5 opacity-80" />
                   </div>
                 </div>
                 <div class="flex flex-col items-start w-full min-w-0">
@@ -230,12 +230,12 @@
       <!-- Summary footer -->
       <div
         v-if="!minimized"
-        class="px-4 py-2 flex items-center gap-3 bg-black/20 border-t border-[var(--border)]"
+        class="px-4 py-2 flex items-center gap-3 border-t border-[var(--border)]"
       >
         <!-- Icono de estado (Circular Progress) -->
         <div v-if="!allDone" class="relative h-10 w-10 flex items-center justify-center shrink-0">
           <svg viewBox="0 0 48 48" class="h-full w-full transform -rotate-90">
-            <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2" fill="transparent" class="text-white/10" />
+            <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2" fill="transparent" class="text-[var(--border)]" />
             <circle
               cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2" fill="transparent"
               stroke-dasharray="113.1" :stroke-dashoffset="113.1 * (1 - uploadProgress / 100)"
@@ -293,7 +293,6 @@ watch(minimized, (val) => {
 
 const uploadFiles = computed<UplaodFileI[]>(() => [
   ...store.state.files.uploadFiles,
-  /*
   {
     id: 'test-id',
     name: 'Archivo_de_prueba.pdf',
@@ -314,7 +313,6 @@ const uploadFiles = computed<UplaodFileI[]>(() => [
     updated: Date.now() / 1000,
     size: 1024 * 500,
   },
-  */
 ]);
 
 const uploadProgress = computed(() => {
