@@ -233,7 +233,7 @@
           @dragstart="onDragStart('file', file)"
           @click="selectItem($event, 'file', file, index)"
           @keydown.enter="selectItem($event, 'file', file, index)"
-          @dblclick="previewFile = file"
+          @dblclick="openPreview(file, $event)"
 
           class="
             group
@@ -364,7 +364,7 @@
                   <div class="border-b border-[var(--border)] p-1 space-y-1">
                     <!-- preview file -->
                     <button
-                    @click="previewFile = file"
+                    @click="openPreview(file, $event)"
                     class="
                         flex items-center justify-start w-full
                         rounded-xl px-3 py-1 border border-transparent
@@ -894,24 +894,7 @@
           </div>
         </div>
       </template>
-  </Modal>
-
-  <!-- preview files -->
-  <PreviewModal
-  v-if="previewFile"
-  v-model="previewFile"
-  :files="files"
-  :disable-navigation="infoModal || createShareModal || moveToFolderModal || createFolderModal"
-  @close="previewFile = null"
-  @copy-link="copyLink($event)"
-  @download="downloadFile($event)"
-  @open-info="(f, dims, dur) => {
-  store.commit('files/setSelectedFiles', [f]);
-  imageDimensions = dims;
-  duration = dur;
-  infoModal = true;
-}"
-/>
+    </Modal>
 </template>
 
 <script setup lang="ts">
@@ -932,7 +915,6 @@ import { FolderI, FoldersResultI } from '@/store/folders/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
-const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 
 const router = useRouter();
 const store = useStore();
@@ -944,7 +926,6 @@ const draggedFolder = ref<number | string | null>(null);
 const activeDropdown = ref<(() => void) | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
 const lastSelectedIndex = ref<number | null>(null);
-const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
 const moveToFolderModal = ref(false);
 const createShareModal = ref(false);
@@ -1015,6 +996,16 @@ const folders = computed(() => (
 const files = computed(() => (
   searchResult.value.data.filter((item) => item.itemType === 'file')
 ));
+
+const previewFile = computed({
+  get: () => store.state.files.activePreviewFile,
+  set: (val) => {
+    store.commit('files/setActivePreviewFile', val);
+    if (val) {
+      store.commit('files/setPreviewFilesList', files.value);
+    }
+  },
+});
 
 async function getFolders() {
   console.log('getFolders');
@@ -1125,6 +1116,31 @@ function selectItem(event: KeyboardEvent, type: 'file' | 'folder', item: FileI |
 
   lastSelectedIndex.value = index;
 }
+
+const openPreview = (file: FileI, event: MouseEvent) => {
+  const card = (event.currentTarget as HTMLElement).closest('[data-selectable]') as HTMLElement || event.currentTarget as HTMLElement;
+  const icon = card.querySelector('img');
+
+  if (icon) {
+    (icon as HTMLElement).style.viewTransitionName = 'preview-content';
+  } else {
+    card.style.viewTransitionName = 'preview-content';
+  }
+
+  if (!(document as any).startViewTransition) {
+    previewFile.value = file;
+    return;
+  }
+
+  const transition = (document as any).startViewTransition(() => {
+    previewFile.value = file;
+  });
+
+  transition.finished.finally(() => {
+    if (icon) (icon as HTMLElement).style.viewTransitionName = '';
+    card.style.viewTransitionName = '';
+  });
+};
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';

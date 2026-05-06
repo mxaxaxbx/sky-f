@@ -13,6 +13,17 @@
     <UploadStatusPanel />
     <Navbar />
 
+    <!-- Global Preview Modal -->
+    <PreviewModal
+      v-if="activePreviewFile"
+      :modelValue="activePreviewFile"
+      :files="previewFilesList"
+      @update:modelValue="(val) => store.commit('files/setActivePreviewFile', val)"
+      @close="store.commit('files/setActivePreviewFile', null)"
+      @copy-link="copyLink($event)"
+      @download="downloadFile($event)"
+    />
+
     <!-- global file input -->
     <label for="fileInputBtn"></label>
     <input
@@ -342,6 +353,7 @@ const Notifications = defineAsyncComponent(() => import('@/components/global/not
 const UploadStatusPanel = defineAsyncComponent(() => import('@/components/global/upload-status-panel.vue'));
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
+const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 
 let searchTimeout: number | undefined;
 
@@ -394,6 +406,9 @@ const showSidebar = computed(() => isAuth.value && route.name !== 'home');
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const showSidebarMovil = computed(() => showSidebarState.value);
 
+const activePreviewFile = computed(() => store.state.files.activePreviewFile);
+const previewFilesList = computed(() => store.state.files.previewFilesList);
+
 const currentYear = new Date().getFullYear();
 
 const clickOutside = () => {
@@ -438,6 +453,25 @@ async function handleInput() {
   searchTimeout = setTimeout(() => {
     handleSearch();
   }, 500);
+}
+
+async function downloadFile(file: any) {
+  await store.dispatch('files/downloadFile', file);
+}
+
+async function copyLink(file: any) {
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+      store.commit('notifications/addNotification', {
+        message: 'Link copied to clipboard',
+        type: 'success',
+      });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
 }
 
 </script>

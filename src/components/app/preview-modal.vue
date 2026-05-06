@@ -233,6 +233,7 @@
             @mouseup="onPanEnd"
             @mouseleave="onPanEnd"
             @blur="onPanEnd"
+            style="view-transition-name: preview-content"
           />
           <!-- video -->
           <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
@@ -258,6 +259,7 @@
                 @ended="isPlaying = false"
                 @click="togglePlay"
                 @keydown.space.prevent="togglePlay"
+                style="view-transition-name: preview-content"
               >
                 <track kind="captions" />
               </video>
@@ -588,6 +590,7 @@
             class="w-full h-full rounded-2xl"
             frameborder="0"
             title="Visor de PDF"
+            style="view-transition-name: preview-content"
           />
           <!-- docx -->
           <iframe
@@ -596,13 +599,14 @@
             class="w-full h-full rounded-2xl"
             frameborder="0"
             title="Visor de docx"
+            style="view-transition-name: preview-content"
           />
                     <!-- other -->
           <div v-else class="flex flex-col pb-10 items-center text-[var(--text-terceary)] text-xs text-center sm:text-md">
             <span class="font-semibold text-[var(--text-terceary)] text-5xl mb-8 ">Ups! :(</span>
-            <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" />
-            <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-20 w-20" />
-            <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-20 w-20" />
+            <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" style="view-transition-name: preview-content" />
+            <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-20 w-20" style="view-transition-name: preview-content" />
+            <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-20 w-20" style="view-transition-name: preview-content" />
             <span class="font-semibold text-white text-xl mb-5 sm:text-3xl"> {{ file.name }} </span>
             <p>Sorry, a preview for the file
               is not available at the moment.

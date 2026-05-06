@@ -479,7 +479,7 @@
             @click="selectItem($event, 'file', file, index)"
             @keydown.enter="selectItem($event, 'file', file, index)"
             @contextmenu.stop.prevent="onItemContextMenu($event, 'file', file, index)"
-            @dblclick="previewFile = file"
+            @dblclick="openPreview(file, $event)"
 
             class="
               group
@@ -638,7 +638,7 @@
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
                         <!-- zone file -->
                         <button
-                          @click="previewFile = file"
+                          @click="openPreview(file, $event)"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -1203,21 +1203,13 @@
         </div>
       </div>
     </Teleport>
-    <!-- preview files -->
-    <PreviewModal
-      v-if="previewFile"
-      v-model="previewFile"
-      :files="fileResults.data"
-      :disable-navigation="infoModal || createShareModal || moveToFolderModal || createFolderModal"
-      @close="previewFile = null"
-      @copy-link="copyLink($event)"
-      @download="downloadFile($event)"
-      @open-info="(f, dims, dur) => {
-        store.commit('files/setSelectedFiles', [f]);
-        imageDimensions = dims;
-        duration = dur;
-        infoModal = true;
-      }"
+    <ContextMenu
+      v-model="contextMenuVisible"
+      :x="contextMenuX"
+      :y="contextMenuY"
+      :selected-files="selectedFiles"
+      :selected-folders="selectedFolders"
+      @action="handleMenuAction"
     />
 
     <ContextMenu
@@ -1250,7 +1242,6 @@ import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
-const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 const ContextMenu = defineAsyncComponent(() => import('@/components/app/context-menu.vue'));
 
 const router = useRouter();
@@ -1267,7 +1258,6 @@ const lastSelectedIndex = ref<number | null>(null);
 const lastSelectedType = ref<'file' | 'folder' | null>(null);
 const editingFolderId = ref<number | string | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
-const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
 const moveToFolderModal = ref(false);
@@ -1294,6 +1284,16 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
+
+const previewFile = computed({
+  get: () => store.state.files.activePreviewFile,
+  set: (val) => {
+    store.commit('files/setActivePreviewFile', val);
+    if (val) {
+      store.commit('files/setPreviewFilesList', fileResults.value.data);
+    }
+  },
+});
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -1461,6 +1461,31 @@ function clearSelection() {
   lastSelectedIndex.value = null;
   lastSelectedType.value = null;
 }
+
+const openPreview = (file: FileI, event: MouseEvent) => {
+  const card = (event.currentTarget as HTMLElement).closest('[data-selectable]') as HTMLElement || event.currentTarget as HTMLElement;
+  const icon = card.querySelector('img');
+
+  if (icon) {
+    (icon as HTMLElement).style.viewTransitionName = 'preview-content';
+  } else {
+    card.style.viewTransitionName = 'preview-content';
+  }
+
+  if (!(document as any).startViewTransition) {
+    previewFile.value = file;
+    return;
+  }
+
+  const transition = (document as any).startViewTransition(() => {
+    previewFile.value = file;
+  });
+
+  transition.finished.finally(() => {
+    if (icon) (icon as HTMLElement).style.viewTransitionName = '';
+    card.style.viewTransitionName = '';
+  });
+};
 
 function handleContainerClick(event: MouseEvent | KeyboardEvent) {
   const target = event.target as HTMLElement;

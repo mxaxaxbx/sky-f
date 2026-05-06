@@ -127,7 +127,7 @@
               block
               h-[10px] w-[10px]
               rounded-full
-              bg-green-500
+              bg-[#07C77B]
               border-2 border-[var(--bg)]
               ">
           </span>
