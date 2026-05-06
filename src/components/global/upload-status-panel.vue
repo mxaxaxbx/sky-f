@@ -104,7 +104,13 @@
               class="px-4 py-2"
             >
               <div class="flex items-center gap-2 mb-2">
-                <i class="fas fa-spinner fa-spin text-[var(--primary,#0B77F3)] text-lg shrink-0 text-center" />
+                <!-- Reloj animado -->
+                <svg class="h-5 w-5 shrink-0 text-[var(--text-terceary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="9" class="" />
+                  <line x1="12" y1="12" x2="12" y2="6" /> <!-- Manecilla fija a las 12 -->
+                  <line x1="12" y1="12" x2="12" y2="7" class="clock-hand-spin" /> <!-- Manecilla giratoria -->
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /> <!-- Centro -->
+                </svg>
                 <div class="flex-1 min-w-0 flex flex-col">
                   <span class="text-[16px] text-[var(--text)] font-medium truncate flex-1 min-w-0" :title="file.name">
                     {{ file.name }}
@@ -381,6 +387,15 @@ function formatFileSize(bytes: number): string {
 }
 .animate-slow-spin {
   animation: slow-spin 3s linear infinite;
+}
+
+@keyframes clock-hand-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.clock-hand-spin {
+  animation: clock-hand-rotate 1.5s linear infinite;
+  transform-origin: 12px 12px;
 }
 
 /* View Transitions */
