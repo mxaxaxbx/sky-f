@@ -930,8 +930,29 @@ async function getBase64(currentFile: FileI) {
     return url;
   }
 
-  await store.dispatch('files/saveCacheFile', currentFile);
-  return '';
+  const url = await store.dispatch('files/getDownloadUrl', { id: currentFile.id });
+  currentBlobURL.value = url;
+
+  if (currentFile.contentType.startsWith('audio/')) {
+    await extractAudioCover(await fetch(url).then((r) => r.blob()));
+  }
+
+  if (
+    currentFile.contentType.startsWith('text/') || currentFile.name?.endsWith('.vue') || currentFile.name?.endsWith('.ts') || currentFile.name?.endsWith('.js') || currentFile.name?.endsWith('.py')
+  ) {
+    textContent.value = await fetch(url).then((r) => r.text());
+  }
+
+  if (currentFile.contentType.startsWith('application/json')) {
+    try {
+      const raw = await fetch(url).then((r) => r.text());
+      textContent.value = JSON.stringify(JSON.parse(raw), null, 2);
+    } catch {
+      textContent.value = await fetch(url).then((r) => r.text());
+    }
+  }
+
+  return url;
 }
 
 function togglePlay() {
