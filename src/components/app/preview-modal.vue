@@ -363,8 +363,26 @@
                         {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
                       </span>
                   </div>
-                  <!-- fullscreen -->
-                  <div class="flex-1 flex items-center justify-end">
+                  <!-- fullscreen + cast -->
+                  <div class="flex-1 flex items-center justify-end gap-1">
+                    <!-- cast -->
+                    <button
+                      v-if="castAvailable"
+                      @click="toggleCast"
+                      :title="isCasting ? 'Stop casting' : 'Cast to device'"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                      :class="isCasting ? 'grayscale-0 border-[var(--color-primary)]' : ''"
+                    >
+                      <i class="fa-brands fa-chromecast h-6 w-6"></i>
+                    </button>
                     <button
                       @click="toggleFullscreen"
                       class="
@@ -808,6 +826,8 @@ const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
+const castAvailable = ref(false);
+const isCasting = ref(false);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
@@ -914,8 +934,29 @@ async function getBase64(currentFile: FileI) {
     return url;
   }
 
-  await store.dispatch('files/saveCacheFile', currentFile);
-  return '';
+  const url = await store.dispatch('files/getDownloadUrl', { id: currentFile.id });
+  currentBlobURL.value = url;
+
+  if (currentFile.contentType.startsWith('audio/')) {
+    await extractAudioCover(await fetch(url).then((r) => r.blob()));
+  }
+
+  if (
+    currentFile.contentType.startsWith('text/') || currentFile.name?.endsWith('.vue') || currentFile.name?.endsWith('.ts') || currentFile.name?.endsWith('.js') || currentFile.name?.endsWith('.py')
+  ) {
+    textContent.value = await fetch(url).then((r) => r.text());
+  }
+
+  if (currentFile.contentType.startsWith('application/json')) {
+    try {
+      const raw = await fetch(url).then((r) => r.text());
+      textContent.value = JSON.stringify(JSON.parse(raw), null, 2);
+    } catch {
+      textContent.value = await fetch(url).then((r) => r.text());
+    }
+  }
+
+  return url;
 }
 
 function togglePlay() {
@@ -1184,6 +1225,34 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function initCastWatcher() {
+  const video = videoRef.value;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const remote = (video as any)?.remote;
+  if (!remote) return;
+
+  remote.watchAvailability((available: boolean) => {
+    castAvailable.value = available;
+  }).catch(() => {
+    castAvailable.value = false;
+  });
+
+  remote.addEventListener('connecting', () => { isCasting.value = true; });
+  remote.addEventListener('connect', () => { isCasting.value = true; });
+  remote.addEventListener('disconnect', () => { isCasting.value = false; });
+}
+
+async function toggleCast() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const remote = (videoRef.value as any)?.remote;
+  if (!remote) return;
+  try {
+    await remote.prompt();
+  } catch {
+    // user cancelled or unavailable
+  }
+}
+
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closeModal();
@@ -1200,6 +1269,10 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+watch(videoRef, (video) => {
+  if (video) initCastWatcher();
+});
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
@@ -1212,7 +1285,7 @@ onUnmounted(() => {
 
 watch(() => props.modelValue, async (newFile) => {
   isPlaying.value = false;
-  progressPercent.value = 0;
+  currentTime.value = 0;
   volume.value = 1;
   isMuted.value = false;
   previousVolume.value = 1;
