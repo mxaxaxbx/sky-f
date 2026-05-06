@@ -2,13 +2,13 @@
   <Transition name="slide-up">
     <div
       v-if="visible"
-      class="upload-panel-container fixed bottom-4 right-4 z-50 w-96 rounded-2xl shadow-xl bg-black/60 backdrop-blur-sm divide-y divide-[var(--border)] overflow-hidden"
+      class="upload-panel-container fixed bottom-4 right-4 z-50 w-[400px] rounded-2xl shadow-xl bg-black/60 backdrop-blur-sm divide-y divide-[var(--border)] overflow-hidden"
+      style="view-transition-name: upload-panel"
     >
       <!-- Header -->
       <div
-        class="flex items-center justify-between transition-all duration-300"
+        class="flex items-center justify-between transition-all duration-300 relative"
         :class="minimized ? 'px-3 py-1' : 'px-4 py-3'"
-        style="view-transition-name: upload-header"
       >
         <div class="flex items-center gap-3">
             <div v-if="minimized && !allDone" class="relative h-10 w-10 flex items-center justify-center shrink-0">
@@ -30,25 +30,27 @@
               class="h-7 w-7"
             />
             <div class=" flex flex-col items-start">
-              <!-- Título cuando está expandido -->
+              <!-- Título solo cuando está expandido -->
               <span v-if="!minimized" class="text-md font-semibold text-[var(--text)]">
                 Uploads
               </span>
 
-              <!-- Estado cuando está minimizado -->
+              <!-- Estado solo cuando está minimizado -->
               <template v-if="minimized">
-                <span class="text-md font-semibold text-[var(--text)]" style="view-transition-name: upload-title">
+                <span class="text-md font-semibold text-[var(--text)]">
                   {{ allDone ? 'Upload complete' : 'Uploading...' }}
                 </span>
                 <div class="flex items-start justify-between text-[12px] text-[var(--text-terceary)]">
                   <span>{{ doneCount }} / {{ uploadFiles.length }}<span class="ml-2">uploads complete</span></span>
-                  <span v-if="errorCount > 0" class="text-red-500 ml-2">{{ errorCount }} failed</span>
+                  <span v-if="errorCount > 0" class="text-red-500 ml-8">{{ errorCount }} failed</span>
                 </div>
               </template>
             </div>
         </div>
         <div class="flex items-center gap-2 absolute"
-        :class="minimized ? 'right-2 top-2' : 'right-1.5 top-1.5'" >
+        :class="minimized ? 'right-2 top-2' : 'right-1.5 top-1.5'"
+        style="view-transition-name: action-buttons"
+        >
           <button
             @click="toggleMinimize"
             class="
@@ -83,28 +85,32 @@
         </div>
       </div>
 
-      <!-- Scrollable Content Wrapper -->
-      <div v-if="!minimized" @scroll="handleScroll" class="max-h-80 overflow-y-auto divide-y divide-[var(--border)]">
+      <!-- Content Wrapper -->
+      <div v-if="!minimized" class="divide-y divide-[var(--border)]">
         <!-- Uploading Section -->
-        <div v-if="uploadingFiles.length > 0" class="relative">
-          <div class="sticky top-0 z-50 bg-transparent px-4 py-3 text-sm tracking-wider text-[var(--text-terceary)] font-semibold">
+        <div v-if="uploadingFiles.length > 0" class="flex flex-col">
+          <div class="bg-transparent px-4 pt-3 pb-1 text-sm tracking-wider text-[var(--text-terceary)] font-semibold">
             Uploading
           </div>
-          <div :style="{
-            maskImage: scrollY > 0
-              ? `linear-gradient(to bottom, transparent ${scrollY - 20}px, black ${scrollY + 10}px)`
-              : 'none',
-            webkitMaskImage: scrollY > 0
-              ? `linear-gradient(to bottom, transparent ${scrollY - 20}px, black ${scrollY + 10}px)`
-              : 'none'
-          }">
+          <div
+            class="max-h-48 overflow-y-auto custom-scrollbar relative"
+            @scroll="handleSectionScroll('uploading', $event)"
+            :style="{
+              maskImage: sectionScrolls.uploading > 0
+                ? `linear-gradient(to bottom, transparent 0px, black 40px)`
+                : 'none',
+              webkitMaskImage: sectionScrolls.uploading > 0
+                ? `linear-gradient(to bottom, transparent 0px, black 40px)`
+                : 'none'
+            }"
+          >
             <div
               v-for="(file, index) in uploadingFiles"
               :key="'uploading-' + index"
               class="px-4 py-2"
             >
               <div class="flex items-center gap-2 mb-2">
-                <!-- Reloj animado -->
+                <!-- Reloj -->
                 <svg class="h-5 w-5 shrink-0 text-[var(--text-terceary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                   <circle cx="12" cy="12" r="9" class="" />
                   <line x1="12" y1="12" x2="12" y2="6" /> <!-- Manecilla fija a las 12 -->
@@ -112,7 +118,7 @@
                   <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /> <!-- Centro -->
                 </svg>
                 <div class="flex-1 min-w-0 flex flex-col">
-                  <span class="text-[16px] text-[var(--text)] font-medium truncate flex-1 min-w-0" :title="file.name">
+                  <span class="text-sm text-[var(--text)] font-medium truncate flex-1 min-w-0" :title="file.name">
                     {{ file.name }}
                   </span>
                   <span class="text-[12px] text-[var(--text-terceary)]">
@@ -129,53 +135,94 @@
             </div>
           </div>
         </div>
-        <!-- Completed Section -->
-        <div v-if="completedFiles.length > 0" class="relative">
-          <div class="sticky top-0 z-50 bg-transparent px-4 py-3 text-sm tracking-wider text-[var(--text-terceary)] font-semibold">
+        <!-- Success Section -->
+        <div v-if="successFiles.length > 0" class="flex flex-col">
+          <div class="bg-transparent px-4 pt-3 pb-1 text-sm tracking-wider text-[var(--text-terceary)] font-semibold">
             Uploaded to Files
           </div>
-          <div :style="{
-            maskImage: scrollY > 0
-              ? `linear-gradient(to bottom, transparent ${scrollY - 20}px, black ${scrollY + 10}px)`
-              : 'none',
-            webkitMaskImage: scrollY > 0
-              ? `linear-gradient(to bottom, transparent ${scrollY - 20}px, black ${scrollY + 10}px)`
-              : 'none'
-          }">
+          <div
+            class="max-h-60 overflow-y-auto custom-scrollbar relative"
+            @scroll="handleSectionScroll('success', $event)"
+            :style="{
+              maskImage: sectionScrolls.success > 0
+                ? `linear-gradient(to bottom, transparent 0px, black 40px)`
+                : 'none',
+              webkitMaskImage: sectionScrolls.success > 0
+                ? `linear-gradient(to bottom, transparent 0px, black 40px)`
+                : 'none'
+            }"
+          >
             <div
-              v-for="(file, index) in completedFiles"
-              :key="'completed-' + index"
-              class="px-4 py-2 hover:bg-white/5 cursor-pointer transition-colors focus:outline-none focus:bg-white/5"
+              v-for="(file, index) in successFiles"
+              :key="'success-' + index"
+              class="px-4 py-2 group hover:bg-white/5 cursor-pointer transition-colors focus:outline-none focus:bg-white/5"
               @click="handleOpenFile(file)"
               @keydown.enter="handleOpenFile(file)"
               tabindex="0"
             >
-            <div class="flex gap-3 items-center">
-              <div class="relative shrink-0">
-                <img
-                  :src="getFileIcon(file)"
-                  alt="file icon"
-                  class="h-8 w-8"
-                />
-                <div v-if="!file.error" class="absolute -bottom-1 -right-1 bg-black rounded-full border border-black shadow-sm">
-                  <img src="/icon/icon-success.svg" alt="done" class="h-3.5 w-3.5" />
+              <div class="flex gap-3 items-center">
+                <div class="relative shrink-0">
+                  <img
+                    :src="getFileIcon(file)"
+                    alt="file icon"
+                    class="h-8 w-8"
+                  />
+                  <div class="absolute -bottom-1 -right-1 bg-black rounded-full border border-black shadow-sm">
+                    <img src="/icon/icon-success.svg" alt="done" class="h-3.5 w-3.5" />
+                  </div>
+                </div>
+                <div class="flex flex-col items-start w-full min-w-0">
+                  <span class="text-sm text-[var(--text)] font-medium truncate w-full group-hover:underline" :title="file.name">
+                    {{ file.name }}
+                  </span>
+                  <span class="text-[12px] text-[var(--text-terceary)]">Completed</span>
                 </div>
               </div>
-              <div class="flex flex-col items-start w-full min-w-0">
-                <span class="text-[16px] text-[var(--text)] font-medium truncate w-full" :title="file.name">
-                  {{ file.name }}
-                </span>
-                <span class="text-[12px] shrink-0 ml-0">
-                  <span v-if="file.error" class="text-red-500">Error</span>
-                  <span v-else class="text-[var(--text-terceary)]">Completed</span>
-                </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Failed Section -->
+        <div v-if="failedFiles.length > 0" class="flex flex-col">
+          <div class="bg-transparent px-4 pt-3 pb-1 text-sm tracking-wider text-red-500 font-semibold">
+            Failed to upload
+          </div>
+          <div
+            class="max-h-40 overflow-y-auto custom-scrollbar relative"
+            @scroll="handleSectionScroll('failed', $event)"
+            :style="{
+              maskImage: sectionScrolls.failed > 0
+                ? `linear-gradient(to bottom, transparent 0px, black 40px)`
+                : 'none',
+              webkitMaskImage: sectionScrolls.failed > 0
+                ? `linear-gradient(to bottom, transparent 0px, black 40px)`
+                : 'none'
+            }"
+          >
+            <div
+              v-for="(file, index) in failedFiles"
+              :key="'failed-' + index"
+              class="px-4 py-2 transition-colors"
+            >
+              <div class="flex gap-3 items-center">
+                <div class="relative shrink-0">
+                  <img
+                    :src="getFileIcon(file)"
+                    alt="file icon"
+                    class="h-8 w-8 opacity-50"
+                  />
+                  <div class="absolute -bottom-1 -right-1 bg-black rounded-full border border-black shadow-sm">
+                    <img src="/icon/icon-warning.svg" alt="error" class="h-3.5 w-3.5" />
+                  </div>
+                </div>
+                <div class="flex flex-col items-start w-full min-w-0">
+                  <span class="text-sm text-[var(--text)] font-medium truncate w-full" :title="file.name">
+                    {{ file.name }}
+                  </span>
+                  <span class="text-[12px] text-red-500">{{ file.error }}</span>
+                </div>
               </div>
             </div>
-            <div v-if="file.error" class="h-1 rounded-full bg-[var(--border)] overflow-hidden mt-1">
-              <div class="h-full rounded-full bg-red-500" style="width: 100%" />
-            </div>
-            <p v-if="file.error" class="text-[10px] text-red-500 mt-0.5 truncate">{{ file.error }}</p>
-          </div>
           </div>
         </div>
       </div>
@@ -212,7 +259,7 @@
           </span>
           <div class="flex items-start justify-between text-[12px] text-[var(--text-terceary)]">
             <span>{{ doneCount }} / {{ uploadFiles.length }}<span class="ml-2">uploads complete</span></span>
-            <span v-if="errorCount > 0" class="text-red-500 ml-2">{{ errorCount }} failed</span>
+            <span v-if="errorCount > 0" class="text-red-500 ml-8">{{ errorCount }} failed</span>
           </div>
         </div>
       </div>
@@ -257,6 +304,16 @@ const uploadFiles = computed<UplaodFileI[]>(() => [
     updated: Date.now() / 1000,
     size: 1024 * 1024 * 15,
   },
+  {
+    id: 'failed-id',
+    name: 'Archivo_con_error.jpg',
+    percentage: 45,
+    error: 'Error de conexión con el servidor',
+    contentType: 'image/jpeg',
+    created: Date.now() / 1000,
+    updated: Date.now() / 1000,
+    size: 1024 * 500,
+  },
   */
 ]);
 
@@ -278,7 +335,19 @@ const uploadProgress = computed(() => {
 });
 
 const uploadingFiles = computed(() => [...uploadFiles.value].reverse().filter((f) => f.percentage < 100 && !f.error));
-const completedFiles = computed(() => [...uploadFiles.value].reverse().filter((f) => f.percentage === 100 || !!f.error));
+const successFiles = computed(() => [...uploadFiles.value].reverse().filter((f) => f.percentage === 100 && !f.error));
+const failedFiles = computed(() => [...uploadFiles.value].reverse().filter((f) => !!f.error));
+
+const sectionScrolls = ref({
+  uploading: 0,
+  success: 0,
+  failed: 0,
+});
+
+function handleSectionScroll(section: 'uploading' | 'success' | 'failed', event: Event) {
+  const target = event.target as HTMLElement;
+  sectionScrolls.value[section] = target.scrollTop;
+}
 
 const doneCount = computed(() => uploadFiles.value.filter((f) => f.percentage === 100 && !f.error).length);
 const errorCount = computed(() => uploadFiles.value.filter((f) => !!f.error).length);
@@ -287,13 +356,6 @@ const allDone = computed(
     && uploadFiles.value.every((f) => f.percentage === 100 || !!f.error),
 );
 const visible = computed(() => uploadFiles.value.length > 0 && !dismissed.value);
-
-const scrollY = ref(0);
-
-function handleScroll(event: Event) {
-  const target = event.target as HTMLElement;
-  scrollY.value = target.scrollTop;
-}
 
 function toggleMinimize() {
   if (!(document as any).startViewTransition) {
@@ -407,5 +469,25 @@ function formatFileSize(bytes: number): string {
 ::view-transition-new(upload-panel) {
   height: 100%;
   width: 100%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+::view-transition-group(root),
+::view-transition-group(upload-panel),
+::view-transition-group(action-buttons) {
+  animation-duration: 300ms;
 }
 </style>
