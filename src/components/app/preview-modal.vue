@@ -249,7 +249,7 @@
               "
             >
               <video
-                :src="currentBlobURL"
+                :src="castUrl || currentBlobURL"
                 :title="`Video preview of ${file.name || 'video'}`"
                 class="max-w-full max-h-full object-contain cursor-pointer"
                 ref="videoRef"
@@ -828,6 +828,7 @@ const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const castAvailable = ref(false);
 const isCasting = ref(false);
+const castUrl = ref<string | null>(null);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
@@ -1239,7 +1240,7 @@ function initCastWatcher() {
 
   remote.addEventListener('connecting', () => { isCasting.value = true; });
   remote.addEventListener('connect', () => { isCasting.value = true; });
-  remote.addEventListener('disconnect', () => { isCasting.value = false; });
+  remote.addEventListener('disconnect', () => { isCasting.value = false; castUrl.value = null; });
 }
 
 async function toggleCast() {
@@ -1247,9 +1248,14 @@ async function toggleCast() {
   const remote = (videoRef.value as any)?.remote;
   if (!remote) return;
   try {
+    // Chromecast can't access blob:// URLs — switch to a real HTTP URL before prompting
+    const httpUrl = await store.dispatch('files/getDownloadUrl', file.value);
+    castUrl.value = httpUrl;
     await remote.prompt();
+    // If the user cancelled and we never connected, restore the blob URL
+    if (!isCasting.value) castUrl.value = null;
   } catch {
-    // user cancelled or unavailable
+    castUrl.value = null;
   }
 }
 
