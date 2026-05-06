@@ -293,6 +293,7 @@ watch(minimized, (val) => {
 
 const uploadFiles = computed<UplaodFileI[]>(() => [
   ...store.state.files.uploadFiles,
+  /*
   {
     id: 'test-id',
     name: 'Archivo_de_prueba.pdf',
@@ -313,6 +314,7 @@ const uploadFiles = computed<UplaodFileI[]>(() => [
     updated: Date.now() / 1000,
     size: 1024 * 500,
   },
+  */
 ]);
 
 const uploadProgress = computed(() => {
