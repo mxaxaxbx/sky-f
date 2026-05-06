@@ -249,7 +249,7 @@
               "
             >
               <video
-                :src="castUrl || currentBlobURL"
+                :src="currentBlobURL"
                 :title="`Video preview of ${file.name || 'video'}`"
                 class="max-w-full max-h-full object-contain cursor-pointer"
                 ref="videoRef"
@@ -828,7 +828,6 @@ const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const castAvailable = ref(false);
 const isCasting = ref(false);
-const castUrl = ref<string | null>(null);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
@@ -1240,22 +1239,26 @@ function initCastWatcher() {
 
   remote.addEventListener('connecting', () => { isCasting.value = true; });
   remote.addEventListener('connect', () => { isCasting.value = true; });
-  remote.addEventListener('disconnect', () => { isCasting.value = false; castUrl.value = null; });
+  remote.addEventListener('disconnect', () => {
+    isCasting.value = false;
+    if (videoRef.value && currentBlobURL.value) videoRef.value.src = currentBlobURL.value;
+  });
 }
 
 async function toggleCast() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = (videoRef.value as any)?.remote;
-  if (!remote) return;
+  const video = videoRef.value as HTMLVideoElement & { remote?: any };
+  if (!video?.remote) return;
   try {
-    // Chromecast can't access blob:// URLs — switch to a real HTTP URL before prompting
+    // Chromecast can't access blob:// URLs — set HTTP URL directly on DOM to avoid
+    // disrupting watchAvailability (reactive src changes reset the remote object)
     const httpUrl = await store.dispatch('files/getDownloadUrl', file.value);
-    castUrl.value = httpUrl;
-    await remote.prompt();
-    // If the user cancelled and we never connected, restore the blob URL
-    if (!isCasting.value) castUrl.value = null;
+    const blobSrc = video.src;
+    video.src = httpUrl;
+    await video.remote.prompt();
+    if (!isCasting.value) video.src = blobSrc;
   } catch {
-    castUrl.value = null;
+    if (videoRef.value && currentBlobURL.value) videoRef.value.src = currentBlobURL.value;
   }
 }
 
