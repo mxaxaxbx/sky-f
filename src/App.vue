@@ -20,8 +20,27 @@
       :files="previewFilesList"
       @update:modelValue="(val) => store.commit('files/setActivePreviewFile', val)"
       @close="store.commit('files/setActivePreviewFile', null)"
-      @copy-link="copyLink($event)"
+      @open-info="(file, dimensions, duration) => {
+        store.commit('files/setActiveInfoFile', file);
+        activeInfoDimensions = dimensions;
+        activeInfoDuration = duration;
+      }"
+      @copy-link="store.commit('files/setActiveShareFile', $event)"
       @download="downloadFile($event)"
+    />
+
+    <InfoModal
+      v-if="activeInfoFile"
+      :modelValue="activeInfoFile"
+      :dimensions="activeInfoDimensions"
+      :duration="activeInfoDuration"
+      @close="store.commit('files/setActiveInfoFile', null)"
+    />
+
+    <ShareModal
+      v-if="activeShareFile"
+      :modelValue="activeShareFile"
+      @close="store.commit('files/setActiveShareFile', null)"
     />
 
     <!-- global file input -->
@@ -354,6 +373,11 @@ const UploadStatusPanel = defineAsyncComponent(() => import('@/components/global
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
 const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
+const InfoModal = defineAsyncComponent(() => import('@/components/app/info-modal.vue'));
+const ShareModal = defineAsyncComponent(() => import('@/components/app/share-modal.vue'));
+
+const activeInfoDimensions = ref<{ width: number; height: number } | null>(null);
+const activeInfoDuration = ref<number>(0);
 
 let searchTimeout: number | undefined;
 
@@ -408,6 +432,8 @@ const showSidebarMovil = computed(() => showSidebarState.value);
 
 const activePreviewFile = computed(() => store.state.files.activePreviewFile);
 const previewFilesList = computed(() => store.state.files.previewFilesList);
+const activeInfoFile = computed(() => store.state.files.activeInfoFile);
+const activeShareFile = computed(() => store.state.files.activeShareFile);
 
 const currentYear = new Date().getFullYear();
 
