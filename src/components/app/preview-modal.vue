@@ -379,7 +379,7 @@
                       "
                       :class="isCasting ? 'grayscale-0 border-[var(--color-primary)]' : ''"
                     >
-                      <i class="fas fa-cast text-lg"></i>
+                      <i class="fa-brands fa-chromecast h-6 w-6"></i>
                     </button>
                     <button
                       @click="toggleFullscreen"
@@ -1206,10 +1206,11 @@ function initCastWatcher() {
   const remote = (video as any)?.remote;
   if (!remote) return;
 
-  castAvailable.value = true;
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  remote.watchAvailability(() => {}).catch(() => {});
+  remote.watchAvailability((available: boolean) => {
+    castAvailable.value = available;
+  }).catch(() => {
+    castAvailable.value = false;
+  });
 
   remote.addEventListener('connecting', () => { isCasting.value = true; });
   remote.addEventListener('connect', () => { isCasting.value = true; });
