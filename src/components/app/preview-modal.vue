@@ -1206,11 +1206,10 @@ function initCastWatcher() {
   const remote = (video as any)?.remote;
   if (!remote) return;
 
-  remote.watchAvailability((available: boolean) => {
-    castAvailable.value = available;
-  }).catch(() => {
-    castAvailable.value = false;
-  });
+  castAvailable.value = true;
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  remote.watchAvailability(() => {}).catch(() => {});
 
   remote.addEventListener('connecting', () => { isCasting.value = true; });
   remote.addEventListener('connect', () => { isCasting.value = true; });
