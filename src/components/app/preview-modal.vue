@@ -363,26 +363,8 @@
                         {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
                       </span>
                   </div>
-                  <!-- fullscreen + cast -->
+                  <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
-                    <!-- cast -->
-                    <button
-                      v-if="castAvailable"
-                      @click="toggleCast"
-                      :title="isCasting ? 'Stop casting' : 'Cast to device'"
-                      class="
-                        border border-transparent
-                        text-[var(--color-primary)] font-medium text-sm
-                        p-1 rounded-xl grayscale
-                        hover:text-[var(--text)]
-                        hover:border-[var(--color-primary)]
-                        hover:grayscale-0
-                        transition-all duration-300
-                      "
-                      :class="isCasting ? 'grayscale-0 border-[var(--color-primary)]' : ''"
-                    >
-                      <i class="fa-brands fa-chromecast h-6 w-6"></i>
-                    </button>
                     <button
                       @click="toggleFullscreen"
                       class="
@@ -826,8 +808,6 @@ const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
-const castAvailable = ref(false);
-const isCasting = ref(false);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
@@ -1225,49 +1205,6 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-async function initCastWatcher() {
-  const video = videoRef.value;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = (video as any)?.remote;
-  if (!remote) return;
-
-  // blob: URLs always yield false from watchAvailability because remote devices
-  // can't check their own compatibility against an opaque blob. Swap to the real
-  // HTTP URL so the browser can negotiate with available cast devices properly.
-  if (video.src.startsWith('blob:')) {
-    const savedTime = video.currentTime;
-    const wasPlaying = !video.paused;
-    const httpUrl = await store.dispatch('files/getDownloadUrl', file.value);
-    video.src = httpUrl;
-    video.addEventListener('loadedmetadata', () => {
-      video.currentTime = savedTime;
-      if (wasPlaying) video.play();
-    }, { once: true });
-  }
-
-  // watchAvailability is unreliable — returns false even with devices present
-  // (blob: URLs, Brave privacy restrictions, etc.). Show the button whenever
-  // the Remote Playback API exists; prompt() opens the native picker which
-  // handles device discovery reliably. Only hide if the platform rejects outright.
-  castAvailable.value = true;
-  remote.watchAvailability(() => { /* ignored */ }).catch(() => {
-    castAvailable.value = false;
-  });
-
-  remote.addEventListener('connecting', () => { isCasting.value = true; });
-  remote.addEventListener('connect', () => { isCasting.value = true; });
-  remote.addEventListener('disconnect', () => { isCasting.value = false; });
-}
-
-async function toggleCast() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const video = videoRef.value as HTMLVideoElement & { remote?: any };
-  if (!video?.remote) return;
-  try {
-    await video.remote.prompt();
-  } catch { /* user cancelled or device error */ }
-}
-
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closeModal();
@@ -1283,10 +1220,6 @@ function handleKeydown(e: KeyboardEvent) {
     e.preventDefault();
   }
 }
-
-watch(videoRef, (video) => {
-  if (video) initCastWatcher();
-});
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
