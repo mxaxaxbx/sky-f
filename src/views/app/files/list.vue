@@ -217,6 +217,7 @@
           </button>
         </h3>
       </div>
+      <!-- folders grid -->
       <Transition name="slide">
         <div
           v-show="showFolders"
@@ -313,7 +314,8 @@
               >
                   <Dropdown
                     :classes="[
-                      'bg-[var(--bg-secondary)]',
+                      'bg-[var(--bg-modal-2)]',
+                      'backdrop-blur-md',
                       'border border-[var(--border)]',
                       'rounded-2xl','shadow-md',
                       'absolute','-right-0', 'z-20',
@@ -413,13 +415,10 @@
     <!-- files -->
     <div
       v-if="fileResults.data.length"
-      class="
-        border-t border-[var(--border)]
-        w-full
-        py-6 px-2 pt-4
-
-        sm:mt-0 sm:py-4 sm:px-14
-      "
+      :class="[
+        folderResults.data.length && 'border-t border-[var(--border)]',
+        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14'
+      ]"
     >
       <div class="flex items-center justify-between mb-4 sm:mb-4">
         <h3
@@ -468,6 +467,7 @@
           {{ sortOrder === 'desc' ? 'Newest' : 'Oldest' }}
         </button>
       </div>
+      <!-- files grid -->
       <Transition name="slide">
         <div
           v-show="showFiles"
@@ -590,7 +590,8 @@
               >
                 <Dropdown
                   :classes="[
-                    'bg-[var(--bg-secondary)]',
+                    'bg-[var(--bg-modal-2)]',
+                    'backdrop-blur-md',
                     'border border-[var(--border)]',
                     'rounded-2xl','shadow-md',
                     'absolute','-right-0', 'z-20',

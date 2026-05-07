@@ -4,7 +4,8 @@
       v-if="modelValue"
       class="
         fixed z-50
-        bg-[var(--bg-secondary)]
+        bg-[var(--bg-modal-2)]
+        backdrop-blur-md
         border border-[var(--border)]
         rounded-2xl shadow-md
         w-48

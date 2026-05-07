@@ -1,6 +1,6 @@
 <template>
-  <div class="mt-10 pt-10 mx-2 sm:mx-14">
-    <h1 class="text-xl mt-8 sm:mt-0 font-semibold font-alexandria mb-4 text-[var(--text)] hidden sm:block">
+  <div class="mt-10 pt-10 ">
+    <h1 class="text-xl mt-8 sm:mt-0 px-2 sm:px-14 font-semibold font-alexandria mb-4 text-[var(--text)] hidden sm:block">
       Search Results for:
       <span v-if="searchQuery" class="text-xl font-light ml-1 text-[var(--text-terceary)]">
         "{{ searchQuery }}"
@@ -22,7 +22,7 @@
     </div>
 
     <!-- folders -->
-    <div v-if="folders.length" class="w-full my-4 px-2">
+    <div v-if="folders.length" class="w-full my-4 px-2 sm:px-14">
       <h3
         class="
           flex items-center
@@ -201,7 +201,13 @@
     </div>
 
     <!-- files -->
-    <div v-if="files.length" class="w-full my-4 mx-2">
+    <div
+      v-if="files.length"
+      :class="[
+        folders.length && 'border-t border-[var(--border)]',
+        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14'
+      ]"
+    >
       <h3
         class="
           flex items-center

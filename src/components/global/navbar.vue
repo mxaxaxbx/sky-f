@@ -88,7 +88,8 @@
           <img src="/icon/icon-signIn.svg" alt="icon" class="ml-1 h-4" />
         </a>
 
-      <Dropdown v-if="isAuth">
+      <Dropdown v-if="isAuth"
+        >
         <template #trigger="{ toggle }">
             <button
               @click="toggle"
@@ -324,6 +325,7 @@ let timeout: number | undefined;
 const isMobileMenuOpen = ref(false);
 const isSticky = ref(false);
 const isRising = ref(false);
+const dropdownPosition = ref('top-8');
 
 const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 const query = ref<string>('');
@@ -444,83 +446,3 @@ watch(
   { deep: true },
 );
 </script>
-
-<style scoped>
-.animate-fade-in-up {
-  animation: fadeInBounce 0.7s ease-out both;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-@keyframes fadeInBounce {
-  0% {
-    opacity: 0;
-    transform: translate3d(100px, 100px, 0);
-    /* desde abajo a la derecha */
-    blur: 100px;
-    /* desenfoque inicial */
-  }
-
-  60% {
-    opacity: 1;
-    transform: translate3d(-10px, -10px, 0);
-    /* ligeramente más allá para efecto bounce */
-    blur: 10px;
-    /* desenfoque eliminado */
-  }
-
-  80% {
-    transform: translate3d(5px, 5px, 0);
-    /* rebote hacia atrás */
-    blur: 0;
-    /* desenfoque eliminado */
-  }
-
-  100% {
-    transform: translate3d(0, 0, 0);
-    /* posición final */
-  }
-}
-
-/* Accesibilidad: sin animación si el usuario la prefiere reducida */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in-up {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* clase base para cada link */
-
-.nav-link:hover {
-  color: #0A77F3;
-  /* cambia el color del texto */
-}
-
-.slide-left-enter-active {
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-}
-
-.slide-left-leave-active {
-  transition: transform 0.3s ease-in, opacity 0.3s ease-in;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(100%);
-  opacity: 1;
-}
-
-.slide-left-enter-to,
-.slide-left-leave-from {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-body.menu-open {
-  overflow: hidden;
-}
-</style>

@@ -15,6 +15,7 @@ const props = defineProps({
       'w-screen h-screen',
       'pt-10 mt-10',
       'bg-[var(--bg)]',
+      'backdrop-blur-md',
       'border border-[var(--border)]',
       'rounded-2xl',
       'shadow-sm z-9999',
