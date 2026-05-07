@@ -1227,13 +1227,17 @@ function formatTime(seconds: number): string {
 
 function initCastWatcher() {
   const video = videoRef.value;
+  console.log('Initializing cast watcher for video element:', video);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const remote = (video as any)?.remote;
+  console.log('Remote object:', remote);
   if (!remote) return;
 
   remote.watchAvailability((available: boolean) => {
+    console.log('Cast availability changed:', available);
     castAvailable.value = available;
-  }).catch(() => {
+  }).catch((err: any) => {
+    console.warn('Error watching cast availability:', err);
     castAvailable.value = false;
   });
 
