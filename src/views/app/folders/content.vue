@@ -166,7 +166,7 @@
     <div
       v-if="folderResults.data.length"
       class="
-        w-full border-b border-[var(--border)]
+        w-full
         py-0 px-2 pt-4
 
         sm:py-4 sm:px-14
@@ -399,11 +399,10 @@
     <!-- files -->
     <div
       v-if="fileResults.data.length"
-      class="
-        w-full py-6 px-2 pt-4
-
-        sm:mt-0 sm:py-4 sm:px-14
-      "
+      :class="[
+        folderResults.data.length && 'border-t border-[var(--border)]',
+        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14'
+      ]"
     >
       <div class="flex items-center justify-between mx-4 sm:mx-0">
         <h3

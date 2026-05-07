@@ -14,7 +14,8 @@ const props = defineProps({
       'fixed inset-0',
       'w-screen h-screen',
       'pt-10 mt-10',
-      'bg-[var(--bg)]',
+      'bg-[var(--bg-modal)]',
+      'backdrop-blur-lg',
       'border border-[var(--border)]',
       'rounded-2xl',
       'shadow-sm z-9999',
@@ -24,8 +25,6 @@ const props = defineProps({
       'sm:mt-2',
       'sm:h-auto',
       'sm:w-80',
-      '-translate-y-1',
-      'overflow-hidden',
     ],
   },
 });
