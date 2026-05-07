@@ -1245,9 +1245,12 @@ async function initCastWatcher() {
     }, { once: true });
   }
 
-  remote.watchAvailability((available: boolean) => {
-    castAvailable.value = available;
-  }).catch(() => {
+  // watchAvailability is unreliable — returns false even with devices present
+  // (blob: URLs, Brave privacy restrictions, etc.). Show the button whenever
+  // the Remote Playback API exists; prompt() opens the native picker which
+  // handles device discovery reliably. Only hide if the platform rejects outright.
+  castAvailable.value = true;
+  remote.watchAvailability(() => { /* ignored */ }).catch(() => {
     castAvailable.value = false;
   });
 
