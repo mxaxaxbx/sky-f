@@ -363,31 +363,9 @@
                         {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
                       </span>
                   </div>
-                  <!-- fullscreen + cast -->
+                  <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
-                    <!-- cast -->
-                    <button
-                      v-if="isCastAvailable"
-                      @click="castMedia"
-                      :title="isCasting ? 'Stop casting' : 'Cast to TV'"
-                      class="
-                        border
-                        text-white font-medium text-sm
-                        p-1 rounded-xl
-                        transition-all duration-300
-                      "
-                      :class="isCasting
-                        ? 'border-[var(--color-primary)] opacity-100'
-                        : 'border-transparent opacity-60 hover:opacity-100 hover:border-[var(--color-primary)]'
-                      "
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                        <!-- Cast icon -->
-                        <path d="M21 3H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1
-                          0 2-.9 2-2V5c0-1.1-.9-2-2-2zM1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76
-                          0 5 2.24 5 5H8c0-3.87-3.13-7-7-7zm0-4v2c4.97 0 9 4.03 9 9h2c0-6.08-4.93-11-11-11z"/>
-                      </svg>
-                    </button>
+                    <google-cast-launcher></google-cast-launcher>
                     <button
                       @click="toggleFullscreen"
                       class="
@@ -569,31 +547,7 @@
                     {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
                   </span>
                 </div>
-                <div class="flex flex-1 items-center justify-end gap-1 mb-1">
-                  <!-- cast -->
-                  <button
-                    v-if="isCastAvailable"
-                    @click="castMedia"
-                    :title="isCasting ? 'Stop casting' : 'Cast to TV'"
-                    class="
-                      border
-                      text-white font-medium text-sm
-                      p-1 rounded-xl
-                      transition-all duration-300
-                    "
-                    :class="isCasting
-                      ? 'border-[var(--color-primary)] opacity-100'
-                      : 'border-transparent opacity-60 hover:opacity-100 hover:border-[var(--color-primary)]'
-                    "
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <!-- Cast icon -->
-                      <path d="M21 3H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1
-                        0 2-.9 2-2V5c0-1.1-.9-2-2-2zM1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76
-                        0 5 2.24 5 5H8c0-3.87-3.13-7-7-7zm0-4v2c4.97 0 9 4.03 9 9h2c0-6.08-4.93-11-11-11z"/>
-                    </svg>
-                  </button>
-                </div>
+                <div class="flex flex-1 items-center gap-2 mb-1"></div>
               </div>
             </div>
           </div>
@@ -831,6 +785,7 @@ const store = useStore();
 const file = computed(() => props.modelValue);
 const files = computed(() => props.files);
 const currentPreviewIndex = computed(() => files.value.findIndex((f) => f.id === file.value.id));
+const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 
 const audioCover = ref<string | null>(null);
 const currentBlobURL = ref<string | null>(null);
@@ -855,11 +810,10 @@ const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
-const isCastAvailable = ref(false);
-const isCasting = ref(false);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
-const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
+const chrome: any = null;
+const cast: any = null;
 
 function closeModal() {
   if (isFullscreen.value) toggleFullscreen();
@@ -1254,68 +1208,6 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-function initCastApi() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const w = window as any;
-  if (!w.cast?.framework) return;
-
-  w.cast.framework.CastContext.getInstance().setOptions({
-    receiverApplicationId: w.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-    autoJoinPolicy: w.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-  });
-
-  isCastAvailable.value = true;
-
-  w.cast.framework.CastContext.getInstance().addEventListener(
-    w.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-    (event: { sessionState: string }) => {
-      const { SessionState } = w.cast.framework;
-      isCasting.value = event.sessionState === SessionState.SESSION_STARTED
-        || event.sessionState === SessionState.SESSION_RESUMED;
-      if (event.sessionState === SessionState.SESSION_ENDED) isCasting.value = false;
-    },
-  );
-}
-
-async function castMedia() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const w = window as any;
-  if (!w.cast?.framework) return;
-
-  const castContext = w.cast.framework.CastContext.getInstance();
-
-  if (isCasting.value) {
-    castContext.getCurrentSession()?.endSession(true);
-    isCasting.value = false;
-    return;
-  }
-
-  try {
-    const sessionState = castContext.getSessionState();
-    if (sessionState === w.cast.framework.SessionState.NO_SESSION) {
-      await castContext.requestSession();
-    }
-
-    const session = castContext.getCurrentSession();
-    if (!session) return;
-
-    const url = await store.dispatch('files/getDownloadUrl', file.value);
-    const mediaInfo = new w.chrome.cast.media.MediaInfo(url, file.value.contentType);
-    mediaInfo.metadata = new w.chrome.cast.media.GenericMediaMetadata();
-    mediaInfo.metadata.title = file.value.name;
-
-    await session.loadMedia(new w.chrome.cast.media.LoadRequest(mediaInfo));
-
-    const media = videoRef.value || audioRef.value;
-    if (media && isPlaying.value) {
-      media.pause();
-      isPlaying.value = false;
-    }
-  } catch (e) {
-    if ((e as { code?: string })?.code !== 'CANCEL') console.error('Cast error:', e);
-  }
-}
-
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closeModal();
@@ -1332,19 +1224,55 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+async function castVideo() {
+  const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+
+  if (!castSession) {
+    console.log('No cast session');
+    return;
+  }
+
+  const mediaInfo = new chrome.cast.media.MediaInfo(
+    currentBlobURL.value,
+    'video/mp4',
+  );
+
+  mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
+  mediaInfo.metadata.title = file.value?.name || 'Video';
+
+  const request = new chrome.cast.media.LoadRequest(mediaInfo);
+
+  try {
+    await castSession.loadMedia(request);
+    console.log('Casting started');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function initializeCastApi() {
+  cast.framework.CastContext.getInstance().setOptions({
+    receiverApplicationId:
+      chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+  });
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
-  /* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
-  if ((window as any).__castAvailable) initCastApi();
-  /* eslint-enable @typescript-eslint/no-explicit-any, no-underscore-dangle */
-  else window.addEventListener('castAvailable', initCastApi as unknown as EventListener, { once: true });
+
+  // eslint-disable-next-line no-underscore-dangle
+  window.__onGCastApiAvailable = function (isAvailable: boolean) {
+    if (isAvailable) {
+      initializeCastApi();
+    }
+  };
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
-  window.removeEventListener('castAvailable', initCastApi as unknown as EventListener);
 });
 
 watch(() => props.modelValue, async (newFile) => {
