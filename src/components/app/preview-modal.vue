@@ -1225,28 +1225,35 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-function initCastWatcher() {
+async function initCastWatcher() {
   const video = videoRef.value;
-  console.log('Initializing cast watcher for video element:', video);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const remote = (video as any)?.remote;
-  console.log('Remote object:', remote);
   if (!remote) return;
 
+  // blob: URLs always yield false from watchAvailability because remote devices
+  // can't check their own compatibility against an opaque blob. Swap to the real
+  // HTTP URL so the browser can negotiate with available cast devices properly.
+  if (video.src.startsWith('blob:')) {
+    const savedTime = video.currentTime;
+    const wasPlaying = !video.paused;
+    const httpUrl = await store.dispatch('files/getDownloadUrl', file.value);
+    video.src = httpUrl;
+    video.addEventListener('loadedmetadata', () => {
+      video.currentTime = savedTime;
+      if (wasPlaying) video.play();
+    }, { once: true });
+  }
+
   remote.watchAvailability((available: boolean) => {
-    console.log('Cast availability changed:', available);
     castAvailable.value = available;
-  }).catch((err: any) => {
-    console.warn('Error watching cast availability:', err);
+  }).catch(() => {
     castAvailable.value = false;
   });
 
   remote.addEventListener('connecting', () => { isCasting.value = true; });
   remote.addEventListener('connect', () => { isCasting.value = true; });
-  remote.addEventListener('disconnect', () => {
-    isCasting.value = false;
-    if (videoRef.value && currentBlobURL.value) videoRef.value.src = currentBlobURL.value;
-  });
+  remote.addEventListener('disconnect', () => { isCasting.value = false; });
 }
 
 async function toggleCast() {
@@ -1254,16 +1261,8 @@ async function toggleCast() {
   const video = videoRef.value as HTMLVideoElement & { remote?: any };
   if (!video?.remote) return;
   try {
-    // Chromecast can't access blob:// URLs — set HTTP URL directly on DOM to avoid
-    // disrupting watchAvailability (reactive src changes reset the remote object)
-    const httpUrl = await store.dispatch('files/getDownloadUrl', file.value);
-    const blobSrc = video.src;
-    video.src = httpUrl;
     await video.remote.prompt();
-    if (!isCasting.value) video.src = blobSrc;
-  } catch {
-    if (videoRef.value && currentBlobURL.value) videoRef.value.src = currentBlobURL.value;
-  }
+  } catch { /* user cancelled or device error */ }
 }
 
 function handleKeydown(e: KeyboardEvent) {
