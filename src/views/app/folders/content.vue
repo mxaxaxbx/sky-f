@@ -602,8 +602,8 @@
                       <!-- zone info-->
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
                         <!-- info file -->
-                        <buttom
-                          @click="infoModal = true"
+                        <button
+                          @click="store.commit('files/setActiveInfoFile', file)"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -616,7 +616,7 @@
                           <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
                           />
                           <span>info</span>
-                        </buttom>
+                        </button>
                         <!-- rename -->
                         <button
                           type="button"
@@ -694,7 +694,7 @@
 
                         <!--share link-->
                         <button
-                          @click="copyLink(file)"
+                          @click="store.commit('files/setActiveShareFile', file)"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -705,7 +705,7 @@
                           "
                         >
                           <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
-                          {{ copied ? 'Copied!' : 'Copy link' }}
+                          Copy link
                         </button>
                       </div>
 
@@ -967,213 +967,6 @@
       </template>
     </Modal>
 
-    <Modal v-model="createShareModal" size="md" @click.stop>
-      <template #header>
-        <h3 class=""> Copy link:
-          <p class="text-[var(--text)] font-light text-base mt-2" v-for="file in selectedFiles" :key="file.id">
-            {{ file.name }}
-          </p>
-          <p class="text-[var(--text)] font-light text-base mt-2" v-for="folder in selectedFolders" :key="folder.id">
-            {{ folder.name }}
-          </p>
-        </h3>
-      </template>
-      <template #content>
-        <div class="flex flex-col gap-3">
-          <div
-            class="
-              flex
-              group
-              p-0.5
-              bg-[var(--bg)]
-              border border-[var(--color-primary)]
-              rounded-xl
-
-              hover:bg-[var(--bg-hover)]
-              shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              transition-all duration-300 ease-in-out
-            "
-          >
-            <input
-              :value="shareUrl"
-              readonly
-              class="
-                w-full flex-1
-                text-xs text-[var(--text)]
-                pr-1 pl-2 py-1
-                bg-transparent
-                rounded-full
-                select-all
-                focus:outline-none
-              "
-              @focus="e => (e.target as HTMLInputElement).select()
-              "
-            />
-            <button
-              type="button"
-              @click.stop="tryCopy"
-              class="
-                flex items-center
-                px-2 gap-1
-                text-[var(--text)] text-sm font-medium
-                bg-[var(--bg-secondary)]
-                border border-[var(--color-primary)]
-
-                hover:bg-[var(--color-primary)]
-                hover:text-white
-                hover:border-[var(--color-primary)]
-                hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
-                rounded-lg
-                transition-all duration-300 ease-in-out
-              "
-              :class="copied ? 'bg-[var(--color-primary)] text-white shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]' : ''
-              "
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
-                  <mask id="mask0_1677_12" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-                  <rect width="24" height="24"/>
-                  </mask>
-                  <g mask="url(#mask0_1677_12)">
-                  <path d="M11 17H7C5.61667 17 4.4375 16.5125 3.4625 15.5375C2.4875 14.5625 2 13.3833 2 12C2 10.6167
-                    2.4875 9.4375 3.4625 8.4625C4.4375 7.4875 5.61667 7 7 7H11V9H7C6.16667 9 5.45833 9.29167
-                    4.875 9.875C4.29167 10.4583 4 11.1667 4 12C4 12.8333 4.29167 13.5417 4.875 14.125C5.45833
-                    14.7083 6.16667 15 7 15H11V17ZM8 13V11H16V13H8ZM13 17V15H17C17.8333 15 18.5417
-                    14.7083 19.125 14.125C19.7083 13.5417 20 12.8333 20 12C20 11.1667 19.7083 10.4583
-                    19.125 9.875C18.5417 9.29167 17.8333 9 17 9H13V7H17C18.3833 7 19.5625 7.4875 20.5375
-                    8.4625C21.5125 9.4375 22 10.6167 22 12C22 13.3833 21.5125 14.5625 20.5375 15.5375C19.5625
-                    16.5125 18.3833 17 17 17H13Z"/>
-                  </g>
-              </svg>
-              {{ copied ? 'Copied!' : 'Copy link' }}
-            </button>
-          </div>
-          <p class="
-            flex items-center
-            font-light text-xs text-center text-[var(--text-terceary)]
-            py-2 mx-2 gap-2
-
-            sm:text-sm
-            "
-          >
-            <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-5"/>
-            Anyone with the link will be able to download the file.
-          </p>
-        </div>
-      </template>
-    </Modal>
-
-    <Modal v-model="infoModal" size="xl" @click.stop>
-      <template #header>
-        <div v-if="selectedFiles.length > 0" class="w-full">
-          <!-- icons + title -->
-          <div class="flex items-center w-[90%] gap-2">
-            <img v-if="selectedFiles[0].contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-12 w-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'application/msword' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'application/vnd.ms-excel' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'application/vnd.ms-powerpoint' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-12" />
-            <img v-else-if="/image\/(png|webp|gif|avif)/.test(selectedFiles[0].contentType)" src="/icon/icon-png.svg" alt="png" class="h-12 w-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-12 w-12" />
-            <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(selectedFiles[0].contentType)" src="/icon/icon-img.svg" alt="img" class="h-12" />
-            <img v-else-if="/^video\//.test(selectedFiles[0].contentType)" src="/icon/icon-video.svg" alt="video" class="h-12" />
-            <img v-else-if="/^audio\//.test(selectedFiles[0].contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-12" />
-            <img v-else-if="
-                selectedFiles[0].name?.toLowerCase().endsWith('.zip') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.rar') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.7z') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.tar') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.gz') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.bz2')
-              "
-              src="/icon/icon-compress.svg"
-              alt="compressed file icon"
-              class="h-12 w-12"
-            />
-            <img v-else src="/icon/icon-file.svg" alt="file" class="h-12 w-12" />
-
-            <!-- titel -->
-            <h3 v-if="selectedFiles[0].id" class="font-regular text-white text-lg w-[90%] break-all sm:text-xl">
-              {{ selectedFiles[0].name }}
-            </h3>
-          </div>
-        </div>
-      </template>
-
-      <template #content>
-        <div
-          v-if="selectedFiles.length > 0"
-          class="
-            grid grid-cols-1 pb-2 px-3
-            gap-3
-
-            sm:grid-cols-2 sm:gap-6
-          "
-        >
-          <!-- size -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Size:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ formatFileSize(Number(selectedFiles[0].size)) }}
-            </p>
-          </div>
-          <!-- Type -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Type:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ formatContentType(selectedFiles[0].contentType, selectedFiles[0].name) }}
-            </p>
-          </div>
-          <!-- Date uploaded -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
-              Date uploaded:
-            </h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(selectedFiles[0].created * 1000).format('DD/MM/YYYY HH:mm a') }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              {{ moment(selectedFiles[0].created * 1000).fromNow() }}
-            </p>
-          </div>
-          <!-- Last modification -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
-              Last modification:
-              </h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(selectedFiles[0].updated * 1000).format('DD/MM/YYYY HH:mm a') }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              {{ moment(selectedFiles[0].updated* 1000).fromNow() }}
-            </p>
-          </div>
-          <!-- Dimensions -->
-          <div v-if="imageDimensions" class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Dimensions:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ imageDimensions.width }} x {{ imageDimensions.height }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              Pixels
-            </p>
-          </div>
-          <!-- Duration -->
-          <div
-            v-if="selectedFiles[0].contentType?.startsWith('video/') || selectedFiles[0].contentType?.startsWith('audio/')"
-            class="flex-col items-center justify-between gap-2
-            "
-          >
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Duration:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ formatTime(duration) }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              Minutes
-            </p>
-          </div>
-        </div>
-      </template>
-    </Modal>
-
     <Teleport to="body">
       <div
         v-if="ghostVisible"
@@ -1203,15 +996,6 @@
         </div>
       </div>
     </Teleport>
-    <ContextMenu
-      v-model="contextMenuVisible"
-      :x="contextMenuX"
-      :y="contextMenuY"
-      :selected-files="selectedFiles"
-      :selected-folders="selectedFolders"
-      @action="handleMenuAction"
-    />
-
     <ContextMenu
       v-model="contextMenuVisible"
       :x="contextMenuX"
@@ -1260,23 +1044,19 @@ const editingFolderId = ref<number | string | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
 const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
-const moveToFolderModal = ref(false);
-const createShareModal = ref(false);
 const editedFolderName = ref('');
 const editedFileName = ref('');
-const showFolders = ref(true);
-const infoModal = ref(false);
-const showFiles = ref(true);
+const moveToFolderModal = ref(false);
 const folderName = ref('');
 const loading = ref(false);
-const copied = ref(false);
-const shareUrl = ref('');
 const ghostVisible = ref(false);
 const ghostX = ref(0);
 const ghostY = ref(0);
 const contextMenuVisible = ref(false);
 const contextMenuX = ref(0);
 const contextMenuY = ref(0);
+const showFolders = ref(true);
+const showFiles = ref(true);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1554,39 +1334,6 @@ const toggleDropdown = async (
   const middle = window.innerHeight / 2;
   const y = event?.clientY || 0;
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
-};
-
-// copy link to clipboard
-const tryCopy = async () => {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(shareUrl.value);
-    } else {
-      const textArea = document.createElement('textarea');
-      textArea.value = shareUrl.value;
-      textArea.style.cssText = 'position:fixed;opacity:0;';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-    }
-    copied.value = true;
-    setTimeout(() => { copied.value = false; }, 2000);
-  } catch (error) {
-    console.error('Error al copiar:', error);
-  }
-};
-
-const copyLink = async (file: FileI) => {
-  try {
-    const url = await store.dispatch('files/getDownloadUrl', file);
-    shareUrl.value = url;
-    createShareModal.value = true;
-    tryCopy();
-  } catch (error) {
-    console.error('Error:', error);
-  }
 };
 
 function onDragStart(type: string, item: FileI | FolderI, event: DragEvent) {
@@ -1951,7 +1698,7 @@ function handleMenuAction(action: string) {
 
   switch (action) {
     case 'info':
-      infoModal.value = true;
+      if (firstFile) store.commit('files/setActiveInfoFile', firstFile);
       break;
     case 'rename-file':
       if (firstFile) startEditingFile(firstFile);
@@ -1972,7 +1719,7 @@ function handleMenuAction(action: string) {
       moveToFolderModal.value = true;
       break;
     case 'copy-link':
-      if (firstFile) copyLink(firstFile);
+      if (firstFile) store.commit('files/setActiveShareFile', firstFile);
       break;
     case 'trash':
       moveToTrash();

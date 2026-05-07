@@ -56,6 +56,8 @@ export interface FilesStateI {
   selectedFiles: FileI[];
   activePreviewFile: FileI | null;
   previewFilesList: FileI[];
+  activeInfoFile: FileI | null;
+  activeShareFile: FileI | null;
 }
 
 export const state: FilesStateI = {
@@ -92,4 +94,6 @@ export const state: FilesStateI = {
   selectedFiles: [],
   activePreviewFile: null,
   previewFilesList: [],
+  activeInfoFile: null,
+  activeShareFile: null,
 };
