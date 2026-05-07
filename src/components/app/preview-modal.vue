@@ -808,6 +808,8 @@ const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
+const isCastAvailable = ref(false);
+const isCasting = ref(false);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
@@ -1205,6 +1207,68 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function initCastApi() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const w = window as any;
+  if (!w.cast?.framework) return;
+
+  w.cast.framework.CastContext.getInstance().setOptions({
+    receiverApplicationId: w.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+    autoJoinPolicy: w.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+  });
+
+  isCastAvailable.value = true;
+
+  w.cast.framework.CastContext.getInstance().addEventListener(
+    w.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+    (event: { sessionState: string }) => {
+      const { SessionState } = w.cast.framework;
+      isCasting.value = event.sessionState === SessionState.SESSION_STARTED
+        || event.sessionState === SessionState.SESSION_RESUMED;
+      if (event.sessionState === SessionState.SESSION_ENDED) isCasting.value = false;
+    },
+  );
+}
+
+async function castMedia() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const w = window as any;
+  if (!w.cast?.framework) return;
+
+  const castContext = w.cast.framework.CastContext.getInstance();
+
+  if (isCasting.value) {
+    castContext.getCurrentSession()?.endSession(true);
+    isCasting.value = false;
+    return;
+  }
+
+  try {
+    const sessionState = castContext.getSessionState();
+    if (sessionState === w.cast.framework.SessionState.NO_SESSION) {
+      await castContext.requestSession();
+    }
+
+    const session = castContext.getCurrentSession();
+    if (!session) return;
+
+    const url = await store.dispatch('files/getDownloadUrl', file.value);
+    const mediaInfo = new w.chrome.cast.media.MediaInfo(url, file.value.contentType);
+    mediaInfo.metadata = new w.chrome.cast.media.GenericMediaMetadata();
+    mediaInfo.metadata.title = file.value.name;
+
+    await session.loadMedia(new w.chrome.cast.media.LoadRequest(mediaInfo));
+
+    const media = videoRef.value || audioRef.value;
+    if (media && isPlaying.value) {
+      media.pause();
+      isPlaying.value = false;
+    }
+  } catch (e) {
+    if ((e as { code?: string })?.code !== 'CANCEL') console.error('Cast error:', e);
+  }
+}
+
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closeModal();
@@ -1224,11 +1288,16 @@ function handleKeydown(e: KeyboardEvent) {
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
+  /* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
+  if ((window as any).__castAvailable) initCastApi();
+  /* eslint-enable @typescript-eslint/no-explicit-any, no-underscore-dangle */
+  else window.addEventListener('castAvailable', initCastApi as unknown as EventListener, { once: true });
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
+  window.removeEventListener('castAvailable', initCastApi as unknown as EventListener);
 });
 
 watch(() => props.modelValue, async (newFile) => {
