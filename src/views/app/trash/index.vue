@@ -274,7 +274,8 @@
             >
               <Dropdown
                 :classes="[
-                  'bg-[var(--bg-secondary)]',
+                  'bg-[var(--bg-modal-2)]',
+                  'backdrop-blur-lg',
                   'border border-[var(--border)]',
                   'rounded-2xl',
                   'absolute', '-right-0', 'z-20',
@@ -310,7 +311,6 @@
                         rounded-xl border
                         text-[var(--color-primary)]
                         border-transparent
-                        bg-[var(--bg-secondary)]
                         grayscale
 
                         hover:border-[var(--color-primary)]
@@ -338,7 +338,6 @@
                           rounded-xl border
                           text-[var(--delete-color)]
                           border-transparent
-                          bg-[var(--bg-secondary)]
                           grayscale opacity-60
 
                           hover:border-[var(--delete-color)]
@@ -500,7 +499,8 @@
               >
                 <Dropdown
                   :classes="[
-                    'bg-[var(--bg-secondary)]',
+                    'bg-[var(--bg-modal-2)]',
+                    'backdrop-blur-lg',
                     'border border-[var(--border)]',
                     'rounded-2xl',
                     'absolute', '-right-0', 'z-20',
@@ -536,7 +536,6 @@
                           rounded-xl border
                           text-[var(--color-primary)]
                           border-transparent
-                          bg-[var(--bg-secondary)]
                           grayscale
 
                           hover:border-[var(--color-primary)]
@@ -564,7 +563,6 @@
                           rounded-xl border
                           text-[var(--delete-color)]
                           border-transparent
-                          bg-[var(--bg-secondary)]
                           grayscale opacity-60
 
                           hover:border-[var(--delete-color)]
