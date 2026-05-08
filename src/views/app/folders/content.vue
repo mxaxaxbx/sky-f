@@ -1,13 +1,48 @@
 <template>
   <div
-    class="w-full h-screen focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
     @contextmenu="handleContextMenu"
-    @dragover.prevent
-    @drop="onDropToRoot($event)"
+    @dragover="onRootDragOver"
+    @dragleave="onRootDragLeave"
+    @drop="onDropToRoot"
     tabindex="0"
+    :class="[
+      'h-full w-full rounded-2xl focus:outline-none transition-all duration-200 relative',
+      isDraggingOverRoot
+        ? 'px-4 py-4'
+        : 'px-0 py-2 '
+    ]"
   >
+  <!-- Overlay drag -->
+  <div
+    v-if="isDraggingOverRoot"
+    class="
+      absolute inset-0 z-50
+      flex items-end justify-end
+      mx-4 my-4 h-[calc(100%-3rem)] py-4
+      rounded-2xl
+      border-2 border-dashed border-[var(--color-primary)]
+      pointer-events-none
+      transition-all duration-200
+    ">
+    <div
+      class="
+        flex items-center justify-center
+        h-12 mx-auto gap-4
+        border border-[var(--border)] rounded-2xl
+        bg-[var(--model-bg)] backdrop-blur-md
+      "
+    >
+      <h1 class="
+        text-md text-[var(--text-terceary)] font-light
+        mx-0 my-2 px-10
+      "
+    >
+      Drop your files to upload to your <span class="ml-1 font-semibold text-[var(--text)]"> {{ dropTargetLabel }}</span>
+    </h1>
+    </div>
+  </div>
     <!-- loading -->
     <div v-if="loading" class="flex mx-auto justify-center items-center py-20 text-[var(--color-primary)]">
       <i class="fas fa-spinner fa-spin text-2xl"></i>
@@ -227,28 +262,22 @@
             data-selectable
 
             :draggable="true"
-            @dragstart="onDragStart('folder', folder)"
+            @dragstart="onDragStart('folder', folder, $event)"
             @click="selectItem($event, 'folder', folder, index)"
             @keydown.enter="selectItem($event, 'folder', folder, index)"
             @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
 
-            class="
-              group
-              flex items-center justify-between
-              w-full
-              bg-[var(--bg-secondary)]
-              border border-[var(--border)]
-              rounded-2xl min-w-0
-              hover:bg-[var(--hover-bg)]
-              hover:border-[var(--hover-border)]
-              transition-all duration-300
-            "
             :class="[
-              'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-              isSelectedFolder(folder) ?
-                'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]' :
-                'border-[var(--border)]'
+              'relative group flex items-center justify-between w-full rounded-2xl cursor-pointer transition-all duration-200',
+
+              isSelectedFolder(folder)
+                ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+
+                : draggedFolder === folder.id
+                  ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] after:absolute after:-inset-2 after:rounded-3xl after:border-2 after:border-dashed after:border-[var(--color-primary)] after:content-[\'\']'
+
+                  : 'border border-[var(--border)] bg-[var(--bg-secondary)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
             ]"
           >
             <div
@@ -1033,6 +1062,7 @@ const route = useRoute();
 
 const dragLeaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const draggedFolder = ref<number | string | null>(null);
+const isDraggingOverRoot = ref(false);
 const selectedFolder = ref<number | string | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
@@ -1063,6 +1093,7 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
+const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 
 const previewFile = computed({
   get: () => store.state.files.activePreviewFile,
@@ -1072,6 +1103,18 @@ const previewFile = computed({
       store.commit('files/setPreviewFilesList', fileResults.value.data);
     }
   },
+});
+
+const dropTargetLabel = computed(() => {
+  if (draggedFolder.value) {
+    const folder = folderResults.value.data.find(
+      (f: FolderI) => f.id === draggedFolder.value,
+    );
+
+    return folder?.name || 'folder';
+  }
+
+  return folderDetails.value?.name || 'root';
 });
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
@@ -1444,20 +1487,62 @@ async function uploadFilesFromDrop(files: FileList, targetFolderId: number | nul
   getFolders();
 }
 
+function onRootDragOver(event: DragEvent) {
+  event.preventDefault();
+
+  const hasFiles = event.dataTransfer?.types.includes('Files');
+
+  if (!hasFiles) return;
+
+  isDraggingOverRoot.value = true;
+}
+
+function onRootDragLeave(event: DragEvent) {
+  const related = event.relatedTarget as HTMLElement | null;
+  const currentTarget = event.currentTarget as HTMLElement;
+
+  if (related && currentTarget.contains(related)) return;
+
+  isDraggingOverRoot.value = false;
+}
+
 async function onDropToRoot(event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  isDraggingOverRoot.value = false;
+
   if (!event.dataTransfer?.files?.length) return;
-  await uploadFilesFromDrop(event.dataTransfer.files, folderId.value);
+
+  await uploadFilesFromDrop(
+    event.dataTransfer.files,
+    folderId.value || null,
+  );
+
   draggedFolder.value = null;
 }
 
 async function onDrop(folder: FolderI, event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  isDraggingOverRoot.value = false;
+
   if (event.dataTransfer?.files?.length) {
-    await uploadFilesFromDrop(event.dataTransfer.files, folder.id as number);
+    await uploadFilesFromDrop(
+      event.dataTransfer.files,
+      folder.id as number,
+    );
+
     draggedFolder.value = null;
     return;
   }
 
-  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
+  if (
+    selectedFiles.value.length === 0
+    && selectedFolders.value.length === 0
+  ) return;
+
   if (!draggedItem.value) return;
 
   const targetFolderId = folder.id as number;
@@ -1468,6 +1553,7 @@ async function onDrop(folder: FolderI, event: DragEvent) {
   }));
 
   await store.dispatch('files/moveFilesToFolder', filesPayload);
+
   store.commit('files/setSelectedFiles', []);
 
   const foldersPayload: FolderI[] = selectedFolders.value

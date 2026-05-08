@@ -148,7 +148,7 @@
           ? 'pl-0'
           : store.state.sidebar
             ? 'sm:pl-64'
-            : 'sm:pl-10'
+            : 'sm:pl-12'
       "
     >
       <div class="flex-1 flex flex-col">

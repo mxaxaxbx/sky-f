@@ -1,17 +1,53 @@
 <template>
   <div
-    class="w-full h-full focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
     @contextmenu="handleContextMenu"
-    @dragover.prevent
-    @drop="onDropToRoot($event)"
+    @dragover="onRootDragOver"
+    @dragleave="onRootDragLeave"
+    @drop="onDropToRoot"
     tabindex="0"
+    :class="[
+      'h-full w-full rounded-2xl focus:outline-none transition-all duration-200 relative',
+      isDraggingOverRoot
+        ? 'px-4 py-4'
+        : 'px-0 py-2 '
+    ]"
   >
+  <!-- Overlay drag -->
+  <div
+    v-if="isDraggingOverRoot"
+    class="
+      absolute inset-0
+      flex items-end justify-end
+      mx-4 my-4 h-[calc(100%-3rem)] py-4
+      rounded-2xl
+      border-2 border-dashed border-[var(--color-primary)]
+      pointer-events-none
+      transition-all duration-200
+    ">
+    <div
+      class="
+        flex items-center justify-center
+        h-12 mx-auto gap-4
+        border border-[var(--border)] rounded-2xl
+        bg-[var(--model-bg)] backdrop-blur-md
+        shadow-md
+      "
+    >
+      <h1 class="
+        text-md text-[var(--text)] font-light
+        mx-0 my-2 px-10
+      "
+    >
+    Drop your files to upload to your <span class="ml-1 font-semibold text-[var(--text)]"> {{ dropTargetLabel }}</span>
+    </h1>
+    </div>
+  </div>
     <h1
       class="
         text-xl text-[var(--text)] font-semibold
-        mx-2 my-2 px-12 font-alexandria
+        mx-0 my-2 px-10 font-alexandria
 
         sm:mt-6
         hidden sm:block
@@ -185,7 +221,7 @@
         w-full
         py-0 px-2 pt-4
 
-        sm:py-4 sm:px-14
+        sm:py-4 sm:px-10
       "
     >
       <div class="flex items-center justify-between mb-4 sm:mb-4">
@@ -241,7 +277,7 @@
             @dragover.prevent
             @dragenter="onDragEnter(folder.id)"
             @dragleave="onDragLeave($event, folder.id)"
-            @drop="onDrop(folder, $event)"
+            @drop.stop="onDrop(folder, $event)"
             data-selectable
 
             :draggable="true"
@@ -252,16 +288,19 @@
             @keydown.enter="selectItem($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
             @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
-                        :class="[
-              'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-              'bg-[var(--bg-secondary)] transition-all duration-300',
+
+            :class="[
+              'relative group flex items-center justify-between w-full rounded-2xl cursor-pointer transition-all duration-200',
+
               isSelectedFolder(folder)
-                ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+                ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+
                 : draggedFolder === folder.id
-                  ? 'border-[var(--color-primary)] bg-[var(--hover-bg)]'
-                  : 'border-[var(--border)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
+                  ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] after:absolute after:-inset-2 after:rounded-3xl after:border-2 after:border-dashed after:border-[var(--color-primary)] after:content-[\'\']'
+
+                  : 'border border-[var(--border)] bg-[var(--bg-secondary)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
             ]"
-            >
+          >
               <div
                 :to="`/app/folders/${folder.id}`"
                 class="flex-1 min-w-0"
@@ -417,7 +456,7 @@
       v-if="fileResults.data.length"
       :class="[
         folderResults.data.length && 'border-t border-[var(--border)]',
-        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14'
+        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-10'
       ]"
     >
       <div class="flex items-center justify-between mb-4 sm:mb-4">
@@ -1030,6 +1069,7 @@ const route = useRoute();
 
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const dragLeaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const isDraggingOverRoot = ref(false);
 const draggedFolder = ref<number | string | null>(null);
 const selectedFolder = ref<number | string | null>(null);
 const editingFileId = ref<number | string | null>(null);
@@ -1075,6 +1115,18 @@ const previewFile = computed({
       store.commit('files/setPreviewFilesList', fileResults.value.data);
     }
   },
+});
+
+const dropTargetLabel = computed(() => {
+  if (draggedFolder.value) {
+    const folder = folderResults.value.data.find(
+      (f: FolderI) => f.id === draggedFolder.value,
+    );
+
+    return folder?.name || 'folder';
+  }
+
+  return 'Cloud Drive';
 });
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
@@ -1429,13 +1481,43 @@ async function uploadFilesFromDrop(files: FileList, targetFolderId: number | nul
   getFolders();
 }
 
+function onRootDragOver(event: DragEvent) {
+  event.preventDefault();
+
+  const hasFiles = event.dataTransfer?.types.includes('Files');
+
+  if (!hasFiles) return;
+
+  isDraggingOverRoot.value = true;
+}
+
+function onRootDragLeave(event: DragEvent) {
+  const related = event.relatedTarget as HTMLElement | null;
+  const currentTarget = event.currentTarget as HTMLElement;
+
+  if (related && currentTarget.contains(related)) return;
+
+  isDraggingOverRoot.value = false;
+}
+
 async function onDropToRoot(event: DragEvent) {
-  if (!event.dataTransfer?.files?.length) return;
+  event.preventDefault();
+
+  isDraggingOverRoot.value = false;
+
+  const hasFiles = event.dataTransfer?.types.includes('Files');
+
+  if (!hasFiles || !event.dataTransfer?.files?.length) return;
+
   await uploadFilesFromDrop(event.dataTransfer.files, null);
+
   draggedFolder.value = null;
 }
 
 async function onDrop(folder: FolderI, event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
   if (event.dataTransfer?.files?.length) {
     await uploadFilesFromDrop(event.dataTransfer.files, folder.id as number);
     draggedFolder.value = null;
