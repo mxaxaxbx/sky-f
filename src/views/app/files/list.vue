@@ -217,8 +217,8 @@
     <div
       v-if="folderResults.data.length"
       class="
-        w-full
-        py-0 pl-2 pt-4
+        w-full mx-auto
+        py-0 px-2 pt-4
 
         sm:py-4 sm:px-10
       "
