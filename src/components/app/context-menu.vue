@@ -60,6 +60,14 @@
           </button>
         </div>
         <div class="border-b border-[var(--border)] p-1 space-y-1">
+          <button
+            v-if="props.showMoveToGroup"
+            @click="emitAction('move-to-group')"
+            class="menu-btn"
+          >
+            <img src="/icon/icon-isle.svg" alt="group" class="menu-icon" />
+            <span>Move to group</span>
+          </button>
           <button @click="emitAction('move')" class="menu-btn">
             <img src="/icon/icon_move.svg" alt="move" class="menu-icon" />
             <span>Move to folder</span>
@@ -70,6 +78,14 @@
       <!-- Multi-select actions -->
       <template v-else-if="totalSelected > 1">
         <div class="border-b border-[var(--border)] p-1 space-y-1">
+          <button
+            v-if="props.showMoveToGroup && selectedFolders.length > 0"
+            @click="emitAction('move-to-group')"
+            class="menu-btn"
+          >
+            <img src="/icon/icon_move.svg" alt="group" class="menu-icon" />
+            <span>Move to group</span>
+          </button>
           <button @click="emitAction('move')" class="menu-btn">
             <img src="/icon/icon_move.svg" alt="move" class="menu-icon" />
             <span>Move to folder</span>
@@ -136,6 +152,7 @@ const props = defineProps<{
   y: number;
   selectedFiles: FileI[];
   selectedFolders: FolderI[];
+  showMoveToGroup?: boolean;
 }>();
 
 const emit = defineEmits(['update:modelValue', 'action']);
