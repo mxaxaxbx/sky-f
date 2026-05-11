@@ -742,37 +742,48 @@ async function startCamera() {
     }
   }
 
+  cameraActive.value = true;
   await nextTick();
 
-  if (videoElement.value && mediaStream.value) {
-    videoElement.value.srcObject = mediaStream.value;
-    videoElement.value.muted = true;
-    videoElement.value.playsInline = true;
-    videoElement.value.controls = true;
+  if (!videoElement.value || !mediaStream.value) {
+    return;
+  }
 
-    const playVideo = async () => {
-      try {
-        await videoElement.value?.play();
-      } catch (playError) {
-        console.warn('Video play prevented:', playError);
-      }
-    };
+  videoElement.value.srcObject = mediaStream.value;
+  videoElement.value.muted = true;
+  videoElement.value.playsInline = true;
+  videoElement.value.controls = true;
+  videoElement.value.style.objectFit = 'cover';
 
-    if (videoElement.value.readyState >= 2) {
-      await playVideo();
-    } else {
-      await new Promise<void>((resolve) => {
-        const handleLoaded = () => {
-          videoElement.value?.removeEventListener('loadedmetadata', handleLoaded);
-          playVideo().finally(resolve);
-        };
+  const playVideo = async () => {
+    try {
+      await videoElement.value?.play();
+    } catch (playError) {
+      console.warn('Video play prevented:', playError);
+    }
+  };
 
-        videoElement.value?.addEventListener('loadedmetadata', handleLoaded);
-      });
+  const waitForReady = () => new Promise<void>((resolve) => {
+    if (!videoElement.value) {
+      resolve();
+      return;
     }
 
-    cameraActive.value = true;
-  }
+    if (videoElement.value.readyState >= 2) {
+      resolve();
+      return;
+    }
+
+    const handler = () => {
+      videoElement.value?.removeEventListener('loadedmetadata', handler);
+      resolve();
+    };
+
+    videoElement.value.addEventListener('loadedmetadata', handler);
+  });
+
+  await waitForReady();
+  await playVideo();
 }
 
 async function openScanModal() {
@@ -889,10 +900,18 @@ async function saveScanAsPdf() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
     const filename = `scan-${timestamp}.pdf`;
 
-    pdf.save(filename);
+    // Convert PDF to Blob and upload
+    const pdfBlob = pdf.output('blob') as Blob;
+    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const currentFolderId = folderResults.value?.current?.id || null;
+    await store.dispatch('files/upload', { formData, folderId: currentFolderId });
 
     store.commit('notifications/addNotification', {
-      message: 'PDF saved successfully',
+      message: 'PDF scanned and saved successfully',
       type: 'success',
     });
 
