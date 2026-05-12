@@ -22,55 +22,51 @@
         <!-- Hidden canvas used for auto-detection analysis -->
         <canvas ref="analysisCanvas" class="hidden"></canvas>
 
-        <!-- ── Top bar: Cancelar | Flash | Auto ── -->
-        <div class="relative z-10 flex items-center justify-between px-5 pt-12 pb-4">
-          <button type="button" @click="closeModal" class="text-white text-base font-medium drop-shadow">
-            Cancelar
+       <!-- ── Top bar: Cancelar | Flash | Auto ── -->
+        <div class="relative z-[99999] flex items-center justify-between px-4 py-2">
+          <button type="button" @click="closeModal" class="text-white text-base font-regular drop-shadow text-left flex-1 justify-start items-center">
+            Cancel
           </button>
-
-          <div class="flex items-center gap-3">
+            <!-- Pages counter → opens review screen -->
+          <button
+            type="button"
+            @click="capturedFrames.length > 0 ? (showPreview = true) : null"
+            class="w-14 h-14 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all flex-1"
+            :class="capturedFrames.length > 0 ? 'bg-white/10 border border-white/30' : 'opacity-40 cursor-default'"
+          >
+            <span class="text-white font-bold text-lg leading-none">
+              {{ capturedFrames.length }}
+            </span>
+            <span class="text-white/60 text-[10px] leading-none">
+              {{ capturedFrames.length === 1 ? 'página' : 'páginas' }}
+            </span>
+          </button>
             <!-- Auto mode toggle -->
+            <div class="flex flex-1 justify-end items-center">
             <button
               type="button"
               @click="autoMode = !autoMode"
-              class="flex items-center justify-center h-9 px-3 rounded-full border transition-all"
+              class="flex items-center justify-center py-1 px-3 rounded-full border transition-all"
               :class="autoMode
-                ? 'text-yellow-300 border-yellow-300 bg-yellow-300/10'
-                : 'text-white/50 border-white/20 bg-black/30'"
+                ? 'text-white border-[var(--color-primary)] bg-[var(--color-primary)]'
+                : 'text-[#868686] border-[#868686] bg-black/30'"
             >
-              <span class="text-xs font-semibold">Auto</span>
+              <span class="text-sm font-semibold">Auto</span>
             </button>
-
-            <!-- Flash button -->
-            <button
-              type="button"
-              @click="toggleFlash"
-              class="flex items-center justify-center w-10 h-10 rounded-full transition-all"
-              :class="flashOn ? 'bg-yellow-400/90' : 'bg-black/30'"
-            >
-              <svg
-                class="w-6 h-6"
-                :class="flashOn ? 'text-black' : 'text-white'"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" />
-              </svg>
-            </button>
-          </div>
+            </div>
         </div>
 
         <!-- ── Document guide overlay ── -->
         <div class="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
           <div class="absolute inset-0 bg-black/40"></div>
           <div
-            class="relative transition-all duration-300"
+            class="relative transition-all duration-300 mb-10"
             :style="{
               width: guideW + 'px',
               height: guideH + 'px',
               boxShadow: '0 0 0 9999px rgba(0,0,0,0.45)',
-              border: documentDetected ? '2.5px solid #4ade80' : '2.5px solid rgba(255,255,255,0.85)',
-              borderRadius: '6px',
+              border: documentDetected ? '2.5px solid #4ade80' : '1px solid white',
+              borderRadius: '10px',
             }"
           >
             <!-- Corner accents -->
@@ -78,7 +74,7 @@
               v-for="c in corners"
               :key="c"
               class="absolute transition-colors duration-300"
-              :class="documentDetected ? 'border-green-400' : 'border-white'"
+              :class="documentDetected ? 'border-green-400' : 'border-[#0A77F3]'"
               :style="cornerStyle(c)"
             ></span>
           </div>
@@ -87,13 +83,13 @@
         <!-- Hint text below guide box -->
         <div
           class="absolute z-10 left-0 right-0 flex justify-center transition-all duration-300"
-          :style="{ top: (guideOffsetTop + guideH + 14) + 'px' }"
+          :style="{ top: (guideOffsetTop + guideH ) + 'px' }"
         >
           <p
-            class="text-sm text-center px-6 drop-shadow font-medium transition-colors duration-300"
+            class="text-sm text-center px-6 drop-shadow font-regular transition-colors duration-300"
             :class="documentDetected ? 'text-green-400' : 'text-white/75'"
           >
-            {{ documentDetected ? 'Documento detectado…' : 'Encuadra el documento dentro del marco' }}
+            {{ documentDetected ? 'Document detected…' : 'Align the document within the frame' }}
           </p>
         </div>
 
@@ -113,18 +109,18 @@
         </div>
 
         <!-- ── Bottom controls ── -->
-        <div class="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between px-8 pb-10">
+        <div class="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between px-8 py-2">
 
           <!-- Gallery thumbnail (last capture, proportional) -->
           <button
             type="button"
             @click="openGallery"
-            class="w-14 h-14 rounded-xl border-2 border-white/60 bg-white/10 flex items-center justify-center overflow-hidden"
+            class="h-12 w-8 flex items-center justify-start overflow-hidden rounded-lg flex-1"
           >
             <img
               v-if="capturedFrames.length > 0"
               :src="capturedFrames[capturedFrames.length - 1]"
-              class="max-w-full max-h-full object-contain"
+              class=""
               alt="última captura"
             />
             <svg v-else class="w-7 h-7 text-white/40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -133,32 +129,34 @@
               <path d="M21 15l-5-5L5 21"/>
             </svg>
           </button>
-
           <!-- Shutter button -->
           <button
             type="button"
             @click="captureFrame"
             class="relative flex items-center justify-center"
-            style="width: 76px; height: 76px;"
+            style="width: 60px; height: 60px;"
           >
-            <span class="absolute inset-0 rounded-full border-4 border-white opacity-90"></span>
-            <span class="rounded-full bg-white" style="width: 60px; height: 60px; display:block;"></span>
+            <span class="absolute inset-0 rounded-full border-2 border-white opacity-90"></span>
+            <span class="rounded-full bg-white" style="width: 50px; height: 50px; display:block;"></span>
           </button>
-
-          <!-- Pages counter → opens review screen -->
-          <button
-            type="button"
-            @click="capturedFrames.length > 0 ? (showPreview = true) : null"
-            class="w-14 h-14 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all"
-            :class="capturedFrames.length > 0 ? 'bg-white/10 border border-white/30' : 'opacity-40 cursor-default'"
-          >
-            <span class="text-white font-bold text-lg leading-none">
-              {{ capturedFrames.length }}
-            </span>
-            <span class="text-white/60 text-[10px] leading-none">
-              {{ capturedFrames.length === 1 ? 'página' : 'páginas' }}
-            </span>
-          </button>
+          <!-- Flash button -->
+          <div class="flex flex-1 items-center justify-end">
+            <button
+              type="button"
+              @click="toggleFlash"
+              class="flex items-center justify-center w-8 h-8 rounded-full transition-all"
+              :class="flashOn ? 'bg-yellow-400/90' : 'bg-black/30'"
+            >
+              <svg
+                class="w-6 h-6"
+                :class="flashOn ? 'text-black' : 'text-white'"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" />
+              </svg>
+            </button>
+        </div>
         </div>
       </div>
 
@@ -168,7 +166,7 @@
       <div v-if="showPreview" class="flex flex-col bg-[#111]" style="height: 100dvh;">
 
         <!-- Top bar -->
-        <div class="flex items-center justify-between px-5 pt-12 pb-4 border-b border-white/10 shrink-0">
+        <div class="flex items-center justify-between px-5 py-2 border-b border-white/10 shrink-0">
           <button type="button" @click="showPreview = false" class="text-white text-base font-medium">
             ‹ Cámara
           </button>
@@ -187,17 +185,17 @@
         </div>
 
         <!-- Scrollable pages list -->
-        <div class="flex-1 overflow-y-auto py-3 px-3 flex flex-col gap-4">
+        <div class="flex-1 overflow-y-auto py-3 px-3 flex flex-col">
           <div
             v-for="(frame, index) in capturedFrames"
             :key="index"
-            class="relative bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/10"
+            class="relative bg-[#1a1a1a] rounded-2xl border border-white/10"
           >
             <!-- Image: full width, full height, no crop -->
             <img
               :src="frame"
               :alt="`Página ${index + 1}`"
-              class="w-full h-auto block"
+              class="w-full h-full block rounded-2xl"
             />
 
             <!-- Overlays: number top-left, delete top-right -->
@@ -213,20 +211,22 @@
         </div>
 
         <!-- Bottom: add more / discard all -->
-        <div class="shrink-0 px-4 pb-10 pt-3 border-t border-white/10 flex flex-col gap-2">
+        <div class="shrink-0 px-4 py-2 border-t border-white/10 flex gap-2">
           <button
             type="button"
             @click="showPreview = false"
-            class="w-full py-3 rounded-full border border-white/25 text-white text-sm font-medium hover:bg-white/5 transition"
+            class="w-full py-1 flex flex-col gap-1 items-center justify-center rounded-full text-white text-xs font-regular opacity-50 hover:opacity-100  transition"
           >
-            + Agregar más páginas
+          <img src="/icon/icon-add.svg" alt="trash" class="h-5 inline-block" />
+            Add pages
           </button>
           <button
             type="button"
             @click="discardAll"
-            class="w-full py-3 rounded-full text-red-400 text-sm font-medium hover:bg-red-500/10 transition"
+            class="w-full py-1 flex flex-col gap-1 items-center justify-center rounded-full text-white text-xs font-regular opacity-50 hover:opacity-100 transition"
           >
-            Descartar todo
+          <img src="/icon/icon-delate-white.svg" alt="trash" class="h-5  inline-block" />
+            Discard all
           </button>
         </div>
       </div>
@@ -312,40 +312,40 @@ function cornerStyle(c: string): Record<string, string> {
   if (c === 'tl') {
     return {
       ...base,
-      top: '-2px',
-      left: '-2px',
-      borderTop: `${t} solid`,
-      borderLeft: `${t} solid`,
-      borderTopLeftRadius: '4px',
+      top: '-8px',
+      left: '-8px',
+      borderTop: `${t} solid #0A77F3`,
+      borderLeft: `${t} solid #0A77F3`,
+      borderTopLeftRadius: '16px',
     };
   }
   if (c === 'tr') {
     return {
       ...base,
-      top: '-2px',
-      right: '-2px',
-      borderTop: `${t} solid`,
-      borderRight: `${t} solid`,
-      borderTopRightRadius: '4px',
+      top: '-8px',
+      right: '-8px',
+      borderTop: `${t} solid #0A77F3`,
+      borderRight: `${t} solid #0A77F3`,
+      borderTopRightRadius: '16px',
     };
   }
   if (c === 'bl') {
     return {
       ...base,
-      bottom: '-2px',
-      left: '-2px',
-      borderBottom: `${t} solid`,
-      borderLeft: `${t} solid`,
-      borderBottomLeftRadius: '4px',
+      bottom: '-8px',
+      left: '-8px',
+      borderBottom: `${t} solid #0A77F3`,
+      borderLeft: `${t} solid #0A77F3`,
+      borderBottomLeftRadius: '16px',
     };
   }
   return {
     ...base,
-    bottom: '-2px',
-    right: '-2px',
-    borderBottom: `${t} solid`,
-    borderRight: `${t} solid`,
-    borderBottomRightRadius: '4px',
+    bottom: '-8px',
+    right: '-8px',
+    borderBottom: `${t} solid #0A77F3`,
+    borderRight: `${t} solid #0A77F3`,
+    borderBottomRightRadius: '16px',
   };
 }
 
