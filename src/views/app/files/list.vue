@@ -259,7 +259,7 @@
           class="block w-full transition-all duration-300 my-4 mx-0 sm:mx-2 sm:my-2 text-[var(--text)]"
         >
           <div
-            class="block w-full flow-root sm:-mr-4"
+            class="block w-full flow-root mr-0 sm:-mr-4"
             @dragover.prevent
             @drop.prevent.stop="onDropToRoot"
           >
@@ -267,25 +267,25 @@
             <div
               v-for="(group, index) in folderGroups"
               :key="group.id"
-              class="w-full mb-2 pr-2 h-max sm:float-left sm:w-auto sm:mr-4 sm:mb-4 sm:pr-0 relative"
+              class="w-full mb-2 h-max sm:float-left sm:w-auto sm:mr-4 sm:mb-4 relative"
             >
             <button
-                  type="button"
-                  @click.stop="collapseGroup(group.id)"
-                  title="Collapse group"
-                  class="
-                    absolute -top-1.5 -right-1.5 p-1 rounded-full z-10
-                    flex items-center justify-center opacity-0 hover:opacity-100
-                    text-xs text-[var(--text-terceary)] w-5 h-5
+              type="button"
+              @click.stop="collapseGroup(group.id)"
+              title="Collapse group"
+              class="
+                absolute -top-1.5 -right-1.5 p-1 rounded-full z-10
+                flex items-center justify-center opacity-0 hover:opacity-100
+                text-xs text-[var(--text-terceary)] w-5 h-5
 
-                    hover:border-[var(--color-primary)]
-                    hover:text-[var(--color-primary)]
-                    hover:bg-[var(--hover-bg)]
-                    transition-all duration-200
-                  "
-                >
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
+                hover:border-[var(--color-primary)]
+                hover:text-[var(--color-primary)]
+                hover:bg-[var(--hover-bg)]
+                transition-all duration-200
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
               <div
                 ref="groupDivs"
 
@@ -441,9 +441,9 @@
 
               class="
                 float-left
-                mr-2 mb-2 sm:mr-4 sm:mb-4
+                mb-2 mx-1 sm:mr-2 sm:mx-0 sm:mb-4
                 w-[calc(50%-0.5rem)]
-                sm:max-w-48 sm:w-[150px]
+                sm:min-w-44 sm:max-w-[150px] sm:w-auto
               "
 
               @dragover.prevent
