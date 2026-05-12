@@ -2,9 +2,7 @@
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[99999] bg-black" style="height: 100dvh;">
 
-      <!-- ═══════════════════════════════════════
-           CAMERA VIEW
-      ════════════════════════════════════════ -->
+      <!-- CAMERA VIEW -->
       <div v-show="!showPreview" class="relative flex flex-col" style="height: 100dvh;">
 
         <!-- Full-screen video -->
@@ -32,13 +30,13 @@
             type="button"
             @click="capturedFrames.length > 0 ? (showPreview = true) : null"
             class="w-14 h-14 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all flex-1"
-            :class="capturedFrames.length > 0 ? 'bg-white/10 border border-white/30' : 'opacity-40 cursor-default'"
+            :class="capturedFrames.length > 0 ? '' : 'opacity-40 cursor-default'"
           >
-            <span class="text-white font-bold text-lg leading-none">
+            <span class="text-white font-bold text-sm leading-none">
               {{ capturedFrames.length }}
             </span>
             <span class="text-white/60 text-[10px] leading-none">
-              {{ capturedFrames.length === 1 ? 'página' : 'páginas' }}
+              {{ capturedFrames.length === 1 ? 'pag' : 'pages' }}
             </span>
           </button>
             <!-- Auto mode toggle -->
@@ -108,14 +106,15 @@
           </div>
         </div>
 
-        <!-- ── Bottom controls ── -->
+        <!-- Bottom controls -->
         <div class="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between px-8 py-2">
 
           <!-- Gallery thumbnail (last capture, proportional) -->
+          <div class="flex items-center justify-start flex-1">
           <button
             type="button"
             @click="openGallery"
-            class="h-12 w-8 flex items-center justify-start overflow-hidden rounded-lg flex-1"
+            class="h-12 w-8 flex items-center justify-start overflow-hidden rounded-lg"
           >
             <img
               v-if="capturedFrames.length > 0"
@@ -129,6 +128,7 @@
               <path d="M21 15l-5-5L5 21"/>
             </svg>
           </button>
+          </div>
           <!-- Shutter button -->
           <button
             type="button"
@@ -160,54 +160,102 @@
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════
-           PREVIEW / REVIEW VIEW
-      ════════════════════════════════════════ -->
+      <!-- PREVIEW / REVIEW VIEW -->
       <div v-if="showPreview" class="flex flex-col bg-[#111]" style="height: 100dvh;">
 
         <!-- Top bar -->
-        <div class="flex items-center justify-between px-5 py-2 border-b border-white/10 shrink-0">
-          <button type="button" @click="showPreview = false" class="text-white text-base font-medium">
-            ‹ Cámara
-          </button>
-          <h2 class="text-white font-semibold text-base">
-            {{ capturedFrames.length }} página{{ capturedFrames.length !== 1 ? 's' : '' }}
-          </h2>
+        <div class="flex items-center justify-between px-4 py-2 shrink-0">
           <button
             type="button"
-            @click="saveScanAsPdf"
-            :disabled="loading"
-            class="font-semibold text-base"
-            :class="loading ? 'text-white/40' : 'text-[#0a77f3]'"
+            @click="showPreview = false"
+            class="text-white text-base font-regular drop-shadow text-left flex-1 justify-start items-center h-14"
           >
-            {{ loading ? 'Guardando…' : 'Guardar PDF' }}
+            <i class="fas fa-chevron-left text-xs m-1"></i>
+            Back
           </button>
-        </div>
 
-        <!-- Scrollable pages list -->
-        <div class="flex-1 overflow-y-auto py-3 px-3 flex flex-col">
-          <div
-            v-for="(frame, index) in capturedFrames"
-            :key="index"
-            class="relative bg-[#1a1a1a] rounded-2xl border border-white/10"
-          >
-            <!-- Image: full width, full height, no crop -->
-            <img
-              :src="frame"
-              :alt="`Página ${index + 1}`"
-              class="w-full h-full block rounded-2xl"
-            />
+          <h2 class="text-white font-regular text-sm">
+            {{ currentIndex + 1 }} of {{ capturedFrames.length }}
+          </h2>
 
-            <!-- Overlays: number top-left, delete top-right -->
-            <div class="absolute top-2 left-2 bg-black/60 rounded-full px-2 py-0.5 text-white text-xs font-semibold">
-              {{ index + 1 }}
-            </div>
+          <div class="flex flex-1 item-center justify-end">
             <button
               type="button"
-              @click="removeFrame(index)"
-              class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 active:bg-red-700 rounded-full w-7 h-7 flex items-center justify-center text-white text-xs leading-none transition-colors"
-            >✕</button>
+              @click="saveScanAsPdf"
+              :disabled="loading"
+              class="flex items-center justify-center py-1 px-3 rounded-full text-sm font-semibold border transition-all"
+              :class="loading
+                ? 'text-white border-[var(--color-primary)] bg-[var(--color-primary)]'
+                : 'text-white border-[var(--color-primary)] bg-[var(--color-primary)]'"
+            >
+              {{ loading ? 'Guardando…' : 'Save PDF' }}
+            </button>
           </div>
+        </div>
+        <!-- Horizontal gallery -->
+        <div
+          class="flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar"
+          @scroll="(e) => {
+            const el = e.target as HTMLElement;
+            currentIndex = Math.round(el.scrollLeft / (el.clientWidth * 0.92));
+          }"
+        >
+          <div
+            class="flex h-full items-center"
+            :class="capturedFrames.length === 1
+              ? 'justify-center px-4'
+              : 'px-4'"
+          >
+            <div
+              v-for="(frame, index) in capturedFrames"
+              :key="index"
+              class="relative h-full snap-center shrink-0 flex items-center justify-center"
+              :style="{
+                width: capturedFrames.length === 1 ? '95%' : '95%'
+              }"
+            >
+              <!-- Inner wrapper -->
+              <div
+                class="relative w-full h-full flex items-center justify-center"
+                :class="capturedFrames.length === 1 ? '' : 'pr-4'"
+              >
+                <!-- Image -->
+                <img
+                  :src="frame"
+                  :alt="`Página ${index + 1}`"
+                  class="w-full max-h-full object-contain rounded-2xl border border-white/10 bg-[#1a1a1a]"
+                />
+
+                <!-- Page number -->
+                <div class="absolute bg-black/60 flex items-center justify-center rounded-full h-6 w-6 text-white text-xs font-semibold"
+                :class="capturedFrames.length === 1 ? 'top-[26px] left-[7px] ' : 'top-9 left-[6px] '">
+                  {{ index + 1 }}
+                </div>
+
+                <!-- Delete -->
+                <button
+                  type="button"
+                  @click="removeFrame(index)"
+                  class="absolute bg-black/60 hover:bg-black/80 active:bg-black/80 rounded-full w-7 h-7 flex items-center justify-center text-white text-xs leading-none transition-colors"
+                  :class="capturedFrames.length === 1 ? 'top-[26px] right-[7px] ' : 'top-9 right-[22px]'">
+                  ✕
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination dots -->
+        <div class="flex items-start justify-center gap-1 pb-6 shrink-0">
+          <span
+            v-for="(_, index) in capturedFrames"
+            :key="index"
+            class="rounded-full transition-all duration-300"
+            :class="currentIndex === index
+              ? 'w-5 h-2 bg-[var(--color-primary)]'
+              : 'w-2 h-2 bg-white/40'"
+          ></span>
         </div>
 
         <!-- Bottom: add more / discard all -->
@@ -215,22 +263,22 @@
           <button
             type="button"
             @click="showPreview = false"
-            class="w-full py-1 flex flex-col gap-1 items-center justify-center rounded-full text-white text-xs font-regular opacity-50 hover:opacity-100  transition"
+            class="w-full py-1 flex flex-col gap-1 items-center justify-center rounded-full text-white text-xs font-regular opacity-50 hover:opacity-100 transition"
           >
-          <img src="/icon/icon-add.svg" alt="trash" class="h-5 inline-block" />
+            <img src="/icon/icon-add.svg" alt="trash" class="h-5 inline-block" />
             Add pages
           </button>
+
           <button
             type="button"
             @click="discardAll"
             class="w-full py-1 flex flex-col gap-1 items-center justify-center rounded-full text-white text-xs font-regular opacity-50 hover:opacity-100 transition"
           >
-          <img src="/icon/icon-delate-white.svg" alt="trash" class="h-5  inline-block" />
+            <img src="/icon/icon-delate-white.svg" alt="trash" class="h-5 inline-block" />
             Discard all
           </button>
         </div>
       </div>
-
     </div>
   </Teleport>
 </template>
@@ -269,6 +317,7 @@ const cameraActive = ref(false);
 const showPreview = ref(false);
 const flashOn = ref(false);
 const autoMode = ref(true);
+const currentIndex = ref(0);
 const documentDetected = ref(false);
 const countdown = ref(2);
 
@@ -276,7 +325,7 @@ const countdown = ref(2);
 let detectionInterval: ReturnType<typeof setInterval> | null = null;
 let countdownInterval: ReturnType<typeof setInterval> | null = null;
 let stableFrames = 0;
-const STABLE_FRAMES_NEEDED = 6; // ~1.2s at 5fps before countdown starts
+const STABLE_FRAMES_NEEDED = 6;
 const COUNTDOWN_SECONDS = 2;
 
 // ── guide box (A4 ratio) ──
@@ -355,13 +404,6 @@ const isOpen = computed({
   set: (v) => emit('update:modelValue', v),
 });
 
-// ─────────────────────────────────────────────────────────────
-// AUTO DOCUMENT DETECTION
-// Strategy: sample the guide-box area from the video frame,
-// analyze edge contrast vs the surrounding area. If there is
-// a significant contrast difference (bright rectangle = paper
-// on a darker background), we consider the document present.
-// ─────────────────────────────────────────────────────────────
 function getCropCoords() {
   const v = videoElement.value;
   if (!v) return null;
@@ -495,7 +537,6 @@ function analyzeFrame(): boolean {
   if (outerCount > 0) outerBrightness /= outerCount;
 
   // Document detected when the inside is notably brighter than the outside
-  // (white paper stands out against table/desk)
   const contrast = innerBrightness - outerBrightness;
   return contrast > 28 && innerBrightness > 140;
 }
@@ -508,7 +549,7 @@ function stopCountdown() {
   countdown.value = COUNTDOWN_SECONDS;
 }
 
-// ── capture (cropped to guide box) ──
+// capture
 function captureFrame() {
   if (!videoElement.value) return;
   const v = videoElement.value;
@@ -571,7 +612,7 @@ function startDetection() {
         stopCountdown();
       }
     }
-  }, 200); // ~5fps analysis
+  }, 200);
 }
 
 function stopDetection() {
@@ -584,7 +625,7 @@ function stopDetection() {
   stableFrames = 0;
 }
 
-// ── camera ──
+// camera
 async function startCamera() {
   const constraints: MediaStreamConstraints = {
     video: {
@@ -769,3 +810,13 @@ watch(
   },
 );
 </script>
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
