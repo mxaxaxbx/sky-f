@@ -365,7 +365,7 @@
                           hover:border-[var(--color-primary)]
                           transition-colors duration-300"
                       >
-                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                        <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                         <span>Rename</span>
                       </button>
 
@@ -382,7 +382,7 @@
                           transition-colors duration-300
                         "
                       >
-                        <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                        <img src="/icon/icon_move.svg" alt="move" class="h-6 mr-4 grayscale"/>
                         <span>Move to folder</span>
                       </button>
                     </div>
@@ -403,7 +403,7 @@
                           transition-colors duration-300
                         "
                       >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 mr-4">
                           <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
                             <rect width="24" height="24" fill="#FFC506"/>
                           </mask>
@@ -641,7 +641,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
+                          <img src="/icon/icon_details.svg" alt="download" class="h-6 mr-4 grayscale"
                           />
                           <span>info</span>
                         </button>
@@ -657,7 +657,7 @@
                             hover:border-[var(--color-primary)]
                             transition-colors duration-300"
                         >
-                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                           <span>Rename</span>
                         </button>
                       </div>
@@ -676,7 +676,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-preview.svg" alt="preview" class="h-6 mr-4 grayscale"/>
                           <span>Preview</span>
                         </button>
 
@@ -695,7 +695,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                          <img src="/icon/icon_download_2.svg" alt="download" class="h-6 mr-4"
                           />
                           <span>Download</span>
                         </button>
@@ -716,7 +716,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon_move.svg" alt="move" class="h-6 mr-4 grayscale"/>
                           <span>Move to folder</span>
                         </button>
 
@@ -732,7 +732,7 @@
                             transition-all duration-300
                           "
                         >
-                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
+                          <img src="/icon/icon-link.svg" alt="link" class="h-6 mr-4 -rotate-45 grayscale"/>
                           Copy link
                         </button>
                       </div>
@@ -754,7 +754,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 mr-4">
                             <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
                             <rect width="24" height="24" fill="#FFC506"/>
                             </mask>

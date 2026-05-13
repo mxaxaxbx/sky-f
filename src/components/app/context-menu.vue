@@ -34,7 +34,7 @@
             <span>Preview</span>
           </button>
           <button @click="emitAction('download')" class="menu-btn grayscale hover:grayscale-0 hover:text-[var(--color-primary)]">
-            <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4" />
+            <img src="/icon/icon_download_2.svg" alt="download" class="h-6 mr-4" />
             <span>Download</span>
           </button>
         </div>
@@ -91,7 +91,7 @@
             <span>Move to folder</span>
           </button>
           <button v-if="selectedFiles.length > 0" @click="emitAction('download-selected')" class="menu-btn grayscale hover:grayscale-0 hover:text-[var(--color-primary)]">
-            <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4" />
+            <img src="/icon/icon_download_2.svg" alt="download" class="h-6 mr-4" />
             <span>Download</span>
           </button>
         </div>
@@ -101,11 +101,11 @@
       <template v-else>
         <div class="p-1 space-y-1 font-regular text-md">
           <button @click="emitAction('upload')" class="menu-btn text-[var(--text)] opacity-50 hover:opacity-100">
-            <img src="/icon/icon-upload.svg" alt="upload" class="menu-icon h-4 mr-4" />
+            <img src="/icon/icon-upload.svg" alt="upload" class="menu-icon h-6 mr-4" />
             <span>Upload files</span>
           </button>
           <button @click="emitAction('create-folder')" class="menu-btn">
-            <img src="/icon/icon-new-folder.svg" alt="new folder" class="menu-icon h-5 mr-4" />
+            <img src="/icon/icon-new-folder.svg" alt="new folder" class="menu-icon h-6 mr-4" />
             <span>Create folder</span>
           </button>
         </div>
@@ -126,7 +126,7 @@
             transition-colors duration-300
           "
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-4">
             <mask id="mask_ctx_delete" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
               <rect width="24" height="24" fill="#FFC506"/>
             </mask>
@@ -185,7 +185,7 @@ const emitAction = (action: string) => {
 }
 
 .menu-icon {
-  height: 1.25rem; /* 20px */
+  height: 1.5rem; /* 20px */
   margin-right: 1rem; /* 16px */
   filter: grayscale(100%);
 }
