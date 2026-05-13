@@ -817,8 +817,14 @@ const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
-const chrome: any = null;
-const cast: any = null;
+
+function getChromeCastApi() {
+  return (window as any).chrome;
+}
+
+function getCastApi() {
+  return (window as any).cast;
+}
 
 function closeModal() {
   if (isFullscreen.value) toggleFullscreen();
@@ -1230,7 +1236,15 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 async function castVideo() {
-  const castContext = cast.framework.CastContext.getInstance();
+  const castApi = getCastApi();
+  const chromeCastApi = getChromeCastApi();
+
+  if (!castApi || !chromeCastApi) {
+    console.error('Chromecast SDK is not available yet');
+    return;
+  }
+
+  const castContext = castApi.framework.CastContext.getInstance();
   const session = castContext.getCurrentSession();
 
   if (!session) {
@@ -1240,16 +1254,16 @@ async function castVideo() {
 
   const url = await store.dispatch('files/getDownloadUrl', { id: file.value.id });
 
-  const mediaInfo = new chrome.cast.media.MediaInfo(
+  const mediaInfo = new chromeCastApi.cast.media.MediaInfo(
     url,
     'video/mp4',
   );
 
-  mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
+  mediaInfo.metadata = new chromeCastApi.cast.media.GenericMediaMetadata();
 
   mediaInfo.metadata.title = file.value.name || 'Video';
 
-  const request = new chrome.cast.media.LoadRequest(mediaInfo);
+  const request = new chromeCastApi.cast.media.LoadRequest(mediaInfo);
 
   try {
     await session.loadMedia(request);
@@ -1260,12 +1274,19 @@ async function castVideo() {
 }
 
 function initializeCastApi() {
-  cast.framework.CastContext.getInstance().setOptions({
+  const castApi = getCastApi();
+  const chromeCastApi = getChromeCastApi();
+
+  if (!castApi || !chromeCastApi) {
+    return;
+  }
+
+  castApi.framework.CastContext.getInstance().setOptions({
     receiverApplicationId:
-      chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      chromeCastApi.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
 
     autoJoinPolicy:
-      chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      chromeCastApi.cast.AutoJoinPolicy.ORIGIN_SCOPED,
   });
 }
 
