@@ -267,10 +267,10 @@
             <div
               v-for="(group, index) in folderGroups"
               :key="group.id"
-              class="relative transition-[grid-column] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-column]"
+              class="relative col-span-full sm:col-auto transition-[grid-column] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-column]"
               :style="{
                 gridColumn: `span ${groupSizes[group.id]?.spans || 1}`,
-                gridRow: `span ${Math.ceil((groupSizes[group.id]?.height || 100) / 56)}`
+                gridRow: `span ${Math.ceil(((groupSizes[group.id]?.height || 100) + 1) / 56)}`
               }"
             >
             <button
@@ -301,7 +301,7 @@
                 :class="[
                   'group-no-resizer-handle',
                   'flex flex-col border rounded-2xl pt-2 px-1 pb-0 overflow-hidden',
-                  'w-full sm:resize-x sm:min-w-[180px] min-h-[100px]',
+                  'w-full resize-none sm:resize-x sm:min-w-[180px] min-h-[100px]',
                   'transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] relative',
 
                   draggedGroup === group.id
@@ -2352,10 +2352,13 @@ watch(groupDivs, (els) => {
 
           const spans = Math.max(1, Math.round((currentWidth + gap) / step));
 
-          if (groupSizes.value[groupId]?.spans !== spans) {
+          const currentHeight = el.offsetHeight;
+          const oldData = groupSizes.value[groupId];
+
+          if (oldData?.spans !== spans || Math.abs((oldData?.height || 0) - currentHeight) > 5) {
             groupSizes.value[groupId] = {
               width: (spans * step) - gap,
-              height: el.offsetHeight,
+              height: currentHeight,
               spans,
             };
           }
