@@ -20,27 +20,30 @@
         <!-- Hidden canvas used for auto-detection analysis -->
         <canvas ref="analysisCanvas" class="hidden"></canvas>
 
-       <!-- ── Top bar: Cancelar | Flash | Auto ── -->
+        <!-- ── Top bar: Cancelar | Flash | Auto ── -->
         <div class="relative z-[99999] flex items-center justify-between px-4 py-2">
           <button type="button" @click="closeModal" class="text-white text-base font-regular drop-shadow text-left flex-1 justify-start items-center">
             Cancel
           </button>
-            <!-- Pages counter → opens review screen -->
-          <button
-            type="button"
-            @click="capturedFrames.length > 0 ? (showPreview = true) : null"
-            class="w-14 h-14 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all flex-1"
-            :class="capturedFrames.length > 0 ? '' : 'opacity-40 cursor-default'"
-          >
-            <span class="text-white font-bold text-sm leading-none">
-              {{ capturedFrames.length }}
-            </span>
-            <span class="text-white/60 text-[10px] leading-none">
-              {{ capturedFrames.length === 1 ? 'pag' : 'pages' }}
-            </span>
-          </button>
-            <!-- Auto mode toggle -->
-            <div class="flex flex-1 justify-end items-center">
+          <div class="flex flex-col items-center flex-1">
+            <span v-if="!cvLoaded" class="text-[10px] text-white/40">Loading AI...</span>
+            <button
+              v-else
+              type="button"
+              @click="capturedFrames.length > 0 ? (showPreview = true) : null"
+              class="flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all"
+              :class="capturedFrames.length > 0 ? '' : 'opacity-40 cursor-default'"
+            >
+              <span class="text-white font-bold text-sm leading-none">
+                {{ capturedFrames.length }}
+              </span>
+              <span class="text-white/60 text-[10px] leading-none">
+                {{ capturedFrames.length === 1 ? 'pag' : 'pages' }}
+              </span>
+            </button>
+          </div>
+          <!-- Auto mode toggle -->
+          <div class="flex flex-1 justify-end items-center">
             <button
               type="button"
               @click="autoMode = !autoMode"
@@ -51,13 +54,27 @@
             >
               <span class="text-sm font-semibold">Auto</span>
             </button>
-            </div>
+          </div>
         </div>
 
         <!-- ── Document guide overlay ── -->
         <div class="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
           <div class="absolute inset-0 bg-black/40"></div>
+
+          <!-- Intelligent Detection Overlay -->
+          <svg v-if="detectedQuadPoints.length === 4" class="absolute inset-0 w-full h-full z-20">
+            <polygon
+              :points="svgQuadPoints"
+              fill="rgba(74, 222, 128, 0.25)"
+              stroke="#4ade80"
+              stroke-width="3"
+              stroke-linejoin="round"
+              class="transition-all duration-150"
+            />
+          </svg>
+
           <div
+            v-else
             class="relative transition-all duration-300 mb-10"
             :style="{
               width: guideW + 'px',
@@ -111,23 +128,22 @@
 
           <!-- Gallery thumbnail (last capture, proportional) -->
           <div class="flex items-center justify-start flex-1">
-          <button
-            type="button"
-            @click="openGallery"
-            class="h-12 w-8 flex items-center justify-start overflow-hidden rounded-lg"
-          >
-            <img
-              v-if="capturedFrames.length > 0"
-              :src="capturedFrames[capturedFrames.length - 1]"
-              class=""
-              alt="última captura"
-            />
-            <svg v-else class="w-7 h-7 text-white/40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="18" height="18" rx="3"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <path d="M21 15l-5-5L5 21"/>
-            </svg>
-          </button>
+            <button
+              type="button"
+              @click="openGallery"
+              class="h-12 w-8 flex items-center justify-start overflow-hidden rounded-lg"
+            >
+              <img
+                v-if="capturedFrames.length > 0"
+                :src="capturedFrames[capturedFrames.length - 1]"
+                alt="última captura"
+              />
+              <svg v-else class="w-7 h-7 text-white/40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </button>
           </div>
           <!-- Shutter button -->
           <button
@@ -156,8 +172,11 @@
                 <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" />
               </svg>
             </button>
+          </div>
         </div>
-        </div>
+
+        <!-- Camera Flash effect -->
+        <div v-if="isCapturing" class="absolute inset-0 z-[100] bg-white animate-pulse"></div>
       </div>
 
       <!-- PREVIEW / REVIEW VIEW -->
@@ -188,9 +207,24 @@
                 ? 'text-white border-[var(--color-primary)] bg-[var(--color-primary)]'
                 : 'text-white border-[var(--color-primary)] bg-[var(--color-primary)]'"
             >
-              {{ loading ? 'Guardando…' : 'Save PDF' }}
+              {{ loading ? 'Saving…' : 'Save PDF' }}
             </button>
           </div>
+        </div>
+
+        <!-- Filter Selection -->
+        <div class="flex items-center justify-center gap-2 py-3 px-4 shrink-0">
+          <button
+            v-for="f in ['original', 'scan', 'gray', 'bw']"
+            :key="f"
+            @click="currentFilter = f"
+            class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            :class="currentFilter === f
+              ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
+              : 'bg-white/5 border-white/10 text-white/60'"
+          >
+            {{ f === 'original' ? 'Photo' : f.charAt(0).toUpperCase() + f.slice(1) }}
+          </button>
         </div>
         <!-- Horizontal gallery -->
         <div
@@ -221,7 +255,7 @@
               >
                 <!-- Image -->
                 <img
-                  :src="frame"
+                  :src="filterPreviewCache[index] || frame"
                   :alt="`Página ${index + 1}`"
                   class="w-full max-h-full object-contain rounded-2xl border border-white/10 bg-[#1a1a1a]"
                 />
@@ -320,6 +354,19 @@ const autoMode = ref(true);
 const currentIndex = ref(0);
 const documentDetected = ref(false);
 const countdown = ref(2);
+const isCapturing = ref(false);
+const currentFilter = ref('scan');
+const filterPreviewCache = ref<string[]>([]);
+
+// ── OpenCV state ──
+const cvLoaded = ref(false);
+const detectedQuadPoints = ref<{x: number, y: number}[]>([]);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cv: any = null;
+
+const svgQuadPoints = computed(() => (
+  detectedQuadPoints.value.map((p) => `${p.x},${p.y}`).join(' ')
+));
 
 // ── auto-detection internals ──
 let detectionInterval: ReturnType<typeof setInterval> | null = null;
@@ -455,12 +502,10 @@ function analyzeFrame(): boolean {
   const coords = getCropCoords();
   if (!coords) return false;
 
-  const {
-    cropX, cropY, cropW, cropH, videoW, videoH,
-  } = coords;
+  const { videoW, videoH } = coords;
 
-  // Work at 1/4 resolution for performance
-  const scale = 0.25;
+  // Work at small resolution for performance
+  const scale = 0.2;
   const w = Math.round(videoW * scale);
   const h = Math.round(videoH * scale);
   canvas.width = w;
@@ -471,19 +516,138 @@ function analyzeFrame(): boolean {
 
   ctx.drawImage(v, 0, 0, w, h);
 
+  if (cvLoaded.value && cv) {
+    try {
+      const src = cv.imread(canvas);
+      const dst = new cv.Mat();
+
+      // 1. Pre-process: Grayscale and Contrast Enhancement (CLAHE)
+      cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+      const clahe = new cv.CLAHE(2.0, new cv.Size(8, 8));
+      clahe.apply(dst, dst);
+      clahe.delete();
+
+      const blurred = new cv.Mat();
+      cv.GaussianBlur(dst, blurred, new cv.Size(5, 5), 0);
+
+      // 2. Edge Detection
+      const edges = new cv.Mat();
+      cv.Canny(blurred, edges, 50, 150);
+
+      const thresh = new cv.Mat();
+      cv.adaptiveThreshold(blurred, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2);
+      cv.bitwise_not(thresh, thresh);
+      cv.bitwise_or(edges, thresh, edges);
+
+      // 3. Dilate
+      const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
+      cv.dilate(edges, edges, kernel);
+
+      const contours = new cv.MatVector();
+      const hierarchy = new cv.Mat();
+      cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+      let maxArea = 0;
+      let maxContourIndex = -1;
+
+      for (let i = 0; i < contours.size(); i += 1) {
+        const contour = contours.get(i);
+        const area = cv.contourArea(contour);
+        if (area > (w * h * 0.06) && area < (w * h * 0.98)) {
+          if (area > maxArea) {
+            maxArea = area;
+            maxContourIndex = i;
+          }
+        }
+      }
+
+      if (maxContourIndex !== -1) {
+        const contour = contours.get(maxContourIndex);
+        const hull = new cv.Mat();
+        cv.convexHull(contour, hull, false, true);
+
+        const peri = cv.arcLength(hull, true);
+        const approx = new cv.Mat();
+        cv.approxPolyDP(hull, approx, 0.02 * peri, true);
+
+        if (approx.rows === 4) {
+          const pts = [];
+          const videoAspect = videoW / videoH;
+          const screenW = window.innerWidth;
+          const screenH = window.innerHeight;
+          const screenAspect = screenW / screenH;
+
+          let renderedW: number;
+          let renderedH: number;
+          let offsetX = 0;
+          let offsetY = 0;
+
+          if (videoAspect > screenAspect) {
+            renderedH = screenH;
+            renderedW = screenH * videoAspect;
+            offsetX = (renderedW - screenW) / 2;
+          } else {
+            renderedW = screenW;
+            renderedH = screenW / videoAspect;
+            offsetY = (renderedH - screenH) / 2;
+          }
+
+          const videoToRenderScale = renderedW / videoW;
+          const analysisToVideoScale = 1 / scale;
+
+          for (let i = 0; i < 4; i += 1) {
+            const vx = approx.data32S[i * 2] * analysisToVideoScale;
+            const vy = approx.data32S[i * 2 + 1] * analysisToVideoScale;
+            pts.push({
+              x: (vx * videoToRenderScale) - offsetX,
+              y: (vy * videoToRenderScale) - offsetY,
+            });
+          }
+
+          // Sort corners: TL, TR, BR, BL
+          const sorted = [...pts];
+          // Sum x+y to find TL and BR
+          sorted.sort((a, b) => (a.x + a.y) - (b.x + b.y));
+          const tl = sorted[0];
+          const br = sorted[3];
+          // Diff x-y to find TR and BL
+          sorted.sort((a, b) => (a.x - a.y) - (b.x - b.y));
+          const bl = sorted[0];
+          const tr = sorted[3];
+
+          detectedQuadPoints.value = [tl, tr, br, bl];
+
+          src.delete(); dst.delete(); blurred.delete(); edges.delete(); thresh.delete();
+          kernel.delete(); contours.delete(); hierarchy.delete(); approx.delete(); hull.delete();
+          return true;
+        }
+        approx.delete();
+        hull.delete();
+      }
+
+      src.delete(); dst.delete(); blurred.delete(); edges.delete(); thresh.delete();
+      kernel.delete(); contours.delete(); hierarchy.delete();
+    } catch (e) {
+      console.error('OpenCV analysis error:', e);
+    }
+  }
+
+  detectedQuadPoints.value = [];
+
+  // Fallback to basic brightness logic if OpenCV fails or no quad found
+  const {
+    cropX, cropY, cropW, cropH,
+  } = coords;
   const sx = Math.round(cropX * scale);
   const sy = Math.round(cropY * scale);
   const sw = Math.round(cropW * scale);
   const sh = Math.round(cropH * scale);
-
-  // Clamp to canvas bounds
   const safeX = Math.max(0, sx);
   const safeY = Math.max(0, sy);
   const safeW = Math.min(sw, w - safeX);
   const safeH = Math.min(sh, h - safeY);
   if (safeW <= 0 || safeH <= 0) return false;
 
-  // Average brightness inside guide box
   const innerData = ctx.getImageData(safeX, safeY, safeW, safeH).data;
   let innerBrightness = 0;
   for (let i = 0; i < innerData.length; i += 4) {
@@ -491,54 +655,7 @@ function analyzeFrame(): boolean {
   }
   innerBrightness /= (innerData.length / 4);
 
-  // Average brightness in a border strip around the guide box (outside)
-  const borderSize = Math.max(4, Math.round(Math.min(sw, sh) * 0.08));
-  let outerBrightness = 0;
-  let outerCount = 0;
-
-  const regions = [
-    {
-      x: Math.max(0, safeX - borderSize),
-      y: Math.max(0, safeY - borderSize),
-      w: safeW + borderSize * 2,
-      h: borderSize,
-    },
-    {
-      x: Math.max(0, safeX - borderSize),
-      y: Math.min(h - borderSize, safeY + safeH),
-      w: safeW + borderSize * 2,
-      h: borderSize,
-    },
-    {
-      x: Math.max(0, safeX - borderSize),
-      y: safeY,
-      w: borderSize,
-      h: safeH,
-    },
-    {
-      x: Math.min(w - borderSize, safeX + safeW),
-      y: safeY,
-      w: borderSize,
-      h: safeH,
-    },
-  ];
-
-  regions.forEach((r) => {
-    const rw = Math.min(r.w, w - r.x);
-    const rh = Math.min(r.h, h - r.y);
-    if (rw <= 0 || rh <= 0) return;
-    const d = ctx.getImageData(r.x, r.y, rw, rh).data;
-    for (let i = 0; i < d.length; i += 4) {
-      outerBrightness += (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000;
-      outerCount += 1;
-    }
-  });
-
-  if (outerCount > 0) outerBrightness /= outerCount;
-
-  // Document detected when the inside is notably brighter than the outside
-  const contrast = innerBrightness - outerBrightness;
-  return contrast > 28 && innerBrightness > 140;
+  return innerBrightness > 160; // Simplified fallback
 }
 
 function stopCountdown() {
@@ -550,32 +667,149 @@ function stopCountdown() {
 }
 
 // capture
+async function applyFilter(srcBase64: string, filter: string): Promise<string> {
+  if (filter === 'original') return srcBase64;
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(srcBase64);
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+
+      if (cvLoaded.value && cv && filter !== 'original') {
+        try {
+          const src = cv.imread(canvas);
+          const dst = new cv.Mat();
+          cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+
+          if (filter === 'scan') {
+            // Sharpen before threshold
+            const kernel = cv.matFromArray(3, 3, cv.CV_32F, [0, -1, 0, -1, 5, -1, 0, -1, 0]);
+            cv.filter2D(dst, dst, cv.CV_8U, kernel);
+            kernel.delete();
+            // Adaptive threshold with better parameters for clean background
+            cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 21, 10);
+          } else if (filter === 'bw') {
+            cv.threshold(dst, dst, 120, 255, cv.THRESH_BINARY);
+          }
+          // if gray, just keep the cvtColor result
+
+          cv.imshow(canvas, dst);
+          src.delete(); dst.delete();
+          resolve(canvas.toDataURL('image/jpeg', 0.9));
+          return;
+        } catch (e) {
+          console.error('CV filter error:', e);
+        }
+      }
+
+      // Manual fallback if CV fails
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const { data } = imageData;
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+        if (filter === 'scan' || filter === 'bw') {
+          const val = gray > 128 ? 255 : 0;
+          data[i] = val;
+          data[i + 1] = val;
+          data[i + 2] = val;
+        } else {
+          data[i] = gray;
+          data[i + 1] = gray;
+          data[i + 2] = gray;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      resolve(canvas.toDataURL('image/jpeg', 0.9));
+    };
+    img.src = srcBase64;
+  });
+}
+
 function captureFrame() {
   if (!videoElement.value) return;
   const v = videoElement.value;
+  isCapturing.value = true;
+  setTimeout(() => { isCapturing.value = false; }, 200);
 
   const coords = getCropCoords();
   if (!coords) return;
 
-  const {
-    cropX, cropY, cropW, cropH,
-  } = coords;
-
+  const { videoW, videoH } = coords;
   const canvas = document.createElement('canvas');
-  canvas.width = cropW;
-  canvas.height = cropH;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  ctx.drawImage(v, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-  capturedFrames.value.push(canvas.toDataURL('image/jpeg', 0.92));
+  if (cvLoaded.value && cv && detectedQuadPoints.value.length === 4) {
+    // Advanced Perspective Warp
+    const src = cv.imread(v);
+    const dst = new cv.Mat();
 
-  // Reset detection so it doesn't immediately fire again
+    // Map screen coordinates back to video coordinates
+    const videoAspect = videoW / videoH;
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    const screenAspect = screenW / screenH;
+
+    let renderedW: number;
+    let renderedH: number;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (videoAspect > screenAspect) {
+      renderedH = screenH;
+      renderedW = screenH * videoAspect;
+      offsetX = (renderedW - screenW) / 2;
+    } else {
+      renderedW = screenW;
+      renderedH = screenW / videoAspect;
+      offsetY = (renderedH - screenH) / 2;
+    }
+
+    const videoToRenderScale = renderedW / videoW;
+    const coordsArr: number[] = [];
+    detectedQuadPoints.value.forEach((p) => {
+      coordsArr.push((p.x + offsetX) / videoToRenderScale);
+      coordsArr.push((p.y + offsetY) / videoToRenderScale);
+    });
+
+    const srcCoords = cv.matFromArray(4, 1, cv.CV_32FC2, coordsArr);
+
+    // Target rectangle (A4 ratio)
+    const targetW = 1200;
+    const targetH = Math.round(targetW * 1.414);
+    const dstCoords = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, targetW, 0, targetW, targetH, 0, targetH]);
+
+    const M = cv.getPerspectiveTransform(srcCoords, dstCoords);
+    cv.warpPerspective(src, dst, M, new cv.Size(targetW, targetH), cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+
+    canvas.width = targetW;
+    canvas.height = targetH;
+    cv.imshow(canvas, dst);
+
+    src.delete(); dst.delete(); srcCoords.delete(); dstCoords.delete(); M.delete();
+  } else {
+    // Basic Crop Fallback
+    const {
+      cropX, cropY, cropW, cropH,
+    } = coords;
+    canvas.width = cropW;
+    canvas.height = cropH;
+    ctx.drawImage(v, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  }
+
+  capturedFrames.value.push(canvas.toDataURL('image/jpeg', 0.92));
   documentDetected.value = false;
   stableFrames = 0;
 
   store.commit('notifications/addNotification', {
-    message: `Página ${capturedFrames.value.length} capturada`,
+    message: `Page ${capturedFrames.value.length} captured`,
     type: 'success',
   });
 }
@@ -651,6 +885,40 @@ async function startCamera() {
     videoElement.value.srcObject = mediaStream.value;
     try { await videoElement.value.play(); } catch { /* silent */ }
     cameraActive.value = true;
+    // Load OpenCV if not loaded
+    if (!cvLoaded.value) {
+      if ((window as any).cv && (window as any).cv.Mat) {
+        cv = (window as any).cv;
+        cvLoaded.value = true;
+      } else {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/opencv.js-pure@4.10.0/opencv.js';
+        script.async = true;
+        script.onload = () => {
+          const checkCV = () => {
+            if ((window as any).cv && (window as any).cv.Mat) {
+              cv = (window as any).cv;
+              cvLoaded.value = true;
+              console.log('OpenCV.js Initialized');
+            } else {
+              setTimeout(checkCV, 100);
+            }
+          };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((window as any).cv) {
+            (window as any).cv.onRuntimeInitialized = () => {
+              checkCV();
+            };
+            // Safety: some versions don't fire onRuntimeInitialized or it fires too early
+            setTimeout(checkCV, 500);
+          }
+        };
+        script.onerror = () => {
+          console.error('Failed to load OpenCV from CDN');
+        };
+        document.head.appendChild(script);
+      }
+    }
     // Start detection after a short delay so video stabilizes
     setTimeout(startDetection, 800);
   }
@@ -731,7 +999,12 @@ async function saveScanAsPdf() {
     const pw: number = pdf.internal.pageSize.getWidth();
     const ph: number = pdf.internal.pageSize.getHeight();
 
-    const images = await Promise.all(capturedFrames.value.map(loadImage));
+    const images = await Promise.all(
+      capturedFrames.value.map(async (f) => {
+        const filtered = await applyFilter(f, currentFilter.value);
+        return loadImage(filtered);
+      }),
+    );
     images.forEach((img, i) => {
       if (i > 0) pdf.addPage();
       let iw = pw - 20;
@@ -761,12 +1034,27 @@ async function saveScanAsPdf() {
   }
 }
 
-// ── pause detection when preview is open ──
+// ── watchers ──
 watch(
   () => showPreview.value,
   (v) => {
     if (v) stopDetection();
     else if (cameraActive.value) startDetection();
+  },
+);
+
+// Sync preview cache when filter, visibility or page count changes
+watch(
+  [() => showPreview.value, () => currentFilter.value, () => capturedFrames.value.length],
+  async ([show, filter]) => {
+    if (show && capturedFrames.value.length > 0) {
+      loading.value = true;
+      const updated = await Promise.all(
+        capturedFrames.value.map((frame) => applyFilter(frame, filter as string)),
+      );
+      filterPreviewCache.value = updated;
+      loading.value = false;
+    }
   },
 );
 
@@ -810,6 +1098,7 @@ watch(
   },
 );
 </script>
+
 <style scoped>
 .no-scrollbar::-webkit-scrollbar {
   display: none;
