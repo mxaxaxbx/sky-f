@@ -1304,6 +1304,10 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
 
+  if (getCastApi() && getChromeCastApi()) {
+    initializeCastApi();
+  }
+
   // eslint-disable-next-line
   window.__onGCastApiAvailable = (isAvailable: boolean) => {
     if (isAvailable) {
