@@ -1245,7 +1245,17 @@ async function castVideo() {
   }
 
   const castContext = castApi.framework.CastContext.getInstance();
-  const session = castContext.getCurrentSession();
+  let session = castContext.getCurrentSession();
+
+  if (!session) {
+    try {
+      await castContext.requestSession();
+      session = castContext.getCurrentSession();
+    } catch (err) {
+      console.error('Chromecast session was not started', err);
+      return;
+    }
+  }
 
   if (!session) {
     console.error('No Chromecast session');
