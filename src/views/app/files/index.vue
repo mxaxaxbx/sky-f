@@ -137,7 +137,8 @@
         >
           <Dropdown
             :classes="[
-              'bg-[var(--bg-secondary)]',
+              'bg-[var(--bg-modal-2)]',
+        'backdrop-blur-md',
               'border border-[var(--border)]',
               'rounded-2xl',
               'absolute','-right-0', 'bottom-10','z-20',
