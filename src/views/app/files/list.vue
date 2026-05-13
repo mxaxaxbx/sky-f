@@ -259,7 +259,7 @@
           class="block w-full transition-all duration-300 my-4 mx-0 sm:mx-2 sm:my-2 text-[var(--text)]"
         >
           <div
-            class="block w-full flow-root mr-0 sm:-mr-4"
+            class="grid sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] grid-cols-[repeat(auto-fill,minmax(140px,1fr))] grid-flow-row-dense auto-rows-[40px] w-full gap-4"
             @dragover.prevent
             @drop.prevent.stop="onDropToRoot"
           >
@@ -267,7 +267,11 @@
             <div
               v-for="(group, index) in folderGroups"
               :key="group.id"
-              class="w-full mb-2 h-max sm:float-left sm:w-auto sm:mr-4 sm:mb-4 relative"
+              class="relative transition-[grid-column] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-column]"
+              :style="{
+                gridColumn: `span ${groupSizes[group.id]?.spans || 1}`,
+                gridRow: `span ${Math.ceil((groupSizes[group.id]?.height || 100) / 56)}`
+              }"
             >
             <button
               type="button"
@@ -297,8 +301,8 @@
                 :class="[
                   'group-no-resizer-handle',
                   'flex flex-col border rounded-2xl pt-2 px-1 pb-0 overflow-hidden',
-                  'w-full sm:resize-x sm:min-w-[100px] sm:max-w-[610px] min-h-[100px]',
-                  'transition-all duration-200 relative',
+                  'w-full sm:resize-x sm:min-w-[180px] min-h-[100px]',
+                  'transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] relative',
 
                   draggedGroup === group.id
                     ? `border-transparent
@@ -440,10 +444,9 @@
               :key="folder.id"
 
               class="
-                float-left
-                mb-2 mx-1 sm:mr-2 sm:mx-0 sm:mb-4
-                w-[calc(50%-0.5rem)]
-                sm:min-w-44 sm:max-w-[150px] sm:w-auto
+                mb-0
+                w-full
+                h-10
               "
 
               @dragover.prevent
@@ -1429,7 +1432,7 @@ const dropTargetLabel = computed(() => {
 
 const folderGroups = ref(
   JSON.parse(
-    localStorage.getItem('folder-groups') || `[
+    localStorage.getItem('folderGroups') || `[
       {
         "id": 1,
         "name": "Group 1",
@@ -2332,12 +2335,46 @@ watch(groupDivs, (els) => {
       }
 
       const observer = new ResizeObserver(() => {
-        if (!isDesktop) return;
+        window.requestAnimationFrame(() => {
+          if (!isDesktop || !el.isConnected) return;
 
-        const newWidth = el.offsetWidth;
-        if (groupSizes.value[groupId]?.width !== newWidth) {
-          groupSizes.value[groupId] = { width: newWidth, height: el.offsetHeight };
-        }
+          const parent = el.parentElement?.parentElement;
+          if (!parent) return;
+
+          const currentWidth = el.offsetWidth;
+          const gridStyle = window.getComputedStyle(parent);
+          const gridColumns = gridStyle.getPropertyValue('grid-template-columns').split(' ');
+          if (!gridColumns[0]) return;
+
+          const colWidth = parseFloat(gridColumns[0]);
+          const gap = parseFloat(gridStyle.getPropertyValue('gap')) || 16;
+          const step = colWidth + gap;
+
+          const spans = Math.max(1, Math.round((currentWidth + gap) / step));
+
+          if (groupSizes.value[groupId]?.spans !== spans) {
+            groupSizes.value[groupId] = {
+              width: (spans * step) - gap,
+              height: el.offsetHeight,
+              spans,
+            };
+          }
+
+          // Al arrastrar, dejamos que el usuario mueva el ratón libremente (fluidez).
+          // Solo registramos el ajuste automático para cuando el usuario suelte el clic.
+          if (!el.getAttribute('data-has-mouseup')) {
+            el.setAttribute('data-has-mouseup', 'true');
+            const onMouseUp = () => {
+              if (el.isConnected) {
+                // eslint-disable-next-line no-param-reassign
+                el.style.width = '';
+                el.removeAttribute('data-has-mouseup');
+              }
+              window.removeEventListener('mouseup', onMouseUp);
+            };
+            window.addEventListener('mouseup', onMouseUp);
+          }
+        });
       });
       observer.observe(el);
       resizeObservers.set(el, observer);
