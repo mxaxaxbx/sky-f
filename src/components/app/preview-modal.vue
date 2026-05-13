@@ -365,6 +365,9 @@
                   </div>
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
+                    <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
+                      {{ castStatusText }}
+                    </span>
                     <button
                       class="px-4 py-2 bg-black text-white rounded"
                       @click="castVideo"
@@ -815,6 +818,14 @@ const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
+const castState = ref('UNKNOWN');
+const castStatusText = computed(() => {
+  if (castState.value === 'CONNECTED') return 'Cast connected';
+  if (castState.value === 'CONNECTING') return 'Looking for device...';
+  if (castState.value === 'NOT_CONNECTED') return 'Cast devices available';
+  if (castState.value === 'NO_DEVICES_AVAILABLE') return 'No Cast devices found';
+  return 'Cast unavailable';
+});
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -824,6 +835,20 @@ function getChromeCastApi() {
 
 function getCastApi() {
   return (window as any).cast;
+}
+
+function syncCastState() {
+  const castApi = getCastApi();
+  if (!castApi) {
+    castState.value = 'UNKNOWN';
+    return;
+  }
+
+  castState.value = castApi.framework.CastContext.getInstance().getCastState();
+}
+
+function handleCastStateChanged(event: any) {
+  castState.value = event?.castState || 'UNKNOWN';
 }
 
 function closeModal() {
@@ -1245,6 +1270,12 @@ async function castVideo() {
   }
 
   const castContext = castApi.framework.CastContext.getInstance();
+  syncCastState();
+
+  if (castState.value === 'NO_DEVICES_AVAILABLE') {
+    console.warn('Chromecast reported no available devices');
+  }
+
   let session = castContext.getCurrentSession();
 
   if (!session) {
@@ -1298,6 +1329,12 @@ function initializeCastApi() {
     autoJoinPolicy:
       chromeCastApi.cast.AutoJoinPolicy.ORIGIN_SCOPED,
   });
+
+  castApi.framework.CastContext.getInstance().addEventListener(
+    castApi.framework.CastContextEventType.CAST_STATE_CHANGED,
+    handleCastStateChanged,
+  );
+  syncCastState();
 }
 
 onMounted(() => {
@@ -1319,6 +1356,14 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
+
+  const castApi = getCastApi();
+  if (castApi) {
+    castApi.framework.CastContext.getInstance().removeEventListener(
+      castApi.framework.CastContextEventType.CAST_STATE_CHANGED,
+      handleCastStateChanged,
+    );
+  }
 });
 
 watch(() => props.modelValue, async (newFile) => {
