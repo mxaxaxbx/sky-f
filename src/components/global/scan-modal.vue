@@ -71,7 +71,18 @@
               stroke-linejoin="round"
               class="transition-all duration-150"
             />
+            <!-- Corner indices for debugging -->
+            <g v-for="(p, i) in detectedQuadPoints" :key="i">
+              <circle :cx="p.x" :cy="p.y" r="10" fill="rgba(0,0,0,0.5)" />
+              <text :x="p.x" :y="p.y + 4" font-size="12" fill="white" text-anchor="middle">{{ i + 1 }}</text>
+            </g>
           </svg>
+
+          <!-- Diagnostic Info (Hidden by default, shown for troubleshooting) -->
+          <div v-if="detectedQuadPoints.length === 4" class="absolute top-4 left-4 z-50 bg-black/60 p-2 rounded text-[10px] text-white font-mono pointer-events-none">
+            Pts: 1:({{Math.round(detectedQuadPoints[0].x)}},{{Math.round(detectedQuadPoints[0].y)}})
+            4:({{Math.round(detectedQuadPoints[3].x)}},{{Math.round(detectedQuadPoints[3].y)}})
+          </div>
 
           <div
             v-else
@@ -82,8 +93,7 @@
               boxShadow: '0 0 0 9999px rgba(0,0,0,0.45)',
               border: documentDetected ? '2.5px solid #4ade80' : '1px solid white',
               borderRadius: '10px',
-            }"
-          >
+            }"          >
             <!-- Corner accents -->
             <span
               v-for="c in corners"
@@ -215,7 +225,7 @@
         <!-- Filter Selection -->
         <div class="flex items-center justify-center gap-2 py-3 px-4 shrink-0">
           <button
-            v-for="f in ['original', 'scan', 'gray', 'bw']"
+            v-for="f in ['original', 'scan', 'gray']"
             :key="f"
             @click="currentFilter = f"
             class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
@@ -453,44 +463,35 @@ const isOpen = computed({
 
 function getCropCoords() {
   const v = videoElement.value;
-  if (!v) return null;
+  if (!v || !v.videoWidth) return null;
 
-  const videoW = v.videoWidth || 1280;
-  const videoH = v.videoHeight || 720;
+  const videoW = v.videoWidth;
+  const videoH = v.videoHeight;
+  const rect = v.getBoundingClientRect();
+  // Use window dimensions since guides are relative to viewport
   const screenW = window.innerWidth;
   const screenH = window.innerHeight;
 
-  const videoAspect = videoW / videoH;
-  const screenAspect = screenW / screenH;
-
-  let renderedW: number;
-  let renderedH: number;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  if (videoAspect > screenAspect) {
-    renderedH = screenH;
-    renderedW = screenH * videoAspect;
-    offsetX = (renderedW - screenW) / 2;
-  } else {
-    renderedW = screenW;
-    renderedH = screenW / videoAspect;
-    offsetY = (renderedH - screenH) / 2;
-  }
-
-  const scaleX = videoW / renderedW;
-  const scaleY = videoH / renderedH;
+  const scale = Math.max(screenW / videoW, screenH / videoH);
+  const renderedW = videoW * scale;
+  const renderedH = videoH * scale;
+  // Offset relative to the video element's own top/left
+  const offsetX = (renderedW - screenW) / 2;
+  const offsetY = (renderedH - screenH) / 2;
 
   const guideLeft = (screenW - guideW.value) / 2;
   const guideTop = (screenH - guideH.value) / 2;
 
   return {
-    cropX: Math.round((guideLeft + offsetX) * scaleX),
-    cropY: Math.round((guideTop + offsetY) * scaleY),
-    cropW: Math.round(guideW.value * scaleX),
-    cropH: Math.round(guideH.value * scaleY),
+    cropX: Math.round((guideLeft + rect.left + offsetX) / scale),
+    cropY: Math.round((guideTop + rect.top + offsetY - 20) / scale),
+    cropW: Math.round(guideW.value / scale),
+    cropH: Math.round(guideH.value / scale),
     videoW,
     videoH,
+    scale,
+    offsetX,
+    offsetY,
   };
 }
 
@@ -572,38 +573,18 @@ function analyzeFrame(): boolean {
 
         if (approx.rows === 4) {
           const pts = [];
-          const videoAspect = videoW / videoH;
-          const screenW = window.innerWidth;
-          const screenH = window.innerHeight;
-          const screenAspect = screenW / screenH;
+          const { scale: scaleFactor, offsetX, offsetY } = coords;
 
-          let renderedW: number;
-          let renderedH: number;
-          let offsetX = 0;
-          let offsetY = 0;
-
-          if (videoAspect > screenAspect) {
-            renderedH = screenH;
-            renderedW = screenH * videoAspect;
-            offsetX = (renderedW - screenW) / 2;
-          } else {
-            renderedW = screenW;
-            renderedH = screenW / videoAspect;
-            offsetY = (renderedH - screenH) / 2;
-          }
-
-          const videoToRenderScale = renderedW / videoW;
           const analysisToVideoScale = 1 / scale;
 
           for (let i = 0; i < 4; i += 1) {
             const vx = approx.data32S[i * 2] * analysisToVideoScale;
             const vy = approx.data32S[i * 2 + 1] * analysisToVideoScale;
             pts.push({
-              x: (vx * videoToRenderScale) - offsetX,
-              y: (vy * videoToRenderScale) - offsetY,
+              x: (vx * scaleFactor) - offsetX,
+              y: (vy * scaleFactor) - offsetY,
             });
           }
-
           // Sort corners: TL, TR, BR, BL
           const sorted = [...pts];
           // Sum x+y to find TL and BR
@@ -695,8 +676,6 @@ async function applyFilter(srcBase64: string, filter: string): Promise<string> {
             kernel.delete();
             // Adaptive threshold with better parameters for clean background
             cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 21, 10);
-          } else if (filter === 'bw') {
-            cv.threshold(dst, dst, 120, 255, cv.THRESH_BINARY);
           }
           // if gray, just keep the cvtColor result
 
@@ -714,7 +693,7 @@ async function applyFilter(srcBase64: string, filter: string): Promise<string> {
       const { data } = imageData;
       for (let i = 0; i < data.length; i += 4) {
         const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-        if (filter === 'scan' || filter === 'bw') {
+        if (filter === 'scan') {
           const val = gray > 128 ? 255 : 0;
           data[i] = val;
           data[i + 1] = val;
@@ -752,31 +731,16 @@ function captureFrame() {
     const dst = new cv.Mat();
 
     // Map screen coordinates back to video coordinates
-    const videoAspect = videoW / videoH;
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
-    const screenAspect = screenW / screenH;
+    const videoRect = v.getBoundingClientRect();
+    const screenW = videoRect.width;
+    const screenH = videoRect.height;
 
-    let renderedW: number;
-    let renderedH: number;
-    let offsetX = 0;
-    let offsetY = 0;
+    const { scale: scaleFactor, offsetX, offsetY } = coords;
 
-    if (videoAspect > screenAspect) {
-      renderedH = screenH;
-      renderedW = screenH * videoAspect;
-      offsetX = (renderedW - screenW) / 2;
-    } else {
-      renderedW = screenW;
-      renderedH = screenW / videoAspect;
-      offsetY = (renderedH - screenH) / 2;
-    }
-
-    const videoToRenderScale = renderedW / videoW;
     const coordsArr: number[] = [];
     detectedQuadPoints.value.forEach((p) => {
-      coordsArr.push((p.x + offsetX) / videoToRenderScale);
-      coordsArr.push((p.y + offsetY) / videoToRenderScale);
+      coordsArr.push((p.x + offsetX) / scaleFactor);
+      coordsArr.push((p.y + offsetY) / scaleFactor);
     });
 
     const srcCoords = cv.matFromArray(4, 1, cv.CV_32FC2, coordsArr);
