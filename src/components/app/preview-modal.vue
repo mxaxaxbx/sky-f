@@ -359,13 +359,18 @@
                   </div>
                   <!-- timer -->
                   <div class="flex flex-1 items-center justify-center gap-2 mb-1">
-                      <span class="text-[var(--text-terceary)] text-sm font-semibold mr-4">
-                        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-                      </span>
+                    <span class="text-[var(--text-terceary)] text-sm font-semibold mr-4">
+                      {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+                    </span>
                   </div>
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
-                    <google-cast-launcher></google-cast-launcher>
+                    <button
+                      class="px-4 py-2 bg-black text-white rounded"
+                      @click="castVideo"
+                    >
+                      Cast Video
+                    </button>
                     <button
                       @click="toggleFullscreen"
                       class="
@@ -812,8 +817,14 @@ const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
-const chrome: any = null;
-const cast: any = null;
+
+function getChromeCastApi() {
+  return (window as any).chrome;
+}
+
+function getCastApi() {
+  return (window as any).cast;
+}
 
 function closeModal() {
   if (isFullscreen.value) toggleFullscreen();
@@ -1225,25 +1236,37 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 async function castVideo() {
-  const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+  const castApi = getCastApi();
+  const chromeCastApi = getChromeCastApi();
 
-  if (!castSession) {
-    console.log('No cast session');
+  if (!castApi || !chromeCastApi) {
+    console.error('Chromecast SDK is not available yet');
     return;
   }
 
-  const mediaInfo = new chrome.cast.media.MediaInfo(
-    currentBlobURL.value,
+  const castContext = castApi.framework.CastContext.getInstance();
+  const session = castContext.getCurrentSession();
+
+  if (!session) {
+    console.error('No Chromecast session');
+    return;
+  }
+
+  const url = await store.dispatch('files/getDownloadUrl', { id: file.value.id });
+
+  const mediaInfo = new chromeCastApi.cast.media.MediaInfo(
+    url,
     'video/mp4',
   );
 
-  mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
-  mediaInfo.metadata.title = file.value?.name || 'Video';
+  mediaInfo.metadata = new chromeCastApi.cast.media.GenericMediaMetadata();
 
-  const request = new chrome.cast.media.LoadRequest(mediaInfo);
+  mediaInfo.metadata.title = file.value.name || 'Video';
+
+  const request = new chromeCastApi.cast.media.LoadRequest(mediaInfo);
 
   try {
-    await castSession.loadMedia(request);
+    await session.loadMedia(request);
     console.log('Casting started');
   } catch (err) {
     console.error(err);
@@ -1251,10 +1274,19 @@ async function castVideo() {
 }
 
 function initializeCastApi() {
-  cast.framework.CastContext.getInstance().setOptions({
+  const castApi = getCastApi();
+  const chromeCastApi = getChromeCastApi();
+
+  if (!castApi || !chromeCastApi) {
+    return;
+  }
+
+  castApi.framework.CastContext.getInstance().setOptions({
     receiverApplicationId:
-      chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      chromeCastApi.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+
+    autoJoinPolicy:
+      chromeCastApi.cast.AutoJoinPolicy.ORIGIN_SCOPED,
   });
 }
 
@@ -1262,8 +1294,8 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
 
-  // eslint-disable-next-line no-underscore-dangle
-  window.__onGCastApiAvailable = function (isAvailable: boolean) {
+  // eslint-disable-next-line
+  window.__onGCastApiAvailable = (isAvailable: boolean) => {
     if (isAvailable) {
       initializeCastApi();
     }
