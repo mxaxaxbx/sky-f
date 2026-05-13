@@ -279,9 +279,16 @@
               title="Collapse group"
               class="
                 absolute -top-1.5 -right-1.5 p-1 rounded-full z-10
-                flex items-center justify-center opacity-0 hover:opacity-100
-                text-xs text-[var(--text-terceary)] w-5 h-5
+                flex items-center justify-center
+                opacity:30
+                bg-[var(--hover-bg)]
+                text-xs text-[var(--text-terceary)]
+                w-5 h-5
 
+                sm:opacity-0
+                sm:bg-transparente
+
+                hover:opacity-100
                 hover:border-[var(--color-primary)]
                 hover:text-[var(--color-primary)]
                 hover:bg-[var(--hover-bg)]
@@ -571,7 +578,7 @@
                               hover:border-[var(--color-primary)]
                               transition-colors duration-300"
                           >
-                            <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                            <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                             <span>Rename</span>
                           </button>
                         </div>
@@ -589,7 +596,7 @@
                               transition-colors duration-300
                             "
                           >
-                            <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                            <img src="/icon/icon_move.svg" alt="move" class="h-6 mr-4 grayscale"/>
                             <span>Move to folder</span>
                           </button>
                           <button
@@ -604,7 +611,7 @@
                               transition-colors duration-300
                             "
                           >
-                            <img src="/icon/icon-isle.svg" alt="group" class="h-5 mr-4 grayscale"/>
+                            <img src="/icon/icon-isle.svg" alt="group" class="h-6 mr-4 grayscale"/>
                             <span>Move to group</span>
                           </button>
                         </div>
@@ -624,7 +631,7 @@
                               transition-colors duration-300
                             "
                           >
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-4">
                                 <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
                                 <rect width="24" height="24" fill="#FFC506"/>
                                 </mask>
@@ -870,7 +877,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
+                          <img src="/icon/icon_details.svg" alt="download" class="h-6 mr-4 grayscale"
                           />
                           <span>info</span>
                         </button>
@@ -886,7 +893,7 @@
                             hover:border-[var(--color-primary)]
                             transition-colors duration-300"
                         >
-                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                           <span>Rename</span>
                         </button>
                       </div>
@@ -905,7 +912,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-preview.svg" alt="preview" class="h-6 mr-4 grayscale"/>
                           <span>Preview</span>
                         </button>
                         <!-- download -->
@@ -923,7 +930,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                          <img src="/icon/icon_download_2.svg" alt="download" class="w-6 mr-4"
                           />
                           <span>Download</span>
                         </button>
@@ -944,7 +951,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon_move.svg" alt="move" class="h-6 mr-4 grayscale"/>
                           <span>Move to folder</span>
                         </button>
 
@@ -960,7 +967,7 @@
                             transition-all duration-300
                           "
                         >
-                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
+                          <img src="/icon/icon-link.svg" alt="link" class="h-6 mr-4 -rotate-45 grayscale"/>
                           Copy link
                         </button>
                       </div>
@@ -982,7 +989,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-4">
                             <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
                             <rect width="24" height="24" fill="#FFC506"/>
                             </mask>
@@ -2336,12 +2343,26 @@ watch(groupDivs, (els) => {
 
       const observer = new ResizeObserver(() => {
         window.requestAnimationFrame(() => {
-          if (!isDesktop || !el.isConnected) return;
+          if (!el.isConnected) return;
+
+          const currentHeight = el.offsetHeight;
+          const currentWidth = el.offsetWidth;
+
+          // Actualizar altura siempre (móvil y escritorio)
+          const oldData = groupSizes.value[groupId];
+          if (!oldData || Math.abs((oldData.height || 0) - currentHeight) > 2) {
+            groupSizes.value[groupId] = {
+              ...(oldData || { spans: 1, width: currentWidth }),
+              height: currentHeight,
+            };
+          }
+
+          // La lógica de columnas y redimensionado solo aplica a escritorio
+          if (!isDesktop) return;
 
           const parent = el.parentElement?.parentElement;
           if (!parent) return;
 
-          const currentWidth = el.offsetWidth;
           const gridStyle = window.getComputedStyle(parent);
           const gridColumns = gridStyle.getPropertyValue('grid-template-columns').split(' ');
           if (!gridColumns[0]) return;
@@ -2349,16 +2370,12 @@ watch(groupDivs, (els) => {
           const colWidth = parseFloat(gridColumns[0]);
           const gap = parseFloat(gridStyle.getPropertyValue('gap')) || 16;
           const step = colWidth + gap;
-
           const spans = Math.max(1, Math.round((currentWidth + gap) / step));
 
-          const currentHeight = el.offsetHeight;
-          const oldData = groupSizes.value[groupId];
-
-          if (oldData?.spans !== spans || Math.abs((oldData?.height || 0) - currentHeight) > 5) {
+          if (oldData?.spans !== spans) {
             groupSizes.value[groupId] = {
+              ...groupSizes.value[groupId],
               width: (spans * step) - gap,
-              height: currentHeight,
               spans,
             };
           }

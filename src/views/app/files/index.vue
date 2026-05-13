@@ -36,7 +36,7 @@
             cursor-pointer
           "
         >
-          <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-5 mr-2 invert brightness-0" />
           <span>Upload</span>
         </label>
 
@@ -108,7 +108,7 @@
             grayscale
             rounded-full
 
-            sm:flex
+            sm:hidden
             hover:grayscale-0
             hover:text-[var(--text)]
             hover:bg-[var(--hover-bg)]
@@ -142,7 +142,7 @@
               'rounded-2xl',
               'absolute','-right-0', 'bottom-10','z-20',
               dropdownPosition,
-              'w-48',
+              'w-56',
             ]">
               <template #trigger="{ toggle }">
                 <button
@@ -164,39 +164,41 @@
                 </button>
               </template>
               <template #content="{ }">
-                <div class="flex flex-col gap-0.5 px-1 py-1 font-medium text-md text-[var(--color-primary)]">
-                  <label
-                    for="fileInputBtn"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
+                <div class="flex flex-col gap-0.5 py-2 font-medium text-sm text-[var(--color-primary)]">
+                  <div class="grid grid-cols-2 flex items-center gap-4 mx-2 mb-2">
+                    <label
+                      for="fileInputBtn"
+                      class="
+                        flex flex-col items-center justify-center
+                        rounded-xl px-2 py-1 border border-transparent
+                        grayscale w-full
 
-                      hover:bg-[var(--hover-bg)]
-                      hover:grayscale-0
-                      hover:border-[var(--color-primary)]
-                      transition-colors duration-300"
-                  >
-                    <img src="/icon/icon_download_2.svg" alt="newFolder" class="rotate-180 h-6 mr-4"/>
-                    <span>Upload</span>
-                  </label>
-                  <!--scan document-->
-                  <button
-                    type="button"
-                    @click="scanModal = true"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
-
-                      hover:bg-[var(--hover-bg)]
-                      hover:grayscale-0
-                      hover:border-[var(--color-primary)]
-                      transition-colors duration-300"
-                  >
-                    <img src="/icon/icon-upload.svg" alt="scan" class="h-6 mr-4"/>
-                    <span>Scan document</span>
-                  </button>
+                        hover:bg-[var(--hover-bg)]
+                        hover:grayscale-0
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300"
+                    >
+                      <img src="/icon/icon-upload.svg" alt="newFolder" class="h-6"/>
+                      <span>Upload</span>
+                    </label>
+                    <!--scan document-->
+                    <button
+                      type="button"
+                      @click="scanModal = true"
+                      class="
+                        flex flex-col items-center justify-center
+                        rounded-xl px-2 py-1 border border-transparent
+                        grayscale w-full
+                        hover:bg-[var(--hover-bg)]
+                        hover:grayscale-0
+                        hover:border-[var(--color-primary)]
+                        transition-colors duration-300"
+                    >
+                      <img src="/icon/icon-scan.svg" alt="scan" class="h-6"/>
+                      <span>Scan pages</span>
+                    </button>
+                  </div>
+                  <div class="flex flex-col border-t border-[var(--border)] pt-2 px-4 gap-1">
                   <!--create a folder-->
                   <button
                     type="button"
@@ -217,30 +219,20 @@
                   <button
                     @click="createGroupModal = true"
                     class="
-                      items-center
-                      bg-[var(--bg-secondary)]
-                      border border-[var(--border)]
-                      text-[var(--text-terceary)] text-sm font-medium
-                      pl-2 pr-2.5 py-0.5
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
                       grayscale
-                      rounded-full
 
-                      sm:flex
-                      hover:grayscale-0
-                      hover:text-[var(--text)]
                       hover:bg-[var(--hover-bg)]
-                      hover:border-[var(--hover-border)]
-                      hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                      focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                      focus:border-[var(--hover-border)]
-                      focus:grayscale-0
-                      transition-all duration-300 ease-in-out
-                      cursor-pointer
+                      hover:grayscale-0
+                      hover:border-[var(--color-primary)]
+                      transition-colors duration-300
                     "
                   >
-                    <img src="/icon/icon-isle.svg" alt="icon" class="h-5 mr-2" />
+                    <img src="/icon/icon-isle.svg" alt="icon" class="h-6 mr-4" />
                     New group
                   </button>
+                  </div>
                 </div>
               </template>
           </Dropdown>
