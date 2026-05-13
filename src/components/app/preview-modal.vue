@@ -359,13 +359,18 @@
                   </div>
                   <!-- timer -->
                   <div class="flex flex-1 items-center justify-center gap-2 mb-1">
-                      <span class="text-[var(--text-terceary)] text-sm font-semibold mr-4">
-                        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-                      </span>
+                    <span class="text-[var(--text-terceary)] text-sm font-semibold mr-4">
+                      {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+                    </span>
                   </div>
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
-                    <google-cast-launcher></google-cast-launcher>
+                    <button
+                      class="px-4 py-2 bg-black text-white rounded"
+                      @click="castVideo"
+                    >
+                      Cast Video
+                    </button>
                     <button
                       @click="toggleFullscreen"
                       class="
@@ -1225,25 +1230,29 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 async function castVideo() {
-  const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+  const castContext = cast.framework.CastContext.getInstance();
+  const session = castContext.getCurrentSession();
 
-  if (!castSession) {
-    console.log('No cast session');
+  if (!session) {
+    console.error('No Chromecast session');
     return;
   }
 
+  const url = await store.dispatch('files/getDownloadUrl', { id: file.value.id });
+
   const mediaInfo = new chrome.cast.media.MediaInfo(
-    currentBlobURL.value,
+    url,
     'video/mp4',
   );
 
   mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
-  mediaInfo.metadata.title = file.value?.name || 'Video';
+
+  mediaInfo.metadata.title = file.value.name || 'Video';
 
   const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
   try {
-    await castSession.loadMedia(request);
+    await session.loadMedia(request);
     console.log('Casting started');
   } catch (err) {
     console.error(err);
@@ -1254,7 +1263,9 @@ function initializeCastApi() {
   cast.framework.CastContext.getInstance().setOptions({
     receiverApplicationId:
       chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+
+    autoJoinPolicy:
+      chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
   });
 }
 
@@ -1262,8 +1273,8 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
 
-  // eslint-disable-next-line no-underscore-dangle
-  window.__onGCastApiAvailable = function (isAvailable: boolean) {
+  // eslint-disable-next-line
+  window.__onGCastApiAvailable = (isAvailable: boolean) => {
     if (isAvailable) {
       initializeCastApi();
     }
