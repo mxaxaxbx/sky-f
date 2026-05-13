@@ -214,6 +214,33 @@
                     <img src="/icon/icon-new-folder.svg" alt="newFolder" class="h-6 mr-4"/>
                     <span>Create a folder</span>
                   </button>
+                  <button
+                    @click="createGroupModal = true"
+                    class="
+                      items-center
+                      bg-[var(--bg-secondary)]
+                      border border-[var(--border)]
+                      text-[var(--text-terceary)] text-sm font-medium
+                      pl-2 pr-2.5 py-0.5
+                      grayscale
+                      rounded-full
+
+                      sm:flex
+                      hover:grayscale-0
+                      hover:text-[var(--text)]
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--hover-border)]
+                      hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                      focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                      focus:border-[var(--hover-border)]
+                      focus:grayscale-0
+                      transition-all duration-300 ease-in-out
+                      cursor-pointer
+                    "
+                  >
+                    <img src="/icon/icon-isle.svg" alt="icon" class="h-5 mr-2" />
+                    New group
+                  </button>
                 </div>
               </template>
           </Dropdown>
