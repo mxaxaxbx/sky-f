@@ -3,6 +3,7 @@
     class="
       bg-[var(--bg)]
       font-alexandria font-sans
+      h-screen
       pt-14 sm:pt-0
     "
   >
@@ -10,7 +11,7 @@
       class="
         mx-auto
         flex flex-col items-start
-        px-0 w-full max-h-screen
+        px-0 w-full h-full
         pt-12
         sm:pt-16
       "

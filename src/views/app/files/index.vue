@@ -68,6 +68,62 @@
           <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
           New folder
         </button>
+        <button
+          v-if="!hideBar"
+          @click="createGroupModal = true"
+          class="
+            hidden items-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            text-[var(--text-terceary)] text-sm font-medium
+            pl-2 pr-2.5 py-0.5
+            grayscale
+            rounded-full
+
+            sm:flex
+            hover:grayscale-0
+            hover:text-[var(--text)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:border-[var(--hover-border)]
+            focus:grayscale-0
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-isle.svg" alt="icon" class="h-5 mr-2" />
+          New group
+        </button>
+        <button
+          v-if="!hideBar"
+          @click="scanModal = true"
+          class="
+            hidden items-center
+            bg-[var(--bg-secondary)]
+            border border-[var(--border)]
+            text-[var(--text-terceary)] text-sm font-medium
+            pl-2 pr-2.5 py-0.5
+            grayscale
+            rounded-full
+
+            sm:flex
+            hover:grayscale-0
+            hover:text-[var(--text)]
+            hover:bg-[var(--hover-bg)]
+            hover:border-[var(--hover-border)]
+            hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+            focus:border-[var(--hover-border)]
+            focus:grayscale-0
+            transition-all duration-300 ease-in-out
+            cursor-pointer
+          "
+        >
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-5 mr-2" />
+          Scan document
+        </button>
       </div>
 
       <!--uploap movil-->
@@ -124,6 +180,23 @@
                     <img src="/icon/icon_download_2.svg" alt="newFolder" class="rotate-180 h-6 mr-4"/>
                     <span>Upload</span>
                   </label>
+                  <!--scan document-->
+                  <button
+                    type="button"
+                    @click="scanModal = true"
+                    class="
+                      flex items-center justify-start
+                      rounded-xl px-2 py-1 border border-transparent
+                      grayscale
+
+                      hover:bg-[var(--hover-bg)]
+                      hover:grayscale-0
+                      hover:border-[var(--color-primary)]
+                      transition-colors duration-300"
+                  >
+                    <img src="/icon/icon-upload.svg" alt="scan" class="h-6 mr-4"/>
+                    <span>Scan document</span>
+                  </button>
                   <!--create a folder-->
                   <button
                     type="button"
@@ -140,6 +213,33 @@
                   >
                     <img src="/icon/icon-new-folder.svg" alt="newFolder" class="h-6 mr-4"/>
                     <span>Create a folder</span>
+                  </button>
+                  <button
+                    @click="createGroupModal = true"
+                    class="
+                      items-center
+                      bg-[var(--bg-secondary)]
+                      border border-[var(--border)]
+                      text-[var(--text-terceary)] text-sm font-medium
+                      pl-2 pr-2.5 py-0.5
+                      grayscale
+                      rounded-full
+
+                      sm:flex
+                      hover:grayscale-0
+                      hover:text-[var(--text)]
+                      hover:bg-[var(--hover-bg)]
+                      hover:border-[var(--hover-border)]
+                      hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                      focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                      focus:border-[var(--hover-border)]
+                      focus:grayscale-0
+                      transition-all duration-300 ease-in-out
+                      cursor-pointer
+                    "
+                  >
+                    <img src="/icon/icon-isle.svg" alt="icon" class="h-5 mr-2" />
+                    New group
                   </button>
                 </div>
               </template>
@@ -230,6 +330,86 @@
     </template>
   </Modal>
 
+  <Modal v-model="createGroupModal" size="xs">
+    <template #header>
+      New group
+    </template>
+    <template #content>
+      <div class="my-4">
+        <form @submit.prevent="createGroup" id="create-group-form">
+          <label for="group-name"></label>
+          <img
+            src="/icon/icon-folder.svg"
+            alt="icon"
+            class="h-5 mt-[1px] absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            v-model="groupName"
+            type="text"
+            placeholder="Group name"
+            id="group-name"
+            class="
+              w-full border
+              border-[var(--border)] bg-[var(--bg)]
+              text-sm text-[var(--text)]
+              my-2 pl-8 py-1
+              rounded-full
+
+              placeholder:text-[var(--text-terceary)]
+              placeholder:font-light
+              placeholder:text-sm
+
+              hover:border-[var(--color-primary)]
+              hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+
+              focus:border-[var(--color-primary)]
+              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+              focus:outline-none
+              transition-all duration-300 ease-in-out
+            "
+            name="group-name"
+          />
+        </form>
+      </div>
+    </template>
+    <template #footer>
+      <button
+        type="button"
+        @click="createGroupModal = false"
+        class="
+          text-[var(--text-secondary)] text-sm
+          border border-[var(--border)] bg-[var(--bg)]
+          rounded-full
+          px-3
+
+          hover:border-[var(--text)]
+          hover:bg-[var(--hover-bg-gray)]
+          hover:text-[var(--text)]
+        ">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="create-group-form"
+        :disabled="!groupName || !groupName.trim()"
+        class="
+          text-[var(--text)] text-sm
+          border
+          rounded-full
+          px-3
+          transition
+        "
+        :class="!groupName || !groupName.trim()
+          ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+          : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
+      >
+        Create
+      </button>
+    </template>
+  </Modal>
+
+  <ScanModal v-model="scanModal" :currentFolderId="folderResults?.current?.id || null" />
+
 </template>
 
 <script setup lang="ts">
@@ -249,6 +429,7 @@ import { FoldersResultI } from '@/store/folders/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
+const ScanModal = defineAsyncComponent(() => import('@/components/global/scan-modal.vue'));
 
 const route = useRoute();
 const router = useRouter();
@@ -264,7 +445,10 @@ const dropdownPosition = ref('top-8');
 const activeDropdownToggle = ref<(() => void) | null>(null);
 const createFolderModal = ref(false);
 const folderName = ref('');
+const createGroupModal = ref(false);
+const groupName = ref('');
 const moveToFolderModal = ref(false);
+const scanModal = ref(false);
 
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
@@ -341,6 +525,27 @@ async function createFolder() {
   } finally {
     loading.value = false;
   }
+}
+
+function createGroup() {
+  const name = groupName.value.trim();
+  if (!name) return;
+
+  const saved = localStorage.getItem('folderGroups');
+  let groups = saved ? JSON.parse(saved) : [];
+
+  if (!Array.isArray(groups)) {
+    groups = [];
+  }
+
+  const nextId = groups.length > 0 ? Math.max(...groups.map((g: any) => g.id)) + 1 : 1;
+
+  groups.push({ id: nextId, name, folderIds: [] });
+  localStorage.setItem('folderGroups', JSON.stringify(groups));
+  window.dispatchEvent(new Event('folder-groups-updated'));
+
+  createGroupModal.value = false;
+  groupName.value = '';
 }
 
 async function handleSearch() {

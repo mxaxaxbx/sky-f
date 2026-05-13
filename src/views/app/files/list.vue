@@ -1,17 +1,52 @@
 <template>
   <div
-    class="w-full h-full focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
     @contextmenu="handleContextMenu"
-    @dragover.prevent
-    @drop="onDropToRoot($event)"
-    tabindex="0"
+    @dragover="onRootDragOver"
+    @dragleave="onRootDragLeave"
+    @drop="onDropToRoot"
+    :class="[
+      'h-full w-full relative',
+      isDraggingOverRoot
+        ? 'px-4 py-4'
+        : 'px-0 py-2 '
+    ]"
   >
+  <!-- Overlay drag -->
+  <div
+    v-if="isDraggingOverRoot"
+    class="
+      absolute inset-0
+      flex items-end justify-end
+      mx-4 my-4 h-[calc(100%-3rem)] py-4
+      rounded-2xl
+      border-2 border-dashed border-[var(--color-primary)]
+      pointer-events-none
+      transition-all duration-200
+    ">
+    <div
+      class="
+        flex items-center justify-center
+        h-12 mx-auto gap-4
+        border border-[var(--border)] rounded-2xl
+        bg-[var(--model-bg)] backdrop-blur-md
+        shadow-md
+      "
+    >
+      <h1 class="
+        text-md text-[var(--text)] font-light
+        mx-0 my-2 px-10
+      "
+    >
+    Drop your files to upload to your <span class="ml-1 font-semibold text-[var(--text)]"> {{ dropTargetLabel }}</span>
+    </h1>
+    </div>
+  </div>
     <h1
       class="
         text-xl text-[var(--text)] font-semibold
-        mx-2 my-2 px-12 font-alexandria
+        mx-0 my-2 px-10 font-alexandria
 
         sm:mt-6
         hidden sm:block
@@ -182,10 +217,10 @@
     <div
       v-if="folderResults.data.length"
       class="
-        w-full
+        w-full mx-auto
         py-0 px-2 pt-4
 
-        sm:py-4 sm:px-14
+        sm:py-4 sm:px-10
       "
     >
       <div class="flex items-center justify-between mb-4 sm:mb-4">
@@ -217,111 +252,293 @@
           </button>
         </h3>
       </div>
-      <!-- folders grid -->
+      <!-- COMBINED FOLDERS & GROUPS -->
       <Transition name="slide">
         <div
           v-show="showFolders"
-          class="
-            grid grid-cols-2 gap-2
-            text-[var(--text)]
-            my-4  mx-0
-
-            sm:gap-4 sm:mx-2 sm:my-2
-            sm:grid-cols-2
-            md:grid-cols-3
-            lg:grid-cols-4
-            xl:grid-cols-6
-            transition-all duration-300
-          "
+          class="block w-full transition-all duration-300 my-4 mx-0 sm:mx-2 sm:my-2 text-[var(--text)]"
         >
           <div
-            v-for="folder, index in folderResults.data"
-            :key="folder.id"
-
+            class="grid sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] grid-cols-[repeat(auto-fill,minmax(140px,1fr))] grid-flow-row-dense auto-rows-[40px] w-full gap-4"
             @dragover.prevent
-            @dragenter="onDragEnter(folder.id)"
-            @dragleave="onDragLeave($event, folder.id)"
-            @drop="onDrop(folder, $event)"
-            data-selectable
+            @drop.prevent.stop="onDropToRoot"
+          >
+            <!-- group -->
+            <div
+              v-for="(group, index) in folderGroups"
+              :key="group.id"
+              class="relative col-span-full sm:col-auto transition-[grid-column] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-column]"
+              :style="{
+                gridColumn: `span ${groupSizes[group.id]?.spans || 1}`,
+                gridRow: `span ${Math.ceil(((groupSizes[group.id]?.height || 100) + 1) / 56)}`
+              }"
+            >
+            <button
+              type="button"
+              @click.stop="collapseGroup(group.id)"
+              title="Collapse group"
+              class="
+                absolute -top-1.5 -right-1.5 p-1 rounded-full z-10
+                flex items-center justify-center opacity-0 hover:opacity-100
+                text-xs text-[var(--text-terceary)] w-5 h-5
 
-            :draggable="true"
-            @dragstart="onDragStart('folder', folder, $event)"
-            @drag="onDragMove($event)"
-            @dragend="onDragEndCleanup()"
-            @click="selectItem($event, 'folder', folder, index)"
-            @keydown.enter="selectItem($event, 'folder', folder, index)"
-            @dblclick="router.push(`/app/folders/${folder.id}`);"
-            @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
-                        :class="[
-              'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-              'bg-[var(--bg-secondary)] transition-all duration-300',
-              isSelectedFolder(folder)
-                ? 'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
-                : draggedFolder === folder.id
-                  ? 'border-[var(--color-primary)] bg-[var(--hover-bg)]'
-                  : 'border-[var(--border)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
-            ]"
+                hover:border-[var(--color-primary)]
+                hover:text-[var(--color-primary)]
+                hover:bg-[var(--hover-bg)]
+                transition-all duration-200
+              "
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+              <div
+                ref="groupDivs"
+
+                @dragover.prevent
+                @dragenter="onGroupDragEnter(group.id)"
+                @dragleave="onGroupDragLeave($event, group.id)"
+                @drop="onDropToGroup(group.id, $event)"
+
+                :class="[
+                  'group-no-resizer-handle',
+                  'flex flex-col border rounded-2xl pt-2 px-1 pb-0 overflow-hidden',
+                  'w-full resize-none sm:resize-x sm:min-w-[180px] min-h-[100px]',
+                  'transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] relative',
+
+                  draggedGroup === group.id
+                    ? `border-transparent
+                      bg-[var(--hover-bg)]
+                      after:absolute
+                      after:-inset-0
+                      after:rounded-2xl
+                      after:border-2
+                      after:border-dashed
+                      after:border-[var(--color-primary)]
+                      after:pointer-events-none
+                      after:content-['']`
+
+                    : 'border-[var(--border)] bg-[var(--bg-secondary)]'
+                ]"
+              >
+                <div
+                  class="
+                    grid
+                    grid-cols-[repeat(auto-fit,70px)]
+                    justify-center
+                    gap-2
+                    w-full relative
+                    flex-1
+                  "
+                >
+                  <div
+                    v-for="folder in folderResults.data.filter(
+                      f => group.folderIds.includes(f.id)
+                    )"
+                    :key="folder.id"
+                    @dragover.prevent
+                    @dragenter="onDragEnter(folder.id)"
+                    @dragleave="onDragLeave($event, folder.id)"
+                    @drop.stop="onDrop(folder, $event)"
+                    data-selectable
+
+                    :draggable="true"
+                    @dragstart="onDragStart('folder', folder, $event)"
+                    @drag="onDragMove($event)"
+                    @dragend="onDragEndCleanup()"
+                    @click="selectItem($event, 'folder', folder, index)"
+                    @keydown.enter="selectItem($event, 'folder', folder, index)"
+                    @dblclick="router.push(`/app/folders/${folder.id}`);"
+                    @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
+                    class="
+                      flex flex-col items-center
+                      text-center
+                      min-w-[70px] p-0.5
+                      relative
+                      group
+                    "
+                    :class="[
+                      'flex flex-col items-center text-center w-[70px] pt-1 px-1 pb-0 relative group border rounded-xl transition-all duration-200',
+
+                      isSelectedFolder(folder)
+                        ? 'bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+
+                        : draggedFolder === folder.id
+                          ? `border-transparent bg-[var(--hover-bg)]
+                            after:absolute
+                            after:-inset-0
+                            after:rounded-2xl
+                            after:border-2
+                            after:border-dashed
+                            after:border-[var(--color-primary)]
+                            after:content-['']`
+
+                          : 'border-transparent hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
+                    ]"
+                  >
+                    <img
+                      src="/icon/icon-folder.svg"
+                      alt="folder"
+                      draggable="false"
+                      class="h-8"
+                    >
+
+                    <div>
+                      <input
+                        v-if="editingFolderId === folder.id"
+                        v-model="editedFolderName"
+                        @keyup.enter="saveFolderName(folder)"
+                        :data-folder-id="folder.id"
+                        @blur="editingFolderId = null"
+                        class="
+                          bg-transparent
+                          border-b border-[var(--color-primary)]
+                          outline-none text-[10px] w-full"
+                      />
+
+                      <h3
+                        v-else
+                        class="font-medium text-[var(--text)] text-[10px] truncate text-left"
+                      >
+                        {{ folder.name }}
+                      </h3>
+                    </div>
+
+                    <button
+                      @click.stop="removeFolderFromGroup(folder.id)"
+                      class="
+                        absolute top-1 right-1
+                        opacity-0 group-hover:opacity-100
+                        transition-opacity
+                        text-[10px] text-[var(--text)]
+                        bg-[var(--hover-bg)]
+                        rounded-full
+                        w-4 h-4
+                      "
+                    >
+                     <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-center mt-2 py-1 px-2">
+                  <h3
+                    class="
+                      relative
+                      group
+                      font-light
+                      text-center w-full
+                      text-xs
+                      text-[var(--text-terceary)]
+                    "
+                  >
+                    {{ group.name }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <!-- independent folders -->
+            <div
+              v-for="folder, index in folderResults.data.filter(
+                f => !folderGroups.some(g => g.folderIds.includes(f.id))
+              )"
+              :key="folder.id"
+
+              class="
+                mb-0
+                w-full
+                h-10
+              "
+
+              @dragover.prevent
+              @dragenter="onDragEnter(folder.id)"
+              @dragleave="onDragLeave($event, folder.id)"
+              @drop.stop="onDrop(folder, $event)"
+              data-selectable
+
+              :draggable="true"
+              @dragstart="onDragStart('folder', folder, $event)"
+              @drag="onDragMove($event)"
+              @dragend="onDragEndCleanup()"
+              @click="selectItem($event, 'folder', folder, index)"
+              @keydown.enter="selectItem($event, 'folder', folder, index)"
+              @dblclick="router.push(`/app/folders/${folder.id}`);"
+              @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)
+              "
             >
               <div
-                :to="`/app/folders/${folder.id}`"
-                class="flex-1 min-w-0"
+                :class="[
+                  'relative group flex items-center justify-between w-full min-w-0 rounded-2xl cursor-pointer transition-all duration-200',
+
+                isSelectedFolder(folder)
+                  ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+
+                  : draggedFolder === folder.id
+                    ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] after:absolute after:-inset-2 after:rounded-3xl after:border-2 after:border-dashed after:border-[var(--color-primary)] after:content-[\'\']'
+
+                    : 'border border-[var(--border)] bg-[var(--bg-secondary)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
+                ]"
               >
-                <div class="flex items center justify-between p-1">
-                  <div
+                <div
+                  :to="`/app/folders/${folder.id}`"
+                  class="flex-1 min-w-0"
+                >
+                  <div class="flex items center justify-between p-1">
+                    <div
                       class="
                         flex items-center
                         space-x-2
                         min-w-0 w-full overflow-hidden
                       "
                     >
-                    <img src="/icon/icon-folder.svg" alt="folder" class="h-8"/>
+                      <img src="/icon/icon-folder.svg" alt="folder" draggable="false" class="h-8"/>
 
-                    <!-- title and date -->
-                    <div class="flex-1 min-w-0">
-                      <div>
-                        <input
-                          v-if="editingFolderId === folder.id"
-                          v-model="editedFolderName"
-                          @keyup.enter="saveFolderName(folder)"
-                          :data-folder-id="folder.id"
-                          @blur="editingFolderId = null"
-                          class="
-                            bg-transparent
-                            border-b border-[var(--color-primary)]
-                            outline-none text-xs sm:text-sm w-full"
-                        />
+                      <!-- title and date -->
+                      <div class="flex-1 min-w-0">
+                        <div>
+                          <input
+                            v-if="editingFolderId === folder.id"
+                            v-model="editedFolderName"
+                            @keyup.enter="saveFolderName(folder)"
+                            :data-folder-id="folder.id"
+                            @blur="editingFolderId = null"
+                            class="
+                              bg-transparent
+                              border-b border-[var(--color-primary)]
+                              outline-none text-xs sm:text-sm w-full"
+                          />
 
-                        <h3
-                          v-else
-                          class="font-semibold text-xs sm:text-sm truncate text-left"
-                        >
-                          {{ folder.name }}
-                        </h3>
+                          <h3
+                            v-else
+                            class="font-semibold text-xs sm:text-sm truncate text-left"
+                          >
+                            {{ folder.name }}
+                          </h3>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                class="
-                  flex items-center justify-center
-                  border-l border-[var(--border)]
-                  w-6 py-2
 
-                  group-hover:border-[var(--color-primary)]
-                  transition-colors duration-300
-                "
-              >
+                <div
+                  class="
+                    flex items-center justify-center
+                    border-l border-[var(--border)]
+                    w-6 py-2
+
+                    group-hover:border-[var(--color-primary)]
+                    transition-colors duration-300
+                  "
+                >
                   <Dropdown
                     :classes="[
                       'bg-[var(--bg-modal-2)]',
                       'backdrop-blur-md',
                       'border border-[var(--border)]',
                       'rounded-2xl','shadow-md',
-                      'absolute','-right-0', 'z-20',
+                      'absolute','right-0', 'z-20',
                       dropdownPosition,
                       'w-48',
-                      'sm:-right-2'
+                      'sm:-right-[160px]'
                     ]"
                   >
                     <template #trigger="{ toggle, close }">
@@ -343,7 +560,7 @@
                       <div class="flex flex-col font-regular text-sm text-[#868686]">
 
                         <div class="border-b border-[var(--border)] p-1 space-y-1">
-                        <!--rename folder-->
+                          <!--rename folder-->
                           <button
                             type="button"
                             @click="() => { startEditingFolder(folder); close(); }"
@@ -357,6 +574,8 @@
                             <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
                             <span>Rename</span>
                           </button>
+                        </div>
+                        <div class="border-b border-[var(--border)] p-1 space-y-1">
                           <!--move to folder-->
                           <button
                             type="button"
@@ -372,6 +591,21 @@
                           >
                             <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
                             <span>Move to folder</span>
+                          </button>
+                          <button
+                            type="button"
+                            @click="selectItem($event, 'folder', folder, index); moveToGroupModal = true; close();"
+                            class="
+                              flex items-center justify-start w-full
+                              rounded-xl px-3 py-1 border border-transparent
+
+                              hover:bg-[var(--hover-bg)]
+                              hover:border-[var(--color-primary)]
+                              transition-colors duration-300
+                            "
+                          >
+                            <img src="/icon/icon-isle.svg" alt="group" class="h-5 mr-4 grayscale"/>
+                            <span>Move to group</span>
                           </button>
                         </div>
                         <div class="p-1">
@@ -406,7 +640,10 @@
                       </div>
                     </template>
                   </Dropdown>
+                </div>
               </div>
+            </div>
+            <div class="clear-both"></div>
           </div>
         </div>
       </Transition>
@@ -417,7 +654,7 @@
       v-if="fileResults.data.length"
       :class="[
         folderResults.data.length && 'border-t border-[var(--border)]',
-        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14'
+        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-10'
       ]"
     >
       <div class="flex items-center justify-between mb-4 sm:mb-4">
@@ -471,6 +708,8 @@
       <Transition name="slide">
         <div
           v-show="showFiles"
+          @dragover.prevent
+          @drop.prevent.stop="onDropToRoot"
           class="
             grid grid-cols-1 gap-2
             text-[var(--text)]
@@ -594,10 +833,10 @@
                     'backdrop-blur-md',
                     'border border-[var(--border)]',
                     'rounded-2xl','shadow-md',
-                    'absolute','-right-0', 'z-20',
+                    'absolute','right-0', 'z-20',
                     dropdownPosition,
                     'w-48',
-                    'sm:-right-2'
+                    'sm:-right-[160px]'
                   ]"
                 >
                   <template #trigger="{ toggle, close }">
@@ -881,6 +1120,86 @@
       </template>
     </Modal>
 
+    <Modal v-model="moveToGroupModal" size="xl" @click.stop>
+      <template #header>
+        <h3 class="">
+          Move to group
+          <p class="font-normal text-sm mt-2 break-all w-[90%]" v-for="folder in selectedFolders" :key="folder.id">
+            {{ folder.name }}
+          </p>
+        </h3>
+      </template>
+
+      <template #content>
+        <form @submit.prevent="moveToGroup" id="move-to-group-form" class="my-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              v-for="group in folderGroups"
+              :key="group.id"
+              type="button"
+              @click="selectedGroup = group.id"
+              class="
+                flex items-center justify-between
+                px-2 py-1
+                rounded-2xl
+                text-left
+                w-auto
+                transition-all duration-200
+                hover:border-[var(--color-primary)] hover:bg-[var(--hover-bg)]
+              "
+              :class="selectedGroup === group.id ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_3px_3px_rgba(10,119,243,0.15)]' : 'border border-transparent'
+              "
+            >
+              <div class="flex items-center  justify-between gap-3 w-full">
+                <h4 class="flex gap-2 font-semibold text-[var(--text)] truncate">
+                  <img src="/icon/icon-isle.svg" alt="group" class="h-6"/>
+                  {{ group.name }}</h4>
+                <p class="text-xs text-[var(--text-terceary)]">
+                  {{ group.folderIds.length }} folder(s)
+                </p>
+              </div>
+            </button>
+          </div>
+          <div v-if="!folderGroups.length" class="text-sm text-[var(--text-terceary)] mt-4">
+            No groups found.
+          </div>
+        </form>
+      </template>
+
+      <template #footer>
+        <div class="flex w-full items-center justify-end gap-2 mt-2">
+          <button
+            type="button"
+            @click="moveToGroupModal = false; selectedGroup = null;"
+            class="
+              text-[var(--text-secondary)] text-sm font-medium
+              border border-[var(--border)] bg-[var(--bg-secondary)]
+              rounded-full px-3 py-0.5
+              hover:border-[var(--text)] hover:bg-[var(--bg)] hover:text-[var(--text)]
+            "
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            form="move-to-group-form"
+            class="
+              text-sm font-medium
+              border rounded-full px-3.5 py-0.5
+              transition
+            "
+            :class="selectedGroup === null
+              ? 'opacity-40 text-[var(--text)] cursor-not-allowed bg-[var(--bg)] border-[var(--border)]'
+              : 'hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)] text-white bg-[var(--color-primary)] border-[var(--color-primary)]'
+            "
+          >
+            Move
+          </button>
+        </div>
+      </template>
+    </Modal>
+
     <Modal v-model="createFolderModal" size="xs" @click.stop>
       <template #header>
         <h3 class="">
@@ -998,6 +1317,7 @@
       :y="contextMenuY"
       :selected-files="selectedFiles"
       :selected-folders="selectedFolders"
+      :show-move-to-group="true"
       @action="handleMenuAction"
     />
   </div>
@@ -1030,6 +1350,7 @@ const route = useRoute();
 
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const dragLeaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const isDraggingOverRoot = ref(false);
 const draggedFolder = ref<number | string | null>(null);
 const selectedFolder = ref<number | string | null>(null);
 const editingFileId = ref<number | string | null>(null);
@@ -1039,9 +1360,11 @@ const lastSelectedIndex = ref<number | null>(null);
 const lastSelectedType = ref<'file' | 'folder' | null>(null);
 const editingFolderId = ref<number | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
-const dropdownPosition = ref('top-8');
+const dropdownPosition = ref('top-8 right-8');
 const createFolderModal = ref(false);
 const moveToFolderModal = ref(false);
+const moveToGroupModal = ref(false);
+const selectedGroup = ref<number | null>(null);
 const folderName = ref('');
 const loading = ref(false);
 const ghostVisible = ref(false);
@@ -1055,6 +1378,9 @@ const showFolders = ref(true);
 const showFiles = ref(true);
 const editedFileName = ref('');
 const editedFolderName = ref('');
+const draggedGroup = ref<number | null>(null);
+const groupDivs = ref<HTMLElement[]>([]);
+const resizeObservers = new Map<HTMLElement, ResizeObserver>();
 
 const contextMenuVisible = ref(false);
 const contextMenuX = ref(0);
@@ -1067,6 +1393,21 @@ const folderResults = computed<FoldersResultI>(() => store.state.folders.result)
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
 
+const onGroupDragEnter = (groupId: string) => {
+  draggedGroup.value = groupId;
+};
+
+const onGroupDragLeave = (event: DragEvent, groupId: string) => {
+  const related = event.relatedTarget as HTMLElement | null;
+  const current = event.currentTarget as HTMLElement;
+
+  if (!related || !current.contains(related)) {
+    if (draggedGroup.value === groupId) {
+      draggedGroup.value = null;
+    }
+  }
+};
+
 const previewFile = computed({
   get: () => store.state.files.activePreviewFile,
   set: (val) => {
@@ -1076,6 +1417,35 @@ const previewFile = computed({
     }
   },
 });
+
+const dropTargetLabel = computed(() => {
+  if (draggedFolder.value) {
+    const folder = folderResults.value.data.find(
+      (f: FolderI) => f.id === draggedFolder.value,
+    );
+
+    return folder?.name || 'folder';
+  }
+
+  return 'Cloud Drive';
+});
+
+const folderGroups = ref(
+  JSON.parse(
+    localStorage.getItem('folderGroups') || `[
+      {
+        "id": 1,
+        "name": "Group 1",
+        "folderIds": []
+      }
+    ]`,
+  ),
+);
+const groupSizes = ref(
+  JSON.parse(
+    localStorage.getItem('folderGroupSizes') || '{}',
+  ),
+);
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -1215,12 +1585,21 @@ function selectItem(event: MouseEvent | KeyboardEvent, type: 'file' | 'folder', 
   const isCtrl = event.ctrlKey || (event as any).metaKey;
 
   if (isShift && lastSelectedIndex.value !== null && lastSelectedType.value !== null) {
-    const allFolders = folderResults.value.data;
+    const visibleFolders = folderResults.value.data.filter(
+      (f) => !folderGroups.value.some(
+        (g) => g.folderIds.includes(f.id as number),
+      ),
+    );
     const allFiles = fileResults.value.data;
-    const allItems = [...allFolders, ...allFiles];
+    const allItems = [...visibleFolders, ...allFiles];
 
-    let startIdx = lastSelectedType.value === 'folder' ? lastSelectedIndex.value : allFolders.length + lastSelectedIndex.value;
-    let endIdx = type === 'folder' ? index : allFolders.length + index;
+    let startIdx = lastSelectedType.value === 'folder'
+      ? lastSelectedIndex.value
+      : visibleFolders.length + lastSelectedIndex.value;
+
+    let endIdx = type === 'folder'
+      ? index
+      : visibleFolders.length + index;
 
     if (startIdx > endIdx) {
       [startIdx, endIdx] = [endIdx, startIdx];
@@ -1429,13 +1808,80 @@ async function uploadFilesFromDrop(files: FileList, targetFolderId: number | nul
   getFolders();
 }
 
+function onRootDragOver(event: DragEvent) {
+  event.preventDefault();
+
+  const hasFiles = event.dataTransfer?.types.includes('Files');
+
+  if (!hasFiles) return;
+
+  isDraggingOverRoot.value = true;
+}
+
+function onRootDragLeave(event: DragEvent) {
+  const related = event.relatedTarget as HTMLElement | null;
+  const currentTarget = event.currentTarget as HTMLElement;
+
+  if (related && currentTarget.contains(related)) return;
+
+  isDraggingOverRoot.value = false;
+}
+
+function removeFolderFromGroup(targetFolderId: number) {
+  folderGroups.value = folderGroups.value.map((group) => ({
+    ...group,
+    folderIds: group.folderIds.filter(
+      (id) => id !== targetFolderId,
+    ),
+  }));
+}
+
+function collapseGroup(targetGroupId: string | number) {
+  folderGroups.value = folderGroups.value.filter(
+    (group) => group.id !== targetGroupId,
+  );
+
+  if (groupSizes.value[targetGroupId]) {
+    const nextSizes = { ...groupSizes.value };
+    delete nextSizes[targetGroupId];
+    groupSizes.value = nextSizes;
+  }
+}
+
 async function onDropToRoot(event: DragEvent) {
-  if (!event.dataTransfer?.files?.length) return;
-  await uploadFilesFromDrop(event.dataTransfer.files, null);
-  draggedFolder.value = null;
+  event.preventDefault();
+
+  isDraggingOverRoot.value = false;
+
+  const hasFiles = event.dataTransfer?.types.includes('Files');
+
+  if (hasFiles && event.dataTransfer?.files?.length) {
+    await uploadFilesFromDrop(event.dataTransfer.files, null);
+    draggedFolder.value = null;
+    return;
+  }
+
+  if (selectedFolders.value.length > 0) {
+    selectedFolders.value.forEach((folder) => {
+      removeFolderFromGroup(folder.id as number);
+    });
+
+    store.commit('folders/setSelectedFolders', []);
+    draggedItem.value = null;
+    draggedFolder.value = null;
+    ghostVisible.value = false;
+  } else if (draggedFolder.value) {
+    removeFolderFromGroup(draggedFolder.value);
+    draggedItem.value = null;
+    draggedFolder.value = null;
+    ghostVisible.value = false;
+  }
 }
 
 async function onDrop(folder: FolderI, event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
   if (event.dataTransfer?.files?.length) {
     await uploadFilesFromDrop(event.dataTransfer.files, folder.id as number);
     draggedFolder.value = null;
@@ -1470,6 +1916,51 @@ async function onDrop(folder: FolderI, event: DragEvent) {
 
   getFiles();
   getFolders();
+}
+
+function onDropToGroup(groupId: number, event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const group = folderGroups.value.find((g) => g.id === groupId);
+
+  if (!group) return;
+
+  selectedFolders.value.forEach((folder) => {
+    const id = folder.id as number;
+
+    if (!group.folderIds.includes(id)) {
+      group.folderIds.push(id);
+    }
+  });
+
+  draggedGroup.value = null;
+}
+
+function addFoldersToGroup(groupId: number) {
+  const group = folderGroups.value.find((g) => g.id === groupId);
+  if (!group) return;
+
+  const foldersToMove = selectedFolders.value.length > 0
+    ? selectedFolders.value
+    : [];
+
+  foldersToMove.forEach((folder) => {
+    const id = folder.id as number;
+    if (!group.folderIds.includes(id)) {
+      group.folderIds.push(id);
+    }
+  });
+}
+
+function moveToGroup() {
+  if (selectedGroup.value === null) {
+    return;
+  }
+
+  addFoldersToGroup(selectedGroup.value);
+  selectedGroup.value = null;
+  moveToGroupModal.value = false;
 }
 
 async function downloadFile(file: FileI) {
@@ -1700,6 +2191,10 @@ function handleMenuAction(action: string) {
     case 'move':
       moveToFolderModal.value = true;
       break;
+    case 'move-to-group':
+      selectedGroup.value = null;
+      moveToGroupModal.value = true;
+      break;
     case 'copy-link':
       if (firstFile) store.commit('files/setActiveShareFile', firstFile);
       break;
@@ -1741,6 +2236,21 @@ function handleKeydown(e: KeyboardEvent) {
 onMounted(() => {
   getFolders();
   getFiles();
+
+  // restore groups
+  const saved = localStorage.getItem('folderGroups');
+
+  if (saved) {
+    folderGroups.value = JSON.parse(saved);
+  }
+
+  window.addEventListener('folder-groups-updated', () => {
+    const fresh = localStorage.getItem('folderGroups');
+    if (fresh) {
+      folderGroups.value = JSON.parse(fresh);
+    }
+  });
+
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('click', closeContextMenu);
   window.addEventListener('scroll', closeContextMenu, true);
@@ -1750,6 +2260,11 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   window.removeEventListener('click', closeContextMenu);
   window.removeEventListener('scroll', closeContextMenu, true);
+
+  resizeObservers.forEach((observer) => {
+    observer.disconnect();
+  });
+  resizeObservers.clear();
 });
 
 watch([selectedFiles, previewFile], async ([files, preview]) => {
@@ -1784,6 +2299,91 @@ watch([selectedFiles, previewFile], async ([files, preview]) => {
     });
   }
 }, { immediate: true });
+
+watch(folderGroups, (value) => {
+  localStorage.setItem('folderGroups', JSON.stringify(value));
+}, { deep: true });
+
+watch(groupSizes, (value) => {
+  localStorage.setItem(
+    'folderGroupSizes',
+    JSON.stringify(value),
+  );
+}, { deep: true });
+
+watch(groupDivs, (els) => {
+  resizeObservers.forEach((observer) => {
+    observer.disconnect();
+  });
+  resizeObservers.clear();
+
+  if (els && els.length) {
+    els.forEach((el, index) => {
+      const group = folderGroups.value[index];
+      if (!group) return;
+
+      const groupId = group.id;
+      const isDesktop = window.matchMedia('(min-width: 640px)').matches;
+      const savedWidth = groupSizes.value[groupId]?.width;
+
+      if (isDesktop && savedWidth) {
+        // eslint-disable-next-line no-param-reassign
+        el.style.width = `${savedWidth}px`;
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        el.style.width = '';
+      }
+
+      const observer = new ResizeObserver(() => {
+        window.requestAnimationFrame(() => {
+          if (!isDesktop || !el.isConnected) return;
+
+          const parent = el.parentElement?.parentElement;
+          if (!parent) return;
+
+          const currentWidth = el.offsetWidth;
+          const gridStyle = window.getComputedStyle(parent);
+          const gridColumns = gridStyle.getPropertyValue('grid-template-columns').split(' ');
+          if (!gridColumns[0]) return;
+
+          const colWidth = parseFloat(gridColumns[0]);
+          const gap = parseFloat(gridStyle.getPropertyValue('gap')) || 16;
+          const step = colWidth + gap;
+
+          const spans = Math.max(1, Math.round((currentWidth + gap) / step));
+
+          const currentHeight = el.offsetHeight;
+          const oldData = groupSizes.value[groupId];
+
+          if (oldData?.spans !== spans || Math.abs((oldData?.height || 0) - currentHeight) > 5) {
+            groupSizes.value[groupId] = {
+              width: (spans * step) - gap,
+              height: currentHeight,
+              spans,
+            };
+          }
+
+          // Al arrastrar, dejamos que el usuario mueva el ratón libremente (fluidez).
+          // Solo registramos el ajuste automático para cuando el usuario suelte el clic.
+          if (!el.getAttribute('data-has-mouseup')) {
+            el.setAttribute('data-has-mouseup', 'true');
+            const onMouseUp = () => {
+              if (el.isConnected) {
+                // eslint-disable-next-line no-param-reassign
+                el.style.width = '';
+                el.removeAttribute('data-has-mouseup');
+              }
+              window.removeEventListener('mouseup', onMouseUp);
+            };
+            window.addEventListener('mouseup', onMouseUp);
+          }
+        });
+      });
+      observer.observe(el);
+      resizeObservers.set(el, observer);
+    });
+  }
+}, { immediate: true, deep: true });
 
 </script>
 

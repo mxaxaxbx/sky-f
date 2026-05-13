@@ -2,7 +2,7 @@
   <Transition name="slide-up">
     <div
       v-if="visible"
-      class="upload-panel-container fixed bottom-4 right-4 z-50 w-[400px] rounded-2xl shadow-lg border border-[var(--border)] bg-[var(--bg-modal)] backdrop-blur-md divide-y divide-[var(--border)] overflow-hidden"
+      class="upload-panel-container fixed bottom-1 sm:bottom-4 right-0 sm:right-4 z-50 w-[96%] mr-2 ml-2 sm:w-[400px] rounded-2xl shadow-lg border border-[var(--border)] bg-[var(--bg-modal)] backdrop-blur-md divide-y divide-[var(--border)] overflow-hidden"
       style="view-transition-name: upload-panel"
     >
       <!-- Header -->
