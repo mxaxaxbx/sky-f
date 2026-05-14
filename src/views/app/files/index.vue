@@ -25,7 +25,7 @@
             hidden items-center
             bg-[var(--color-primary)]
             border border-[var(--color-primary)]
-            text-white text-sm font-medium
+            text-white text-md font-medium
             px-2 py-0.5
             rounded-full
 
@@ -36,7 +36,7 @@
             cursor-pointer
           "
         >
-          <img src="/icon/icon-upload.svg" alt="icon" class="h-5 mr-2 invert brightness-0" />
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-6 mr-2 invert brightness-0" />
           <span>Upload</span>
         </label>
 
@@ -47,7 +47,7 @@
             hidden items-center
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            text-[var(--text-terceary)] text-sm font-medium
+            text-[var(--text-terceary)] text-md font-medium
             pl-2 pr-2.5 py-0.5
             grayscale
             rounded-full
@@ -65,7 +65,7 @@
             cursor-pointer
           "
         >
-          <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+          <img src="/icon/icon-new-folder.svg" alt="icon" class="h-6 mr-2" />
           New folder
         </button>
         <button
@@ -75,26 +75,30 @@
             hidden items-center
             bg-[var(--bg-secondary)]
             border border-[var(--border)]
-            text-[var(--text-terceary)] text-sm font-medium
+            text-[var(--text-terceary)] text-md font-medium
             pl-2 pr-2.5 py-0.5
-            grayscale
             rounded-full
 
             sm:flex
-            hover:grayscale-0
             hover:text-[var(--text)]
             hover:bg-[var(--hover-bg)]
             hover:border-[var(--hover-border)]
             hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
             focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
             focus:border-[var(--hover-border)]
-            focus:grayscale-0
             transition-all duration-300 ease-in-out
             cursor-pointer
+            relative
+            group
           "
         >
-          <img src="/icon/icon-isle.svg" alt="icon" class="h-5 mr-2" />
-          New group
+          <img
+            src="/icon/icon-isle.svg"
+            alt="icon"
+            class="h-6 mr-2 grayscale group-hover:grayscale-0 transition-all duration-300"
+          />
+          <span class="grayscale group-hover:grayscale-0 transition-all duration-300">New island</span>
+          <span class="absolute -top-2 -right-6 text-xs px-2 text-white bg-[var(--color-primary)] rounded-full">beta</span>
         </button>
         <button
           v-if="!hideBar"

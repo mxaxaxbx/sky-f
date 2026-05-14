@@ -2,7 +2,7 @@
   <Transition name="fab">
     <div
       v-show="showFab"
-      class="fixed bottom-2 right-3 sm:hidden z-10"
+      class="fixed bottom-2 right-1 sm:hidden z-10 mx-auto px-2"
     >
       <Dropdown
         :classes="[
@@ -10,7 +10,7 @@
           'backdrop-blur-md',
           'border border-[var(--border)]',
           'rounded-2xl',
-          'absolute', '-right-3', '-bottom-16', 'z-20',
+          'absolute', '-right-3', '-bottom-2', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
@@ -72,14 +72,20 @@
                 class="
                   flex flex-col items-center justify-center
                   rounded-xl px-2 py-1 border border-transparent
-                  grayscale w-full h-full
+                  w-full h-full
                   hover:bg-[var(--hover-bg)]
-                  hover:grayscale-0
                   hover:border-[var(--color-primary)]
-                  transition-colors duration-300"
+                  transition-colors duration-300 relative
+                  group
+                "
               >
-                <img src="/icon/icon-scan.svg" alt="scan" class="h-6"/>
-                <span>Scan pages</span>
+                <img
+                  src="/icon/icon-scan.svg"
+                  alt="scan"
+                  class="h-6 grayscale group-hover:grayscale-0 transition-all duration-300"
+                />
+                <span class="grayscale group-hover:grayscale-0 transition-all duration-300">Scan pages</span>
+                <span class="absolute -top-0 right-0 text-xs px-2 text-white bg-[var(--color-primary)] rounded-full">beta</span>
               </button>
             </div>
             <div class="h-px bg-[var(--border)] w-full"></div>
@@ -126,19 +132,40 @@
               <div class="h-px bg-[var(--border)] w-full opacity-50"></div>
 
               <button
-                @click="$emit('createGroup')"
+                @click="canCreateIsland && $emit('createGroup')"
+                :disabled="!canCreateIsland"
                 class="
                   flex items-center justify-start
                   rounded-xl mx-2 my-2 px-4 py-2 border border-transparent
-                  grayscale
-                  hover:bg-[var(--hover-bg)]
-                  hover:grayscale-0
-                  hover:border-[var(--color-primary)]
                   transition-colors duration-300
+                  relative
+                  group
                 "
+                :class="{
+                  'hover:bg-[var(--hover-bg)] hover:border-[var(--color-primary)] cursor-pointer': canCreateIsland,
+                  'opacity-40 cursor-not-allowed pointer-events-none': !canCreateIsland
+                }"
               >
-                <img src="/icon/icon-isle.svg" alt="icon" class="h-6 mr-4" />
-                Create a group
+                <img
+                  src="/icon/icon-isle.svg"
+                  alt="icon"
+                  class="h-6 mr-4 transition-all duration-300"
+                  :class="{
+                    'grayscale group-hover:grayscale-0': canCreateIsland,
+                    'grayscale': !canCreateIsland
+                  }"
+                />
+                <span
+                  class="transition-all duration-300"
+                  :class="{
+                    'grayscale group-hover:grayscale-0': canCreateIsland,
+                    'grayscale': !canCreateIsland
+                  }"
+                >Create island</span>
+                <span
+                  class="absolute top-1/2 -translate-y-1/2 right-2 text-xs px-2 py-1 text-white rounded-full transition-all duration-300"
+                  :class="canCreateIsland ? 'bg-[var(--color-primary)]' : 'bg-gray-400 opacity-50'"
+                >beta</span>
               </button>
             </div>
           </div>
@@ -151,6 +178,7 @@
 <script setup lang="ts">
 import {
   ref,
+  computed,
   defineAsyncComponent,
   nextTick,
   onMounted,
@@ -175,6 +203,8 @@ const store = useStore();
 const showFab = ref(true);
 const dropdownPosition = ref('top-8');
 const activeDropdownClose = ref<(() => void) | null>(null);
+
+const canCreateIsland = computed(() => props.currentFolderId === null);
 
 function openRecorder() {
   store.commit('setRecorder', { show: true, folderId: props.currentFolderId });

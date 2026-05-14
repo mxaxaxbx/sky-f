@@ -79,7 +79,7 @@
                 hidden items-center
                 bg-[var(--color-primary)]
                 border border-[var(--color-primary)]
-                text-white text-sm font-medium
+                text-white text-md font-medium
                 px-2 py-0.5
                 rounded-full
 
@@ -90,7 +90,7 @@
                 cursor-pointer
               "
             >
-              <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
+              <img src="/icon/icon-upload.svg" alt="icon" class="h-6 mr-2 invert brightness-0" />
               <span>Upload</span>
             </label>
             <!-- New folder-->
@@ -100,7 +100,7 @@
                 hidden items-center
                 bg-[var(--bg-secondary)]
                 border border-[var(--border)]
-                text-[var(--text-terceary)] text-sm font-medium
+                text-[var(--text-terceary)] text-md font-medium
                 pl-2 pr-2.5 py-0.5
                 grayscale
                 rounded-full
@@ -118,7 +118,7 @@
                 cursor-pointer
               "
             >
-              <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+              <img src="/icon/icon-new-folder.svg" alt="icon" class="h-6 mr-2" />
               New folder
             </button>
 
