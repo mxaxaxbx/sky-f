@@ -10,7 +10,7 @@
           'backdrop-blur-md',
           'border border-[var(--border)]',
           'rounded-2xl',
-          'absolute', '-right-3', '-bottom-8', 'z-20',
+          'absolute', '-right-3', '-bottom-16', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
