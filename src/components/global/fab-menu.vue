@@ -10,7 +10,7 @@
           'backdrop-blur-md',
           'border border-[var(--border)]',
           'rounded-t-2xl',
-          'absolute', '-right-3', '-bottom-2', 'z-20',
+          'absolute', '-right-3', '-bottom-4', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
@@ -51,9 +51,8 @@
                 <span>Upload files</span>
               </label>
               <!--Upload img-->
-              <button
-                type="button"
-                @click="$emit('scan')"
+              <label
+                for="photoInputBtn"
                 class="
                   flex flex-col items-center justify-center
                   rounded-xl px-2 py-1 border border-transparent
@@ -65,7 +64,7 @@
               >
                 <img src="/icon/icon-upload-img.svg" alt="scan" class="h-6"/>
                 <span>upload photos</span>
-              </button>
+              </label>
               <!--scan document-->
               <button
                 type="button"

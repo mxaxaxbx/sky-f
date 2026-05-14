@@ -62,6 +62,19 @@
       :key="inputKey"
       @click="() => { if (fileInputBtn) fileInputBtn.value = '' }"
     />
+
+    <label for="photoInputBtn"></label>
+    <input
+      id="photoInputBtn"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      ref="photoInputBtn"
+      @change="uploadFile"
+      multiple
+      :key="`photo-${inputKey}`"
+      @click="() => { if (photoInputBtn) photoInputBtn.value = '' }"
+    />
     <!-- search box movil-->
     <div
       v-if="!hideBar"
@@ -390,10 +403,11 @@ const activeInfoDuration = ref<number>(0);
 let searchTimeout: number | undefined;
 
 const fileInputBtn = ref<HTMLInputElement | null>(null);
+const photoInputBtn = ref<HTMLInputElement | null>(null);
 const inputKey = ref(0);
 
-async function uploadFile(): Promise<void> {
-  const input = fileInputBtn.value;
+async function uploadFile(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
   if (!input || !input.files || input.files.length === 0) return;
 
   const filesArray = Array.from(input.files);
@@ -415,8 +429,8 @@ async function uploadFile(): Promise<void> {
   } catch (error: unknown) {
     console.error(error);
   } finally {
-    if (fileInputBtn.value) {
-      fileInputBtn.value.value = '';
+    if (input) {
+      input.value = '';
     }
 
     // eslint-disable-next-line no-plusplus

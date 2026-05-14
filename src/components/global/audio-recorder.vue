@@ -2,9 +2,8 @@
   <Transition name="panel">
     <div
       v-if="showRecorder"
-      class="fixed bottom-0 left-0 w-full bg-[var(--bg-modal-2)] backdrop-blur-xl border-t border-[var(--border)] rounded-t-[3rem] z-[100] pb-10 pt-6 px-6 flex flex-col items-center"
+      class="fixed bottom-0 left-0 w-full bg-[var(--bg-modal-2)] backdrop-blur-xl border-t border-[var(--border)] rounded-t-2xl z-[100] pb-10 pt-6 px-6 flex flex-col items-center"
     >
-      <div class="w-12 h-1.5 bg-[var(--border)] rounded-full mb-8 opacity-50"></div>
 
       <div class="text-[var(--text)] text-3xl font-light tracking-widest mb-10">
         {{ formattedTime }}
@@ -13,12 +12,12 @@
       <div class="relative flex items-center justify-center">
         <button
           @click="toggleRecording"
-          class="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center transition-all duration-300 active:scale-95"
-          :class="{ 'bg-red-500 scale-110 shadow-[0_0_20px_rgba(239,68,68,0.5)]': isRecording, 'bg-transparent': !isRecording }"
+          class="w-20 h-20 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300 active:scale-95"
+          :class="{ 'bg-[#FF2828] scale-100 shadow-[0_0_20px_rgba(255,40,40,0.5)]': isRecording, 'bg-transparent': !isRecording }"
         >
           <div
             class="transition-all duration-300"
-            :class="isRecording ? 'w-6 h-6 bg-white rounded-sm' : 'w-14 h-14 bg-red-500 rounded-full'"
+            :class="isRecording ? 'w-6 h-6 bg-white rounded-sm' : 'w-16 h-16 bg-[#FF2828] rounded-full'"
           ></div>
         </button>
       </div>
@@ -27,7 +26,7 @@
         @click="closeRecorder"
         class="mt-8 text-[var(--text-terceary)] text-sm font-medium hover:text-[var(--text)] transition-colors"
       >
-        {{ isRecording ? 'Stop and Cancel' : 'Close' }}
+        {{ isRecording ? '' : 'Close' }}
       </button>
     </div>
   </Transition>

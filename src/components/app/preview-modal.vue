@@ -369,10 +369,18 @@
                       {{ castStatusText }}
                     </span>
                     <button
-                      class="px-4 py-2 bg-black text-white rounded"
                       @click="castVideo"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
                     >
-                      Cast Video
+                      <img src="/icon/icon-cast.svg" alt="cast" class="h-6"/>
                     </button>
                     <button
                       @click="toggleFullscreen"
