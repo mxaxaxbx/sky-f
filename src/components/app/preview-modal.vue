@@ -831,7 +831,7 @@ const castStatusText = computed(() => {
   if (castState.value === 'CONNECTED') return 'Cast connected';
   if (castState.value === 'CONNECTING') return 'Looking for device...';
   if (castState.value === 'NOT_CONNECTED') return 'Cast devices available';
-  if (castState.value === 'NO_DEVICES_AVAILABLE') return 'No Cast devices found';
+  if (castState.value === 'NO_DEVICES_AVAILABLE') return '';
   return 'Cast unavailable';
 });
 
