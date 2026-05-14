@@ -9,8 +9,8 @@
           'bg-[var(--bg-modal-2)]',
           'backdrop-blur-md',
           'border border-[var(--border)]',
-          'rounded-t-2xl',
-          'absolute', '-right-3', '-bottom-4', 'z-20',
+          'rounded-2xl',
+          'absolute', '-right-3', '-bottom-8', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
