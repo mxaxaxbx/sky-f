@@ -2,7 +2,6 @@
 import {
   ref,
   onUnmounted,
-  computed,
   defineProps,
   defineEmits,
 } from 'vue';
@@ -11,11 +10,10 @@ const props = defineProps({
   classes: {
     type: Array as () => string[],
     default: () => [
-      'fixed inset-0',
+      'fixed inset-0 z-50',
       'w-screen h-screen',
       'pt-10 mt-10',
       'bg-[var(--bg)]',
-      'backdrop-blur-md',
       'border border-[var(--border)]',
       'rounded-2xl',
       'shadow-sm z-9999',
@@ -60,7 +58,7 @@ onUnmounted(() => {
       enter-active-class="transition ease-out duration-200"
       enter-from-class="opacity-0 scale-95"
       enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-150"
+      leave-active-class="transition ease-in duration-75"
       leave-from-class="opacity-100 scale-100"
       leave-to-class="opacity-0 scale-95"
     >
@@ -72,3 +70,10 @@ onUnmounted(() => {
     </transition>
   </div>
 </template>
+
+<style>
+.backdrop-blur-md {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+</style>

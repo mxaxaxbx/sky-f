@@ -3,12 +3,14 @@
     class="
       fixed z-50 top-0
       font-alexandria font-sans
-      bg-[var(--bg)]
       border-b border-[var(--border)]
       w-full h-10
       px-2  sm:px-4
     ">
-    <div class="flex items-center justify-between h-full">
+    <!-- Capa de fondo con blur que no bloquea al dropdown -->
+    <div class="absolute inset-0 bg-[var(--bg-modal)] backdrop-blur-md -z-10 rounded-b-none pointer-events-none"></div>
+
+    <div class="relative flex items-center justify-between h-full">
       <div class="flex space-x-8">
         <!-- LOGO animado -->
         <router-link
@@ -69,7 +71,7 @@
       </div>
 
       <!-- sing in -->
-      <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
+      <div class="flex items-center gap-4 ml-auto">
         <a v-if="!isAuth" :href="`${usersLink}/auth/provider?app=sky`"
           class="
             flex items-center justify-center
@@ -89,7 +91,16 @@
         </a>
 
       <Dropdown v-if="isAuth"
-        >
+        :classes="[
+          'bg-[var(--bg-modal-2)]',
+          'backdrop-blur-md',
+          'border border-[var(--border)]',
+          'rounded-2xl', 'shadow-md',
+          'absolute', 'sm:right-0', 'z-20',
+          'sm:top-6 top-7',
+          '-right-2', 'w-[100vw] h-screen py-16 sm:h-auto sm:w-80 sm:py-8',
+        ]"
+      >
         <template #trigger="{ toggle }">
             <button
               @click="toggle"
@@ -178,7 +189,7 @@
             <!-- Manage Account Button -->
             <a :href="`${usersLink}/app/users/edit-profile`"
               class="
-                bg-[var(--bg-secondary)]
+                bg-[var(--bg-modal-2)]
                 border border-[var(--color-primary)]
                 rounded-full
                 w-48 px-auto py-1 mt-6
@@ -204,7 +215,7 @@
               class="
                 flex items-center justify-between
                 w-72 px-2 py-2
-                bg-[var(--bg-secondary)]
+                bg-[var(--bg-modal-2)]
                 border border-[var(--border)]
                 rounded-full
                 text-[#868686] font-regular text-sm
@@ -235,7 +246,7 @@
               class="
                 flex items-center justify-between
                 w-72 px-2 py-2
-                bg-[var(--bg-secondary)]
+                bg-[var(--bg-modal-2)]
                 border border-[var(--border)]
                 rounded-full
                 text-[#868686] font-regular text-sm
@@ -446,3 +457,6 @@ watch(
   { deep: true },
 );
 </script>
+
+<style scoped>
+</style>

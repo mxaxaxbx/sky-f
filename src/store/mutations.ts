@@ -11,6 +11,15 @@ const mutations: MutationTree<RootStateI> = {
     state.sidebar = false;
     localStorage.setItem('sidebar', JSON.stringify(false));
   },
+  setRecorder(state, { show, folderId }) {
+    state.showRecorder = show;
+    if (folderId !== undefined) {
+      state.recorderFolderId = folderId;
+    }
+  },
+  setRecording(state, isRecording) {
+    state.isRecording = isRecording;
+  },
 };
 
 export {
