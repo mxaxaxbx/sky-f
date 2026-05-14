@@ -6,6 +6,7 @@ import store from './store';
 
 import clickOutside from './directives/click-outside';
 import checkPerm from './directives/perm';
+import { registerServiceWorker } from './registerServiceWorker';
 
 import './index.css';
 
@@ -18,3 +19,5 @@ app.use(checkPerm);
 
 store.dispatch('theme/initTheme');
 app.mount('#app');
+
+registerServiceWorker();
