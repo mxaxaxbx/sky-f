@@ -10,7 +10,7 @@
           'backdrop-blur-md',
           'border border-[var(--border)]',
           'rounded-2xl',
-          'absolute', '-right-3', 'bottom-20', 'z-20',
+          'absolute', '-right-3', 'bottom-0', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
@@ -201,7 +201,7 @@ const emit = defineEmits(['scan', 'createFolder', 'createGroup']);
 
 const store = useStore();
 const showFab = ref(true);
-const dropdownPosition = ref('top-8');
+const dropdownPosition = ref('bottom-0');
 const activeDropdownClose = ref<(() => void) | null>(null);
 
 const canCreateIsland = computed(() => props.currentFolderId === null);

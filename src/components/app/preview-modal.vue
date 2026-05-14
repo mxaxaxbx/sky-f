@@ -381,6 +381,7 @@
                       "
                     >
                       <img src="/icon/icon-cast.svg" alt="cast" class="h-6"/>
+                      <span class="absolute -bottom-3 -right-0.5 text-[10px] px-2 text-[var(--color-primary)] rounded-full">beta</span>
                     </button>
                     <button
                       @click="toggleFullscreen"
