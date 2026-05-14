@@ -2,22 +2,22 @@
   <Transition name="fab">
     <div
       v-show="showFab"
-      class="fixed bottom-3 right-3 sm:hidden z-10"
+      class="fixed bottom-2 right-3 sm:hidden z-10"
     >
       <Dropdown
         :classes="[
           'bg-[var(--bg-modal-2)]',
           'backdrop-blur-md',
           'border border-[var(--border)]',
-          'rounded-2xl',
-          'absolute', '-right-3', 'bottom-10', 'z-20',
+          'rounded-t-2xl',
+          'absolute', '-right-3', '-bottom-2', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
       >
-        <template #trigger="{ toggle }">
+        <template #trigger="{ toggle, close }">
           <button
-            @click="toggleDropdown(toggle, $event)"
+            @click="toggleDropdown(close, toggle, $event)"
             class="
               flex items-center justify-center
               bg-[#0A77F3]
@@ -34,7 +34,7 @@
           </button>
         </template>
         <template #content="{}">
-          <div class="flex flex-col gap-0.5 py-2 font-medium text-sm text-[var(--color-primary)]">
+          <div class="flex flex-col gap-0.5 pt-2 font-medium text-sm text-[var(--color-primary)]">
             <div class="grid grid-cols-3 flex items-center gap-2 mx-2 mb-2">
               <label
                 for="fileInputBtn"
@@ -83,14 +83,16 @@
                 <span>Scan pages</span>
               </button>
             </div>
-            <div class="flex flex-col border-t border-[var(--border)] pt-2 px-4 gap-1">
+            <div class="h-px bg-[var(--border)] w-full"></div>
+
+            <div class="flex flex-col px-0 w-full text-base">
               <!--record sound-->
               <!-- //-- inicia boton grabacion// -->
               <button
                 @click="openRecorder"
                 class="
                   flex items-center justify-start
-                  rounded-xl px-2 py-1 border border-transparent
+                  rounded-xl mx-2 mb-2 mt-1 px-4 py-2 border border-transparent
                   grayscale
                   hover:bg-[var(--hover-bg)]
                   hover:grayscale-0
@@ -103,13 +105,15 @@
               </button>
               <!-- //-- termina boton grabacion// -->
 
+              <div class="h-px bg-[var(--border)] w-full opacity-50"></div>
+
               <!--create a folder-->
               <button
                 type="button"
                 @click="$emit('createFolder')"
                 class="
                   flex items-center justify-start
-                  rounded-xl px-2 py-1 border border-transparent
+                  rounded-xl m-2 px-4 py-2 border border-transparent
                   grayscale
                   hover:bg-[var(--hover-bg)]
                   hover:grayscale-0
@@ -119,11 +123,14 @@
                 <img src="/icon/icon-new-folder.svg" alt="newFolder" class="h-6 mr-4"/>
                 <span>Create a folder</span>
               </button>
+
+              <div class="h-px bg-[var(--border)] w-full opacity-50"></div>
+
               <button
                 @click="$emit('createGroup')"
                 class="
                   flex items-center justify-start
-                  rounded-xl px-2 py-1 border border-transparent
+                  rounded-xl mx-2 my-2 px-4 py-2 border border-transparent
                   grayscale
                   hover:bg-[var(--hover-bg)]
                   hover:grayscale-0
@@ -168,16 +175,16 @@ const emit = defineEmits(['scan', 'createFolder', 'createGroup']);
 const store = useStore();
 const showFab = ref(true);
 const dropdownPosition = ref('top-8');
-const activeDropdownToggle = ref<(() => void) | null>(null);
+const activeDropdownClose = ref<(() => void) | null>(null);
 
 function openRecorder() {
   store.commit('setRecorder', { show: true, folderId: props.currentFolderId });
-  if (activeDropdownToggle.value) activeDropdownToggle.value();
+  if (activeDropdownClose.value) activeDropdownClose.value();
 }
 
-const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
+const toggleDropdown = async (close: () => void, toggle: () => void, event?: MouseEvent) => {
   if (event) event.stopPropagation();
-  activeDropdownToggle.value = toggle;
+  activeDropdownClose.value = close;
   toggle();
   await nextTick();
   const middle = window.innerHeight / 2;
@@ -197,6 +204,10 @@ const handleScroll = () => {
     showFab.value = true;
   } else if (current > lastScroll + threshold) {
     showFab.value = false;
+    // Close dropdown when scrolling down
+    if (activeDropdownClose.value) {
+      activeDropdownClose.value();
+    }
   } else if (current < lastScroll - threshold) {
     showFab.value = true;
   }
