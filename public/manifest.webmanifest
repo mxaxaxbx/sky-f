@@ -1,10 +1,10 @@
 {
   "name": "Sky",
   "short_name": "Sky",
-  "id": "/",
+  "id": "/app",
   "lang": "en-GB",
   "description": "Securely store and manage files with encryption and cloud access.",
-  "start_url": "/",
+  "start_url": "https://sky.digiapps.com.co/app",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0b1220",
