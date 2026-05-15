@@ -10,7 +10,7 @@
           'backdrop-blur-md',
           'border border-[var(--border)]',
           'rounded-2xl',
-          'absolute', '-right-3', 'bottom-14', 'z-20',
+          'absolute', '-right-3', 'z-20',
           dropdownPosition,
           'w-screen',
         ]"
@@ -218,7 +218,7 @@ const toggleDropdown = async (close: () => void, toggle: () => void, event?: Mou
   await nextTick();
   const middle = window.innerHeight / 2;
   const y = event?.clientY || 0;
-  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
+  dropdownPosition.value = y > middle ? 'bottom-0' : 'top-4';
 };
 
 let lastScroll = 0;
