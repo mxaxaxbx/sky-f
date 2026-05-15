@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ref,
+  onMounted,
   onUnmounted,
   defineProps,
   defineEmits,
@@ -32,8 +33,12 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const isOpen = ref(false);
+const dropdownId = Math.random().toString(36).substr(2, 9);
 
 const toggle = () => {
+  if (!isOpen.value) {
+    window.dispatchEvent(new CustomEvent('close-all-dropdowns', { detail: { id: dropdownId } }));
+  }
   isOpen.value = !isOpen.value;
 };
 
@@ -42,8 +47,43 @@ const close = () => {
   emit('close');
 };
 
+const handleCloseAll = (event: any) => {
+  if (event.detail?.id !== dropdownId) {
+    isOpen.value = false;
+  }
+};
+
+// Swipe to close logic
+const touchStartY = ref(0);
+const touchCurrentY = ref(0);
+const isDragging = ref(false);
+
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartY.value = e.touches[0].clientY;
+  isDragging.value = true;
+};
+
+const handleTouchMove = (e: TouchEvent) => {
+  if (!isDragging.value) return;
+  const deltaY = e.touches[0].clientY - touchStartY.value;
+  touchCurrentY.value = deltaY;
+};
+
+const handleTouchEnd = () => {
+  if (Math.abs(touchCurrentY.value) > 20) {
+    close();
+  }
+  touchCurrentY.value = 0;
+  isDragging.value = false;
+};
+
+onMounted(() => {
+  window.addEventListener('close-all-dropdowns', handleCloseAll);
+});
+
 // Cleanup on unmount
 onUnmounted(() => {
+  window.removeEventListener('close-all-dropdowns', handleCloseAll);
   isOpen.value = false;
 });
 </script>
@@ -55,16 +95,24 @@ onUnmounted(() => {
 
     <!-- Dropdown content -->
     <transition
-      enter-active-class="transition ease-out duration-200"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-75"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
+      enter-active-class="transition ease-out duration-[800ms]"
+      enter-from-class="scale-95 translate-y-4"
+      enter-to-class="scale-100 translate-y-0"
+      leave-active-class="transition ease-in duration-[800ms]"
+      leave-from-class="scale-100 translate-y-0"
+      leave-to-class="scale-95 translate-y-full"
     >
       <div
         v-if="isOpen"
-        :class="props.classes">
+        :class="props.classes"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
+        :style="{
+          transform: `translateY(${touchCurrentY}px)`,
+          transition: touchCurrentY === 0 ? 'transform 0.3s ease' : 'none'
+        }"
+      >
         <slot name="content" :close="close" />
       </div>
     </transition>

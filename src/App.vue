@@ -14,8 +14,8 @@
     <Navbar />
     <AudioRecorder />
     <!-- Global blocker when recording -->
-    <div v-if="isRecording" class="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-[90] flex items-center justify-center">
-      <div class="bg-[var(--bg-modal-2)] px-6 py-2 rounded-full border border-[var(--border)] shadow-xl text-[var(--text)] text-sm font-medium animate-pulse">
+    <div v-if="isRecording" class="fixed inset-0 bg-black/10 backdrop-blur-sm z-[90] flex items-center justify-center">
+      <div class="bg-[var(--bg-modal-2)] backdrop-blur-sm px-6 py-2 rounded-full border border-[var(--border)] shadow-xl text-[var(--text)] text-sm font-medium animate-pulse">
         Recording in progress...
       </div>
     </div>
@@ -82,7 +82,8 @@
         fixed top-10
         flex flex-col justify-center
         w-full px-2 pt-2
-        bg-[var(--bg)] z-20
+        bg-[var(--bg)]
+        z-20
 
         sm:hidden
       "
@@ -143,7 +144,7 @@
 
           <!-- Ícono dentro del input -->
           <img src="/icon/icon-search.svg" alt="Search Icon"
-            class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
+            class="absolute left-1 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
           />
         </form>
       </div>

@@ -381,6 +381,7 @@
                       "
                     >
                       <img src="/icon/icon-cast.svg" alt="cast" class="h-6"/>
+                      <span class="absolute -bottom-3 -right-0.5 text-[10px] px-2 text-[var(--color-primary)] rounded-full">beta</span>
                     </button>
                     <button
                       @click="toggleFullscreen"
@@ -831,7 +832,7 @@ const castStatusText = computed(() => {
   if (castState.value === 'CONNECTED') return 'Cast connected';
   if (castState.value === 'CONNECTING') return 'Looking for device...';
   if (castState.value === 'NOT_CONNECTED') return 'Cast devices available';
-  if (castState.value === 'NO_DEVICES_AVAILABLE') return 'No Cast devices found';
+  if (castState.value === 'NO_DEVICES_AVAILABLE') return '';
   return 'Cast unavailable';
 });
 
