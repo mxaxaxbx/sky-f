@@ -70,7 +70,7 @@ const handleTouchMove = (e: TouchEvent) => {
 };
 
 const handleTouchEnd = () => {
-  if (Math.abs(touchCurrentY.value) > 50) {
+  if (Math.abs(touchCurrentY.value) > 20) {
     close();
   }
   touchCurrentY.value = 0;
