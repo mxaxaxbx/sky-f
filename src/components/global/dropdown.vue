@@ -110,7 +110,7 @@ onUnmounted(() => {
         @touchend="handleTouchEnd"
         :style="{
           transform: `translateY(${touchCurrentY}px)`,
-          transition: touchCurrentY === 0 ? 'transform 0.3s ease' : 'none'
+          transition: touchCurrentY === 0 ? 'transform 0.5s ease' : 'none'
         }"
       >
         <slot name="content" :close="close" />
