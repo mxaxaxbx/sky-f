@@ -5,6 +5,8 @@
 /* Tema base (dark) */
 :root {
     --bg: #1d1d1d;
+    --bg-modal: #1d1d1dbf;
+    --bg-modal-2: #25252577;
     --bg-secondary: #252525;
     --color-primary: #0A77F3;
     --text: #ffffff;
@@ -39,6 +41,8 @@
   /* Tema claro */
 .light {
   --bg: #f5f5f5;
+  --bg-modal: rgba(255, 255, 255, 0.6);
+  --bg-modal-2: #ffffff76;
   --bg-secondary: #Fbfbfb;
   --text: #1d1d1d;
   --text-secondary: #3d3d3d;
@@ -141,7 +145,11 @@
 
 /* barra */
 ::-webkit-scrollbar-thumb {
-  background: #0A77F3;
+  background: var(--color-primary);
   border-radius: 999px;
 }
+
+
+
+
 

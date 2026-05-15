@@ -45,10 +45,8 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       // extract files ONCE
       const files = payload.formData.getAll('file') as File[];
 
-      // eslint-disable-next-line no-param-reassign
-      context.state.uploadFiles = [];
-
       // populate UI state
+      const startIndex = context.state.uploadFiles.length;
       files.forEach((file) => {
         context.state.uploadFiles.push({
           id: 0,
@@ -70,15 +68,25 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       // request upload URLs
       const { data } = await storageClient.post(
         '/api/storage/generate-upload-url',
-        camelToSnake(context.state.uploadFiles),
+        camelToSnake(context.state.uploadFiles.slice(startIndex)),
       );
 
       const dataArray: FileI[] = snakeToCamel(data);
+
+      // Sincronizar IDs reales con la lista de subida del UI
+      dataArray.forEach((item: FileI, index: number) => {
+        const uiIndex = startIndex + index;
+        if (context.state.uploadFiles[uiIndex]) {
+          // eslint-disable-next-line no-param-reassign
+          context.state.uploadFiles[uiIndex].id = item.id;
+        }
+      });
 
       // upload all files in parallel
       await Promise.all(
         dataArray.map(async (item: FileI, index: number) => {
           const file = files[index];
+          const uiIndex = startIndex + index;
           if (!file || !item.r2Url) return;
 
           await new Promise<void>((resolve) => {
@@ -87,7 +95,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
             xhr.upload.onprogress = (event) => {
               if (event.lengthComputable) {
                 // eslint-disable-next-line no-param-reassign
-                context.state.uploadFiles[index].percentage = Math.round(
+                context.state.uploadFiles[uiIndex].percentage = Math.round(
                   (event.loaded / event.total) * 100,
                 );
               }
@@ -96,13 +104,15 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
             xhr.onload = () => {
               if (xhr.status >= 200 && xhr.status < 300) {
                 // eslint-disable-next-line no-param-reassign
-                context.state.uploadFiles[index].percentage = 100;
+                context.state.uploadFiles[uiIndex].percentage = 100;
                 // eslint-disable-next-line no-param-reassign
                 item.uploadCompleted = true;
                 completedFiles.push(item);
               } else {
                 // eslint-disable-next-line no-param-reassign
                 item.error = `Upload failed (${xhr.status})`;
+                // eslint-disable-next-line no-param-reassign
+                context.state.uploadFiles[uiIndex].error = item.error;
               }
               resolve();
             };
@@ -110,6 +120,8 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
             xhr.onerror = () => {
               // eslint-disable-next-line no-param-reassign
               item.error = 'Network error during upload';
+              // eslint-disable-next-line no-param-reassign
+              context.state.uploadFiles[uiIndex].error = item.error;
               resolve();
             };
 

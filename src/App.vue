@@ -12,6 +12,43 @@
     <Notifications />
     <UploadStatusPanel />
     <Navbar />
+    <AudioRecorder />
+    <!-- Global blocker when recording -->
+    <div v-if="isRecording" class="fixed inset-0 bg-black/10 backdrop-blur-sm z-[90] flex items-center justify-center">
+      <div class="bg-[var(--bg-modal-2)] backdrop-blur-sm px-6 py-2 rounded-full border border-[var(--border)] shadow-xl text-[var(--text)] text-sm font-medium animate-pulse">
+        Recording in progress...
+      </div>
+    </div>
+
+    <!-- Global Preview Modal -->
+    <PreviewModal
+      v-if="activePreviewFile"
+      :modelValue="activePreviewFile"
+      :files="previewFilesList"
+      @update:modelValue="(val) => store.commit('files/setActivePreviewFile', val)"
+      @close="store.commit('files/setActivePreviewFile', null)"
+      @open-info="(file, dimensions, duration) => {
+        store.commit('files/setActiveInfoFile', file);
+        activeInfoDimensions = dimensions;
+        activeInfoDuration = duration;
+      }"
+      @copy-link="store.commit('files/setActiveShareFile', $event)"
+      @download="downloadFile($event)"
+    />
+
+    <InfoModal
+      v-if="activeInfoFile"
+      :modelValue="activeInfoFile"
+      :dimensions="activeInfoDimensions"
+      :duration="activeInfoDuration"
+      @close="store.commit('files/setActiveInfoFile', null)"
+    />
+
+    <ShareModal
+      v-if="activeShareFile"
+      :modelValue="activeShareFile"
+      @close="store.commit('files/setActiveShareFile', null)"
+    />
 
     <!-- global file input -->
     <label for="fileInputBtn"></label>
@@ -25,6 +62,19 @@
       :key="inputKey"
       @click="() => { if (fileInputBtn) fileInputBtn.value = '' }"
     />
+
+    <label for="photoInputBtn"></label>
+    <input
+      id="photoInputBtn"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      ref="photoInputBtn"
+      @change="uploadFile"
+      multiple
+      :key="`photo-${inputKey}`"
+      @click="() => { if (photoInputBtn) photoInputBtn.value = '' }"
+    />
     <!-- search box movil-->
     <div
       v-if="!hideBar"
@@ -32,7 +82,8 @@
         fixed top-10
         flex flex-col justify-center
         w-full px-2 pt-2
-        bg-[var(--bg)] z-20
+        bg-[var(--bg)]
+        z-20
 
         sm:hidden
       "
@@ -93,7 +144,7 @@
 
           <!-- Ícono dentro del input -->
           <img src="/icon/icon-search.svg" alt="Search Icon"
-            class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
+            class="absolute left-1 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
           />
         </form>
       </div>
@@ -118,7 +169,7 @@
           ? 'pl-0'
           : store.state.sidebar
             ? 'sm:pl-64'
-            : 'sm:pl-10'
+            : 'sm:pl-12'
       "
     >
       <div class="flex-1 flex flex-col">
@@ -342,14 +393,22 @@ const Notifications = defineAsyncComponent(() => import('@/components/global/not
 const UploadStatusPanel = defineAsyncComponent(() => import('@/components/global/upload-status-panel.vue'));
 const Sidebar = defineAsyncComponent(() => import('@/components/global/sidebar.vue'));
 const Navbar = defineAsyncComponent(() => import('@/components/global/navbar.vue'));
+const AudioRecorder = defineAsyncComponent(() => import('@/components/global/audio-recorder.vue'));
+const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
+const InfoModal = defineAsyncComponent(() => import('@/components/app/info-modal.vue'));
+const ShareModal = defineAsyncComponent(() => import('@/components/app/share-modal.vue'));
+
+const activeInfoDimensions = ref<{ width: number; height: number } | null>(null);
+const activeInfoDuration = ref<number>(0);
 
 let searchTimeout: number | undefined;
 
 const fileInputBtn = ref<HTMLInputElement | null>(null);
+const photoInputBtn = ref<HTMLInputElement | null>(null);
 const inputKey = ref(0);
 
-async function uploadFile(): Promise<void> {
-  const input = fileInputBtn.value;
+async function uploadFile(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
   if (!input || !input.files || input.files.length === 0) return;
 
   const filesArray = Array.from(input.files);
@@ -371,8 +430,8 @@ async function uploadFile(): Promise<void> {
   } catch (error: unknown) {
     console.error(error);
   } finally {
-    if (fileInputBtn.value) {
-      fileInputBtn.value.value = '';
+    if (input) {
+      input.value = '';
     }
 
     // eslint-disable-next-line no-plusplus
@@ -393,6 +452,12 @@ const isLight = computed(() => store.state.theme?.theme === 'light');
 const showSidebar = computed(() => isAuth.value && route.name !== 'home');
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const showSidebarMovil = computed(() => showSidebarState.value);
+const isRecording = computed(() => store.state.isRecording);
+
+const activePreviewFile = computed(() => store.state.files.activePreviewFile);
+const previewFilesList = computed(() => store.state.files.previewFilesList);
+const activeInfoFile = computed(() => store.state.files.activeInfoFile);
+const activeShareFile = computed(() => store.state.files.activeShareFile);
 
 const currentYear = new Date().getFullYear();
 
@@ -438,6 +503,25 @@ async function handleInput() {
   searchTimeout = setTimeout(() => {
     handleSearch();
   }, 500);
+}
+
+async function downloadFile(file: any) {
+  await store.dispatch('files/downloadFile', file);
+}
+
+async function copyLink(file: any) {
+  try {
+    const url = await store.dispatch('files/getDownloadUrl', file);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+      store.commit('notifications/addNotification', {
+        message: 'Link copied to clipboard',
+        type: 'success',
+      });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
 }
 
 </script>

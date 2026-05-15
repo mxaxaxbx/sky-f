@@ -45,5 +45,16 @@ export const mutations: MutationTree<FilesStateI> = {
   clearUploadFiles(state: FilesStateI) {
     state.uploadFiles = [];
   },
-
+  setActivePreviewFile(state: FilesStateI, payload: FileI | null) {
+    state.activePreviewFile = payload;
+  },
+  setPreviewFilesList(state: FilesStateI, payload: FileI[]) {
+    state.previewFilesList = payload;
+  },
+  setActiveInfoFile(state: FilesStateI, payload: FileI | null) {
+    state.activeInfoFile = payload;
+  },
+  setActiveShareFile(state: FilesStateI, payload: FileI | null) {
+    state.activeShareFile = payload;
+  },
 };

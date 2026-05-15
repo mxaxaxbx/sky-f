@@ -54,6 +54,10 @@ export interface FilesStateI {
   file: FileI;
   searchResult: SearchResultI;
   selectedFiles: FileI[];
+  activePreviewFile: FileI | null;
+  previewFilesList: FileI[];
+  activeInfoFile: FileI | null;
+  activeShareFile: FileI | null;
 }
 
 export const state: FilesStateI = {
@@ -88,4 +92,8 @@ export const state: FilesStateI = {
     totalPages: 0,
   },
   selectedFiles: [],
+  activePreviewFile: null,
+  previewFilesList: [],
+  activeInfoFile: null,
+  activeShareFile: null,
 };

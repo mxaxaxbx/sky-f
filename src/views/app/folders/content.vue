@@ -1,13 +1,48 @@
 <template>
   <div
-    class="w-full h-screen focus:outline-none"
     @click="handleContainerClick"
     @keydown.enter="handleContainerClick"
     @contextmenu="handleContextMenu"
-    @dragover.prevent
-    @drop="onDropToRoot($event)"
+    @dragover="onRootDragOver"
+    @dragleave="onRootDragLeave"
+    @drop="onDropToRoot"
     tabindex="0"
+    :class="[
+      'h-full w-full rounded-2xl focus:outline-none transition-all duration-200 relative',
+      isDraggingOverRoot
+        ? 'px-4 py-4'
+        : 'px-0 py-2 '
+    ]"
   >
+  <!-- Overlay drag -->
+  <div
+    v-if="isDraggingOverRoot"
+    class="
+      absolute inset-0 z-50
+      flex items-end justify-end
+      mx-4 my-4 h-[calc(100%-3rem)] py-4
+      rounded-2xl
+      border-2 border-dashed border-[var(--color-primary)]
+      pointer-events-none
+      transition-all duration-200
+    ">
+    <div
+      class="
+        flex items-center justify-center
+        h-12 mx-auto gap-4
+        border border-[var(--border)] rounded-2xl
+        bg-[var(--model-bg)] backdrop-blur-md
+      "
+    >
+      <h1 class="
+        text-md text-[var(--text-terceary)] font-light
+        mx-0 my-2 px-10
+      "
+    >
+      Drop your files to upload to your <span class="ml-1 font-semibold text-[var(--text)]"> {{ dropTargetLabel }}</span>
+    </h1>
+    </div>
+  </div>
     <!-- loading -->
     <div v-if="loading" class="flex mx-auto justify-center items-center py-20 text-[var(--color-primary)]">
       <i class="fas fa-spinner fa-spin text-2xl"></i>
@@ -166,7 +201,7 @@
     <div
       v-if="folderResults.data.length"
       class="
-        w-full border-b border-[var(--border)]
+        w-full
         py-0 px-2 pt-4
 
         sm:py-4 sm:px-14
@@ -227,28 +262,22 @@
             data-selectable
 
             :draggable="true"
-            @dragstart="onDragStart('folder', folder)"
+            @dragstart="onDragStart('folder', folder, $event)"
             @click="selectItem($event, 'folder', folder, index)"
             @keydown.enter="selectItem($event, 'folder', folder, index)"
             @contextmenu.stop.prevent="onItemContextMenu($event, 'folder', folder, index)"
             @dblclick="router.push(`/app/folders/${folder.id}`);"
 
-            class="
-              group
-              flex items-center justify-between
-              w-full
-              bg-[var(--bg-secondary)]
-              border border-[var(--border)]
-              rounded-2xl min-w-0
-              hover:bg-[var(--hover-bg)]
-              hover:border-[var(--hover-border)]
-              transition-all duration-300
-            "
             :class="[
-              'group flex items-center justify-between w-full rounded-2xl border cursor-pointer',
-              isSelectedFolder(folder) ?
-                'border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]' :
-                'border-[var(--border)]'
+              'relative group flex items-center justify-between w-full rounded-2xl cursor-pointer transition-all duration-200',
+
+              isSelectedFolder(folder)
+                ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] shadow-[0_0_5px_2px_rgba(10,119,243,0.5)]'
+
+                : draggedFolder === folder.id
+                  ? 'border border-[var(--color-primary)] bg-[var(--hover-bg)] after:absolute after:-inset-2 after:rounded-3xl after:border-2 after:border-dashed after:border-[var(--color-primary)] after:content-[\'\']'
+
+                  : 'border border-[var(--border)] bg-[var(--bg-secondary)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
             ]"
           >
             <div
@@ -336,7 +365,7 @@
                           hover:border-[var(--color-primary)]
                           transition-colors duration-300"
                       >
-                        <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                        <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                         <span>Rename</span>
                       </button>
 
@@ -353,7 +382,7 @@
                           transition-colors duration-300
                         "
                       >
-                        <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                        <img src="/icon/icon_move.svg" alt="move" class="h-6 mr-4 grayscale"/>
                         <span>Move to folder</span>
                       </button>
                     </div>
@@ -374,7 +403,7 @@
                           transition-colors duration-300
                         "
                       >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 mr-4">
                           <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
                             <rect width="24" height="24" fill="#FFC506"/>
                           </mask>
@@ -399,11 +428,10 @@
     <!-- files -->
     <div
       v-if="fileResults.data.length"
-      class="
-        w-full py-6 px-2 pt-4
-
-        sm:mt-0 sm:py-4 sm:px-14
-      "
+      :class="[
+        folderResults.data.length && 'border-t border-[var(--border)]',
+        'w-full py-6 px-2 pt-4 sm:mt-0 sm:py-4 sm:px-14'
+      ]"
     >
       <div class="flex items-center justify-between mx-4 sm:mx-0">
         <h3
@@ -479,7 +507,7 @@
             @click="selectItem($event, 'file', file, index)"
             @keydown.enter="selectItem($event, 'file', file, index)"
             @contextmenu.stop.prevent="onItemContextMenu($event, 'file', file, index)"
-            @dblclick="previewFile = file"
+            @dblclick="openPreview(file, $event)"
 
             class="
               group
@@ -602,8 +630,8 @@
                       <!-- zone info-->
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
                         <!-- info file -->
-                        <buttom
-                          @click="infoModal = true"
+                        <button
+                          @click="store.commit('files/setActiveInfoFile', file)"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -613,10 +641,10 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_details.svg" alt="download" class="h-5 mr-4 grayscale"
+                          <img src="/icon/icon_details.svg" alt="download" class="h-6 mr-4 grayscale"
                           />
                           <span>info</span>
-                        </buttom>
+                        </button>
                         <!-- rename -->
                         <button
                           type="button"
@@ -629,7 +657,7 @@
                             hover:border-[var(--color-primary)]
                             transition-colors duration-300"
                         >
-                          <img src="/icon/icon-edit.svg" alt="edit" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                           <span>Rename</span>
                         </button>
                       </div>
@@ -638,7 +666,7 @@
                       <div class="border-b border-[var(--border)] p-1 space-y-1">
                         <!-- zone file -->
                         <button
-                          @click="previewFile = file"
+                          @click="openPreview(file, $event)"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -648,7 +676,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon-preview.svg" alt="preview" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon-preview.svg" alt="preview" class="h-6 mr-4 grayscale"/>
                           <span>Preview</span>
                         </button>
 
@@ -667,7 +695,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_download_2.svg" alt="download" class="h-5 mr-4"
+                          <img src="/icon/icon_download_2.svg" alt="download" class="h-6 mr-4"
                           />
                           <span>Download</span>
                         </button>
@@ -688,13 +716,13 @@
                             transition-colors duration-300
                           "
                         >
-                          <img src="/icon/icon_move.svg" alt="move" class="h-5 mr-4 grayscale"/>
+                          <img src="/icon/icon_move.svg" alt="move" class="h-6 mr-4 grayscale"/>
                           <span>Move to folder</span>
                         </button>
 
                         <!--share link-->
                         <button
-                          @click="copyLink(file)"
+                          @click="store.commit('files/setActiveShareFile', file)"
                           class="
                             flex items-center justify-start w-full
                             rounded-xl px-3 py-1 border border-transparent
@@ -704,8 +732,8 @@
                             transition-all duration-300
                           "
                         >
-                          <img src="/icon/icon-link.svg" alt="link" class="h-5 mr-4 -rotate-45 grayscale"/>
-                          {{ copied ? 'Copied!' : 'Copy link' }}
+                          <img src="/icon/icon-link.svg" alt="link" class="h-6 mr-4 -rotate-45 grayscale"/>
+                          Copy link
                         </button>
                       </div>
 
@@ -726,7 +754,7 @@
                             transition-colors duration-300
                           "
                         >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 mr-3">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 mr-4">
                             <mask id="mask0_1676_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
                             <rect width="24" height="24" fill="#FFC506"/>
                             </mask>
@@ -967,213 +995,6 @@
       </template>
     </Modal>
 
-    <Modal v-model="createShareModal" size="md" @click.stop>
-      <template #header>
-        <h3 class=""> Copy link:
-          <p class="text-[var(--text)] font-light text-base mt-2" v-for="file in selectedFiles" :key="file.id">
-            {{ file.name }}
-          </p>
-          <p class="text-[var(--text)] font-light text-base mt-2" v-for="folder in selectedFolders" :key="folder.id">
-            {{ folder.name }}
-          </p>
-        </h3>
-      </template>
-      <template #content>
-        <div class="flex flex-col gap-3">
-          <div
-            class="
-              flex
-              group
-              p-0.5
-              bg-[var(--bg)]
-              border border-[var(--color-primary)]
-              rounded-xl
-
-              hover:bg-[var(--bg-hover)]
-              shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              transition-all duration-300 ease-in-out
-            "
-          >
-            <input
-              :value="shareUrl"
-              readonly
-              class="
-                w-full flex-1
-                text-xs text-[var(--text)]
-                pr-1 pl-2 py-1
-                bg-transparent
-                rounded-full
-                select-all
-                focus:outline-none
-              "
-              @focus="e => (e.target as HTMLInputElement).select()
-              "
-            />
-            <button
-              type="button"
-              @click.stop="tryCopy"
-              class="
-                flex items-center
-                px-2 gap-1
-                text-[var(--text)] text-sm font-medium
-                bg-[var(--bg-secondary)]
-                border border-[var(--color-primary)]
-
-                hover:bg-[var(--color-primary)]
-                hover:text-white
-                hover:border-[var(--color-primary)]
-                hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
-                rounded-lg
-                transition-all duration-300 ease-in-out
-              "
-              :class="copied ? 'bg-[var(--color-primary)] text-white shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]' : ''
-              "
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
-                  <mask id="mask0_1677_12" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-                  <rect width="24" height="24"/>
-                  </mask>
-                  <g mask="url(#mask0_1677_12)">
-                  <path d="M11 17H7C5.61667 17 4.4375 16.5125 3.4625 15.5375C2.4875 14.5625 2 13.3833 2 12C2 10.6167
-                    2.4875 9.4375 3.4625 8.4625C4.4375 7.4875 5.61667 7 7 7H11V9H7C6.16667 9 5.45833 9.29167
-                    4.875 9.875C4.29167 10.4583 4 11.1667 4 12C4 12.8333 4.29167 13.5417 4.875 14.125C5.45833
-                    14.7083 6.16667 15 7 15H11V17ZM8 13V11H16V13H8ZM13 17V15H17C17.8333 15 18.5417
-                    14.7083 19.125 14.125C19.7083 13.5417 20 12.8333 20 12C20 11.1667 19.7083 10.4583
-                    19.125 9.875C18.5417 9.29167 17.8333 9 17 9H13V7H17C18.3833 7 19.5625 7.4875 20.5375
-                    8.4625C21.5125 9.4375 22 10.6167 22 12C22 13.3833 21.5125 14.5625 20.5375 15.5375C19.5625
-                    16.5125 18.3833 17 17 17H13Z"/>
-                  </g>
-              </svg>
-              {{ copied ? 'Copied!' : 'Copy link' }}
-            </button>
-          </div>
-          <p class="
-            flex items-center
-            font-light text-xs text-center text-[var(--text-terceary)]
-            py-2 mx-2 gap-2
-
-            sm:text-sm
-            "
-          >
-            <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-5"/>
-            Anyone with the link will be able to download the file.
-          </p>
-        </div>
-      </template>
-    </Modal>
-
-    <Modal v-model="infoModal" size="xl" @click.stop>
-      <template #header>
-        <div v-if="selectedFiles.length > 0" class="w-full">
-          <!-- icons + title -->
-          <div class="flex items-center w-[90%] gap-2">
-            <img v-if="selectedFiles[0].contentType === 'application/pdf'" src="/icon/icon-pdf.svg" alt="pdf" class="h-12 w-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'application/msword' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'application/vnd.ms-excel' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'application/vnd.ms-powerpoint' || selectedFiles[0].contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-12" />
-            <img v-else-if="/image\/(png|webp|gif|avif)/.test(selectedFiles[0].contentType)" src="/icon/icon-png.svg" alt="png" class="h-12 w-12" />
-            <img v-else-if="selectedFiles[0].contentType === 'image/svg+xml'" src="/icon/icon-svg.svg" alt="svg" class="h-12 w-12" />
-            <img v-else-if="/image\/(jpeg|jpg|bmp|tiff|heic|heif|x-icon|vnd\.microsoft\.icon)/.test(selectedFiles[0].contentType)" src="/icon/icon-img.svg" alt="img" class="h-12" />
-            <img v-else-if="/^video\//.test(selectedFiles[0].contentType)" src="/icon/icon-video.svg" alt="video" class="h-12" />
-            <img v-else-if="/^audio\//.test(selectedFiles[0].contentType)" src="/icon/icon-audio.svg" alt="audio" class="h-12" />
-            <img v-else-if="
-                selectedFiles[0].name?.toLowerCase().endsWith('.zip') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.rar') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.7z') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.tar') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.gz') ||
-                selectedFiles[0].name?.toLowerCase().endsWith('.bz2')
-              "
-              src="/icon/icon-compress.svg"
-              alt="compressed file icon"
-              class="h-12 w-12"
-            />
-            <img v-else src="/icon/icon-file.svg" alt="file" class="h-12 w-12" />
-
-            <!-- titel -->
-            <h3 v-if="selectedFiles[0].id" class="font-regular text-white text-lg w-[90%] break-all sm:text-xl">
-              {{ selectedFiles[0].name }}
-            </h3>
-          </div>
-        </div>
-      </template>
-
-      <template #content>
-        <div
-          v-if="selectedFiles.length > 0"
-          class="
-            grid grid-cols-1 pb-2 px-3
-            gap-3
-
-            sm:grid-cols-2 sm:gap-6
-          "
-        >
-          <!-- size -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Size:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ formatFileSize(Number(selectedFiles[0].size)) }}
-            </p>
-          </div>
-          <!-- Type -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Type:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ formatContentType(selectedFiles[0].contentType, selectedFiles[0].name) }}
-            </p>
-          </div>
-          <!-- Date uploaded -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
-              Date uploaded:
-            </h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(selectedFiles[0].created * 1000).format('DD/MM/YYYY HH:mm a') }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              {{ moment(selectedFiles[0].created * 1000).fromNow() }}
-            </p>
-          </div>
-          <!-- Last modification -->
-          <div class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">
-              Last modification:
-              </h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ moment(selectedFiles[0].updated * 1000).format('DD/MM/YYYY HH:mm a') }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              {{ moment(selectedFiles[0].updated* 1000).fromNow() }}
-            </p>
-          </div>
-          <!-- Dimensions -->
-          <div v-if="imageDimensions" class="flex-col items-center justify-between gap-2">
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Dimensions:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ imageDimensions.width }} x {{ imageDimensions.height }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              Pixels
-            </p>
-          </div>
-          <!-- Duration -->
-          <div
-            v-if="selectedFiles[0].contentType?.startsWith('video/') || selectedFiles[0].contentType?.startsWith('audio/')"
-            class="flex-col items-center justify-between gap-2
-            "
-          >
-            <h3 class="text-xs font-semibold text-[var(--text-terceary)]">Duration:</h3>
-            <p class="text-xl font-light text-[var(--text)]">
-              {{ formatTime(duration) }}
-            </p>
-            <p class="text-sm font-light text-[var(--text-terceary)]">
-              Minutes
-            </p>
-          </div>
-        </div>
-      </template>
-    </Modal>
-
     <Teleport to="body">
       <div
         v-if="ghostVisible"
@@ -1203,23 +1024,6 @@
         </div>
       </div>
     </Teleport>
-    <!-- preview files -->
-    <PreviewModal
-      v-if="previewFile"
-      v-model="previewFile"
-      :files="fileResults.data"
-      :disable-navigation="infoModal || createShareModal || moveToFolderModal || createFolderModal"
-      @close="previewFile = null"
-      @copy-link="copyLink($event)"
-      @download="downloadFile($event)"
-      @open-info="(f, dims, dur) => {
-        store.commit('files/setSelectedFiles', [f]);
-        imageDimensions = dims;
-        duration = dur;
-        infoModal = true;
-      }"
-    />
-
     <ContextMenu
       v-model="contextMenuVisible"
       :x="contextMenuX"
@@ -1250,7 +1054,6 @@ import { FileI, FilesResultI } from '@/store/files/state';
 
 const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
-const PreviewModal = defineAsyncComponent(() => import('@/components/app/preview-modal.vue'));
 const ContextMenu = defineAsyncComponent(() => import('@/components/app/context-menu.vue'));
 
 const router = useRouter();
@@ -1259,6 +1062,7 @@ const route = useRoute();
 
 const dragLeaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const draggedFolder = ref<number | string | null>(null);
+const isDraggingOverRoot = ref(false);
 const selectedFolder = ref<number | string | null>(null);
 const editingFileId = ref<number | string | null>(null);
 const draggedItem = ref<FileI | FolderI | null>(null);
@@ -1267,26 +1071,21 @@ const lastSelectedIndex = ref<number | null>(null);
 const lastSelectedType = ref<'file' | 'folder' | null>(null);
 const editingFolderId = ref<number | string | null>(null);
 const sortOrder = ref<'desc' | 'asc'>('desc');
-const previewFile = ref<FileI | null>(null);
 const dropdownPosition = ref('top-8');
 const createFolderModal = ref(false);
-const moveToFolderModal = ref(false);
-const createShareModal = ref(false);
 const editedFolderName = ref('');
 const editedFileName = ref('');
-const showFolders = ref(true);
-const infoModal = ref(false);
-const showFiles = ref(true);
+const moveToFolderModal = ref(false);
 const folderName = ref('');
 const loading = ref(false);
-const copied = ref(false);
-const shareUrl = ref('');
 const ghostVisible = ref(false);
 const ghostX = ref(0);
 const ghostY = ref(0);
 const contextMenuVisible = ref(false);
 const contextMenuX = ref(0);
 const contextMenuY = ref(0);
+const showFolders = ref(true);
+const showFiles = ref(true);
 
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
@@ -1294,6 +1093,29 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const fileResults = computed<FilesResultI>(() => store.state.files.result);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
+const folderDetails = computed<FolderI>(() => store.state.folders.folder);
+
+const previewFile = computed({
+  get: () => store.state.files.activePreviewFile,
+  set: (val) => {
+    store.commit('files/setActivePreviewFile', val);
+    if (val) {
+      store.commit('files/setPreviewFilesList', fileResults.value.data);
+    }
+  },
+});
+
+const dropTargetLabel = computed(() => {
+  if (draggedFolder.value) {
+    const folder = folderResults.value.data.find(
+      (f: FolderI) => f.id === draggedFolder.value,
+    );
+
+    return folder?.name || 'folder';
+  }
+
+  return folderDetails.value?.name || 'root';
+});
 
 const isSelectedFolder = (item: FolderI) => selectedFolders.value.some((f: FolderI) => f.id === item.id);
 const isSelectedFile = (item: FileI) => selectedFiles.value.some((f: FileI) => f.id === item.id);
@@ -1462,6 +1284,31 @@ function clearSelection() {
   lastSelectedType.value = null;
 }
 
+const openPreview = (file: FileI, event: MouseEvent) => {
+  const card = (event.currentTarget as HTMLElement).closest('[data-selectable]') as HTMLElement || event.currentTarget as HTMLElement;
+  const icon = card.querySelector('img');
+
+  if (icon) {
+    (icon as HTMLElement).style.viewTransitionName = 'preview-content';
+  } else {
+    card.style.viewTransitionName = 'preview-content';
+  }
+
+  if (!(document as any).startViewTransition) {
+    previewFile.value = file;
+    return;
+  }
+
+  const transition = (document as any).startViewTransition(() => {
+    previewFile.value = file;
+  });
+
+  transition.finished.finally(() => {
+    if (icon) (icon as HTMLElement).style.viewTransitionName = '';
+    card.style.viewTransitionName = '';
+  });
+};
+
 function handleContainerClick(event: MouseEvent | KeyboardEvent) {
   const target = event.target as HTMLElement;
   if (target.closest('[data-selectable]')) return;
@@ -1529,39 +1376,6 @@ const toggleDropdown = async (
   const middle = window.innerHeight / 2;
   const y = event?.clientY || 0;
   dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
-};
-
-// copy link to clipboard
-const tryCopy = async () => {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(shareUrl.value);
-    } else {
-      const textArea = document.createElement('textarea');
-      textArea.value = shareUrl.value;
-      textArea.style.cssText = 'position:fixed;opacity:0;';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-    }
-    copied.value = true;
-    setTimeout(() => { copied.value = false; }, 2000);
-  } catch (error) {
-    console.error('Error al copiar:', error);
-  }
-};
-
-const copyLink = async (file: FileI) => {
-  try {
-    const url = await store.dispatch('files/getDownloadUrl', file);
-    shareUrl.value = url;
-    createShareModal.value = true;
-    tryCopy();
-  } catch (error) {
-    console.error('Error:', error);
-  }
 };
 
 function onDragStart(type: string, item: FileI | FolderI, event: DragEvent) {
@@ -1673,20 +1487,62 @@ async function uploadFilesFromDrop(files: FileList, targetFolderId: number | nul
   getFolders();
 }
 
+function onRootDragOver(event: DragEvent) {
+  event.preventDefault();
+
+  const hasFiles = event.dataTransfer?.types.includes('Files');
+
+  if (!hasFiles) return;
+
+  isDraggingOverRoot.value = true;
+}
+
+function onRootDragLeave(event: DragEvent) {
+  const related = event.relatedTarget as HTMLElement | null;
+  const currentTarget = event.currentTarget as HTMLElement;
+
+  if (related && currentTarget.contains(related)) return;
+
+  isDraggingOverRoot.value = false;
+}
+
 async function onDropToRoot(event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  isDraggingOverRoot.value = false;
+
   if (!event.dataTransfer?.files?.length) return;
-  await uploadFilesFromDrop(event.dataTransfer.files, folderId.value);
+
+  await uploadFilesFromDrop(
+    event.dataTransfer.files,
+    folderId.value || null,
+  );
+
   draggedFolder.value = null;
 }
 
 async function onDrop(folder: FolderI, event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  isDraggingOverRoot.value = false;
+
   if (event.dataTransfer?.files?.length) {
-    await uploadFilesFromDrop(event.dataTransfer.files, folder.id as number);
+    await uploadFilesFromDrop(
+      event.dataTransfer.files,
+      folder.id as number,
+    );
+
     draggedFolder.value = null;
     return;
   }
 
-  if (selectedFiles.value.length === 0 && selectedFolders.value.length === 0) return;
+  if (
+    selectedFiles.value.length === 0
+    && selectedFolders.value.length === 0
+  ) return;
+
   if (!draggedItem.value) return;
 
   const targetFolderId = folder.id as number;
@@ -1697,6 +1553,7 @@ async function onDrop(folder: FolderI, event: DragEvent) {
   }));
 
   await store.dispatch('files/moveFilesToFolder', filesPayload);
+
   store.commit('files/setSelectedFiles', []);
 
   const foldersPayload: FolderI[] = selectedFolders.value
@@ -1926,7 +1783,7 @@ function handleMenuAction(action: string) {
 
   switch (action) {
     case 'info':
-      infoModal.value = true;
+      if (firstFile) store.commit('files/setActiveInfoFile', firstFile);
       break;
     case 'rename-file':
       if (firstFile) startEditingFile(firstFile);
@@ -1947,7 +1804,7 @@ function handleMenuAction(action: string) {
       moveToFolderModal.value = true;
       break;
     case 'copy-link':
-      if (firstFile) copyLink(firstFile);
+      if (firstFile) store.commit('files/setActiveShareFile', firstFile);
       break;
     case 'trash':
       moveToTrash();

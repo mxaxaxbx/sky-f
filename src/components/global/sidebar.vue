@@ -27,7 +27,7 @@
         lg:shadow-none
         sm:block sm:pt-0 sm:ml-0
       "
-      :class="showSidebar ? 'w-full pr-2 sm:pr-0 sm:w-64' : 'w-0 mr-6 -ml-2 sm:w-12'"
+      :class="showSidebar ? 'w-full pr-2 sm:pr-0 sm:w-64 z-10' : 'w-0 mr-6 -ml-2 sm:w-12'"
     >
         <div class="flex flex-col h-full pt-12 pb-4">
           <div class="flex px-2 items-center justify-between">

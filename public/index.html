@@ -6,6 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <link rel="apple-touch-icon" href="<%= BASE_URL %>favicon.ico">
+  <link rel="manifest" href="<%= BASE_URL %>manifest.webmanifest">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>
     <%= htmlWebpackPlugin.options.title %>
   </title>
@@ -39,9 +45,6 @@
     content="Securely store and manage your files with top-notch encryption. Keep your data safe, private, and accessible from anywhere.">
   <!-- <meta name="twitter:image" content="https://yourwebsite.com/images/twitter-image.jpg"> -->
 
-  <!-- Responsive Design -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <!-- Robots -->
   <meta name="robots" content="index, follow">
 
@@ -56,6 +59,7 @@
   </noscript>
   <div id="app"></div>
   <!-- built files will be auto injected -->
+   <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </body>
 
 </html>

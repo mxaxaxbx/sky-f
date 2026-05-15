@@ -233,6 +233,7 @@
             @mouseup="onPanEnd"
             @mouseleave="onPanEnd"
             @blur="onPanEnd"
+            style="view-transition-name: preview-content"
           />
           <!-- video -->
           <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
@@ -258,6 +259,7 @@
                 @ended="isPlaying = false"
                 @click="togglePlay"
                 @keydown.space.prevent="togglePlay"
+                style="view-transition-name: preview-content"
               >
                 <track kind="captions" />
               </video>
@@ -357,12 +359,30 @@
                   </div>
                   <!-- timer -->
                   <div class="flex flex-1 items-center justify-center gap-2 mb-1">
-                      <span class="text-[var(--text-terceary)] text-sm font-semibold mr-4">
-                        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-                      </span>
+                    <span class="text-[var(--text-terceary)] text-sm font-semibold mr-4">
+                      {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+                    </span>
                   </div>
                   <!-- fullscreen -->
-                  <div class="flex-1 flex items-center justify-end">
+                  <div class="flex-1 flex items-center justify-end gap-1">
+                    <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
+                      {{ castStatusText }}
+                    </span>
+                    <button
+                      @click="castVideo"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <img src="/icon/icon-cast.svg" alt="cast" class="h-6"/>
+                      <span class="absolute -bottom-3 -right-0.5 text-[10px] px-2 text-[var(--color-primary)] rounded-full">beta</span>
+                    </button>
                     <button
                       @click="toggleFullscreen"
                       class="
@@ -588,6 +608,7 @@
             class="w-full h-full rounded-2xl"
             frameborder="0"
             title="Visor de PDF"
+            style="view-transition-name: preview-content"
           />
           <!-- docx -->
           <iframe
@@ -596,13 +617,14 @@
             class="w-full h-full rounded-2xl"
             frameborder="0"
             title="Visor de docx"
+            style="view-transition-name: preview-content"
           />
                     <!-- other -->
           <div v-else class="flex flex-col pb-10 items-center text-[var(--text-terceary)] text-xs text-center sm:text-md">
             <span class="font-semibold text-[var(--text-terceary)] text-5xl mb-8 ">Ups! :(</span>
-            <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" />
-            <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-20 w-20" />
-            <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-20 w-20" />
+            <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" style="view-transition-name: preview-content" />
+            <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-20 w-20" style="view-transition-name: preview-content" />
+            <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-20 w-20" style="view-transition-name: preview-content" />
             <span class="font-semibold text-white text-xl mb-5 sm:text-3xl"> {{ file.name }} </span>
             <p>Sorry, a preview for the file
               is not available at the moment.
@@ -780,6 +802,7 @@ const store = useStore();
 const file = computed(() => props.modelValue);
 const files = computed(() => props.files);
 const currentPreviewIndex = computed(() => files.value.findIndex((f) => f.id === file.value.id));
+const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 
 const audioCover = ref<string | null>(null);
 const currentBlobURL = ref<string | null>(null);
@@ -804,9 +827,38 @@ const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
+const castState = ref('UNKNOWN');
+const castStatusText = computed(() => {
+  if (castState.value === 'CONNECTED') return 'Cast connected';
+  if (castState.value === 'CONNECTING') return 'Looking for device...';
+  if (castState.value === 'NOT_CONNECTED') return 'Cast devices available';
+  if (castState.value === 'NO_DEVICES_AVAILABLE') return '';
+  return 'Cast unavailable';
+});
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
-const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
+
+function getChromeCastApi() {
+  return (window as any).chrome;
+}
+
+function getCastApi() {
+  return (window as any).cast;
+}
+
+function syncCastState() {
+  const castApi = getCastApi();
+  if (!castApi) {
+    castState.value = 'UNKNOWN';
+    return;
+  }
+
+  castState.value = castApi.framework.CastContext.getInstance().getCastState();
+}
+
+function handleCastStateChanged(event: any) {
+  castState.value = event?.castState || 'UNKNOWN';
+}
 
 function closeModal() {
   if (isFullscreen.value) toggleFullscreen();
@@ -910,8 +962,29 @@ async function getBase64(currentFile: FileI) {
     return url;
   }
 
-  await store.dispatch('files/saveCacheFile', currentFile);
-  return '';
+  const url = await store.dispatch('files/getDownloadUrl', { id: currentFile.id });
+  currentBlobURL.value = url;
+
+  if (currentFile.contentType.startsWith('audio/')) {
+    await extractAudioCover(await fetch(url).then((r) => r.blob()));
+  }
+
+  if (
+    currentFile.contentType.startsWith('text/') || currentFile.name?.endsWith('.vue') || currentFile.name?.endsWith('.ts') || currentFile.name?.endsWith('.js') || currentFile.name?.endsWith('.py')
+  ) {
+    textContent.value = await fetch(url).then((r) => r.text());
+  }
+
+  if (currentFile.contentType.startsWith('application/json')) {
+    try {
+      const raw = await fetch(url).then((r) => r.text());
+      textContent.value = JSON.stringify(JSON.parse(raw), null, 2);
+    } catch {
+      textContent.value = await fetch(url).then((r) => r.text());
+    }
+  }
+
+  return url;
 }
 
 function togglePlay() {
@@ -1196,19 +1269,115 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+async function castVideo() {
+  const castApi = getCastApi();
+  const chromeCastApi = getChromeCastApi();
+
+  if (!castApi || !chromeCastApi) {
+    console.error('Chromecast SDK is not available yet');
+    return;
+  }
+
+  const castContext = castApi.framework.CastContext.getInstance();
+  syncCastState();
+
+  if (castState.value === 'NO_DEVICES_AVAILABLE') {
+    console.warn('Chromecast reported no available devices');
+  }
+
+  let session = castContext.getCurrentSession();
+
+  if (!session) {
+    try {
+      await castContext.requestSession();
+      session = castContext.getCurrentSession();
+    } catch (err) {
+      console.error('Chromecast session was not started', err);
+      return;
+    }
+  }
+
+  if (!session) {
+    console.error('No Chromecast session');
+    return;
+  }
+
+  const url = await store.dispatch('files/getDownloadUrl', { id: file.value.id });
+
+  const mediaInfo = new chromeCastApi.cast.media.MediaInfo(
+    url,
+    'video/mp4',
+  );
+
+  mediaInfo.metadata = new chromeCastApi.cast.media.GenericMediaMetadata();
+
+  mediaInfo.metadata.title = file.value.name || 'Video';
+
+  const request = new chromeCastApi.cast.media.LoadRequest(mediaInfo);
+
+  try {
+    await session.loadMedia(request);
+    console.log('Casting started');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function initializeCastApi() {
+  const castApi = getCastApi();
+  const chromeCastApi = getChromeCastApi();
+
+  if (!castApi || !chromeCastApi) {
+    return;
+  }
+
+  castApi.framework.CastContext.getInstance().setOptions({
+    receiverApplicationId:
+      chromeCastApi.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+
+    autoJoinPolicy:
+      chromeCastApi.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+  });
+
+  castApi.framework.CastContext.getInstance().addEventListener(
+    castApi.framework.CastContextEventType.CAST_STATE_CHANGED,
+    handleCastStateChanged,
+  );
+  syncCastState();
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('fullscreenchange', onFullscreenChange);
+
+  if (getCastApi() && getChromeCastApi()) {
+    initializeCastApi();
+  }
+
+  // eslint-disable-next-line
+  window.__onGCastApiAvailable = (isAvailable: boolean) => {
+    if (isAvailable) {
+      initializeCastApi();
+    }
+  };
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
+
+  const castApi = getCastApi();
+  if (castApi) {
+    castApi.framework.CastContext.getInstance().removeEventListener(
+      castApi.framework.CastContextEventType.CAST_STATE_CHANGED,
+      handleCastStateChanged,
+    );
+  }
 });
 
 watch(() => props.modelValue, async (newFile) => {
   isPlaying.value = false;
-  progressPercent.value = 0;
+  currentTime.value = 0;
   volume.value = 1;
   isMuted.value = false;
   previousVolume.value = 1;

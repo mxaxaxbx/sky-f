@@ -3,6 +3,7 @@
     class="
       bg-[var(--bg)]
       font-alexandria font-sans
+      h-screen
       pt-14 sm:pt-0
     "
   >
@@ -10,87 +11,16 @@
       class="
         mx-auto
         flex flex-col items-start
-        px-0 w-full max-h-screen
+        px-0 w-full h-full
         pt-12
         sm:pt-16
       "
     >
-    <!--uploap movil-->
-      <Transition name="fab">
-        <div
-          v-show="showFab && !hideBar"
-          :class="showSidebar ? 'hidden' : 'inline'"
-          class="
-            fixed bottom-3 right-3 sm:hidden z-10
-          "
-        >
-          <Dropdown
-            :classes="[
-              'bg-[var(--bg-secondary)]',
-              'border border-[var(--border)]',
-              'rounded-2xl',
-              'absolute','-right-0', 'bottom-10','z-20',
-              dropdownPosition,
-              'w-48',
-            ]">
-              <template #trigger="{ toggle }">
-                <button
-                  @click="toggleDropdown(toggle, $event)"
-                  class="
-                    flex items-center justify-center
-                    bg-[#0A77F3]
-                    text-white text-md font-medium
-                    shadow-sm h-12 w-12
-                    rounded-full
-                    cursor-pointer
-
-                    hover:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                    focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-                    transition-all duration-300 ease-in-out
-                  "
-                >
-                  <img src="/icon/icon-add.svg" alt="icon" class="h-8 w-8" />
-                </button>
-              </template>
-              <template #content="{ }">
-                <div class="flex flex-col gap-0.5 px-1 py-1 font-medium text-md text-[var(--color-primary)]">
-                  <label
-                    for="fileInputBtn"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
-
-                      hover:bg-[var(--hover-bg)]
-                      hover:grayscale-0
-                      hover:border-[var(--color-primary)]
-                      transition-colors duration-300"
-                  >
-                    <img src="/icon/icon_download_2.svg" alt="newFolder" class="rotate-180 h-6 mr-4"/>
-                    <span>Upload</span>
-                  </label>
-                  <!--create a folder-->
-                  <button
-                    type="button"
-                    @click="createFolderModal = true"
-                    class="
-                      flex items-center justify-start
-                      rounded-xl px-2 py-1 border border-transparent
-                      grayscale
-
-                      hover:bg-[var(--hover-bg)]
-                      hover:grayscale-0
-                      hover:border-[var(--color-primary)]
-                      transition-colors duration-300"
-                  >
-                    <img src="/icon/icon-new-folder.svg" alt="newFolder" class="h-6 mr-4"/>
-                    <span>Create a folder</span>
-                  </button>
-                </div>
-              </template>
-          </Dropdown>
-        </div>
-      </Transition>
+      <FabMenu
+        :currentFolderId="folderDetails?.id || null"
+        @scan="scanModal = true"
+        @createFolder="createFolderModal = true"
+      />
 
       <!-- folder details -->
       <div
@@ -149,7 +79,7 @@
                 hidden items-center
                 bg-[var(--color-primary)]
                 border border-[var(--color-primary)]
-                text-white text-sm font-medium
+                text-white text-md font-medium
                 px-2 py-0.5
                 rounded-full
 
@@ -160,7 +90,7 @@
                 cursor-pointer
               "
             >
-              <img src="/icon/icon-upload.svg" alt="icon" class="h-4 mr-2" />
+              <img src="/icon/icon-upload.svg" alt="icon" class="h-6 mr-2 invert brightness-0" />
               <span>Upload</span>
             </label>
             <!-- New folder-->
@@ -170,7 +100,7 @@
                 hidden items-center
                 bg-[var(--bg-secondary)]
                 border border-[var(--border)]
-                text-[var(--text-terceary)] text-sm font-medium
+                text-[var(--text-terceary)] text-md font-medium
                 pl-2 pr-2.5 py-0.5
                 grayscale
                 rounded-full
@@ -188,7 +118,7 @@
                 cursor-pointer
               "
             >
-              <img src="/icon/icon-new-folder.svg" alt="icon" class="h-5 mr-2" />
+              <img src="/icon/icon-new-folder.svg" alt="icon" class="h-6 mr-2" />
               New folder
             </button>
 
@@ -359,8 +289,6 @@
 import {
   computed,
   defineAsyncComponent,
-  onMounted,
-  onBeforeUnmount,
   nextTick,
   watch,
   ref,
@@ -370,65 +298,24 @@ import { useRoute } from 'vue-router';
 import moment from 'moment';
 
 import { FolderI, FoldersResultI } from '@/store/folders/state';
-import { FileI } from '@/store/files/state';
 
-const Dropdown = defineAsyncComponent(() => import('@/components/global/dropdown.vue'));
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
+const FabMenu = defineAsyncComponent(() => import('@/components/global/fab-menu.vue'));
 
 const store = useStore();
 const route = useRoute();
 
 const loading = ref(false);
-const dropdownPosition = ref('top-8');
-const activeDropdownToggle = ref<(() => void) | null>(null);
 const createFolderModal = ref(false);
 const folderName = ref('');
 const editingFolderId = ref<number | string | null>(null);
 const editedFolderName = ref('');
-const showFab = ref(true); // Show FAB on mobile
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const showSidebar = computed(() => showSidebarState.value);
-const hideBar = computed(() => route.path.includes('/details'));
 
 const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
-
-let lastScroll = 0;
-let scrollTarget: Window | Element = window;
-
-// Show FAB on mobile
-const handleScroll = () => {
-  const current = scrollTarget === window ? window.scrollY : (scrollTarget as Element).scrollTop;
-  const threshold = 10;
-  const offset = 50;
-
-  if (current <= offset) {
-    showFab.value = true;
-  } else if (current > lastScroll + threshold) {
-    showFab.value = false;
-  } else if (current < lastScroll - threshold) {
-    showFab.value = true;
-  }
-
-  lastScroll = current;
-};
-
-// toggle dropdown position based on click position
-const toggleDropdown = async (toggle: () => void, event?: MouseEvent) => {
-  if (event) event.stopPropagation();
-
-  activeDropdownToggle.value = toggle;
-
-  toggle();
-
-  await nextTick();
-
-  const middle = window.innerHeight / 2;
-  const y = event?.clientY || 0;
-
-  dropdownPosition.value = y > middle ? 'bottom-8' : 'top-8';
-};
 
 async function getFolders() {
   loading.value = true;
@@ -557,37 +444,9 @@ async function saveFolderName() {
   }
 }
 
-onMounted(() => {
-  getFolderDetails();
-});
-
 watch(() => route.params.id, () => {
   console.log('route.params.id', route.params.id);
   getFolderDetails();
 }, { immediate: true });
 
-onMounted(() => {
-  scrollTarget = document.querySelector('.overflow-auto, .overflow-y-auto') || window;
-
-  lastScroll = scrollTarget === window ? window.scrollY : (scrollTarget as Element).scrollTop;
-
-  scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
-});
-
-onBeforeUnmount(() => {
-  scrollTarget.removeEventListener('scroll', handleScroll);
-});
-
 </script>
-<style scoped>
-.fab-enter-active,
-  .fab-leave-active {
-    transition: all 0.3s ease;
-  }
-
-  .fab-enter-from,
-  .fab-leave-to {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-</style>

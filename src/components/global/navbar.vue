@@ -3,12 +3,14 @@
     class="
       fixed z-50 top-0
       font-alexandria font-sans
-      bg-[var(--bg)]
       border-b border-[var(--border)]
       w-full h-10
       px-2  sm:px-4
     ">
-    <div class="flex items-center justify-between h-full">
+    <!-- Capa de fondo con blur que no bloquea al dropdown -->
+    <div class="absolute inset-0 bg-[var(--bg-modal)] backdrop-blur-md -z-10 rounded-b-none pointer-events-none"></div>
+
+    <div class="relative flex items-center justify-between h-full">
       <div class="flex space-x-8">
         <!-- LOGO animado -->
         <router-link
@@ -69,7 +71,7 @@
       </div>
 
       <!-- sing in -->
-      <div class="flex items-center gap-4 ml-auto opacity-0 animate-showButtons">
+      <div class="flex items-center gap-4 ml-auto">
         <a v-if="!isAuth" :href="`${usersLink}/auth/provider?app=sky`"
           class="
             flex items-center justify-center
@@ -88,7 +90,17 @@
           <img src="/icon/icon-signIn.svg" alt="icon" class="ml-1 h-4" />
         </a>
 
-      <Dropdown v-if="isAuth">
+      <Dropdown v-if="isAuth"
+        :classes="[
+          'bg-[var(--bg-modal-2)]',
+          'backdrop-blur-md',
+          'border border-[var(--border)]',
+          'rounded-2xl', 'shadow-md',
+          'absolute', 'z-20',
+          'sm:top-6', '-top-2',
+          '-right-2', 'w-screen', 'h-screen', 'py-16 sm:h-auto sm:w-80 sm:py-8',
+        ]"
+      >
         <template #trigger="{ toggle }">
             <button
               @click="toggle"
@@ -127,13 +139,14 @@
               block
               h-[10px] w-[10px]
               rounded-full
-              bg-green-500
+              bg-[#07C77B]
               border-2 border-[var(--bg)]
               ">
           </span>
         </template>
 
         <template #content="{ }">
+          <div class="flex flex-col w-full h-full items-center justify-center">
           <!-- Avatar, email, user name -->
           <div class="flex flex-col items-center mb-10">
             <div class="relative --w-16 --h-16">
@@ -177,7 +190,7 @@
             <!-- Manage Account Button -->
             <a :href="`${usersLink}/app/users/edit-profile`"
               class="
-                bg-[var(--bg-secondary)]
+                bg-[var(--bg-modal-2)]
                 border border-[var(--color-primary)]
                 rounded-full
                 w-48 px-auto py-1 mt-6
@@ -203,7 +216,7 @@
               class="
                 flex items-center justify-between
                 w-72 px-2 py-2
-                bg-[var(--bg-secondary)]
+                bg-[var(--bg-modal-2)]
                 border border-[var(--border)]
                 rounded-full
                 text-[#868686] font-regular text-sm
@@ -234,7 +247,7 @@
               class="
                 flex items-center justify-between
                 w-72 px-2 py-2
-                bg-[var(--bg-secondary)]
+                bg-[var(--bg-modal-2)]
                 border border-[var(--border)]
                 rounded-full
                 text-[#868686] font-regular text-sm
@@ -275,7 +288,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex justify-around mt-8 text-[10px] text-[#3d3d3d] px-16">
+          <div class="flex justify-around mt-10 text-[10px] text-[#3d3d3d] px-16 space-x-4">
             <a
               :href="`${usersLink}/privacy-policy`"
               target="_blank" class="hover:underline hover:text-[#bebebe]"
@@ -289,6 +302,7 @@
               ">
               Privacy Policy
             </a>
+          </div>
           </div>
         </template>
       </Dropdown>
@@ -324,6 +338,7 @@ let timeout: number | undefined;
 const isMobileMenuOpen = ref(false);
 const isSticky = ref(false);
 const isRising = ref(false);
+const dropdownPosition = ref('top-8');
 
 const usersLink = ref(`${VUE_APP_DG_USERS_APP}`);
 const query = ref<string>('');
@@ -446,81 +461,4 @@ watch(
 </script>
 
 <style scoped>
-.animate-fade-in-up {
-  animation: fadeInBounce 0.7s ease-out both;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-@keyframes fadeInBounce {
-  0% {
-    opacity: 0;
-    transform: translate3d(100px, 100px, 0);
-    /* desde abajo a la derecha */
-    blur: 100px;
-    /* desenfoque inicial */
-  }
-
-  60% {
-    opacity: 1;
-    transform: translate3d(-10px, -10px, 0);
-    /* ligeramente más allá para efecto bounce */
-    blur: 10px;
-    /* desenfoque eliminado */
-  }
-
-  80% {
-    transform: translate3d(5px, 5px, 0);
-    /* rebote hacia atrás */
-    blur: 0;
-    /* desenfoque eliminado */
-  }
-
-  100% {
-    transform: translate3d(0, 0, 0);
-    /* posición final */
-  }
-}
-
-/* Accesibilidad: sin animación si el usuario la prefiere reducida */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in-up {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* clase base para cada link */
-
-.nav-link:hover {
-  color: #0A77F3;
-  /* cambia el color del texto */
-}
-
-.slide-left-enter-active {
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-}
-
-.slide-left-leave-active {
-  transition: transform 0.3s ease-in, opacity 0.3s ease-in;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(100%);
-  opacity: 1;
-}
-
-.slide-left-enter-to,
-.slide-left-leave-from {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-body.menu-open {
-  overflow: hidden;
-}
 </style>
