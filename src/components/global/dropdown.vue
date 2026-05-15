@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ref,
+  onMounted,
   onUnmounted,
   defineProps,
   defineEmits,
@@ -32,8 +33,12 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const isOpen = ref(false);
+const dropdownId = Math.random().toString(36).substr(2, 9);
 
 const toggle = () => {
+  if (!isOpen.value) {
+    window.dispatchEvent(new CustomEvent('close-all-dropdowns', { detail: { id: dropdownId } }));
+  }
   isOpen.value = !isOpen.value;
 };
 
@@ -42,8 +47,19 @@ const close = () => {
   emit('close');
 };
 
+const handleCloseAll = (event: any) => {
+  if (event.detail?.id !== dropdownId) {
+    isOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('close-all-dropdowns', handleCloseAll);
+});
+
 // Cleanup on unmount
 onUnmounted(() => {
+  window.removeEventListener('close-all-dropdowns', handleCloseAll);
   isOpen.value = false;
 });
 </script>
