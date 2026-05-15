@@ -146,6 +146,7 @@
         </template>
 
         <template #content="{ }">
+          <div class="flex flex-col w-full h-full items-center justify-center">
           <!-- Avatar, email, user name -->
           <div class="flex flex-col items-center mb-10">
             <div class="relative --w-16 --h-16">
@@ -287,7 +288,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex justify-around mt-8 text-[10px] text-[#3d3d3d] px-16">
+          <div class="flex justify-around mt-10 text-[10px] text-[#3d3d3d] px-16 space-x-4">
             <a
               :href="`${usersLink}/privacy-policy`"
               target="_blank" class="hover:underline hover:text-[#bebebe]"
@@ -301,6 +302,7 @@
               ">
               Privacy Policy
             </a>
+          </div>
           </div>
         </template>
       </Dropdown>

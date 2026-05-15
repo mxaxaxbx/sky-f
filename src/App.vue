@@ -82,7 +82,8 @@
         fixed top-10
         flex flex-col justify-center
         w-full px-2 pt-2
-        bg-[var(--bg)] z-20
+        bg-[var(--bg)]
+        z-20
 
         sm:hidden
       "
@@ -143,7 +144,7 @@
 
           <!-- Ícono dentro del input -->
           <img src="/icon/icon-search.svg" alt="Search Icon"
-            class="absolute left-2 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
+            class="absolute left-1 top-1/2 -translate-y-1/2 w-5 pointer-events-none"
           />
         </form>
       </div>
