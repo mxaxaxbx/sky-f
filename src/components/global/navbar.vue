@@ -96,9 +96,9 @@
           'backdrop-blur-md',
           'border border-[var(--border)]',
           'rounded-2xl', 'shadow-md',
-          'absolute', 'sm:right-0', 'z-20',
-          'sm:top-6 top-7',
-          '-right-2', 'w-[100vw] h-screen py-16 sm:h-auto sm:w-80 sm:py-8',
+          'absolute', 'z-20',
+          'sm:top-6', 'top-0',
+          'right-0', 'w-[96vw]', 'h-[98vh]', 'py-16 sm:h-auto sm:w-80 sm:py-8',
         ]"
       >
         <template #trigger="{ toggle }">
