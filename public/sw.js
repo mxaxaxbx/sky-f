@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sky-pwa-v1';
+const CACHE_VERSION = 'sky-pwa-v2';
 const SHELL_CACHE = `sky-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `sky-runtime-${CACHE_VERSION}`;
 const SCOPE_URL = new URL(self.registration.scope);
@@ -10,8 +10,9 @@ const APP_SHELL = [
   assetUrl('index.html'),
   assetUrl('manifest.webmanifest'),
   assetUrl('favicon.ico'),
+  assetUrl('icon-192.png'),
+  assetUrl('icon-512.png'),
   assetUrl('offline.html'),
-  assetUrl('icon/icon-logoSky.svg'),
 ];
 
 self.addEventListener('install', (event) => {
