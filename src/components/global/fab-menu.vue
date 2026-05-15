@@ -12,7 +12,7 @@
           'rounded-2xl',
           'absolute', '-right-3', 'z-20',
           dropdownPosition,
-          'w-screen',
+          'w-[96vw] mx-2',
         ]"
       >
         <template #trigger="{ toggle, close }">
@@ -34,7 +34,9 @@
           </button>
         </template>
         <template #content="{}">
-          <div class="flex flex-col gap-0.5 pt-2 font-medium text-sm text-[var(--color-primary)]">
+          <div
+            class="flex flex-col gap-0.5 pt-2 font-medium text-sm text-[var(--color-primary)]"
+          >
             <div class="grid grid-cols-3 flex items-center gap-2 mx-2 mb-2">
               <label
                 for="fileInputBtn"
@@ -218,7 +220,7 @@ const toggleDropdown = async (close: () => void, toggle: () => void, event?: Mou
   await nextTick();
   const middle = window.innerHeight / 2;
   const y = event?.clientY || 0;
-  dropdownPosition.value = y > middle ? 'bottom-0' : 'top-4';
+  dropdownPosition.value = y > middle ? '-bottom-0' : 'top-4';
 };
 
 let lastScroll = 0;

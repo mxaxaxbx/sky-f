@@ -53,6 +53,30 @@ const handleCloseAll = (event: any) => {
   }
 };
 
+// Swipe to close logic
+const touchStartY = ref(0);
+const touchCurrentY = ref(0);
+const isDragging = ref(false);
+
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartY.value = e.touches[0].clientY;
+  isDragging.value = true;
+};
+
+const handleTouchMove = (e: TouchEvent) => {
+  if (!isDragging.value) return;
+  const deltaY = e.touches[0].clientY - touchStartY.value;
+  touchCurrentY.value = deltaY;
+};
+
+const handleTouchEnd = () => {
+  if (Math.abs(touchCurrentY.value) > 100) {
+    close();
+  }
+  touchCurrentY.value = 0;
+  isDragging.value = false;
+};
+
 onMounted(() => {
   window.addEventListener('close-all-dropdowns', handleCloseAll);
 });
@@ -80,7 +104,15 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        :class="props.classes">
+        :class="props.classes"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
+        :style="{
+          transform: `translateY(${touchCurrentY}px)`,
+          transition: touchCurrentY === 0 ? 'transform 0.3s ease' : 'none'
+        }"
+      >
         <slot name="content" :close="close" />
       </div>
     </transition>
