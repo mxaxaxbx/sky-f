@@ -2,6 +2,7 @@
   "name": "Sky",
   "short_name": "Sky",
   "id": "/",
+  "lang": "en-GB",
   "description": "Securely store and manage files with encryption and cloud access.",
   "start_url": "/",
   "scope": "/",
