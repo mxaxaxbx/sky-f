@@ -1105,6 +1105,15 @@ const previewFile = computed({
   },
 });
 
+watch(
+  () => fileResults.value.data,
+  (value) => {
+    if (!value.length) return;
+    store.commit('files/setPreviewFilesList', value);
+  },
+  { deep: true },
+);
+
 const dropTargetLabel = computed(() => {
   if (draggedFolder.value) {
     const folder = folderResults.value.data.find(

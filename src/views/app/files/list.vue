@@ -2377,6 +2377,15 @@ watch([selectedFiles, previewFile], async ([files, preview]) => {
   }
 }, { immediate: true });
 
+watch(
+  () => fileResults.value.data,
+  (value) => {
+    if (!value.length) return;
+    store.commit('files/setPreviewFilesList', value);
+  },
+  { deep: true },
+);
+
 watch(folderGroups, (value) => {
   localStorage.setItem('folderGroups', JSON.stringify(value));
 }, { deep: true });
