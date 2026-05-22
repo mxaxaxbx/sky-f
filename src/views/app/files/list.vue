@@ -1010,6 +1010,13 @@
           </div>
         </div>
       </Transition>
+
+      <div
+        v-if="isLoadingMoreFiles"
+        class="flex items-center justify-center py-6 text-[var(--color-primary)]"
+      >
+        <i class="fas fa-spinner fa-spin text-lg"></i>
+      </div>
     </div>
 
     <Modal v-model="moveToFolderModal" size="xl" @click.stop>
@@ -1399,6 +1406,14 @@ const selectedFiles = computed<FileI[]>(() => store.state.files.selectedFiles);
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
 const selectedFolders = computed<FolderI[]>(() => store.state.folders.selectedFolders);
 const totalSelected = computed(() => selectedFiles.value.length + selectedFolders.value.length);
+const hasMoreFiles = computed(() => (
+  fileResults.value.totalPages > 0
+  && fileResults.value.page < fileResults.value.totalPages
+));
+
+const appScrollContainer = ref<HTMLElement | null>(null);
+const isLoadingMoreFiles = ref(false);
+let scrollRafId: number | null = null;
 
 const onGroupDragEnter = (groupId: string) => {
   draggedGroup.value = groupId;
@@ -1424,6 +1439,16 @@ const previewFile = computed({
     }
   },
 });
+
+function getAppScrollContainer(): HTMLElement | null {
+  if (appScrollContainer.value) return appScrollContainer.value;
+
+  appScrollContainer.value = document.querySelector(
+    '[data-scroll-container="app-content"]',
+  ) as HTMLElement | null;
+
+  return appScrollContainer.value;
+}
 
 const dropTargetLabel = computed(() => {
   if (draggedFolder.value) {
@@ -1785,13 +1810,50 @@ async function getFolders() {
   });
 }
 
-async function getFiles() {
+async function fetchFiles(page: number) {
   await store.dispatch('files/filter', {
     query: '',
-    page: 1,
+    page,
     orderBy: 'created',
     order: sortOrder.value,
     folderId: '',
+  });
+}
+
+async function getFiles() {
+  await fetchFiles(1);
+}
+
+async function loadMoreFiles() {
+  if (!hasMoreFiles.value || isLoadingMoreFiles.value) return;
+
+  isLoadingMoreFiles.value = true;
+
+  try {
+    await fetchFiles(fileResults.value.page + 1);
+  } catch (error) {
+    console.error('Error loading more files:', error);
+  } finally {
+    isLoadingMoreFiles.value = false;
+  }
+}
+
+function handleFilesScroll() {
+  if (scrollRafId !== null) return;
+
+  scrollRafId = window.requestAnimationFrame(() => {
+    scrollRafId = null;
+
+    if (!showFiles.value || !hasMoreFiles.value || isLoadingMoreFiles.value) return;
+
+    const container = getAppScrollContainer();
+    if (!container) return;
+
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+
+    if (distanceFromBottom <= 320) {
+      loadMoreFiles();
+    }
   });
 }
 
@@ -2243,6 +2305,7 @@ function handleKeydown(e: KeyboardEvent) {
 onMounted(() => {
   getFolders();
   getFiles();
+  getAppScrollContainer()?.addEventListener('scroll', handleFilesScroll, { passive: true });
 
   // restore groups
   const saved = localStorage.getItem('folderGroups');
@@ -2264,6 +2327,13 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  getAppScrollContainer()?.removeEventListener('scroll', handleFilesScroll);
+
+  if (scrollRafId !== null) {
+    window.cancelAnimationFrame(scrollRafId);
+    scrollRafId = null;
+  }
+
   window.removeEventListener('keydown', handleKeydown);
   window.removeEventListener('click', closeContextMenu);
   window.removeEventListener('scroll', closeContextMenu, true);

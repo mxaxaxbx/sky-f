@@ -163,6 +163,7 @@
 
     <!-- content -->
     <div
+      data-scroll-container="app-content"
       class="overflow-y-auto transition-[padding] duration-300"
       :class="
         !isAuth || isHome
