@@ -1,7 +1,7 @@
 import { GetterTree } from 'vuex';
 
-import { FoldersStateI } from './state';
+import { SubscriptionsStateI } from './state';
 import { RootStateI } from '../state';
 
-export const getters: GetterTree<FoldersStateI, RootStateI> = {
+export const getters: GetterTree<SubscriptionsStateI, RootStateI> = {
 };

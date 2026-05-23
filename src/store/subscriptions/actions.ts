@@ -4,16 +4,15 @@ import { storageClient } from '@/http-client';
 import { snakeToCamel, camelToSnake } from '@/utils';
 
 import { RootStateI } from '../state';
-import { FolderI, FoldersStateI } from './state';
-import { FileI } from '../files/state';
+import { SubscriptionsStateI } from './state';
 
-export const actions: ActionTree<FoldersStateI, RootStateI> = {
+export const actions: ActionTree<SubscriptionsStateI, RootStateI> = {
 
   async getPlan(
-    context: ActionContext<FoldersStateI, RootStateI>,
+    context: ActionContext<SubscriptionsStateI, RootStateI>,
   ): Promise<void> {
-    const { data } = await storageClient.get('/api/subscription/plan');
-    console.log('data', data);
+    const { data } = await storageClient.get('/api/subscriptions/plan');
+    context.commit('setPlan', snakeToCamel(data));
   },
 
 };

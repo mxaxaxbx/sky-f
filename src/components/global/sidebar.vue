@@ -31,7 +31,6 @@
     >
         <div class="flex flex-col h-full pt-12 pb-4">
           <div class="flex px-2 items-center justify-between">
-            <!-- Texto -->
             <span
               v-show="showSidebar"
               class="font-semibold text-[var(--text-secondary)] hidden sm:inline"
@@ -50,8 +49,8 @@
               :src="showSidebar
                 ? '/icon/icon-close.svg'
                 : '/icon/icon-open.svg'"
-              :alt="showSidebar ? 'close' : 'open'"
-              class="w-6 h-6 opacity-50 hover:opacity-100 transition"
+                :alt="showSidebar ? 'close' : 'open'"
+                class="w-6 h-6 opacity-50 hover:opacity-100 transition"
               />
             </div>
           </button>
@@ -154,6 +153,7 @@
 
           <!-- Spacer for authenticated users -->
           <div v-if="isAuth" class="flex-1 flex flex-col justify-end px-1">
+            {{ plan }}
             <div class="flex justify-between"
             :class="showSidebar
                 ? 'flex-row gap-2'
@@ -240,6 +240,7 @@ import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
 import { PermissionI } from '@/store/auth/state';
+import { PlanI } from '@/store/subscriptions/state';
 
 const token = localStorage.getItem('token');
 
@@ -268,8 +269,7 @@ const permissions = computed<PermissionI[]>(() => store.getters['auth/permission
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const isLight = computed(() => store.state.theme?.theme === 'light');
-// const projects = computed<BusinessI[]>(() => store.getters['auth/projects']);
-// const project = computed(() => store.getters['auth/project']);
+const plan = computed<PlanI>(() => store.state.subscriptions.plan);
 
 // Show sidebar based on state (can be toggled on all screen sizes)
 const showSidebar = computed(() => showSidebarState.value);
@@ -323,6 +323,22 @@ function handleEscape(event: KeyboardEvent) {
 if (typeof window !== 'undefined') {
   document.addEventListener('keydown', handleEscape);
 }
+
+async function getPlan() {
+  try {
+    await store.dispatch('subscriptions/getPlan');
+  } catch (error: any) {
+    console.error('Error fetching subscription plan:', error);
+    const message = error.response?.data?.error || 'Failed to fetch subscription plan';
+    alert(message);
+  }
+}
+
+onMounted(() => {
+  if (isAuth.value) {
+    getPlan();
+  }
+});
 
 // Cleanup event listeners
 onBeforeUnmount(() => {

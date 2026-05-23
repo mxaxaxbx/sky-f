@@ -1,53 +1,33 @@
-export interface FolderI {
-  id: string | number;
-  name: string;
-  userId: string | number;
-  folderId: null | number | string;
-  isTrash: boolean;
+export interface PlanI {
+  billingCycle: string;
   created: number;
+  currency: string;
+  description: string;
+  features: string;
+  id: number;
+  name: string;
+  price: number;
+  serviceId: number;
+  trialDays: number;
   updated: number;
 }
 
-export interface FoldersResultI {
-  data: FolderI[];
-  page: number;
-  perPage: number;
-  total: number;
-  totalPages: number;
+export interface SubscriptionsStateI {
+  plan: PlanI;
 }
 
-export interface FoldersStateI {
-  trashFolder: FolderI;
-  folder: FolderI;
-  result: FoldersResultI;
-  selectedFolders: FolderI[];
-}
-
-export const state: FoldersStateI = {
-  trashFolder: {
+export const state: SubscriptionsStateI = {
+  plan: {
+    billingCycle: '',
+    created: 0,
+    currency: '',
+    description: '',
+    features: '',
     id: 0,
     name: '',
-    userId: 0,
-    folderId: null,
-    isTrash: false,
-    created: 0,
+    price: 0,
+    serviceId: 0,
+    trialDays: 0,
     updated: 0,
   },
-  folder: {
-    id: 0,
-    name: '',
-    userId: 0,
-    folderId: null,
-    isTrash: false,
-    created: 0,
-    updated: 0,
-  },
-  result: {
-    data: [],
-    page: 1,
-    perPage: 0,
-    total: 0,
-    totalPages: 0,
-  },
-  selectedFolders: [],
 };
