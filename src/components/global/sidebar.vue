@@ -153,7 +153,65 @@
 
           <!-- Spacer for authenticated users -->
           <div v-if="isAuth" class="flex-1 flex flex-col justify-end px-1">
-            {{ plan }}
+            <div
+              v-if="showSidebar"
+              class="mb-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/80 p-3 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm"
+            >
+              <div class="flex items-start gap-3">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--hover-bg)] text-[var(--color-primary)]">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="h-5 w-5"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 7.25A3.25 3.25 0 0 1 7.25 4h9.5A3.25 3.25 0 0 1 20 7.25v9.5A3.25 3.25 0 0 1 16.75 20h-9.5A3.25 3.25 0 0 1 4 16.75v-9.5Zm3.25-1.75A1.75 1.75 0 0 0 5.5 7.25v9.5c0 .966.784 1.75 1.75 1.75h9.5a1.75 1.75 0 0 0 1.75-1.75v-9.5a1.75 1.75 0 0 0-1.75-1.75h-9.5Zm.75 3.5h8a.75.75 0 0 1 0 1.5h-8a.75.75 0 0 1 0-1.5Zm0 4h8a.75.75 0 0 1 0 1.5h-8a.75.75 0 0 1 0-1.5Z"
+                    />
+                  </svg>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">
+                    Subscription
+                  </p>
+                  <p class="mt-1 truncate text-sm font-semibold text-[var(--text)]">
+                    {{ planDisplayName }}
+                  </p>
+                  <p class="mt-0.5 text-xs text-[var(--text-secondary)]">
+                    {{ planMetaLabel }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <div class="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                  <span>Storage used</span>
+                  <span>{{ storageLabel }}</span>
+                </div>
+
+                <div
+                  class="mt-2 h-2 overflow-hidden rounded-full bg-[var(--hover-bg)]"
+                  role="progressbar"
+                  :aria-valuenow="storageUsagePercent"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  :aria-label="`Storage usage for ${planDisplayName}`"
+                >
+                  <div
+                    class="h-full rounded-full bg-[linear-gradient(90deg,var(--color-primary),rgba(10,119,243,0.55))] transition-[width] duration-300 ease-out"
+                    :style="{ width: `${storageUsagePercent}%` }"
+                  />
+                </div>
+
+                <div class="mt-2 flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
+                  <span>{{ storageUsedLabel }}</span>
+                  <span>{{ storageLimitLabel }}</span>
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-between"
             :class="showSidebar
                 ? 'flex-row gap-2'
@@ -239,8 +297,7 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
-import { PermissionI } from '@/store/auth/state';
-import { PlanI } from '@/store/subscriptions/state';
+import { PlanI, StorageI } from '@/store/subscriptions/state';
 
 const token = localStorage.getItem('token');
 
@@ -264,12 +321,65 @@ if (typeof window !== 'undefined') {
   window.addEventListener('resize', handleResize);
 }
 
-// Computed properties with proper typing
-const permissions = computed<PermissionI[]>(() => store.getters['auth/permissions']);
+function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / (k ** i)).toFixed(1))} ${sizes[i]}`;
+}
+
+function formatPlanPrice(price: number, currency: string): string {
+  if (!price) return 'Free';
+  if (!currency) return `${price}`;
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+    }).format(price);
+  } catch {
+    return `${price} ${currency}`;
+  }
+}
+
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const isLight = computed(() => store.state.theme?.theme === 'light');
 const plan = computed<PlanI>(() => store.state.subscriptions.plan);
+const storage = computed<StorageI>(() => store.state.subscriptions.storage);
+const hasPlanData = computed(() => Boolean(plan.value?.id || plan.value?.name || plan.value?.description));
+const hasStorageData = computed(() => Number(storage.value?.storageLimit) > 0);
+const storageUsagePercent = computed(() => {
+  if (!hasStorageData.value) return 0;
+  const percent = (storage.value.currentStorage / storage.value.storageLimit) * 100;
+  return Math.max(0, Math.min(100, Number(percent.toFixed(1))));
+});
+const planDisplayName = computed(() => {
+  if (!hasPlanData.value) return 'Loading plan...';
+  return plan.value.name?.trim() || 'Custom plan';
+});
+const planMetaLabel = computed(() => {
+  if (!hasPlanData.value) return 'Loading plan...';
+
+  const bits: string[] = [];
+  if (plan.value.price > 0) bits.push(formatPlanPrice(plan.value.price, plan.value.currency));
+  if (plan.value.billingCycle?.trim()) bits.push(plan.value.billingCycle.trim());
+  return bits.length ? bits.join(' / ') : 'Free plan';
+});
+const storageLabel = computed(() => {
+  if (!hasStorageData.value) return 'Loading storage...';
+  return `${storageUsagePercent.value}% used`;
+});
+const storageUsedLabel = computed(() => {
+  if (!hasStorageData.value) return '0 Bytes used';
+  return `${formatFileSize(storage.value.currentStorage)} used`;
+});
+const storageLimitLabel = computed(() => {
+  if (!hasStorageData.value) return '0 Bytes limit';
+  return `${formatFileSize(storage.value.storageLimit)} total`;
+});
 
 // Show sidebar based on state (can be toggled on all screen sizes)
 const showSidebar = computed(() => showSidebarState.value);
@@ -334,9 +444,20 @@ async function getPlan() {
   }
 }
 
+async function getStorage() {
+  try {
+    await store.dispatch('subscriptions/getStorage');
+  } catch (error: any) {
+    console.error('Error fetching storage info:', error);
+    const message = error.response?.data?.error || 'Failed to fetch storage info';
+    alert(message);
+  }
+}
+
 onMounted(() => {
   if (isAuth.value) {
     getPlan();
+    getStorage();
   }
 });
 

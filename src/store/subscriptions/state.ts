@@ -12,8 +12,15 @@ export interface PlanI {
   updated: number;
 }
 
+export interface StorageI {
+  currentStorage: number;
+  storageLeft: number;
+  storageLimit: number;
+}
+
 export interface SubscriptionsStateI {
   plan: PlanI;
+  storage: StorageI;
 }
 
 export const state: SubscriptionsStateI = {
@@ -29,5 +36,10 @@ export const state: SubscriptionsStateI = {
     serviceId: 0,
     trialDays: 0,
     updated: 0,
+  },
+  storage: {
+    currentStorage: 0,
+    storageLeft: 0,
+    storageLimit: 0,
   },
 };

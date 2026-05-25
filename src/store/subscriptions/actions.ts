@@ -15,4 +15,11 @@ export const actions: ActionTree<SubscriptionsStateI, RootStateI> = {
     context.commit('setPlan', snakeToCamel(data));
   },
 
+  async getStorage(
+    context: ActionContext<SubscriptionsStateI, RootStateI>,
+  ): Promise<void> {
+    const { data } = await storageClient.get('/api/subscriptions/storage');
+    context.commit('setStorage', snakeToCamel(data));
+  },
+
 };
