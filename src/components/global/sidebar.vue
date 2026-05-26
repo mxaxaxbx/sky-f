@@ -154,48 +154,156 @@
           <!-- Spacer for authenticated users -->
           <div v-if="isAuth" class="flex-1 flex flex-col justify-end px-1">
             <div
-              v-if="showSidebar"
-              class="mb-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/80 p-3 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm"
+              class="relative mb-2 border bg-[var(--hover-bg)] backdrop-blur-sm group "
+              :class="showSidebar
+              ? 'justify-start rounded-2xl px-1 py-1 border-[var(--hover-border)] bg-[var(--hover-bg)]'
+              : 'justify-center rounded-xl px-0 py-0 border-transparent bg-transparent'"
             >
-              <div class="flex items-start gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--hover-bg)] text-[var(--color-primary)]">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="h-5 w-5"
-                    aria-hidden="true"
+            <button
+              @click="toggleMinimize"
+              class="
+                absolute top-1 right-1 p-1
+                text-sm border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                bg-transparent
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+
+                transition-all duration-300
+              "
+              :class="[
+                showSidebar ? 'inline' : 'hidden',
+                minimized ? 'top-1' : 'top-1.5'
+              ]"
+            >
+              <i :class="minimized ? 'fas fa-chevron-down' : 'fas fa-chevron-up'" class="m-1" />
+            </button>
+              <div v-if="showSidebar" class="flex items-center gap-3">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-path)] text-[var(--color-primary)]"
+                  :class="minimized ? 'inline' : 'hidden'"
                   >
+                  <svg
+                    class="planet-svg w-7 h-7 mr-0.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <!-- anillo / elipsis -->
                     <path
-                      d="M4 7.25A3.25 3.25 0 0 1 7.25 4h9.5A3.25 3.25 0 0 1 20 7.25v9.5A3.25 3.25 0 0 1 16.75 20h-9.5A3.25 3.25 0 0 1 4 16.75v-9.5Zm3.25-1.75A1.75 1.75 0 0 0 5.5 7.25v9.5c0 .966.784 1.75 1.75 1.75h9.5a1.75 1.75 0 0 0 1.75-1.75v-9.5a1.75 1.75 0 0 0-1.75-1.75h-9.5Zm.75 3.5h8a.75.75 0 0 1 0 1.5h-8a.75.75 0 0 1 0-1.5Zm0 4h8a.75.75 0 0 1 0 1.5h-8a.75.75 0 0 1 0-1.5Z"
+                      d="M14.4873 6.0083C16.7151 4.39557 20.7112 2.51207 21.2259 3.02825C22.1425 3.94737 19.0002 8.56686 14.2075 13.3462C9.41476 18.1255 4.78649 21.2548 3.86994 20.3356C3.28742 19.7515 4.90915 16.6729 6.9873 14.0083"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      fill="none"
                     />
+
+                    <!-- planeta -->
+                    <circle
+                      cx="12.4873"
+                      cy="12.0083"
+                      r="6"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                    />
+
+                    <!-- planeta orbitando SOBRE la elipsis -->
+                    <circle
+                      class="orbit-dot"
+                      r="2"
+                      fill="currentColor"
+                    >
+                      <animateMotion
+                        dur="2s"
+                        repeatCount="indefinite"
+                        rotate="auto"
+                        path="M14.4873 6.0083C16.7151 4.39557 20.7112 2.51207 21.2259 3.02825C22.1425 3.94737 19.0002 8.56686 14.2075 13.3462C9.41476 18.1255 4.78649 21.2548 3.86994 20.3356C3.28742 19.7515 4.90915 16.6729 6.9873 14.0083"
+                      />
+                    </circle>
+
+                    <!-- estrellas -->
+                    <g class="stars">
+                      <path
+                        class="star star-1"
+                        d="M3 8L4.67614 7.67615L5 6L5.32385 7.67614L7 8L5.32385 8.32385L5 10L4.67615 8.32385L3 8Z"
+                        fill="currentColor"
+                      />
+
+                      <path
+                        class="star star-2"
+                        d="M11 21L12.6761 20.6761L13 19L13.3239 20.6761L15 21L13.3239 21.3239L13 23L12.6761 21.3239L11 21Z"
+                        fill="currentColor"
+                      />
+
+                      <path
+                        class="star star-3"
+                        d="M20 14L21.6761 13.6761L22 12L22.3239 13.6761L24 14L22.3239 14.3239L22 16L21.6761 14.3239L20 14Z"
+                        fill="currentColor"
+                      />
+                    </g>
                   </svg>
                 </div>
-
-                <div class="min-w-0 flex-1">
-                  <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">
-                    Subscription
-                  </p>
-                  <p class="mt-1 truncate text-sm font-semibold text-[var(--text)]">
+                <div v-if="showSidebar" class="flex flex-col items-center"
+                :class="minimized ? 'hidden' : 'inline'">
+                <svg
+                  width="35"
+                  height="35"
+                  viewBox="0 0 100 100"
+                  role="img"
+                  :aria-label="`Uso de almacenamiento para ${planDisplayName}`"
+                >
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    class="stroke-[var(--color-secondary)]"
+                    stroke-width="6"
+                  />
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="stroke-[var(--color-primary)] transition-[stroke-dashoffset] duration-300 ease-out"
+                    :style="{
+                      strokeDasharray: 251.33,
+                      strokeDashoffset: 251.33 * (1 - storageUsagePercent / 100),
+                      transform: 'rotate(-90deg)',
+                      transformOrigin: '50% 50%',
+                    }"
+                  />
+                  <text
+                    x="50" y="54"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="var(--text)"
+                    style="font-size: 28px; font-weight: 500;"
+                  >
+                    {{ storageUsagePercent }}%
+                  </text>
+                </svg>
+              </div>
+                <div class="flex flex-col space-y-0">
+                  <p class="truncate text-sm font-semibold text-[var(--text)]">
                     {{ planDisplayName }}
                   </p>
-                  <p class="mt-0.5 text-xs text-[var(--text-secondary)]">
+                  <p
+                    class="text-[10px] text-[var(--text-terceary)]"
+                    :class="minimized ? 'inline' : 'hidden'"
+                  >
                     {{ planMetaLabel }}
                   </p>
                 </div>
               </div>
 
-              <div class="mt-4">
-                <div class="flex items-center justify-between text-xs text-[var(--text-secondary)]">
-                  <span>Storage used</span>
-                  <span>{{ storageLabel }}</span>
-                </div>
-
+              <div v-if="showSidebar" class="mt-4"
+                :class="minimized ? 'inline' : 'hidden'"
+                >
                 <div
-                  class="mt-2 h-2 overflow-hidden rounded-full bg-[var(--hover-bg)]"
+                  class="mt-2 h-1 overflow-hidden rounded-full bg-[var(--color-secondary)]"
                   role="progressbar"
                   :aria-valuenow="storageUsagePercent"
-                  aria-valuemin="0"
+                  aria-valuemin="1"
                   aria-valuemax="100"
                   :aria-label="`Storage usage for ${planDisplayName}`"
                 >
@@ -205,13 +313,52 @@
                   />
                 </div>
 
-                <div class="mt-2 flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
-                  <span>{{ storageUsedLabel }}</span>
-                  <span>{{ storageLimitLabel }}</span>
+                <div class="mt-2 flex items-center justify-between gap-1 px-1 text-[10px] text-[var(--text-secondary)]">
+                  <span>{{ storageLabel }}</span>
+                  <div>
+                    <span>{{ storageUsedLabel }}</span> of <span>{{ storageLimitLabel }}</span>
+                  </div>
                 </div>
               </div>
+              <div v-if="!showSidebar" class="flex flex-col items-center">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 100 100"
+                  role="img"
+                  :aria-label="`Uso de almacenamiento para ${planDisplayName}`"
+                >
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    class="stroke-[var(--border)]"
+                    stroke-width="6"
+                  />
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="stroke-[var(--color-primary)] transition-[stroke-dashoffset] duration-300 ease-out"
+                    :style="{
+                      strokeDasharray: 251.33,
+                      strokeDashoffset: 251.33 * (1 - storageUsagePercent / 100),
+                      transform: 'rotate(-90deg)',
+                      transformOrigin: '50% 50%',
+                    }"
+                  />
+                  <text
+                    x="50" y="54"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="var(--text)"
+                    style="font-size: 28px; font-weight: 500;"
+                  >
+                    {{ storageUsagePercent }}%
+                  </text>
+                </svg>
+              </div>
             </div>
-
             <div class="flex justify-between"
             :class="showSidebar
                 ? 'flex-row gap-2'
@@ -224,17 +371,18 @@
                 group w-full
                 flex items-center
                 transition-all duration-200
-                text-sm text-[var(--text-terceary)]
-                rounded-xl border border-[var(--border)]
+                text-sm text-[var(--text-secondary)]
+                rounded-xl opacity-70
 
                 hover:bg-[var(--hover-bg)]
+                hover:opacity-100
                 hover:text-[var(--text)]
                 hover:border-[var(--hover-border)]
                 hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
               "
               :class="showSidebar
-                ? 'justify-start px-2 py-1.5'
-                : 'justify-center py-1.5'
+                ? 'justify-start px-2 py-1.5 border border-[var(--border)]'
+                : 'justify-center py-1.5 border border-transparent'
               "
             >
               <div class="w-6 h-6 flex items-center">
@@ -244,7 +392,7 @@
                   fill="currentColor"
                   class="
                     w-6 h-6
-                    text-[var(--text-terceary)]
+                    text-[#868686]
                     transition-all duration-150
                     group-hover:text-[var(--color-primary)]
                     arrow-move
@@ -264,7 +412,7 @@
             <!-- chnage theme -->
             <button
               @click="toggleTheme"
-              class="flex items-center rounded-xl w-10 h-10"
+              class="flex items-center rounded-xl w-10 h-10 opacity-50 hover:opacity-100"
               :class="showSidebar
                 ? 'justify-center px-2 py-1.5'
                 : 'justify-center px-2 py-1.5'
@@ -275,7 +423,7 @@
                 ? '/icon/icon-light.svg'
                 : '/icon/icon-dark.svg'"
                 alt="theme toggle"
-                class="w-5 h-5 m-1 opacity-70 hover:opacity-100 transition" />
+                class="w-5 h-5 m-1" />
             </button>
             </div>
             </div>
@@ -296,7 +444,6 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
-
 import { PlanI, StorageI } from '@/store/subscriptions/state';
 
 const token = localStorage.getItem('token');
@@ -304,6 +451,21 @@ const token = localStorage.getItem('token');
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const STORAGE_KEY = 'uploadPanel:minimized';
+
+const minimized = ref(
+  localStorage.getItem(STORAGE_KEY) === 'true',
+);
+
+function toggleMinimize() {
+  if (!(document as any).startViewTransition) {
+    minimized.value = !minimized.value;
+    return;
+  }
+  (document as any).startViewTransition(() => {
+    minimized.value = !minimized.value;
+  });
+}
 
 // Track when user is interacting with project dropdown
 const isProjectDropdownActive = ref(false);
@@ -373,12 +535,12 @@ const storageLabel = computed(() => {
   return `${storageUsagePercent.value}% used`;
 });
 const storageUsedLabel = computed(() => {
-  if (!hasStorageData.value) return '0 Bytes used';
-  return `${formatFileSize(storage.value.currentStorage)} used`;
+  if (!hasStorageData.value) return '0 Bytes';
+  return `${formatFileSize(storage.value.currentStorage)}`;
 });
 const storageLimitLabel = computed(() => {
   if (!hasStorageData.value) return '0 Bytes limit';
-  return `${formatFileSize(storage.value.storageLimit)} total`;
+  return `${formatFileSize(storage.value.storageLimit)}`;
 });
 
 // Show sidebar based on state (can be toggled on all screen sizes)
@@ -420,6 +582,10 @@ watch(route, () => {
   if (window.innerWidth < 1024) {
     store.commit('closeSidebar');
   }
+});
+
+watch(minimized, (value) => {
+  localStorage.setItem(STORAGE_KEY, String(value));
 });
 
 // Handle escape key (mobile only)
@@ -472,6 +638,72 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.planet-svg {
+  transition: transform 0.45s ease;
+  transform-origin: center;
+}
+
+.group:hover .planet-svg {
+  transform: rotate(40deg);
+}
+
+/* ---------- ORBITA ---------- */
+
+.orbit-dot {
+  opacity: 0;
+}
+
+.group:hover .orbit-dot {
+  opacity: 1;
+}
+
+/* ---------- ESTRELLAS ---------- */
+.star {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* delays distintos */
+
+.group:hover .star-1 {
+  animation: twinkle 2.2s ease-in-out infinite;
+}
+
+.group:hover .star-2 {
+  animation: twinkle 2.2s ease-in-out infinite 0.5s;
+}
+
+.group:hover .star-3 {
+  animation: twinkle 2.2s ease-in-out infinite 1s;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  20% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  35% {
+    opacity: 0.85;
+    transform: scale(2.5);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
 .group:hover .arrow-move {
     animation: arrowMove 1s ease-in-out;
   }

@@ -17,6 +17,7 @@
     --spaceship:#202F41;
     --bg-path: #142B47;
     --bg-path-secondary: #CFE6FF;
+    --color-secondary: #40516d;
   
     /* hover */
     --hover-border: #0A77F3;
@@ -52,6 +53,7 @@
   --spaceship:#ffffff;
   --bg-path: #FDFDFD;
   --bg-path-secondary: #002e5f;
+  --color-secondary: #c0c6d0;
   
   /* hover */
   --hover-border: #0A77F3;
