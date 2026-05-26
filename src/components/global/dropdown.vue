@@ -98,9 +98,10 @@ const handleTouchMove = (e: TouchEvent) => {
   if (!isDragging.value) return;
 
   const deltaY = e.touches[0].clientY - touchStartY.value;
+  touchCurrentY.value = deltaY;
 
-  if (deltaY > 0) {
-    touchCurrentY.value = deltaY;
+  if (deltaY < -80) {
+    close();
   }
 };
 
