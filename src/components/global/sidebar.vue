@@ -173,12 +173,12 @@
               "
               :class="[
                 showSidebar ? 'inline' : 'hidden',
-                minimized ? 'top-1' : 'top-1.5'
+                minimized ? 'top-1' : 'top-1'
               ]"
             >
               <i :class="minimized ? 'fas fa-chevron-down' : 'fas fa-chevron-up'" class="m-1" />
             </button>
-              <div v-if="showSidebar" class="flex items-center gap-3">
+              <div v-if="showSidebar" class="flex items-center gap-2 ">
                 <div
                   class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-path)] text-[var(--color-primary)]"
                   :class="minimized ? 'inline' : 'hidden'"
@@ -247,8 +247,8 @@
                 <div v-if="showSidebar" class="flex flex-col items-center"
                 :class="minimized ? 'hidden' : 'inline'">
                 <svg
-                  width="35"
-                  height="35"
+                  width="31"
+                  height="31"
                   viewBox="0 0 100 100"
                   role="img"
                   :aria-label="`Uso de almacenamiento para ${planDisplayName}`"
