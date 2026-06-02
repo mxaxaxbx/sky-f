@@ -407,6 +407,188 @@
             </div>
           </template>
 
+          <!-- HLS video -->
+          <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+          <template v-else-if="currentBlobURL && isHlsPlaylist(file)">
+            <div
+              class="
+                relative
+                flex flex-col
+                items-center justify-center
+                w-full h-full
+                rounded-2xl
+                bg-gradient-to-t from-black to-transparent
+              "
+            >
+              <video
+                :title="`Stream preview of ${file.name || 'stream'}`"
+                :src="isNativeHlsSupported ? currentBlobURL : undefined"
+                class="max-w-full max-h-full object-contain cursor-pointer"
+                ref="hlsVideoRef"
+
+                @timeupdate="onTimeUpdate"
+                @loadedmetadata="onLoadedMetadata"
+                @ended="isPlaying = false"
+                @click="togglePlay"
+                @keydown.space.prevent="togglePlay"
+                style="view-transition-name: preview-content"
+              >
+                <track kind="captions" />
+              </video>
+
+              <!-- controles -->
+              <div
+                class="
+                  absolute bottom-0 left-0 right-0
+                  flex flex-col
+                  px-4 pb-2 pt-8 gap-2
+                  transtion-all duration-300
+                "
+                :class="isFullscreen
+                  ? (showPreviewHeader ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none') : 'opacity-100'
+                "
+                style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%)
+                "
+              >
+                <!-- seek -->
+                <div
+                  v-if="canSeek"
+                  @mousedown="onSeekStart"
+                  @blur="onSeekEnd"
+                  role="slider"
+                  tabindex="0"
+                  :aria-valuenow="Math.round(progressPercent)"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  class="seek-bar relative mx-2 h-1 bg-[var(--text-terceary)] rounded-full cursor-pointer select-none"
+                >
+                  <div class="absolute top-0 left-0 h-full rounded-full bg-[var(--color-primary)]" :style="{ width: progressPercent + '%' }" />
+                  <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[var(--color-primary)]" :style="{ left: progressPercent + '%' }" />
+                </div>
+                <!-- buttons actions -->
+                <div class="flex items-center justify-between">
+                  <div class=" flex-1 flex items-center gap-2 mb-1">
+                    <!-- play/pause -->
+                    <button
+                      @click="togglePlay"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <img v-if="isPlaying" src="/icon/icon-pause.svg" alt="Pause" class="h-6 w-6" />
+                      <img v-else src="/icon/icon-play.svg" alt="Play" class="h-6 w-6" />
+                    </button>
+                    <!--volumen-->
+                    <div
+                      class="
+                        group
+                        relative flex items-center
+                        border border-transparent gap-2
+                        py-1 px-1.5 rounded-xl grayscale
+
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <!-- BotÃ³n volumen -->
+                      <button @click="toggleMute">
+                        <img v-if="isMuted" src="/icon/icon-mute.svg" alt="Unmute" class="h-6" />
+                        <img v-else src="/icon/icon-sound.svg" alt="Mute" class="h-6" />
+                      </button>
+
+                      <!-- Slider: oculto por defecto, visible al hacer hover en el grupo -->
+                      <div
+                        class="
+                          flex items-center justify-center
+                          w-0 h-5
+                          overflow-hidden opacity-0
+
+                          group-hover:w-24 group-hover:opacity-100
+                          transition-all duration-300 ease-in-out
+                        "
+                      >
+                        <label class="sr-only" for="volume-slider-hls">Volumen</label>
+                        <input
+                          id="volume-slider-hls"
+                          type="range" min="0" max="1" step="0.01"
+                          :value="volume"
+                          @input="volume = parseFloat(($event.target as HTMLInputElement).value); onVolumeChange()"
+                          class="volume-slider w-24"
+                          :style="{
+                            background: `linear-gradient(to right, var(--color-primary)
+                            ${volume * 100}%, var(--text-terceary) ${volume * 100}%)`
+                          }"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <!-- timer -->
+                  <div class="flex flex-1 items-center justify-center gap-2 mb-1">
+                    <span
+                      v-if="canSeek"
+                      class="text-[var(--text-terceary)] text-sm font-semibold mr-4"
+                    >
+                      {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+                    </span>
+                    <span
+                      v-else
+                      class="text-[var(--text-terceary)] text-sm font-semibold mr-4 uppercase tracking-[0.2em]"
+                    >
+                      Live
+                    </span>
+                  </div>
+                  <!-- fullscreen -->
+                  <div class="flex-1 flex items-center justify-end gap-1">
+                    <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
+                      {{ castStatusText }}
+                    </span>
+                    <button
+                      @click="castVideo"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <img src="/icon/icon-cast.svg" alt="cast" class="h-6"/>
+                      <span class="absolute -bottom-3 -right-0.5 text-[10px] px-2 text-[var(--color-primary)] rounded-full">beta</span>
+                    </button>
+                    <button
+                      @click="toggleFullscreen"
+                      class="
+                        border border-transparent
+                        text-[var(--color-primary)] font-medium text-sm
+                        p-1 rounded-xl grayscale
+                        hover:text-[var(--text)]
+                        hover:border-[var(--color-primary)]
+                        hover:grayscale-0
+                        transition-all duration-300
+                      "
+                    >
+                      <img
+                        :src="isFullscreen
+                        ? '/icon/icon-fullscreen-close.svg' : '/icon/icon-fullscreen.svg'"
+                        alt="fullscreen"
+                        class="w-6 h-6"/>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
           <!-- audio -->
           <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
           <div
@@ -619,16 +801,18 @@
             title="Visor de docx"
             style="view-transition-name: preview-content"
           />
-                    <!-- other -->
+          <!-- other -->
           <div v-else class="flex flex-col pb-10 items-center text-[var(--text-terceary)] text-xs text-center sm:text-md">
             <span class="font-semibold text-[var(--text-terceary)] text-5xl mb-8 ">Ups! :(</span>
             <img v-if="file.contentType === 'application/msword' || file.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'" src="/icon/icon-doc.svg" alt="doc" class="h-20 w-20" style="view-transition-name: preview-content" />
             <img v-else-if="file.contentType === 'application/vnd.ms-excel' || file.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'" src="/icon/icon-excel.svg" alt="excel" class="h-20 w-20" style="view-transition-name: preview-content" />
             <img v-else-if="file.contentType === 'application/vnd.ms-powerpoint' || file.contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'" src="/icon/icon-ppt.svg" alt="ppt" class="h-20 w-20" style="view-transition-name: preview-content" />
             <span class="font-semibold text-white text-xl mb-5 sm:text-3xl"> {{ file.name }} </span>
-            <p>Sorry, a preview for the file
+            <p>
+              Sorry, a preview for the file
               is not available at the moment.
-              <br>We recommend downloading it to view its contents...</p>
+              <br>We recommend downloading it to view its contents...
+            </p>
           </div>
         </div>
 
@@ -776,6 +960,7 @@
 import {
   ref,
   computed,
+  nextTick,
   watch,
   onMounted,
   onUnmounted,
@@ -803,6 +988,7 @@ const file = computed(() => props.modelValue);
 const files = computed(() => props.files);
 const currentPreviewIndex = computed(() => files.value.findIndex((f) => f.id === file.value.id));
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
+const canSeek = computed(() => Number.isFinite(duration.value) && duration.value > 0);
 
 const audioCover = ref<string | null>(null);
 const currentBlobURL = ref<string | null>(null);
@@ -825,7 +1011,10 @@ const showPreviewHeader = ref(true);
 const touchStartX = ref(0);
 const imageRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
+const hlsVideoRef = ref<HTMLVideoElement | null>(null);
 const audioRef = ref<HTMLAudioElement | null>(null);
+const hlsReady = ref(false);
+const pendingHlsPlay = ref(false);
 const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const castState = ref('UNKNOWN');
 const castStatusText = computed(() => {
@@ -837,6 +1026,14 @@ const castStatusText = computed(() => {
 });
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
+type HlsInstance = {
+  destroy: () => void;
+  loadSource: (source: string) => void;
+  attachMedia: (media: HTMLVideoElement) => void;
+  on: (event: string, handler: (...args: any[]) => void) => void;
+};
+
+let hlsInstance: HlsInstance | null = null;
 
 function getChromeCastApi() {
   return (window as any).chrome;
@@ -881,6 +1078,90 @@ function previewPrev() {
     emit('update:modelValue', prev);
     resetZoom();
   }
+}
+
+function isHlsPlaylist(currentFile: FileI | null | undefined) {
+  if (!currentFile) return false;
+
+  const name = currentFile.name?.toLowerCase() || '';
+  const contentType = currentFile.contentType?.toLowerCase() || '';
+
+  return name.endsWith('.m3u8') || [
+    'application/vnd.apple.mpegurl',
+    'application/x-mpegurl',
+    'application/mpegurl',
+    'audio/x-mpegurl',
+  ].includes(contentType);
+}
+
+const isNativeHlsSupported = computed(() => {
+  if (!hlsVideoRef.value) return false;
+  return hlsVideoRef.value.canPlayType('application/vnd.apple.mpegurl') !== '';
+});
+
+function getActiveMediaElement() {
+  return videoRef.value || hlsVideoRef.value || audioRef.value;
+}
+
+async function destroyHlsPlayer() {
+  if (hlsInstance) {
+    hlsInstance.destroy();
+    hlsInstance = null;
+  }
+
+  hlsReady.value = false;
+  pendingHlsPlay.value = false;
+
+  if (hlsVideoRef.value) {
+    hlsVideoRef.value.removeAttribute('src');
+    hlsVideoRef.value.load();
+  }
+}
+
+async function setupHlsPlayer(source: string) {
+  const video = hlsVideoRef.value;
+  if (!video) return;
+
+  await destroyHlsPlayer();
+
+  if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = source;
+    hlsReady.value = true;
+    return;
+  }
+
+  const { default: Hls } = await import('hls.js');
+
+  if (Hls.isSupported()) {
+    hlsInstance = new Hls();
+    hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
+      hlsInstance?.loadSource(source);
+    });
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+      hlsReady.value = true;
+      if (!pendingHlsPlay.value) return;
+
+      pendingHlsPlay.value = false;
+      video.play().then(() => {
+        isPlaying.value = true;
+      }).catch((error) => {
+        console.warn('HLS autoplay after manifest parsing failed', error);
+        isPlaying.value = false;
+      });
+    });
+    hlsInstance.on(Hls.Events.ERROR, (_event, data) => {
+      if (!data?.fatal) return;
+      console.error('HLS fatal error', data);
+      hlsReady.value = false;
+      pendingHlsPlay.value = false;
+      isPlaying.value = false;
+    });
+    hlsInstance.attachMedia(video);
+    return;
+  }
+
+  video.src = source;
+  hlsReady.value = true;
 }
 
 async function extractAudioCover(blob: Blob) {
@@ -933,6 +1214,8 @@ async function extractAudioCover(blob: Blob) {
 }
 
 async function getBase64(currentFile: FileI) {
+  if (isHlsPlaylist(currentFile)) return '';
+
   const base64 = await store.dispatch('files/getCacheFile', { id: currentFile.id });
 
   if (base64) {
@@ -987,30 +1270,45 @@ async function getBase64(currentFile: FileI) {
   return url;
 }
 
-function togglePlay() {
-  const media = videoRef.value || audioRef.value;
+async function togglePlay() {
+  const media = getActiveMediaElement();
   if (!media) return;
   if (isPlaying.value) {
-    media.pause(); isPlaying.value = false;
-  } else {
-    media.play(); isPlaying.value = true;
+    pendingHlsPlay.value = false;
+    media.pause();
+    isPlaying.value = false;
+    return;
+  }
+
+  if (isHlsPlaylist(file.value) && !hlsReady.value) {
+    pendingHlsPlay.value = true;
+    return;
+  }
+
+  try {
+    await media.play();
+    isPlaying.value = true;
+  } catch (error) {
+    pendingHlsPlay.value = false;
+    isPlaying.value = false;
+    console.warn('Playback failed to start', error);
   }
 }
 
 function onTimeUpdate() {
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   currentTime.value = media?.currentTime ?? 0;
 }
 
 function onLoadedMetadata() {
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   if (!media) return;
-  duration.value = media.duration;
+  duration.value = Number.isFinite(media.duration) ? media.duration : 0;
   media.volume = volume.value;
 }
 
 function seekFromEvent(e: MouseEvent) {
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   if (!media || !duration.value || !Number.isFinite(duration.value)) return;
 
   const bar = document.querySelector('.seek-bar') as HTMLElement;
@@ -1033,7 +1331,7 @@ function onSeekMove(e: MouseEvent) {
 function onSeekEnd() {
   if (!isSeeking.value) return;
   isSeeking.value = false;
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   if (media) {
     media.play();
     isPlaying.value = true;
@@ -1045,7 +1343,7 @@ function onSeekEnd() {
 
 function onSeekStart(e: MouseEvent) {
   e.preventDefault();
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   if (media) {
     media.pause();
     isPlaying.value = false;
@@ -1058,7 +1356,7 @@ function onSeekStart(e: MouseEvent) {
 }
 
 function toggleMute() {
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   if (!media) return;
 
   isMuted.value = !isMuted.value;
@@ -1076,7 +1374,7 @@ function toggleMute() {
 }
 
 function onVolumeChange() {
-  const media = videoRef.value || audioRef.value;
+  const media = getActiveMediaElement();
   if (!media) return;
   media.volume = volume.value;
   isMuted.value = volume.value === 0;
@@ -1304,10 +1602,11 @@ async function castVideo() {
 
   const url = await store.dispatch('files/getDownloadUrl', { id: file.value.id });
 
-  const mediaInfo = new chromeCastApi.cast.media.MediaInfo(
-    url,
-    'video/mp4',
-  );
+  const mediaType = isHlsPlaylist(file.value)
+    ? 'application/vnd.apple.mpegurl'
+    : (file.value.contentType || 'video/mp4');
+
+  const mediaInfo = new chromeCastApi.cast.media.MediaInfo(url, mediaType);
 
   mediaInfo.metadata = new chromeCastApi.cast.media.GenericMediaMetadata();
 
@@ -1365,6 +1664,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
+  destroyHlsPlayer();
 
   const castApi = getCastApi();
   if (castApi) {
@@ -1387,12 +1687,25 @@ watch(() => props.modelValue, async (newFile) => {
   zoomLevel.value = 1;
   imageDimensions.value = null;
   duration.value = 0;
+  currentBlobURL.value = null;
+  textContent.value = null;
   pdfDownloadUrl.value = null;
   docxDownloadUrl.value = null;
+  hlsReady.value = false;
+  pendingHlsPlay.value = false;
+  await destroyHlsPlayer();
 
   if (!newFile) return;
 
-  getBase64(newFile);
+  if (isHlsPlaylist(newFile)) {
+    currentBlobURL.value = await store.dispatch('files/getDownloadUrl', newFile);
+    await nextTick();
+    if (currentBlobURL.value) {
+      await setupHlsPlayer(currentBlobURL.value);
+    }
+  } else {
+    getBase64(newFile);
+  }
 
   if (newFile.contentType === 'application/pdf') { // 👈 añade esto
     pdfDownloadUrl.value = await store.dispatch('files/getDownloadUrl', newFile);

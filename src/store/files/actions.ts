@@ -8,6 +8,18 @@ import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
 import { FolderI } from '../folders/state';
 
+function isHlsPlaylistFile(file: Pick<FileI, 'name' | 'contentType'>) {
+  const name = file.name?.toLowerCase() || '';
+  const contentType = file.contentType?.toLowerCase() || '';
+
+  return name.endsWith('.m3u8') || [
+    'application/vnd.apple.mpegurl',
+    'application/x-mpegurl',
+    'application/mpegurl',
+    'audio/x-mpegurl',
+  ].includes(contentType);
+}
+
 export const actions: ActionTree<FilesStateI, RootStateI> = {
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
@@ -219,13 +231,21 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       return;
     }
 
-    const { data } = await storageClient.get(
-      `/api/storage/get-download-url/${payload.id}`,
-    );
+    if (isHlsPlaylistFile(payload)) {
+      console.log('Skipping cache for HLS playlist');
+      return;
+    }
 
+    const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
 
-    const blob = await fetch(url).then((r) => r.blob());
+    let blob: Blob;
+    try {
+      blob = await fetch(url).then((r) => r.blob());
+    } catch (error) {
+      console.warn('Skipping cache because the file could not be fetched', error);
+      return;
+    }
 
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -304,7 +324,11 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   ): Promise<string> {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
-    context.dispatch('saveCacheFile', payload);
+
+    if (!isHlsPlaylistFile(payload)) {
+      context.dispatch('saveCacheFile', payload);
+    }
+
     return url;
   },
 
