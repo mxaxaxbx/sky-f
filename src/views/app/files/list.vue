@@ -840,10 +840,10 @@
                     'backdrop-blur-md',
                     'border border-[var(--border)]',
                     'rounded-2xl','shadow-md',
-                    'absolute','right-0', 'z-20',
+                    'absolute','right-2', 'z-20',
                     dropdownPosition,
                     'w-48',
-                    'sm:-right-[160px]'
+                    'sm:-right-[150px]'
                   ]"
                 >
                   <template #trigger="{ toggle, close }">

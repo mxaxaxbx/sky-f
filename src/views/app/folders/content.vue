@@ -69,7 +69,9 @@
           sm:ml-2 sm:mx-0
           "
         >
-        <!-- <h1 class="text-6xl font-bold text-center text-white">Fui a comprar lo del almuerzo! :D</h1> -->
+        <!-- <h1 class="text-6xl font-bold text-center text-white">
+            Fui a comprar lo del almuerzo! :D</h1>
+          -->
         <svg width="300" height="260" viewBox="0 0 220 260" fill="#fffff" xmlns="http://www.w3.org/2000/svg">
           <!-- luz -->
           <g class="lights">
@@ -1889,7 +1891,7 @@ watch(() => route.params.id, () => {
 
 .slide-enter-to,
 .slide-leave-from {
-  max-height: 500px; /* ajusta según tu contenido */
+  max-height: 500px;
   opacity: 1;
   transform: translateY(0);
 }
