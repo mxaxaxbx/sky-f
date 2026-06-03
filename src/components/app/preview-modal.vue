@@ -1094,6 +1094,71 @@ function isHlsPlaylist(currentFile: FileI | null | undefined) {
   ].includes(contentType);
 }
 
+function isWrappedPlaylistFile(currentFile: FileI | null | undefined) {
+  if (!currentFile) return false;
+
+  const name = currentFile.name?.toLowerCase() || '';
+  return name.endsWith('.m3u');
+}
+
+function extractPlaylistStreamUrl(playlistText: string, baseUrl?: string): string | null {
+  const lines = playlistText.split(/\r?\n/);
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    // eslint-disable-next-line no-continue
+    if (!line || line.startsWith('#')) continue;
+
+    if (baseUrl) {
+      try {
+        return new URL(line, baseUrl).toString();
+      } catch (error) {
+        console.warn('Unable to resolve HLS playlist URL against base URL', error);
+      }
+    }
+
+    return line;
+  }
+
+  return null;
+}
+
+async function readTextFromDataUrl(dataUrl: string): Promise<string> {
+  return fetch(dataUrl).then((response) => response.text());
+}
+
+async function resolveHlsStreamUrl(currentFile: FileI): Promise<string | null> {
+  const downloadUrl = await store.dispatch('files/getDownloadUrl', currentFile);
+  const cachedPlaylist = await store.dispatch('files/getCacheFile', { id: currentFile.id });
+
+  const tryExtract = async (playlistSource: string | null) => {
+    if (!playlistSource) return null;
+
+    try {
+      const playlistText = playlistSource.startsWith('data:')
+        ? await readTextFromDataUrl(playlistSource)
+        : await fetch(playlistSource).then((response) => response.text());
+
+      return extractPlaylistStreamUrl(playlistText, downloadUrl);
+    } catch (error) {
+      console.warn('Unable to read HLS playlist contents', error);
+      return null;
+    }
+  };
+
+  const cachedSource = await tryExtract(cachedPlaylist || null);
+  if (cachedSource) return cachedSource;
+
+  try {
+    const playlistText = await fetch(downloadUrl).then((response) => response.text());
+    return extractPlaylistStreamUrl(playlistText, downloadUrl);
+  } catch (error) {
+    console.warn('Unable to fetch HLS playlist contents from download URL', error);
+    return null;
+  }
+}
+
 const isNativeHlsSupported = computed(() => {
   if (!hlsVideoRef.value) return false;
   return hlsVideoRef.value.canPlayType('application/vnd.apple.mpegurl') !== '';
@@ -1698,10 +1763,19 @@ watch(() => props.modelValue, async (newFile) => {
   if (!newFile) return;
 
   if (isHlsPlaylist(newFile)) {
-    currentBlobURL.value = await store.dispatch('files/getDownloadUrl', newFile);
-    await nextTick();
-    if (currentBlobURL.value) {
-      await setupHlsPlayer(currentBlobURL.value);
+    if (isWrappedPlaylistFile(newFile)) {
+      const hlsSource = await resolveHlsStreamUrl(newFile);
+      currentBlobURL.value = hlsSource;
+      await nextTick();
+      if (hlsSource) {
+        await setupHlsPlayer(hlsSource);
+      }
+    } else {
+      currentBlobURL.value = await store.dispatch('files/getDownloadUrl', newFile);
+      await nextTick();
+      if (currentBlobURL.value) {
+        await setupHlsPlayer(currentBlobURL.value);
+      }
     }
   } else {
     getBase64(newFile);
@@ -1726,7 +1800,7 @@ watch(() => props.modelValue, async (newFile) => {
     };
   }
 
-  if (newFile.contentType?.startsWith('audio/') || newFile.contentType?.startsWith('video/')) {
+  if (!isHlsPlaylist(newFile) && (newFile.contentType?.startsWith('audio/') || newFile.contentType?.startsWith('video/'))) {
     const base64 = await store.dispatch('files/getCacheFile', { id: newFile.id });
     if (!base64) return;
 
