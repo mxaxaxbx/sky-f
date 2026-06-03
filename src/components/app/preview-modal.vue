@@ -1165,6 +1165,9 @@ const isNativeHlsSupported = computed(() => {
 });
 
 function getActiveMediaElement() {
+  if (isHlsPlaylist(file.value)) return hlsVideoRef.value;
+  if (file.value?.contentType?.startsWith('audio/')) return audioRef.value;
+  if (file.value?.contentType?.startsWith('video/')) return videoRef.value;
   return videoRef.value || hlsVideoRef.value || audioRef.value;
 }
 
@@ -1336,17 +1339,23 @@ async function getBase64(currentFile: FileI) {
 }
 
 async function togglePlay() {
+  if (isHlsPlaylist(file.value) && !hlsReady.value) {
+    pendingHlsPlay.value = true;
+    return;
+  }
+
   const media = getActiveMediaElement();
   if (!media) return;
+
+  if (media.readyState === HTMLMediaElement.HAVE_NOTHING && !media.currentSrc && !media.src) {
+    console.warn('Playback skipped because the media element has no source yet');
+    return;
+  }
+
   if (isPlaying.value) {
     pendingHlsPlay.value = false;
     media.pause();
     isPlaying.value = false;
-    return;
-  }
-
-  if (isHlsPlaylist(file.value) && !hlsReady.value) {
-    pendingHlsPlay.value = true;
     return;
   }
 
@@ -1398,8 +1407,12 @@ function onSeekEnd() {
   isSeeking.value = false;
   const media = getActiveMediaElement();
   if (media) {
-    media.play();
-    isPlaying.value = true;
+    media.play().then(() => {
+      isPlaying.value = true;
+    }).catch((error) => {
+      console.warn('Playback failed after seek', error);
+      isPlaying.value = false;
+    });
   }
 
   document.removeEventListener('mousemove', onSeekMove);
