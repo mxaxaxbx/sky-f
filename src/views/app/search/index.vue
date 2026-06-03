@@ -806,6 +806,15 @@ const previewFile = computed({
   },
 });
 
+watch(
+  () => files.value,
+  (value) => {
+    if (!value.length) return;
+    store.commit('files/setPreviewFilesList', value);
+  },
+  { deep: true },
+);
+
 async function getFolders() {
   console.log('getFolders');
   loading.value = true;

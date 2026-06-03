@@ -50,7 +50,7 @@
             "
           >
             <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
-            Could Drive
+            Cloud Drive
           </router-link>
           <span class="text-[var(--text-terceary)] px-1">></span>
           <div class="flex items-center gap-1">

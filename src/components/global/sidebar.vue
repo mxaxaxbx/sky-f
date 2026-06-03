@@ -31,7 +31,6 @@
     >
         <div class="flex flex-col h-full pt-12 pb-4">
           <div class="flex px-2 items-center justify-between">
-            <!-- Texto -->
             <span
               v-show="showSidebar"
               class="font-semibold text-[var(--text-secondary)] hidden sm:inline"
@@ -50,8 +49,8 @@
               :src="showSidebar
                 ? '/icon/icon-close.svg'
                 : '/icon/icon-open.svg'"
-              :alt="showSidebar ? 'close' : 'open'"
-              class="w-6 h-6 opacity-50 hover:opacity-100 transition"
+                :alt="showSidebar ? 'close' : 'open'"
+                class="w-6 h-6 opacity-50 hover:opacity-100 transition"
               />
             </div>
           </button>
@@ -154,6 +153,212 @@
 
           <!-- Spacer for authenticated users -->
           <div v-if="isAuth" class="flex-1 flex flex-col justify-end px-1">
+            <div
+              class="relative mb-2 border bg-[var(--hover-bg)] backdrop-blur-sm group "
+              :class="showSidebar
+              ? 'justify-start rounded-2xl px-1 py-1 border-[var(--hover-border)] bg-[var(--hover-bg)]'
+              : 'justify-center rounded-xl px-0 py-0 border-transparent bg-transparent'"
+            >
+            <button
+              @click="toggleMinimize"
+              class="
+                absolute top-1 right-1 p-1
+                text-sm border border-transparent rounded-xl
+                text-[var(--text-terceary)]
+                bg-transparent
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-primary)]
+
+                transition-all duration-300
+              "
+              :class="[
+                showSidebar ? 'inline' : 'hidden',
+                minimized ? 'top-1' : 'top-1'
+              ]"
+            >
+              <i :class="minimized ? 'fas fa-chevron-down' : 'fas fa-chevron-up'" class="m-1" />
+            </button>
+              <div v-if="showSidebar" class="flex items-center gap-2 ">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-path)] text-[var(--color-primary)]"
+                  :class="minimized ? 'inline' : 'hidden'"
+                  >
+                  <svg
+                    class="planet-svg w-7 h-7 mr-0.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <!-- anillo / elipsis -->
+                    <path
+                      d="M14.4873 6.0083C16.7151 4.39557 20.7112 2.51207 21.2259 3.02825C22.1425 3.94737 19.0002 8.56686 14.2075 13.3462C9.41476 18.1255 4.78649 21.2548 3.86994 20.3356C3.28742 19.7515 4.90915 16.6729 6.9873 14.0083"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      fill="none"
+                    />
+
+                    <!-- planeta -->
+                    <circle
+                      cx="12.4873"
+                      cy="12.0083"
+                      r="6"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      fill="none"
+                    />
+
+                    <!-- planeta orbitando SOBRE la elipsis -->
+                    <circle
+                      class="orbit-dot"
+                      r="2"
+                      fill="currentColor"
+                    >
+                      <animateMotion
+                        dur="2s"
+                        repeatCount="indefinite"
+                        rotate="auto"
+                        path="M14.4873 6.0083C16.7151 4.39557 20.7112 2.51207 21.2259 3.02825C22.1425 3.94737 19.0002 8.56686 14.2075 13.3462C9.41476 18.1255 4.78649 21.2548 3.86994 20.3356C3.28742 19.7515 4.90915 16.6729 6.9873 14.0083"
+                      />
+                    </circle>
+
+                    <!-- estrellas -->
+                    <g class="stars">
+                      <path
+                        class="star star-1"
+                        d="M3 8L4.67614 7.67615L5 6L5.32385 7.67614L7 8L5.32385 8.32385L5 10L4.67615 8.32385L3 8Z"
+                        fill="currentColor"
+                      />
+
+                      <path
+                        class="star star-2"
+                        d="M11 21L12.6761 20.6761L13 19L13.3239 20.6761L15 21L13.3239 21.3239L13 23L12.6761 21.3239L11 21Z"
+                        fill="currentColor"
+                      />
+
+                      <path
+                        class="star star-3"
+                        d="M20 14L21.6761 13.6761L22 12L22.3239 13.6761L24 14L22.3239 14.3239L22 16L21.6761 14.3239L20 14Z"
+                        fill="currentColor"
+                      />
+                    </g>
+                  </svg>
+                </div>
+                <div v-if="showSidebar" class="flex flex-col items-center"
+                :class="minimized ? 'hidden' : 'inline'">
+                <svg
+                  width="31"
+                  height="31"
+                  viewBox="0 0 100 100"
+                  role="img"
+                  :aria-label="`Uso de almacenamiento para ${planDisplayName}`"
+                >
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    class="stroke-[var(--color-secondary)]"
+                    stroke-width="6"
+                  />
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="stroke-[var(--color-primary)] transition-[stroke-dashoffset] duration-300 ease-out"
+                    :style="{
+                      strokeDasharray: 251.33,
+                      strokeDashoffset: 251.33 * (1 - storageUsagePercent / 100),
+                      transform: 'rotate(-90deg)',
+                      transformOrigin: '50% 50%',
+                    }"
+                  />
+                  <text
+                    x="50" y="54"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="var(--text)"
+                    style="font-size: 28px; font-weight: 500;"
+                  >
+                    {{ storageUsagePercent }}%
+                  </text>
+                </svg>
+              </div>
+                <div class="flex flex-col space-y-0">
+                  <p class="truncate text-sm font-semibold text-[var(--text)]">
+                    {{ planDisplayName }}
+                  </p>
+                  <p
+                    class="text-[10px] text-[var(--text-terceary)]"
+                    :class="minimized ? 'inline' : 'hidden'"
+                  >
+                    {{ planMetaLabel }}
+                  </p>
+                </div>
+              </div>
+
+              <div v-if="showSidebar" class="mt-4"
+                :class="minimized ? 'inline' : 'hidden'"
+                >
+                <div
+                  class="mt-2 h-1 overflow-hidden rounded-full bg-[var(--color-secondary)]"
+                  role="progressbar"
+                  :aria-valuenow="storageUsagePercent"
+                  aria-valuemin="1"
+                  aria-valuemax="100"
+                  :aria-label="`Storage usage for ${planDisplayName}`"
+                >
+                  <div
+                    class="h-full rounded-full bg-[linear-gradient(90deg,var(--color-primary),rgba(10,119,243,0.55))] transition-[width] duration-300 ease-out"
+                    :style="{ width: `${storageUsagePercent}%` }"
+                  />
+                </div>
+
+                <div class="mt-2 flex items-center justify-between gap-1 px-1 text-[10px] text-[var(--text-secondary)]">
+                  <span>{{ storageLabel }}</span>
+                  <div>
+                    <span>{{ storageUsedLabel }}</span> of <span>{{ storageLimitLabel }}</span>
+                  </div>
+                </div>
+              </div>
+              <div v-if="!showSidebar" class="flex flex-col items-center">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 100 100"
+                  role="img"
+                  :aria-label="`Uso de almacenamiento para ${planDisplayName}`"
+                >
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    class="stroke-[var(--border)]"
+                    stroke-width="6"
+                  />
+                  <circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="stroke-[var(--color-primary)] transition-[stroke-dashoffset] duration-300 ease-out"
+                    :style="{
+                      strokeDasharray: 251.33,
+                      strokeDashoffset: 251.33 * (1 - storageUsagePercent / 100),
+                      transform: 'rotate(-90deg)',
+                      transformOrigin: '50% 50%',
+                    }"
+                  />
+                  <text
+                    x="50" y="54"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="var(--text)"
+                    style="font-size: 28px; font-weight: 500;"
+                  >
+                    {{ storageUsagePercent }}%
+                  </text>
+                </svg>
+              </div>
+            </div>
             <div class="flex justify-between"
             :class="showSidebar
                 ? 'flex-row gap-2'
@@ -166,17 +371,18 @@
                 group w-full
                 flex items-center
                 transition-all duration-200
-                text-sm text-[var(--text-terceary)]
-                rounded-xl border border-[var(--border)]
+                text-sm text-[var(--text-secondary)]
+                rounded-xl opacity-70
 
                 hover:bg-[var(--hover-bg)]
+                hover:opacity-100
                 hover:text-[var(--text)]
                 hover:border-[var(--hover-border)]
                 hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.3)]
               "
               :class="showSidebar
-                ? 'justify-start px-2 py-1.5'
-                : 'justify-center py-1.5'
+                ? 'justify-start px-2 py-1.5 border border-[var(--border)]'
+                : 'justify-center py-1.5 border border-transparent'
               "
             >
               <div class="w-6 h-6 flex items-center">
@@ -186,7 +392,7 @@
                   fill="currentColor"
                   class="
                     w-6 h-6
-                    text-[var(--text-terceary)]
+                    text-[#868686]
                     transition-all duration-150
                     group-hover:text-[var(--color-primary)]
                     arrow-move
@@ -206,7 +412,7 @@
             <!-- chnage theme -->
             <button
               @click="toggleTheme"
-              class="flex items-center rounded-xl w-10 h-10"
+              class="flex items-center rounded-xl w-10 h-10 opacity-50 hover:opacity-100"
               :class="showSidebar
                 ? 'justify-center px-2 py-1.5'
                 : 'justify-center px-2 py-1.5'
@@ -217,7 +423,7 @@
                 ? '/icon/icon-light.svg'
                 : '/icon/icon-dark.svg'"
                 alt="theme toggle"
-                class="w-5 h-5 m-1 opacity-70 hover:opacity-100 transition" />
+                class="w-5 h-5 m-1" />
             </button>
             </div>
             </div>
@@ -238,14 +444,28 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
-
-import { PermissionI } from '@/store/auth/state';
+import { PlanI, StorageI } from '@/store/subscriptions/state';
 
 const token = localStorage.getItem('token');
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const STORAGE_KEY = 'uploadPanel:minimized';
+
+const minimized = ref(
+  localStorage.getItem(STORAGE_KEY) === 'true',
+);
+
+function toggleMinimize() {
+  if (!(document as any).startViewTransition) {
+    minimized.value = !minimized.value;
+    return;
+  }
+  (document as any).startViewTransition(() => {
+    minimized.value = !minimized.value;
+  });
+}
 
 // Track when user is interacting with project dropdown
 const isProjectDropdownActive = ref(false);
@@ -263,13 +483,65 @@ if (typeof window !== 'undefined') {
   window.addEventListener('resize', handleResize);
 }
 
-// Computed properties with proper typing
-const permissions = computed<PermissionI[]>(() => store.getters['auth/permissions']);
+function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / (k ** i)).toFixed(1))} ${sizes[i]}`;
+}
+
+function formatPlanPrice(price: number, currency: string): string {
+  if (!price) return 'Free';
+  if (!currency) return `${price}`;
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+    }).format(price);
+  } catch {
+    return `${price} ${currency}`;
+  }
+}
+
 const showSidebarState = computed<boolean>(() => store.state.sidebar);
 const isAuth = computed(() => store.getters['auth/isAuth']);
 const isLight = computed(() => store.state.theme?.theme === 'light');
-// const projects = computed<BusinessI[]>(() => store.getters['auth/projects']);
-// const project = computed(() => store.getters['auth/project']);
+const plan = computed<PlanI>(() => store.state.subscriptions.plan);
+const storage = computed<StorageI>(() => store.state.subscriptions.storage);
+const hasPlanData = computed(() => Boolean(plan.value?.id || plan.value?.name || plan.value?.description));
+const hasStorageData = computed(() => Number(storage.value?.storageLimit) > 0);
+const storageUsagePercent = computed(() => {
+  if (!hasStorageData.value) return 0;
+  const percent = (storage.value.currentStorage / storage.value.storageLimit) * 100;
+  return Math.max(0, Math.min(100, Number(percent.toFixed(1))));
+});
+const planDisplayName = computed(() => {
+  if (!hasPlanData.value) return 'Loading plan...';
+  return plan.value.name?.trim() || 'Custom plan';
+});
+const planMetaLabel = computed(() => {
+  if (!hasPlanData.value) return 'Loading plan...';
+
+  const bits: string[] = [];
+  if (plan.value.price > 0) bits.push(formatPlanPrice(plan.value.price, plan.value.currency));
+  if (plan.value.billingCycle?.trim()) bits.push(plan.value.billingCycle.trim());
+  return bits.length ? bits.join(' / ') : 'Free plan';
+});
+const storageLabel = computed(() => {
+  if (!hasStorageData.value) return 'Loading storage...';
+  return `${storageUsagePercent.value}% used`;
+});
+const storageUsedLabel = computed(() => {
+  if (!hasStorageData.value) return '0 Bytes';
+  return `${formatFileSize(storage.value.currentStorage)}`;
+});
+const storageLimitLabel = computed(() => {
+  if (!hasStorageData.value) return '0 Bytes limit';
+  return `${formatFileSize(storage.value.storageLimit)}`;
+});
 
 // Show sidebar based on state (can be toggled on all screen sizes)
 const showSidebar = computed(() => showSidebarState.value);
@@ -312,6 +584,10 @@ watch(route, () => {
   }
 });
 
+watch(minimized, (value) => {
+  localStorage.setItem(STORAGE_KEY, String(value));
+});
+
 // Handle escape key (mobile only)
 function handleEscape(event: KeyboardEvent) {
   if (windowWidth.value < 1024 && event.key === 'Escape' && showSidebar.value && !isProjectDropdownActive.value) {
@@ -324,6 +600,33 @@ if (typeof window !== 'undefined') {
   document.addEventListener('keydown', handleEscape);
 }
 
+async function getPlan() {
+  try {
+    await store.dispatch('subscriptions/getPlan');
+  } catch (error: any) {
+    console.error('Error fetching subscription plan:', error);
+    const message = error.response?.data?.error || 'Failed to fetch subscription plan';
+    alert(message);
+  }
+}
+
+async function getStorage() {
+  try {
+    await store.dispatch('subscriptions/getStorage');
+  } catch (error: any) {
+    console.error('Error fetching storage info:', error);
+    const message = error.response?.data?.error || 'Failed to fetch storage info';
+    alert(message);
+  }
+}
+
+onMounted(() => {
+  if (isAuth.value) {
+    getPlan();
+    getStorage();
+  }
+});
+
 // Cleanup event listeners
 onBeforeUnmount(() => {
   if (typeof window !== 'undefined') {
@@ -335,6 +638,72 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.planet-svg {
+  transition: transform 0.45s ease;
+  transform-origin: center;
+}
+
+.group:hover .planet-svg {
+  transform: rotate(40deg);
+}
+
+/* ---------- ORBITA ---------- */
+
+.orbit-dot {
+  opacity: 0;
+}
+
+.group:hover .orbit-dot {
+  opacity: 1;
+}
+
+/* ---------- ESTRELLAS ---------- */
+.star {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* delays distintos */
+
+.group:hover .star-1 {
+  animation: twinkle 2.2s ease-in-out infinite;
+}
+
+.group:hover .star-2 {
+  animation: twinkle 2.2s ease-in-out infinite 0.5s;
+}
+
+.group:hover .star-3 {
+  animation: twinkle 2.2s ease-in-out infinite 1s;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  20% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  35% {
+    opacity: 0.85;
+    transform: scale(2.5);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
 .group:hover .arrow-move {
     animation: arrowMove 1s ease-in-out;
   }

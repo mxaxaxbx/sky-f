@@ -12,7 +12,7 @@
           'rounded-2xl',
           'absolute', '-right-3', 'z-20',
           dropdownPosition,
-          'w-[96vw] mx-2',
+          'w-[calc(100vw-0.22rem)]',
         ]"
       >
         <template #trigger="{ toggle, close }">
@@ -35,7 +35,7 @@
         </template>
         <template #content="{}">
           <div
-            class="flex flex-col gap-0.5 pt-2 font-medium text-sm text-[var(--color-primary)]"
+            class="flex flex-col gap-0.5 pt-2 font-medium text-xs text-[var(--color-primary)]"
           >
             <div class="grid grid-cols-3 flex items-center gap-2 mx-2 mb-2">
               <label

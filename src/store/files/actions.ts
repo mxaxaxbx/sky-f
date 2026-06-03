@@ -8,6 +8,27 @@ import { RootStateI } from '../state';
 import { FileI, FilesStateI } from './state';
 import { FolderI } from '../folders/state';
 
+function isHlsPlaylistFile(file: Pick<FileI, 'name' | 'contentType'>) {
+  const name = file.name?.toLowerCase() || '';
+  const contentType = file.contentType?.toLowerCase() || '';
+
+  return name.endsWith('.m3u8') || [
+    'application/vnd.apple.mpegurl',
+    'application/x-mpegurl',
+    'application/mpegurl',
+    'audio/x-mpegurl',
+  ].includes(contentType);
+}
+
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export const actions: ActionTree<FilesStateI, RootStateI> = {
   async filter(
     context: ActionContext<FilesStateI, RootStateI>,
@@ -101,13 +122,24 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
               }
             };
 
-            xhr.onload = () => {
+            xhr.onload = async () => {
               if (xhr.status >= 200 && xhr.status < 300) {
                 // eslint-disable-next-line no-param-reassign
                 context.state.uploadFiles[uiIndex].percentage = 100;
                 // eslint-disable-next-line no-param-reassign
                 item.uploadCompleted = true;
                 completedFiles.push(item);
+
+                if (isHlsPlaylistFile({ name: file.name, contentType: file.type })) {
+                  try {
+                    await context.dispatch('saveCacheFile', {
+                      ...item,
+                      sourceBlob: file,
+                    });
+                  } catch (error) {
+                    console.warn('Unable to cache uploaded HLS playlist', error);
+                  }
+                }
               } else {
                 // eslint-disable-next-line no-param-reassign
                 item.error = `Upload failed (${xhr.status})`;
@@ -134,15 +166,15 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
       // confirm uploads ONCE
       if (completedFiles.length > 0) {
-        const { data: confirmedData } = await storageClient.post(
+        await storageClient.post(
           '/api/storage/confirm-uploads',
           camelToSnake(completedFiles),
         );
 
-        const confirmed: FileI[] = snakeToCamel(confirmedData);
-
-        confirmed.forEach((file) => {
-          context.dispatch('saveCacheFile', file);
+        completedFiles.forEach((file) => {
+          if (!isHlsPlaylistFile(file)) {
+            context.dispatch('saveCacheFile', file);
+          }
         });
       }
 
@@ -206,7 +238,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async saveCacheFile(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI,
+    payload: FileI & { sourceBlob?: Blob },
   ): Promise<void> {
     console.log('saveCacheFile', payload);
     const db = await getDB();
@@ -219,20 +251,29 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       return;
     }
 
-    const { data } = await storageClient.get(
-      `/api/storage/get-download-url/${payload.id}`,
-    );
+    if (isHlsPlaylistFile(payload) && !payload.sourceBlob) {
+      console.log('Skipping cache for HLS playlist');
+      return;
+    }
 
-    const { url } = data;
+    const base64 = payload.sourceBlob
+      ? await blobToDataUrl(payload.sourceBlob)
+      : await (async () => {
+        const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
+        const { url } = data;
 
-    const blob = await fetch(url).then((r) => r.blob());
+        let blob: Blob;
+        try {
+          blob = await fetch(url).then((r) => r.blob());
+        } catch (error) {
+          console.warn('Skipping cache because the file could not be fetched', error);
+          return '';
+        }
 
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+        return blobToDataUrl(blob);
+      })();
+
+    if (!base64) return;
 
     const tx = db.transaction('files', 'readwrite');
     const store = tx.objectStore('files');
@@ -304,7 +345,11 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
   ): Promise<string> {
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
-    context.dispatch('saveCacheFile', payload);
+
+    if (!isHlsPlaylistFile(payload)) {
+      context.dispatch('saveCacheFile', payload);
+    }
+
     return url;
   },
 
