@@ -6,6 +6,7 @@ import files from './files';
 import folders from './folders';
 import theme from './theme';
 import subscriptions from './subscriptions';
+import shares from './shares';
 
 import { state, RootStateI } from './state';
 import { mutations } from './mutations';
@@ -27,5 +28,6 @@ store.registerModule('files', files);
 store.registerModule('folders', folders);
 store.registerModule('theme', theme);
 store.registerModule('subscriptions', subscriptions);
+store.registerModule('shares', shares);
 
 export default store;
