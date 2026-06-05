@@ -35,6 +35,15 @@ const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  // public share route (no authentication required)
+  {
+    path: '/share/:token',
+    name: 'share',
+    component: () => import('../views/share/index.vue'),
+    meta: {
+      title: 'Shared with you',
+    },
+  },
   // app routes
   {
     path: '/app',
