@@ -113,7 +113,22 @@ export const actions: ActionTree<ShareStateI, RootStateI> = {
         : undefined,
     );
 
-    const files: SharedFileI[] = snakeToCamel(data).files || [];
+    const camel = snakeToCamel(data);
+
+    // A folder share returns { files: [...] }; a single-file share
+    // returns the presigned link directly as { url, ... }.
+    let files: SharedFileI[] = [];
+    if (Array.isArray(camel.files)) {
+      files = camel.files;
+    } else if (camel.url) {
+      files = [{
+        id: camel.id || 0,
+        name: camel.name || '',
+        size: camel.size || 0,
+        url: camel.url,
+      }];
+    }
+
     context.commit('setSharedFiles', files);
     return files;
   },
