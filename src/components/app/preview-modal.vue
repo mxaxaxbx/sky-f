@@ -1296,7 +1296,13 @@ async function getBase64(currentFile: FileI) {
     }
 
     if (
-      currentFile.contentType.startsWith('text/') || currentFile.name?.endsWith('.vue') || currentFile.name?.endsWith('.ts') || currentFile.name?.endsWith('.js') || currentFile.name?.endsWith('.py')
+      currentFile.contentType.startsWith('text/')
+      || currentFile.name?.endsWith('.vue')
+      || currentFile.name?.endsWith('.ts')
+      || currentFile.name?.endsWith('.js')
+      || currentFile.name?.endsWith('.py')
+      || currentFile.name?.endsWith('.env')
+      || currentFile.contentType === 'text/plain'
     ) {
       textContent.value = await blob.text();
     }
