@@ -1,7 +1,7 @@
 <template>
   <Modal :modelValue="!!modelValue" size="md" @update:modelValue="$emit('close')" @click.stop>
     <template #header>
-      <h3> Share link:
+      <h3> Copy link:
         <p class="font-normal text-sm mt-2 break-all w-[90%]">
           {{ modelValue?.name }}
         </p>
@@ -9,73 +9,8 @@
     </template>
 
     <template #content>
-      <!-- CONFIGURE: link not created yet -->
-      <form
-        v-if="!createdShare"
-        id="create-share-form"
-        @submit.prevent="createShare"
-        class="flex flex-col gap-4"
-      >
-        <!-- password protection -->
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center justify-between cursor-pointer">
-            <span class="flex items-center gap-2 text-sm text-[var(--text)]">
-              <i class="fa-solid fa-lock text-[var(--text-terceary)]"></i>
-              Password protection
-            </span>
-            <input v-model="usePassword" type="checkbox" class="accent-[var(--color-primary)]" />
-          </label>
-          <input
-            v-if="usePassword"
-            v-model="password"
-            type="password"
-            placeholder="Set a password"
-            class="
-              w-full px-3 py-1.5
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-full
-              text-sm text-[var(--text)]
-              placeholder:text-[var(--text-terceary)]
-              focus:border-[var(--color-primary)]
-              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              focus:outline-none
-              transition-all duration-300
-            "
-          />
-        </div>
-
-        <!-- expiration -->
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center justify-between cursor-pointer">
-            <span class="flex items-center gap-2 text-sm text-[var(--text)]">
-              <i class="fa-regular fa-clock text-[var(--text-terceary)]"></i>
-              Set an expiration date
-            </span>
-            <input v-model="useExpiration" type="checkbox" class="accent-[var(--color-primary)]" />
-          </label>
-          <input
-            v-if="useExpiration"
-            v-model="expiresAt"
-            type="datetime-local"
-            :min="minDateTime"
-            class="
-              w-full px-3 py-1.5
-              bg-[var(--bg)]
-              border border-[var(--border)]
-              rounded-full
-              text-sm text-[var(--text)]
-              focus:border-[var(--color-primary)]
-              focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
-              focus:outline-none
-              transition-all duration-300
-            "
-          />
-        </div>
-      </form>
-
-      <!-- CREATED: show link + management -->
-      <div v-else class="flex flex-col gap-3">
+      <div class="flex flex-col gap-4">
+        <!-- Input and Copy Button -->
         <div
           class="
             flex group p-0.5
@@ -85,9 +20,10 @@
             shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
             transition-all duration-300 ease-in-out
           "
+          :class="{ 'opacity-60 pointer-events-none': !createdShare }"
         >
           <input
-            :value="shareUrl"
+            :value="createdShare ? shareUrl : 'Generating link...'"
             readonly
             class="
               w-full flex-1
@@ -96,10 +32,11 @@
               bg-transparent rounded-full select-all
               focus:outline-none
             "
-            @focus="e => (e.target as HTMLInputElement).select()"
+            @focus="e => createdShare && (e.target as HTMLInputElement).select()"
           />
           <button
             type="button"
+            :disabled="!createdShare || copied"
             @click.stop="tryCopy"
             class="
               flex items-center px-2 gap-1
@@ -110,10 +47,12 @@
               hover:bg-[var(--color-primary)] hover:text-white
               hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
               transition-all duration-300 ease-in-out
+              disabled:opacity-50 disabled:cursor-not-allowed
             "
             :class="copied ? 'bg-[var(--color-primary)] text-white shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]' : ''"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
+            <i v-if="!createdShare" class="fas fa-spinner fa-spin mr-1"></i>
+            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -rotate-45">
               <mask id="mask0_1677_12" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
               <rect width="24" height="24"/>
               </mask>
@@ -128,56 +67,176 @@
                 16.5125 18.3833 17 17 17H13Z"/>
               </g>
             </svg>
-            {{ copied ? 'Copied!' : 'Copy link' }}
+            {{ !createdShare ? 'Creating...' : (copied ? 'Copied!' : 'Copy link') }}
           </button>
         </div>
-
-        <!-- summary -->
-        <div class="flex flex-wrap items-center gap-2 text-xs text-[var(--text-terceary)] px-1">
-          <span
-            class="
-              flex items-center gap-1 px-2 py-0.5 rounded-full
-              border border-[var(--border)] bg-[var(--bg)]
-            "
-          >
-            <i class="fa-solid" :class="usePassword ? 'fa-lock' : 'fa-lock-open'"></i>
-            {{ usePassword ? 'Password protected' : 'Public' }}
-          </span>
-          <span
-            class="
-              flex items-center gap-1 px-2 py-0.5 rounded-full
-              border border-[var(--border)] bg-[var(--bg)]
-            "
-          >
-            <i class="fa-regular fa-clock"></i>
-            {{ createdShare.share.expiresAt ? `Expires ${formatDate(createdShare.share.expiresAt)}` : 'No expiration' }}
-          </span>
+        <!-- Settings toggle and badges summary -->
+        <div v-if="createdShare" class="flex flex-col items-center justify-between gap-3">
+          <!-- summary badges -->
+          <div class="flex flex-wrap items-center gap-2 w-full px-1">
+            <button
+              type="button"
+              @click="togglePasswordSettings"
+              class="
+                flex items-center gap-2 px-2 py-1 rounded-xl font-medium
+                border bg-[var(--bg)] text-xs
+                hover:border-[var(--color-primary)] hover:text-[var(--text)]
+                transition-all duration-200 cursor-pointer
+              "
+              :class="savedUsePassword ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white' : 'text-[var(--text-terceary)] border-[var(--border)]'"
+            >
+              <i class="fa-solid text-xs" :class="savedUsePassword ? 'fa-lock' : 'fa-lock-open'"></i>
+              {{ savedUsePassword ? ' Password protected' : 'Public' }}
+            </button>
+            <button
+              type="button"
+              @click="toggleExpirationSettings"
+              class="
+                flex items-center gap-2 px-2 py-1 rounded-xl font-medium
+                border bg-[var(--bg)] text-xs
+                hover:border-[var(--color-primary)] hover:text-[var(--text)]
+                transition-all duration-200 cursor-pointer
+              "
+              :class="savedExpiresAt ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white' : 'text-[var(--text-terceary)] border-[var(--border)]'"
+            >
+              <i class="fa-regular fa-clock text-xs"></i>
+              {{ savedExpiresAt ? `Expires ${formatDate(savedExpiresAt)}` : 'No expiration' }}
+            </button>
+          </div>
         </div>
+        <!-- Password Settings Panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out overflow-hidden"
+          leave-active-class="transition-all duration-200 ease-in overflow-hidden"
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-[500px]"
+          leave-from-class="opacity-100 max-h-[500px]"
+          leave-to-class="opacity-0 max-h-0"
+        >
+          <div v-if="showPasswordSettings && createdShare" class="flex flex-col gap-4 p-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl -mt-2">
+            <!-- password protection -->
+            <div class="flex flex-col gap-2">
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="flex items-center gap-2 text-sm text-[var(--text)] font-medium">
+                  <i class="fa-solid fa-lock text-[var(--text-terceary)]"></i>
+                  Password protection
+                </span>
+                <input v-model="usePassword" type="checkbox" class="accent-[var(--color-primary)]" />
+              </label>
+              <input
+                v-if="usePassword"
+                v-model="password"
+                type="password"
+                placeholder="Set a password"
+                class="
+                  w-full px-3 py-1.5
+                  bg-[var(--bg)]
+                  border border-[var(--border)]
+                  rounded-full
+                  text-sm text-[var(--text)]
+                  placeholder:text-[var(--text-terceary)]
+                  focus:border-[var(--color-primary)]
+                  focus:shadow-[0_0_3px_3px_rgba(10,119,243,0.5)]
+                  focus:outline-none
+                  transition-all duration-300
+                "
+              />
+            </div>
 
+            <!-- Save Settings Button -->
+            <div class="flex justify-end gap-2 mt-1">
+              <button
+                type="button"
+                @click="savePasswordSettings"
+                :disabled="savingSettings || (usePassword && !password.trim())"
+                class="
+                  flex items-center gap-2
+                  text-white text-xs font-semibold
+                  border border-[var(--color-primary)] bg-[var(--color-primary)]
+                  rounded-full px-3.5 py-1.5
+                  hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
+                  transition-all duration-300
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                "
+              >
+                <i v-if="savingSettings" class="fas fa-spinner fa-spin"></i>
+                Save settings
+              </button>
+            </div>
+          </div>
+        </transition>
+
+        <!-- Expiration Settings Panel -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out overflow-hidden"
+          leave-active-class="transition-all duration-200 ease-in overflow-hidden"
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-[500px]"
+          leave-from-class="opacity-100 max-h-[500px]"
+          leave-to-class="opacity-0 max-h-0"
+        >
+          <div v-if="showExpirationSettings && createdShare" class="flex flex-col gap-4 p-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl mt-1">
+            <!-- expiration -->
+            <div class="flex flex-col gap-2">
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="flex items-center gap-2 text-sm text-[var(--text)] font-medium">
+                  <i class="fa-regular fa-clock text-[var(--text-terceary)]"></i>
+                  Set an expiration date
+                </span>
+                <input v-model="useExpiration" type="checkbox" class="accent-[var(--color-primary)]" />
+              </label>
+              <DateTimePicker
+                v-if="useExpiration"
+                v-model="expiresAt"
+                placeholder="Select date and time"
+              />
+            </div>
+
+            <!-- Save Settings Button -->
+            <div class="flex justify-end gap-2 mt-1">
+              <button
+                type="button"
+                @click="saveExpirationSettings"
+                :disabled="savingSettings"
+                class="
+                  flex items-center gap-2
+                  text-white text-xs font-semibold
+                  border border-[var(--color-primary)] bg-[var(--color-primary)]
+                  rounded-full px-3.5 py-1.5
+                  hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)]
+                  transition-all duration-300
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                "
+              >
+                <i v-if="savingSettings" class="fas fa-spinner fa-spin"></i>
+                Save settings
+              </button>
+            </div>
+          </div>
+        </transition>
         <p
           class="
-            flex items-center
+            flex items-center mx-auto
             font-light text-xs text-center text-[var(--text-terceary)]
-            py-1 mx-1 gap-2
-            sm:text-sm
+            pt-1 mx-1 gap-2
+            sm:text-xs
           "
         >
-          <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-5"/>
-          Anyone with the link{{ usePassword ? ' and password' : '' }} will be able to download this {{ modelValue?.name ? 'file' : 'item' }}.
+          <img src="/icon/icon-warning.svg" alt="warning" class="h-4 sm:h-4"/>
+          Anyone with the link{{ savedUsePassword ? ' and password' : '' }} will be able to download this {{ modelValue?.name ? 'file' : 'item' }}.
         </p>
       </div>
     </template>
 
-    <template #footer>
-      <!-- configure footer -->
-      <template v-if="!createdShare">
+    <!-- <template #footer> -->
+      <!-- <template v-if="!createdShare">
         <button
           type="button"
           @click="$emit('close')"
-          class="
+          class="hidden
             text-[var(--text-secondary)] text-sm
             border border-[var(--border)] bg-[var(--bg)]
-            rounded-full px-3
+            rounded-full px-3 py-1
             hover:border-[var(--text)]
             hover:bg-[var(--hover-bg-gray)]
             hover:text-[var(--text)]
@@ -185,32 +244,15 @@
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          form="create-share-form"
-          :disabled="loading || (usePassword && !password.trim())"
-          class="
-            flex items-center gap-2
-            text-white text-sm
-            border rounded-full px-3 py-1
-            transition
-          "
-          :class="loading || (usePassword && !password.trim())
-            ? 'opacity-40 cursor-not-allowed bg-[var(--bg)] border-[var(--border)] text-[var(--text)]'
-            : 'hover:shadow-[0_0_3px_2px_rgba(10,119,243,0.5)] bg-[var(--color-primary)] border-[var(--color-primary)]'"
-        >
-          <i v-if="loading" class="fas fa-spinner fa-spin"></i>
-          Create link
-        </button>
-      </template>
+      </template> -->
 
-      <!-- created footer -->
-      <template v-else>
+      <!-- Once link is generated -->
+      <!-- <template v-else>
         <button
           type="button"
           @click="revokeShare"
           :disabled="loading"
-          class="
+          class="hidden
             flex items-center gap-2
             text-[var(--delete-color)] text-sm
             border border-[var(--border)] bg-[var(--bg)]
@@ -228,7 +270,7 @@
         <button
           type="button"
           @click="$emit('close')"
-          class="
+          class="hidden
             text-white text-sm
             border border-[var(--color-primary)] bg-[var(--color-primary)]
             rounded-full px-3 py-1
@@ -238,8 +280,8 @@
         >
           Done
         </button>
-      </template>
-    </template>
+      </template> -->
+    <!-- </template> -->
   </Modal>
 </template>
 
@@ -249,6 +291,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import Modal from '@/components/global/modal.vue';
+import DateTimePicker from '@/components/global/datetime-picker.vue';
 import { FileI } from '@/store/files/state';
 import { CreatedShareI } from '@/store/shares/state';
 
@@ -268,12 +311,11 @@ const loading = ref(false);
 const copied = ref(false);
 const createdShare = ref<CreatedShareI | null>(null);
 
-// minimum selectable datetime is "now" (local), formatted for datetime-local input
-const minDateTime = computed(() => {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  return now.toISOString().slice(0, 16);
-});
+const showPasswordSettings = ref(false);
+const showExpirationSettings = ref(false);
+const savingSettings = ref(false);
+const savedUsePassword = ref(false);
+const savedExpiresAt = ref<number | null>(null);
 
 const shareUrl = computed(() => (createdShare.value
   ? `${window.location.origin}${createdShare.value.url}`
@@ -290,12 +332,12 @@ function resetForm() {
   expiresAt.value = '';
   copied.value = false;
   createdShare.value = null;
+  showPasswordSettings.value = false;
+  showExpirationSettings.value = false;
+  savingSettings.value = false;
+  savedUsePassword.value = false;
+  savedExpiresAt.value = null;
 }
-
-// reset state every time a new file is shared
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) resetForm();
-}, { immediate: true });
 
 async function createShare() {
   if (!props.modelValue) return;
@@ -304,12 +346,12 @@ async function createShare() {
     const payload = {
       fileId: Number(props.modelValue.id),
       folderId: null as number | null,
-      password: usePassword.value ? password.value : null,
-      expiresAt: useExpiration.value && expiresAt.value
-        ? Math.floor(new Date(expiresAt.value).getTime() / 1000)
-        : null,
+      password: null,
+      expiresAt: null,
     };
     createdShare.value = await store.dispatch('shares/createShare', payload);
+    savedUsePassword.value = false;
+    savedExpiresAt.value = null;
   } catch (error: any) {
     store.commit('notifications/addNotification', {
       message: error?.response?.data?.error || 'Unable to create the share link.',
@@ -317,6 +359,70 @@ async function createShare() {
     });
   } finally {
     loading.value = false;
+  }
+}
+
+async function savePasswordSettings() {
+  if (!createdShare.value) return;
+  savingSettings.value = true;
+  try {
+    const payload = {
+      token: createdShare.value.share.token,
+      password: usePassword.value ? password.value : null,
+      expiresAt: savedExpiresAt.value,
+    };
+    const updatedShare = await store.dispatch('shares/updateShare', payload);
+
+    // Update local state
+    createdShare.value.share = updatedShare;
+    savedUsePassword.value = usePassword.value;
+
+    store.commit('notifications/addNotification', {
+      message: 'Password settings updated successfully.',
+      type: 'success',
+    });
+
+    showPasswordSettings.value = false;
+  } catch (error: any) {
+    store.commit('notifications/addNotification', {
+      message: error?.response?.data?.error || 'Unable to update password settings.',
+      type: 'error',
+    });
+  } finally {
+    savingSettings.value = false;
+  }
+}
+
+async function saveExpirationSettings() {
+  if (!createdShare.value) return;
+  savingSettings.value = true;
+  try {
+    const targetExpiresAt = useExpiration.value && expiresAt.value
+      ? Math.floor(new Date(expiresAt.value).getTime() / 1000)
+      : null;
+    const payload = {
+      token: createdShare.value.share.token,
+      expiresAt: targetExpiresAt,
+    };
+    const updatedShare = await store.dispatch('shares/updateShare', payload);
+
+    // Update local state
+    createdShare.value.share = updatedShare;
+    savedExpiresAt.value = targetExpiresAt;
+
+    store.commit('notifications/addNotification', {
+      message: 'Expiration settings updated successfully.',
+      type: 'success',
+    });
+
+    showExpirationSettings.value = false;
+  } catch (error: any) {
+    store.commit('notifications/addNotification', {
+      message: error?.response?.data?.error || 'Unable to update expiration settings.',
+      type: 'error',
+    });
+  } finally {
+    savingSettings.value = false;
   }
 }
 
@@ -354,4 +460,54 @@ async function tryCopy() {
     console.error('Error copying:', error);
   }
 }
+
+function togglePasswordSettings() {
+  if (showPasswordSettings.value) {
+    showPasswordSettings.value = false;
+  } else {
+    // Sync password input with saved value
+    usePassword.value = savedUsePassword.value;
+
+    showPasswordSettings.value = true;
+    showExpirationSettings.value = false;
+
+    // Auto-check password protection if opening and it's currently Public
+    if (!savedUsePassword.value) {
+      usePassword.value = true;
+    }
+  }
+}
+
+function toggleExpirationSettings() {
+  if (showExpirationSettings.value) {
+    showExpirationSettings.value = false;
+  } else {
+    // Sync expiration input with saved value (DateTimePicker uses YYYY-MM-DDTHH:mm)
+    useExpiration.value = savedExpiresAt.value !== null;
+    if (savedExpiresAt.value) {
+      const date = new Date(savedExpiresAt.value * 1000);
+      const offset = date.getTimezoneOffset();
+      const localDate = new Date(date.getTime() - offset * 60 * 1000);
+      expiresAt.value = localDate.toISOString().slice(0, 16);
+    } else {
+      expiresAt.value = '';
+    }
+
+    showExpirationSettings.value = true;
+    showPasswordSettings.value = false;
+
+    // Auto-check expiration if opening and it's currently No expiration
+    if (savedExpiresAt.value === null) {
+      useExpiration.value = true;
+    }
+  }
+}
+
+// reset state and automatically generate share link every time a new file is shared
+watch(() => props.modelValue, (newVal) => {
+  if (newVal) {
+    resetForm();
+    createShare();
+  }
+}, { immediate: true });
 </script>
