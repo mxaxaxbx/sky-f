@@ -9,7 +9,7 @@
     </div>
 
     <!-- Modal -->
-    <div class="flex min-h-full items-center justify-center mx-2  sm:items-start sm:pt-[20vh]">
+    <div class="flex min-h-full items-center justify-center mx-2 sm:items-start sm:pt-[20vh]">
       <div
         class="
           relative
@@ -60,12 +60,12 @@
         </div>
 
         <!-- Content -->
-        <div class="mt-2 text-[var(--text-terceary)] text-sm px-4">
+        <div class="mt-6 mb-2 text-[var(--text-terceary)] text-sm px-4">
           <slot name="content">Default content goes here</slot>
         </div>
 
         <!-- Footer -->
-        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-4">
+        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-4 bg-blue-100/10">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"

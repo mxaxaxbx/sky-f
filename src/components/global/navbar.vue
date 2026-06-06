@@ -23,7 +23,7 @@
             : '/img/logo-sky-light.svg'"
             alt="logosky"
             class="
-              h-5
+              h-6
               courser-pointer"
               />
         </router-link>
