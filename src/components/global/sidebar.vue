@@ -621,7 +621,8 @@ async function getStorage() {
 }
 
 onMounted(() => {
-  if (isAuth.value) {
+  const { path } = route;
+  if (isAuth.value && (path.startsWith('/app'))) {
     getPlan();
     getStorage();
   }

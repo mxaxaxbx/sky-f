@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { decode } from '@/utils/custom-enc-dec';
 import { camelToSnake } from '@/utils/index';
+import { getAuthProviderRedirectUrl } from './auth-redirect';
 
 const URL_DIGIUSERS = process.env.VUE_APP_DG_USERS_SVC;
 
@@ -35,8 +36,7 @@ function customErrorHandler(error: any) {
 
   switch (error.response.status) {
     case 401: {
-      const { VUE_APP_DG_USERS_APP } = process.env;
-      window.location.href = `${VUE_APP_DG_USERS_APP}/auth/provider?app=sky`;
+      window.location.href = getAuthProviderRedirectUrl();
       break;
     }
     case 403:
