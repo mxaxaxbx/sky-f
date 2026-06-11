@@ -771,7 +771,8 @@
             file.name?.endsWith('.vue') ||
             file.name?.endsWith('.ts') ||
             file.name?.endsWith('.js') ||
-            file.name?.endsWith('.py')
+            file.name?.endsWith('.py') ||
+            file.name?.endsWith('.env')
           )"
             class="
               w-full h-full overflow-auto
@@ -1327,7 +1328,12 @@ async function getBase64(currentFile: FileI) {
   }
 
   if (
-    currentFile.contentType.startsWith('text/') || currentFile.name?.endsWith('.vue') || currentFile.name?.endsWith('.ts') || currentFile.name?.endsWith('.js') || currentFile.name?.endsWith('.py')
+    currentFile.contentType.startsWith('text/')
+    || currentFile.name?.endsWith('.vue')
+    || currentFile.name?.endsWith('.ts')
+    || currentFile.name?.endsWith('.js')
+    || currentFile.name?.endsWith('.py')
+    || currentFile.name?.endsWith('.env')
   ) {
     textContent.value = await fetch(url).then((r) => r.text());
   }
