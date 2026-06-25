@@ -6,17 +6,23 @@ import { RootStateI } from '../state';
 import { AuthStateI, ProjectI } from './state';
 
 export const actions: ActionTree<AuthStateI, RootStateI> = {
-  async confirmSession(context: ActionContext<AuthStateI, RootStateI>, payload: string) {
+  async confirmSession(
+    context: ActionContext<AuthStateI, RootStateI>,
+    payload: {
+      token: string,
+      redirect: string,
+    },
+  ) {
     if (!payload) {
       const { VUE_APP_DG_USERS_APP } = process.env;
       window.location.href = `${VUE_APP_DG_USERS_APP}/auth/provider?app=sky`;
       return;
     }
-    context.commit('setToken', payload);
+    context.commit('setToken', payload.token);
     await context.dispatch('getUserDetails');
     // await context.dispatch('getUserProjects');
     // await context.dispatch('getUserPermissions');
-    window.location.href = '/app';
+    window.location.href = `/app?redirect=${payload.redirect}`;
   },
   async getUserDetails(context: ActionContext<AuthStateI, RootStateI>) {
     const { data } = await usersClient.get('/api/auth/userdetailsv2');

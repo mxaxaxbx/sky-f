@@ -14,8 +14,11 @@ const store = useStore();
 
 onMounted(() => {
   try {
-    const { token } = route.query;
-    store.dispatch('auth/confirmSession', token);
+    const { token, redirect } = route.query;
+    store.dispatch('auth/confirmSession', {
+      token,
+      redirect,
+    });
   } catch (err: any) {
     const message = err?.response?.data?.error || 'Ocurrió un error al validar el código';
     console.error('auth/validatecode validatecode', err);
