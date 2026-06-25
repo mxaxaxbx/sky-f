@@ -238,9 +238,10 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async saveCacheFile(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI & { sourceBlob?: Blob },
+    payload: FileI & { sourceBlob?: Blob; url?: string },
   ): Promise<void> {
     console.log('saveCacheFile', payload);
+    if (typeof payload.id === 'string' && payload.id.startsWith('shared-')) return;
     const db = await getDB();
     // Skip if not supported
     if (!db) return;
@@ -341,8 +342,21 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async getDownloadUrl(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI,
+    payload: FileI & { url?: string },
   ): Promise<string> {
+    if (payload.url) return payload.url;
+
+    const idStr = String(payload.id);
+    if (idStr.startsWith('shared-')) {
+      const realId = Number(idStr.replace('shared-', ''));
+      const sharesModule = (context.rootState as any).shares;
+      const sharedFiles = (sharesModule && sharesModule.sharedFiles) || [];
+      const found = sharedFiles.find((f: any) => f.id === realId);
+      if (found && found.url) {
+        return found.url;
+      }
+    }
+
     const { data } = await storageClient.get(`/api/storage/get-download-url/${payload.id}`);
     const { url } = data;
 

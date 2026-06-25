@@ -65,7 +65,7 @@
         </div>
 
         <!-- Footer -->
-        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-4 bg-blue-100/10">
+        <div v-if="$slots.footer" class="mb-2 mt-4 flex justify-end space-x-2 px-4">
           <slot name="footer">
             <button
               @click="$emit('update:modelValue', false)"
