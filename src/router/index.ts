@@ -150,6 +150,13 @@ router.beforeEach((to, from, next) => {
       next();
     }
   }
+
+  if (to.query.redirect && !to.path.startsWith('/auth')) {
+    // redirect to the to path
+    next(to.query.redirect as string);
+    return;
+  }
+
   next();
 });
 
