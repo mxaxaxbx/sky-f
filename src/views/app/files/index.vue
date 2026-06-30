@@ -36,7 +36,7 @@
             cursor-pointer
           "
         >
-          <img src="/icon/icon-upload.svg" alt="icon" class="h-6 mr-2 invert brightness-0" />
+          <img src="/icon/icon-upload.svg" alt="icon" class="h-5 mr-2 invert brightness-0" />
           <span>Upload</span>
         </label>
 

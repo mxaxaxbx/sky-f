@@ -3,6 +3,7 @@ import {
   createWebHistory,
   RouteRecordRaw,
   RouteLocationNormalized,
+  NavigationGuardNext,
 } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
@@ -139,7 +140,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to: RouteLocationNormalized) => {
+router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   if (to.meta.title) {
     document.title = `${to.meta.title} - sky`;
   }
@@ -156,7 +157,12 @@ router.beforeEach((to: RouteLocationNormalized) => {
     }
   }
 
-  return true;
+  if (to.query.redirect && !to.path.startsWith('/auth')) {
+    // redirect to the to path
+    return next(to.query.redirect as string);
+  }
+
+  return next();
 });
 
 export default router;
