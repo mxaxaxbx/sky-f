@@ -1,7 +1,13 @@
+export interface BreadcrumbI {
+  id: string | number;
+  name: string;
+  type: string;
+}
+
 export interface BreadcrumbsStateI {
-  foo: string;
+  breadcrumbs: BreadcrumbI[];
 }
 
 export const state: BreadcrumbsStateI = {
-  foo: 'bar',
+  breadcrumbs: [],
 };

@@ -10,10 +10,13 @@ export const actions: ActionTree<BreadcrumbsStateI, RootStateI> = {
 
   async getBreadcrumbs(
     context: ActionContext<BreadcrumbsStateI, RootStateI>,
-    payload: string,
+    payload: {
+      id: string,
+      type: string,
+    },
   ): Promise<void> {
-    const { data } = await storageClient.get(`/api/storage/${payload}/breadcrumbs`);
-    console.log('data->', data);
+    const { data } = await storageClient.get(`/api/storage/${payload.id}/breadcrumbs?type=${payload.type}`);
+    context.commit('setBreadcrumbs', snakeToCamel(data));
   },
 
 };

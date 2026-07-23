@@ -134,6 +134,12 @@ const router = createRouter({
   routes,
 });
 
+router.onError((error) => {
+  if (error.name === 'ChunkLoadError' || error.message.includes('Failed to fetch dynamically imported module')) {
+    window.location.reload();
+  }
+});
+
 router.beforeEach((to, from, next) => {
   // Set title
   if (to.meta.title) {
@@ -152,6 +158,10 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.query.redirect && !to.path.startsWith('/auth')) {
+    if (to.query.redirect === 'undefined') {
+      next({ name: 'app-home' });
+      return;
+    }
     // redirect to the to path
     next(to.query.redirect as string);
     return;
