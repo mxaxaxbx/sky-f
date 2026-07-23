@@ -32,40 +32,104 @@
           sm:px-8
         "
       >
-        <div class="flex items-center px-2 gap-1">
-          <!-- Back button -->
-          <router-link
-            to="/app/files"
-            class="
-              flex items-center
-              gap-2
-              grayscale
-              text-[var(--text-terceary)] font-semibold
-              text-xs
-
-              sm:text-md md:text-lg lg:text-xl
-
-              hover:text-[var(--text)] hover:grayscale-0
-              transition-colors duration-200
-            "
-          >
-            <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
-            Cloud Drive
-          </router-link>
-          <span class="text-[var(--text-terceary)] px-1">></span>
-          <div class="flex items-center gap-1">
-            <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
-            <h2
+        <div class="flex items-center px-2 gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <template v-for="(breadcrumb, index) in breadcrumbs" :key="breadcrumb.id">
+            <!-- Root / Cloud Drive -->
+            <router-link
+              v-if="index === 0"
+              to="/app/files"
               class="
-                font-light text-[var(--text)]
+                flex items-center
+                gap-2
+                grayscale
+                text-[var(--text-terceary)] font-semibold
                 text-xs
 
                 sm:text-md md:text-lg lg:text-xl
+
+                hover:text-[var(--text)] hover:grayscale-0
+                transition-colors duration-200
               "
             >
-              {{ folderDetails.name }}
-            </h2>
-          </div>
+              <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
+              Cloud Drive
+            </router-link>
+
+            <!-- Separator -->
+            <span v-if="index > 0" class="text-[var(--text-terceary)] px-1">></span>
+
+            <!-- Non-Root Links -->
+            <router-link
+              v-if="index > 0 && index < breadcrumbs.length - 1"
+              :to="`/app/folders/${breadcrumb.id}`"
+              class="
+                flex items-center
+                gap-1
+                grayscale
+                text-[var(--text-terceary)] font-semibold
+                text-xs
+
+                sm:text-md md:text-lg lg:text-xl
+
+                hover:text-[var(--text)] hover:grayscale-0
+                transition-colors duration-200
+              "
+            >
+              <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
+              {{ breadcrumb.name }}
+            </router-link>
+
+            <!-- Current Folder -->
+            <div v-if="index > 0 && index === breadcrumbs.length - 1" class="flex items-center gap-1">
+              <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
+              <h2
+                class="
+                  font-light text-[var(--text)]
+                  text-xs
+
+                  sm:text-md md:text-lg lg:text-xl
+                "
+              >
+                {{ breadcrumb.name }}
+              </h2>
+            </div>
+          </template>
+
+          <!-- Fallback if no breadcrumbs -->
+          <template v-if="!breadcrumbs || breadcrumbs.length === 0">
+            <router-link
+              to="/app/files"
+              class="
+                flex items-center
+                gap-2
+                grayscale
+                text-[var(--text-terceary)] font-semibold
+                text-xs
+
+                sm:text-md md:text-lg lg:text-xl
+
+                hover:text-[var(--text)] hover:grayscale-0
+                transition-colors duration-200
+              "
+            >
+              <img src="/icon/icon-cloudDrive-active.svg" alt="folder" class="h-5 sm:h-6"/>
+              Cloud Drive
+            </router-link>
+            <span class="text-[var(--text-terceary)] px-1">></span>
+            <div class="flex items-center gap-1">
+              <img src="/icon/icon-folder.svg" alt="folder" class="h-5 sm:h-6"/>
+              <h2
+                class="
+                  font-light text-[var(--text)]
+                  text-xs
+
+                  sm:text-md md:text-lg lg:text-xl
+                "
+              >
+                {{ folderDetails.name }}
+              </h2>
+            </div>
+          </template>
         </div>
         <div class="mx-4 hidden sm:inline">
           <!-- actions desktop-->
@@ -298,6 +362,7 @@ import { useRoute } from 'vue-router';
 import moment from 'moment';
 
 import { FolderI, FoldersResultI } from '@/store/folders/state';
+import { BreadcrumbI } from '@/store/breadcrumbs/state';
 
 const Modal = defineAsyncComponent(() => import('@/components/global/modal.vue'));
 const FabMenu = defineAsyncComponent(() => import('@/components/global/fab-menu.vue'));
@@ -306,6 +371,7 @@ const store = useStore();
 const route = useRoute();
 
 const loading = ref(false);
+const scanModal = ref(false);
 const createFolderModal = ref(false);
 const folderName = ref('');
 const editingFolderId = ref<number | string | null>(null);
@@ -316,6 +382,7 @@ const showSidebar = computed(() => showSidebarState.value);
 const folderDetails = computed<FolderI>(() => store.state.folders.folder);
 const folderId = computed<number>(() => Number(route.params.id as string));
 const folderResults = computed<FoldersResultI>(() => store.state.folders.result);
+const breadcrumbs = computed<BreadcrumbI[]>(() => store.state.breadcrumbs.breadcrumbs);
 
 async function getFolders() {
   loading.value = true;
@@ -343,6 +410,11 @@ async function getFolderDetails() {
   try {
     await store.dispatch('folders/getFolderDetails', {
       folderId: Number(folderId.value),
+    });
+
+    await store.dispatch('breadcrumbs/getBreadcrumbs', {
+      id: String(folderId.value),
+      type: 'folder',
     });
   } catch (error) {
     console.error('Error loading folder details:', error);
