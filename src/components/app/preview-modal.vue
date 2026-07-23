@@ -68,6 +68,7 @@
                 text-md border border-transparent rounded-xl
                 text-[var(--text-terceary)]
                 px-1.5 py-0.5
+
                 hover:text-[var(--color-primary)]
                 hover:border-[var(--color-primary)]
 
