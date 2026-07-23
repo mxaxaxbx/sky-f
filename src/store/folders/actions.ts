@@ -63,6 +63,14 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
   ): Promise<void> {
     const { data } = await storageClient.get(`/api/folders/get-folder-details/${payload.folderId}`);
     context.commit('setFolder', snakeToCamel(data));
+    await context.dispatch(
+      'breadcrumbs/getBreadcrumbs',
+      {
+        id: payload.folderId,
+        type: 'folder',
+      },
+      { root: true },
+    );
   },
 
   async moveFoldersToFolder(

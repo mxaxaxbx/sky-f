@@ -140,7 +140,14 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+router.onError((error) => {
+  if (error.name === 'ChunkLoadError' || error.message.includes('Failed to fetch dynamically imported module')) {
+    window.location.reload();
+  }
+});
+
+router.beforeEach((to, from, next) => {
+  // Set title
   if (to.meta.title) {
     document.title = `${to.meta.title} - sky`;
   }
@@ -158,6 +165,9 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   }
 
   if (to.query.redirect && !to.path.startsWith('/auth')) {
+    if (to.query.redirect === 'undefined') {
+      return next({ name: 'app-home' });
+    }
     // redirect to the to path
     return next(to.query.redirect as string);
   }
