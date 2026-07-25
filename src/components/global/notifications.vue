@@ -14,11 +14,11 @@
       :key="index"
       class="mt-2 rounded-2xl px-2 py-1 z-999 border shadow mb-2 text-[#3d3d3d]"
       :class="{
-        'border-[var(--error-border)] bg-[var(--error-bg)]': notification.type === 'error',
-        'border-[var(--success-border)] bg-[var(--success-bg)]': notification.type === 'success',
-        'border-[var(--info-border)] bg-[var(--info-bg)]': notification.type === 'info',
-        'border-[var(--warning-border)] bg-[var(--warning-bg)]': notification.type === 'warning',
-        'border-[#3d3d3d] bg-white': notification.type === 'default',
+        'border-[var(--error-border)] bg-[var(--error-bg)] backdrop-blur-sm': notification.type === 'error',
+        'border-[var(--success-border)] bg-[var(--success-bg)] backdrop-blur-sm': notification.type === 'success',
+        'border-[var(--info-border)] bg-[var(--info-bg)] backdrop-blur-sm': notification.type === 'info',
+        'border-[var(--warning-border)] bg-[var(--warning-bg)] backdrop-blur-sm': notification.type === 'warning',
+        'border-[#3d3d3d] bg-white backdrop-blur-sm': notification.type === 'default',
       }"
     >
       <div class="flex justify-between">
