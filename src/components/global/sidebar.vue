@@ -620,13 +620,21 @@ async function getStorage() {
   }
 }
 
-onMounted(() => {
+function fetchSubscriptionData() {
   const { path } = route;
   if (isAuth.value && (path.startsWith('/app'))) {
     getPlan();
     getStorage();
   }
+}
+
+onMounted(() => {
+  fetchSubscriptionData();
 });
+
+watch([isAuth, () => route.path], () => {
+  fetchSubscriptionData();
+}, { immediate: true });
 
 // Cleanup event listeners
 onBeforeUnmount(() => {

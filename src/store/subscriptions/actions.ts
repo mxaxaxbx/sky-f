@@ -61,14 +61,16 @@ export const actions: ActionTree<SubscriptionsStateI, RootStateI> = {
   async getPlan(
     context: ActionContext<SubscriptionsStateI, RootStateI>,
   ): Promise<void> {
-    const cachedPlan = readCache<PlanI>(PLAN_CACHE_KEY);
+    const cachedPlan = readCache<any>(PLAN_CACHE_KEY);
 
-    if (cachedPlan) {
+    if (cachedPlan && (cachedPlan.id || cachedPlan.name)) {
+      console.log('cachedPlan->', cachedPlan);
       context.commit('setPlan', cachedPlan);
       return;
     }
 
     const { data } = await storageClient.get('/api/subscriptions/plan');
+    console.log('plan-data->', data);
     const plan = snakeToCamel(data);
     context.commit('setPlan', plan);
     writeCache(PLAN_CACHE_KEY, plan);
@@ -77,14 +79,16 @@ export const actions: ActionTree<SubscriptionsStateI, RootStateI> = {
   async getStorage(
     context: ActionContext<SubscriptionsStateI, RootStateI>,
   ): Promise<void> {
-    const cachedStorage = readCache<StorageI>(STORAGE_CACHE_KEY);
+    const cachedStorage = readCache<any>(STORAGE_CACHE_KEY);
 
-    if (cachedStorage) {
+    if (cachedStorage && cachedStorage.storageLimit) {
+      console.log('cachedStorage->', cachedStorage);
       context.commit('setStorage', cachedStorage);
       return;
     }
 
     const { data } = await storageClient.get('/api/subscriptions/storage');
+    console.log('storage-data->', data);
     const storage = snakeToCamel(data);
     context.commit('setStorage', storage);
     writeCache(STORAGE_CACHE_KEY, storage);
