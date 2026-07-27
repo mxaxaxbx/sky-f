@@ -1,0 +1,37 @@
+# Sky Frontend (sky-f)
+
+> This file is intended for Large Language Models (LLMs) to quickly understand the structure, context, and key contents of the sky-f project.
+
+## About
+Sky is a frontend application built with Vue 3, TypeScript, Vuex, Vue Router, Tailwind CSS, GSAP, and PixiJS.
+
+## Tech Stack
+- **Framework**: Vue 3 (Composition API / Class Components)
+- **Language**: TypeScript
+- **State Management**: Vuex 4
+- **Routing**: Vue Router 4
+- **Styling**: Tailwind CSS, SCSS, PostCSS
+- **Animations/Graphics**: GSAP, PixiJS
+- **Media**: hls.js (Video streaming), jspdf (PDF generation)
+- **HTTP Client**: Axios
+
+## Project Structure
+- `/public`: Static assets (SVG icons, HTML templates, images, manifest).
+- `/src/components`: Reusable UI Vue components.
+- `/src/views`: Main page views.
+- `/src/store`: Vuex state management modules.
+- `/src/router`: Vue Router configurations.
+- `/src/http-client`: Axios configurations and API wrappers.
+- `/src/utils`: Helper functions and utilities.
+- `/src/assets`: Compiled assets and global styles.
+
+## Developer Commands
+- `npm run serve`: Start local development server
+- `npm run build`: Build for production
+- `npm run lint`: Lint source files
+
+## Important Links
+- [Vue.js Documentation](https://vuejs.org/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [GSAP Documentation](https://gsap.com/)
+- [PixiJS Documentation](https://pixijs.com/)
