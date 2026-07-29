@@ -42,3 +42,50 @@ This roadmap outlines the steps to implement a text and Markdown file editor wit
   - Ensure Monaco Editor is configured to leverage the device GPU. Monaco uses hardware-accelerated rendering (canvas/WebGL where applicable) for its editor surface.
   - Optimize the editor for large text files by adjusting Monaco's layout configuration and disabling heavy features (like format on type or excessive minimap rendering) for massive files.
 - [ ] **Unsaved Changes Warning:** Implement an alert if the user tries to navigate away with unsaved changes.
+
+## API Reference: Update File Content
+
+#### Request Payload
+```json
+{
+  "content": "This is the updated text content for the file."
+}
+```
+
+#### Curl Example
+```bash
+curl -X PUT http://localhost:8080/api/storage/files/123/content \
+  -H "Authorization: DGTK <your_token_here>" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"Updated text content goes here..."}'
+```
+
+#### Response Example - Success (200 OK)
+```json
+{
+  "message": "file content updated successfully",
+  "id": "123",
+  "file": {
+    "id": 123,
+    "name": "document.txt",
+    "size": 33,
+    "content_type": "text/plain",
+    "user_id": 42,
+    "bucket_url": "",
+    "r2_key": "42/document-20231012150405.txt",
+    "r2_url": "...",
+    "upload_completed": true,
+    "error": "",
+    "folder_id": null,
+    "created": 1697123045,
+    "updated": 1697123080
+  }
+}
+```
+
+#### Response Example - Error (400 Bad Request)
+```json
+{
+  "error": "file type not supported for text editing"
+}
+```
