@@ -3,10 +3,12 @@
 This roadmap outlines the steps to implement a text and Markdown file editor within the current Vue.js application using Monaco Editor and Vuex.
 
 ## Phase 1: Setup & Tool Selection
-- [ ] **Install Monaco Editor:**
+- [x] **Install Monaco Editor:**
   - Standardize on `monaco-editor` (or a Vue 3 wrapper like `monaco-editor-vue3` / `@guolao/vue-monaco-editor`).
   - Configure Webpack/Vite plugins (e.g., `monaco-editor-webpack-plugin`) to load Monaco's web workers properly.
-- [ ] **Install Markdown Parsers (Optional for preview):** Run `npm install marked` or `markdown-it` if a secondary rendered preview pane is desired.
+- [x] **Install Markdown Parsers (Optional for preview):** Run `npm install marked` or `markdown-it` if a secondary rendered preview pane is desired.
+  
+*(Files touched in Phase 1: `package.json`, `package-lock.json`, `vue.config.js`, `EDITOR_ROADMAP.md`)*
 
 ## Phase 2: File Handling (I/O)
 - [ ] **Implement File Reader:** Use the HTML5 `FileReader` API or the modern `File System Access API` to open local `.txt` and `.md` files.
