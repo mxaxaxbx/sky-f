@@ -7,8 +7,8 @@ module.exports = defineConfig({
     plugins: [
       new MonacoWebpackPlugin({
         languages: ['markdown', 'plaintext'],
-      })
-    ]
+      }),
+    ],
   },
   pages: {
     index: {

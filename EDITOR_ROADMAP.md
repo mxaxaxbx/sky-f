@@ -11,12 +11,14 @@ This roadmap outlines the steps to implement a text and Markdown file editor wit
 *(Files touched in Phase 1: `package.json`, `package-lock.json`, `vue.config.js`, `EDITOR_ROADMAP.md`)*
 
 ## Phase 2: File Handling (I/O)
-- [ ] **Implement File Reader:** Use the HTML5 `FileReader` API or the modern `File System Access API` to open local `.txt` and `.md` files.
-- [ ] **Implement File Saver:** Create a mechanism to save edits back to the user's device (using `Blob` and `<a download>` or `showSaveFilePicker`).
-- [ ] **State Management (Vuex):** Add Vuex store modules to manage:
+- [x] **Implement File Reader:** Use the HTML5 `FileReader` API or the modern `File System Access API` to open local `.txt` and `.md` files.
+- [x] **Implement File Saver:** Create a mechanism to save edits back to the user's device (using `Blob` and `<a download>` or `showSaveFilePicker`).
+- [x] **State Management (Vuex):** Add Vuex store modules to manage:
   - Current file name.
   - Current file content.
   - "Unsaved changes" state.
+
+*(Files touched in Phase 2: `src/store/index.ts`, `src/store/editor/index.ts`, `src/store/editor/state.ts`, `src/store/editor/mutations.ts`, `src/store/editor/actions.ts`)*
 
 ## Phase 3: Component Development
 - [ ] **Create `EditorComponent.vue`:**
