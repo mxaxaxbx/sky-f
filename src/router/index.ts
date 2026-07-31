@@ -125,6 +125,16 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: true,
         },
       },
+      // editor
+      {
+        path: 'editor',
+        name: 'app-editor',
+        component: () => import('../views/EditorView.vue'),
+        meta: {
+          title: 'Editor',
+          requiresAuth: true,
+        },
+      },
     ],
   },
 ];

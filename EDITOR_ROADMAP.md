@@ -33,10 +33,12 @@ This roadmap outlines the steps to implement a text and Markdown file editor wit
 *(Files touched in Phase 3: `src/components/editor/EditorComponent.vue`, `src/components/editor/MarkdownPreview.vue`, `src/components/editor/EditorToolbar.vue`)*
 
 ## Phase 4: App Integration
-- [ ] **Create `EditorView.vue`:**
+- [x] **Create `EditorView.vue`:**
   - Assemble the Toolbar, EditorComponent, and (optionally) MarkdownPreview into a cohesive page.
-- [ ] **Routing:** Add a new route in `src/router/index.ts` (e.g., `/editor`) pointing to `EditorView.vue`.
-- [ ] **Navigation:** Add a link or button in the main layout (`App.vue` or navigation bar) to access the editor.
+- [x] **Routing:** Add a new route in `src/router/index.ts` (e.g., `/editor`) pointing to `EditorView.vue`.
+- [x] **Navigation:** Add a link or button in the main layout (`App.vue` or navigation bar) to access the editor.
+
+*(Files touched in Phase 4: `src/views/EditorView.vue`, `src/router/index.ts`, `src/components/global/sidebar.vue`, `EDITOR_ROADMAP.md`)*
 
 ## Phase 5: Styling & Polish
 - [ ] **Styling:** Style the editor container using Tailwind CSS to match the existing app theme (`tailwind.config.js`). Set Monaco to a theme matching your app (e.g., `vs-dark`).
