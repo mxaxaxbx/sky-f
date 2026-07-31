@@ -21,14 +21,16 @@ This roadmap outlines the steps to implement a text and Markdown file editor wit
 *(Files touched in Phase 2: `src/store/index.ts`, `src/store/editor/index.ts`, `src/store/editor/state.ts`, `src/store/editor/mutations.ts`, `src/store/editor/actions.ts`)*
 
 ## Phase 3: Component Development
-- [ ] **Create `EditorComponent.vue`:**
+- [x] **Create `EditorComponent.vue`:**
   - Wrap the Monaco Editor instance.
   - Support two-way binding (`v-model` or equivalent) for the file content.
   - Configure Monaco for `markdown` and `plaintext` language modes.
-- [ ] **Create `MarkdownPreview.vue` (Optional):**
+- [x] **Create `MarkdownPreview.vue` (Optional):**
   - If split-pane editing is desired, build a component to parse and render Markdown content in real-time.
-- [ ] **Create `EditorToolbar.vue`:**
+- [x] **Create `EditorToolbar.vue`:**
   - Add actions like Open, Save, Undo, Redo, and formatting shortcuts if applicable.
+
+*(Files touched in Phase 3: `src/components/editor/EditorComponent.vue`, `src/components/editor/MarkdownPreview.vue`, `src/components/editor/EditorToolbar.vue`)*
 
 ## Phase 4: App Integration
 - [ ] **Create `EditorView.vue`:**
