@@ -10,11 +10,11 @@
       @redo="triggerRedo"
     />
 
-    <div class="flex-1 flex overflow-hidden">
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
       <!-- Editor Pane -->
       <div
-        class="flex-1 h-full"
-        :class="{ 'border-r border-gray-700': isMarkdown && showPreview }"
+        class="flex-1 h-full min-h-0"
+        :class="{ 'border-b md:border-b-0 md:border-r border-gray-700': isMarkdown && showPreview }"
       >
         <EditorComponent
           v-model="fileContent"
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Markdown Preview Pane -->
-      <div v-if="isMarkdown && showPreview" class="flex-1 h-full bg-gray-900">
+      <div v-if="isMarkdown && showPreview" class="flex-1 h-full min-h-0 overflow-y-auto bg-gray-900">
         <MarkdownPreview :content="fileContent" />
       </div>
     </div>

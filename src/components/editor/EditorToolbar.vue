@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-toolbar flex items-center justify-between p-2 bg-gray-800 text-white border-b border-gray-700">
+  <div class="editor-toolbar flex flex-wrap items-center justify-between p-2 bg-gray-800 text-white border-b border-gray-700 gap-y-2">
     <div class="flex space-x-2">
       <button @click="$emit('open')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors">
         Open
@@ -9,7 +9,7 @@
       </button>
     </div>
 
-    <div class="flex space-x-4 items-center">
+    <div class="flex space-x-4 items-center flex-wrap gap-y-2">
       <span v-if="fileName" class="text-sm text-gray-300">
         {{ fileName }}
         <span v-if="hasUnsavedChanges" class="text-yellow-400 ml-1">*</span>

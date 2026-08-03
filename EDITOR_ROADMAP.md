@@ -41,8 +41,10 @@ This roadmap outlines the steps to implement a text and Markdown file editor wit
 *(Files touched in Phase 4: `src/views/EditorView.vue`, `src/router/index.ts`, `src/components/global/sidebar.vue`, `EDITOR_ROADMAP.md`)*
 
 ## Phase 5: Styling & Polish
-- [ ] **Styling:** Style the editor container using Tailwind CSS to match the existing app theme (`tailwind.config.js`). Set Monaco to a theme matching your app (e.g., `vs-dark`).
-- [ ] **Responsiveness:** Ensure the editor layout works well on mobile and desktop views.
+- [x] **Styling:** Style the editor container using Tailwind CSS to match the existing app theme (`tailwind.config.js`). Set Monaco to a theme matching your app (e.g., `vs-dark`).
+- [x] **Responsiveness:** Ensure the editor layout works well on mobile and desktop views.
+
+*(Files touched in Phase 5: `src/views/EditorView.vue`, `src/components/editor/EditorToolbar.vue`, `EDITOR_ROADMAP.md`)*
 
 ## Phase 6: Testing & Edge Cases
 - [ ] **Test File Extensions:** Ensure the app only accepts/filters `.txt` and `.md` files in the file picker.
