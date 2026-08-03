@@ -13,14 +13,18 @@
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
       <!-- Editor Pane -->
       <div
-        class="flex-1 h-full min-h-0"
+        class="flex-1 h-full min-h-0 relative"
         :class="{ 'border-b md:border-b-0 md:border-r border-gray-700': isMarkdown && showPreview }"
       >
         <EditorComponent
           v-model="fileContent"
           :language="editorLanguage"
+          :is-large-file="isLargeFile"
           ref="editorComponentRef"
         />
+        <div v-if="isLargeFile" class="absolute top-2 right-2 px-2 py-1 bg-yellow-900 text-yellow-200 text-xs rounded pointer-events-none">
+          Large file ({{ formatFileSize(currentFileSize) }}) — optimized mode
+        </div>
       </div>
 
       <!-- Markdown Preview Pane -->
@@ -57,6 +61,8 @@ export default defineComponent({
     const currentFileName = computed(() => store.state.editor.currentFileName);
     const hasUnsavedChanges = computed(() => store.state.editor.hasUnsavedChanges);
     const rawFileContent = computed(() => store.state.editor.currentFileContent);
+    const isLargeFile = computed(() => store.state.editor.isLargeFile);
+    const currentFileSize = computed(() => store.state.editor.currentFileSize);
 
     const isMarkdown = computed(() => {
       const name = currentFileName.value;
@@ -111,6 +117,15 @@ export default defineComponent({
       // Stub
     };
 
+    const formatFileSize = (bytes: number): string => {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      const size = Math.round((bytes / (k ** i)) * 100) / 100;
+      return `${size} ${sizes[i]}`;
+    };
+
     return {
       currentFileName,
       hasUnsavedChanges,
@@ -122,6 +137,9 @@ export default defineComponent({
       saveLocalFile,
       triggerUndo,
       triggerRedo,
+      isLargeFile,
+      currentFileSize,
+      formatFileSize,
     };
   },
 });

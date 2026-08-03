@@ -26,6 +26,7 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
         commit('SET_FILE_HANDLE', fileHandle);
         commit('SET_CURRENT_FILE_NAME', file.name);
         commit('SET_CURRENT_FILE_CONTENT', content);
+        commit('SET_FILE_SIZE', file.size);
         commit('SET_HAS_UNSAVED_CHANGES', false);
       } catch (err) {
         console.error('File open aborted or failed', err);
@@ -48,6 +49,7 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
             commit('SET_FILE_HANDLE', null);
             commit('SET_CURRENT_FILE_NAME', file.name);
             commit('SET_CURRENT_FILE_CONTENT', content);
+            commit('SET_FILE_SIZE', file.size);
             commit('SET_HAS_UNSAVED_CHANGES', false);
             resolve(content);
           };

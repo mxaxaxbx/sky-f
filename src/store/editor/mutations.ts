@@ -15,4 +15,8 @@ export const mutations: MutationTree<EditorStateI> = {
   SET_FILE_HANDLE(state, handle: any) {
     state.fileHandle = handle;
   },
+  SET_FILE_SIZE(state, size: number) {
+    state.currentFileSize = size;
+    state.isLargeFile = size > 1024 * 1024; // > 1MB
+  },
 };

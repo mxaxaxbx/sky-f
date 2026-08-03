@@ -4,6 +4,8 @@ export interface EditorStateI {
   hasUnsavedChanges: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fileHandle: any;
+  currentFileSize: number; // in bytes
+  isLargeFile: boolean;
 }
 
 export const state: EditorStateI = {
@@ -11,4 +13,6 @@ export const state: EditorStateI = {
   currentFileContent: '',
   hasUnsavedChanges: false,
   fileHandle: null,
+  currentFileSize: 0,
+  isLargeFile: false,
 };

@@ -47,11 +47,19 @@ This roadmap outlines the steps to implement a text and Markdown file editor wit
 *(Files touched in Phase 5: `src/views/EditorView.vue`, `src/components/editor/EditorToolbar.vue`, `EDITOR_ROADMAP.md`)*
 
 ## Phase 6: Testing & Edge Cases
-- [ ] **Test File Extensions:** Ensure the app only accepts/filters `.txt` and `.md` files in the file picker.
-- [ ] **Handle Large Files (GPU Acceleration):** 
-  - Ensure Monaco Editor is configured to leverage the device GPU. Monaco uses hardware-accelerated rendering (canvas/WebGL where applicable) for its editor surface.
-  - Optimize the editor for large text files by adjusting Monaco's layout configuration and disabling heavy features (like format on type or excessive minimap rendering) for massive files.
-- [ ] **Unsaved Changes Warning:** Implement an alert if the user tries to navigate away with unsaved changes.
+- [x] **Test File Extensions:** Ensure the app only accepts/filters `.txt` and `.md` files in the file picker.
+  - Modern `showOpenFilePicker` API enforces `.txt` and `.md` filters
+  - Fallback `<input type="file">` method uses `accept=".txt,.md"`
+- [x] **Handle Large Files (GPU Acceleration):** 
+  - Detect files >1MB and automatically enable optimized mode
+  - Disable expensive Monaco features for large files: format on type/paste, bracket pair colorization, whitespace rendering, glyph margin
+  - Increase suggestion delay to 500ms for better performance
+  - Visual indicator displays file size and optimization status
+- [x] **Unsaved Changes Warning:** Implement an alert if the user tries to navigate away with unsaved changes.
+  - Route guard in `EditorView.vue` shows confirmation dialog
+  - Prevents accidental data loss
+
+*(Files touched in Phase 6: `src/store/editor/state.ts`, `src/store/editor/mutations.ts`, `src/store/editor/actions.ts`, `src/components/editor/EditorComponent.vue`, `src/views/EditorView.vue`, `EDITOR_ROADMAP.md`)*
 
 ## API Reference: Update File Content
 

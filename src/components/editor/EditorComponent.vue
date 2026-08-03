@@ -11,59 +11,79 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+<script setup lang="ts">
+import {
+  ref,
+  watch,
+  computed,
+  defineProps,
+  defineEmits,
+} from 'vue';
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor';
 import * as monaco from 'monaco-editor';
 
-export default defineComponent({
-  name: 'EditorComponent',
-  components: {
-    VueMonacoEditor,
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true,
   },
-  props: {
-    modelValue: {
-      type: String,
-      required: true,
-    },
-    language: {
-      type: String,
-      default: 'plaintext', // 'markdown' or 'plaintext'
-    },
-    theme: {
-      type: String,
-      default: 'vs-dark',
-    },
+  language: {
+    type: String,
+    default: 'plaintext',
   },
-  emits: ['update:modelValue'],
-  setup(props, { emit }) {
-    const editorRef = ref<monaco.editor.IStandaloneCodeEditor | null>(null);
+  theme: {
+    type: String,
+    default: 'vs-dark',
+  },
+  isLargeFile: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-    const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
-      automaticLayout: true,
-      wordWrap: 'on',
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-    };
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+}>();
 
-    const handleMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editorRef.value = editor;
-      editor.onDidChangeModelContent(() => {
-        emit('update:modelValue', editor.getValue());
-      });
-    };
+const editorRef = ref<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-    watch(() => props.modelValue, (newValue) => {
-      if (editorRef.value && editorRef.value.getValue() !== newValue) {
-        editorRef.value.setValue(newValue);
-      }
-    });
+const editorOptions = computed(() => {
+  const baseOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
+    automaticLayout: true,
+    wordWrap: 'on',
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+  };
 
+  if (props.isLargeFile) {
     return {
-      editorOptions,
-      handleMount,
+      ...baseOptions,
+      formatOnType: false,
+      formatOnPaste: false,
+      'bracketPairColorization.enabled': false,
+      'bracketPairColorization.independentColorPoolPerBracketType': false,
+      glyphMargin: false,
+      lineNumbersMinChars: 3,
+      renderWhitespace: 'none',
+      renderControlCharacters: false,
+      quickSuggestionsDelay: 500,
     };
-  },
+  }
+
+  return baseOptions;
+});
+
+const handleMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+  editorRef.value = editor;
+  editor.onDidChangeModelContent(() => {
+    emit('update:modelValue', editor.getValue());
+  });
+};
+
+watch(() => props.modelValue, (newValue) => {
+  if (editorRef.value && editorRef.value.getValue() !== newValue) {
+    editorRef.value.setValue(newValue);
+  }
 });
 </script>
 
