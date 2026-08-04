@@ -8,6 +8,7 @@ import theme from './theme';
 import subscriptions from './subscriptions';
 import shares from './shares';
 import breadcrumbs from './breadcrumbs';
+import editor from './editor';
 
 import { state, RootStateI } from './state';
 import { mutations } from './mutations';
@@ -31,5 +32,6 @@ store.registerModule('theme', theme);
 store.registerModule('subscriptions', subscriptions);
 store.registerModule('shares', shares);
 store.registerModule('breadcrumbs', breadcrumbs);
+store.registerModule('editor', editor);
 
 export default store;

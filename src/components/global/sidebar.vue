@@ -103,6 +103,52 @@
                     </span>
                   </router-link>
                 </li>
+                <!-- Editor -->
+                <li>
+                  <router-link
+                    to="/app/editor"
+                    @click="handleNavClick"
+                    class="
+                      w-full group
+                      flex items-center
+                      text-sm font-regular
+                      rounded-xl opacity-70
+                      border border-transparent
+                      grayscale
+
+                      hover:opacity-100
+                      hover:grayscale-0
+                      hover:bg-[var(--hover-bg)]
+                      hover:text-[var(--text)]
+                      hover:border-[var(--hover-border)]
+                      hover:shadow-[0_0_2px_1px_rgba(10,119,243,0.3)]
+                      transition-all duration-200
+                    "
+                    :class="showSidebar
+                      ? 'justify-start px-2 py-1.5'
+                      : 'justify-center py-1.5'"
+                    active-class="
+                      bg-[var(--bg-seconary)] text-[var(--text-terceary)] !opacity-100 grayscale-0
+                      !border-[var(--border)] hover:!border-[var(--color-primary)]
+                    ">
+                    <div class="w-6 h-6 flex items-center justify-center">
+                      <!-- You could use a specific icon if available, reusing document icon here or text -->
+                      <img
+                        :src="getIcon(
+                          '/app/editor',
+                          '/document.svg',
+                          '/document.svg'
+                        )"
+                        alt="editor"
+                        class="w-6 h-6"
+                      />
+                    </div>
+                    <span
+                      v-show="showSidebar" class="ml-3 whitespace-nowrap">
+                      Editor
+                    </span>
+                  </router-link>
+                </li>
                 <!-- trash folder -->
                 <li>
                   <router-link
