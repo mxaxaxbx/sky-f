@@ -7,6 +7,7 @@ import store from './store';
 import clickOutside from './directives/click-outside';
 import checkPerm from './directives/perm';
 import { registerServiceWorker } from './registerServiceWorker';
+import { checkAndEmptyOldTrash } from './services/trash-scheduler';
 
 import './index.css';
 
@@ -19,5 +20,9 @@ app.use(checkPerm);
 
 store.dispatch('theme/initTheme');
 app.mount('#app');
+
+// Run trash cleanup on app start and every hour
+checkAndEmptyOldTrash();
+setInterval(checkAndEmptyOldTrash, 60 * 60 * 1000);
 
 registerServiceWorker();
