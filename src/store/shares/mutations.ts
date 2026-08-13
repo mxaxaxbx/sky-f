@@ -6,6 +6,7 @@ import {
   CreatedShareI,
   PublicShareMetaI,
   SharedFileI,
+  PublicShareContentI,
 } from './state';
 
 export const mutations: MutationTree<ShareStateI> = {
@@ -42,6 +43,24 @@ export const mutations: MutationTree<ShareStateI> = {
 
   setSharedFiles(state: ShareStateI, payload: SharedFileI[]) {
     state.sharedFiles = payload || [];
+  },
+
+  setPublicShareContent(state: ShareStateI, payload: PublicShareContentI | null) {
+    state.publicShareContent = payload;
+  },
+
+  setPublicShareLoading(state: ShareStateI, payload: boolean) {
+    state.publicShareLoading = payload;
+  },
+
+  setPublicShareError(state: ShareStateI, payload: string | null) {
+    state.publicShareError = payload;
+  },
+
+  clearPublicShareState(state: ShareStateI) {
+    state.publicShareContent = null;
+    state.publicShareLoading = false;
+    state.publicShareError = null;
   },
 
 };

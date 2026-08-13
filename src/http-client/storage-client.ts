@@ -11,6 +11,7 @@ const baseHttpClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 function customErrorHandler(error: any) {

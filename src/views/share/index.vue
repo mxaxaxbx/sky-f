@@ -12,7 +12,9 @@
       <!-- loading metadata -->
       <div v-if="loading" class="flex flex-col items-center gap-4 py-10 text-[var(--color-primary)]">
         <i class="fas fa-spinner fa-spin text-3xl"></i>
-        <p class="text-sm text-[var(--text-terceary)]">Loading shared content...</p>
+        <p class="text-sm text-[var(--text-terceary)]">
+          {{ isDirectDownload && downloading ? 'Downloading...' : 'Loading shared content...' }}
+        </p>
       </div>
 
       <!-- error / not found -->
@@ -167,6 +169,7 @@ const route = useRoute();
 const store = useStore();
 
 const token = route.params.token as string;
+const isDirectDownload = computed(() => route.query.dl === '1');
 
 const loading = ref(true);
 const error = ref('');
@@ -303,12 +306,59 @@ async function loadMeta(): Promise<void> {
   }
 }
 
+// Direct streaming download (when dl=1 query parameter is present)
+async function triggerStreamingDownload(): Promise<void> {
+  downloading.value = true;
+  try {
+    const response = await store.dispatch('shares/getPublicShareContentStream', {
+      token,
+    });
+
+    // Create a blob from the stream and trigger download
+    const blob = new Blob([response.data], {
+      type: response.headers['content-type'] || 'application/octet-stream',
+    });
+
+    // Extract filename from Content-Disposition header if available
+    let fileName = meta.value?.name || 'download';
+    const contentDisposition = response.headers['content-disposition'];
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=(['"'']*)([^'"'';]*)\1/);
+      if (fileNameMatch && fileNameMatch[2]) {
+        fileName = decodeURIComponent(fileNameMatch[2]);
+      }
+    }
+
+    // Create object URL and trigger browser download
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch (err: any) {
+    console.error('Streaming download error:', err);
+    store.commit('notifications/addNotification', {
+      message: err?.response?.data?.error || 'Unable to download the shared content.',
+      type: 'error',
+    });
+  } finally {
+    downloading.value = false;
+  }
+}
+
 async function verify(): Promise<void> {
   verifying.value = true;
   verifyError.value = '';
   try {
-    await store.dispatch('shares/verifyShare', { token, password: password.value });
-    await fetchSharedFiles();
+    await store.dispatch('shares/verifySharePassword', { token, password: password.value });
+    if (isDirectDownload.value) {
+      await triggerStreamingDownload();
+    } else {
+      await fetchSharedFiles();
+    }
   } catch (err: any) {
     verifyError.value = err?.response?.data?.error || 'Incorrect password. Please try again.';
   } finally {
@@ -369,5 +419,23 @@ async function download(): Promise<void> {
   }
 }
 
-onMounted(loadMeta);
+// Handle direct download after metadata and authorization are ready
+async function handleDirectDownload(): Promise<void> {
+  if (!isDirectDownload.value || !meta.value) {
+    return;
+  }
+
+  // If password protected and not verified, wait for user to verify
+  if (meta.value.isPasswordProtected && !accessToken.value) {
+    return;
+  }
+
+  // Trigger streaming download
+  await triggerStreamingDownload();
+}
+
+onMounted(async () => {
+  await loadMeta();
+  await handleDirectDownload();
+});
 </script>

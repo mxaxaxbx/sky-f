@@ -1,4 +1,5 @@
 import { ActionTree, ActionContext } from 'vuex';
+import { AxiosResponse, AxiosRequestConfig } from 'axios';
 
 import { storageClient } from '@/http-client';
 import { snakeToCamel, camelToSnake } from '@/utils';
@@ -131,6 +132,133 @@ export const actions: ActionTree<ShareStateI, RootStateI> = {
 
     context.commit('setSharedFiles', files);
     return files;
+  },
+
+  // Get public share content (presigned URL redirect) - unprotected or already authorized
+  async getPublicShareContent(
+    context: ActionContext<ShareStateI, RootStateI>,
+    payload: string,
+  ): Promise<string> {
+    context.commit('setPublicShareLoading', true);
+    context.commit('setPublicShareError', null);
+
+    try {
+      // Request with maxRedirects: 0 to capture the 302 redirect
+      const response = await storageClient.get(
+        `/api/public/shares/${payload}/content`,
+        {
+          maxRedirects: 0,
+          validateStatus: (status: number) => status === 302 || status === 200,
+        },
+      );
+
+      let presignedUrl = '';
+
+      // Handle redirect response (302)
+      if (response.status === 302 && response.headers.location) {
+        presignedUrl = response.headers.location as string;
+      } else if (response.status === 200 && response.data?.url) {
+        presignedUrl = response.data.url as string;
+      } else if (response.status === 200) {
+        presignedUrl = response.data as string;
+      }
+
+      context.commit('setPublicShareContent', {
+        url: presignedUrl,
+        fileName: response.headers['content-disposition']
+          ?.split('filename=')[1]
+          ?.replace(/"/g, ''),
+      });
+
+      context.commit('setPublicShareLoading', false);
+      return presignedUrl;
+    } catch (error) {
+      const errorMessage = (error as any)?.response?.data?.error
+        || (error as Error)?.message
+        || 'Failed to retrieve share content';
+
+      context.commit('setPublicShareError', errorMessage);
+      context.commit('setPublicShareLoading', false);
+      throw error;
+    }
+  },
+
+  // Get public share content with streaming option (preserves Range/ETag support)
+  async getPublicShareContentStream(
+    context: ActionContext<ShareStateI, RootStateI>,
+    payload: {
+      token: string;
+      range?: string;
+    },
+  ): Promise<AxiosResponse> {
+    context.commit('setPublicShareLoading', true);
+    context.commit('setPublicShareError', null);
+
+    try {
+      const config: AxiosRequestConfig = {
+        responseType: 'stream',
+        maxRedirects: 1,
+      };
+
+      if (payload.range) {
+        config.headers = { Range: payload.range };
+      }
+
+      const response = await storageClient.get(
+        `/api/public/shares/${payload.token}/content?dl=1`,
+        config,
+      );
+
+      context.commit('setPublicShareLoading', false);
+      return response;
+    } catch (error) {
+      const errorMessage = (error as any)?.response?.data?.error
+        || (error as Error)?.message
+        || 'Failed to retrieve share content stream';
+
+      context.commit('setPublicShareError', errorMessage);
+      context.commit('setPublicShareLoading', false);
+      throw error;
+    }
+  },
+
+  // Verify password for protected share - sets httpOnly session cookie
+  async verifySharePassword(
+    context: ActionContext<ShareStateI, RootStateI>,
+    payload: {
+      token: string;
+      password: string;
+    },
+  ): Promise<void> {
+    context.commit('setPublicShareLoading', true);
+    context.commit('setPublicShareError', null);
+
+    try {
+      // Make request with credentials to include cookies
+      await storageClient.post(
+        `/api/public/shares/${payload.token}/verify`,
+        { password: payload.password },
+        {
+          withCredentials: true,
+        },
+      );
+
+      context.commit('setPublicShareLoading', false);
+    } catch (error) {
+      const errorMessage = (error as any)?.response?.data?.error
+        || 'Invalid password';
+
+      context.commit('setPublicShareError', errorMessage);
+      context.commit('setPublicShareLoading', false);
+      throw error;
+    }
+  },
+
+  // Clear public share state (useful when navigating away)
+  clearPublicShareState(
+    context: ActionContext<ShareStateI, RootStateI>,
+  ): void {
+    context.commit('clearPublicShareState');
   },
 
 };
