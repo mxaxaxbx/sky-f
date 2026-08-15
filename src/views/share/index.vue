@@ -419,19 +419,15 @@ async function loadRawContent(): Promise<void> {
   const file = sharedFiles.value[0];
   fileUrl.value = file.url;
 
-  // For text files, fetch the content as text
+  // For text files, fetch the content as text with proper headers
   if (isTextContent.value) {
     try {
-      const response = await fetch(file.url);
-      const contentType = response.headers.get('content-type') || deduceContentType(file.name);
+      const response = await store.dispatch('shares/getPublicShareContentStream', { token });
+      const contentType = response.headers['content-type'] || deduceContentType(file.name);
 
-      // Set response headers for raw file view
-      if (contentType) {
-        // Update document headers to reflect raw file serving
-        document.contentType = contentType;
-      }
-
-      const text = await response.text();
+      // Create blob with proper content-type for raw file serving
+      const blob = new Blob([response.data], { type: contentType });
+      const text = await blob.text();
       rawContent.value = text;
     } catch (err) {
       console.error('Error loading raw content:', err);
@@ -439,6 +435,7 @@ async function loadRawContent(): Promise<void> {
     }
   } else {
     // For media files (images, videos, audio, pdf), set rawContent to trigger display
+    // The browser will request with proper content-type headers from the file URL
     rawContent.value = '';
   }
 }
