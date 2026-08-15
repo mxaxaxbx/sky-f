@@ -1,5 +1,36 @@
 <template>
-  <div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
+  <!-- raw file view (when dl=1) -->
+  <template v-if="isDirectDownload && rawContent !== null">
+    <!-- raw text content -->
+    <pre v-if="isTextContent" class="w-full h-screen bg-[var(--bg)] text-[var(--text)] p-4 overflow-auto font-mono text-sm">{{ rawContent }}</pre>
+
+    <!-- raw image content -->
+    <img v-else-if="isImageContent" :src="fileUrl" :alt="meta?.name || 'Shared image'" class="max-w-full max-h-screen" />
+
+    <!-- raw video content -->
+    <video v-else-if="isVideoContent" :src="fileUrl" controls class="max-w-full max-h-screen">
+      <track kind="captions" />
+    </video>
+
+    <!-- raw audio content -->
+    <audio v-else-if="isAudioContent" :src="fileUrl" controls class="w-full">
+      <track kind="captions" />
+    </audio>
+
+    <!-- pdf embed -->
+    <iframe v-else-if="isPdfContent" :src="fileUrl" :title="`Shared document: ${meta?.name}`" class="w-full h-screen border-0" />
+
+    <!-- fallback for unsupported types -->
+    <div v-else class="min-h-screen w-full flex items-center justify-center">
+      <div class="text-center">
+        <p class="text-[var(--text)]">Cannot display this file type in browser.</p>
+        <a :href="fileUrl" download class="text-[var(--color-primary)] hover:underline mt-4 block">Download the file instead</a>
+      </div>
+    </div>
+  </template>
+
+  <!-- sky ui view (normal share experience) -->
+  <div v-else class="min-h-screen w-full flex items-center justify-center px-4 py-10">
     <div
       class="
         w-full max-w-md
@@ -181,6 +212,38 @@ const verifyError = ref('');
 
 const downloading = ref(false);
 
+const rawContent = ref<string | null>(null);
+const fileUrl = ref('');
+
+const isTextContent = computed(() => {
+  if (!meta.value) return false;
+  const name = meta.value.name.toLowerCase();
+  return /\.(txt|md|json|js|jsx|ts|tsx|html|css|scss|xml|yaml|yml|sql|py|java|cpp|c|go|rs|rb|php)$/.test(name);
+});
+
+const isImageContent = computed(() => {
+  if (!meta.value) return false;
+  const name = meta.value.name.toLowerCase();
+  return /\.(png|jpg|jpeg|gif|webp|bmp|svg|avif|ico)$/.test(name);
+});
+
+const isVideoContent = computed(() => {
+  if (!meta.value) return false;
+  const name = meta.value.name.toLowerCase();
+  return /\.(mp4|webm|ogg|mov|mkv|avi|flv|wmv)$/.test(name);
+});
+
+const isAudioContent = computed(() => {
+  if (!meta.value) return false;
+  const name = meta.value.name.toLowerCase();
+  return /\.(mp3|wav|ogg|flac|aac|m4a|wma)$/.test(name);
+});
+
+const isPdfContent = computed(() => {
+  if (!meta.value) return false;
+  return meta.value.name.toLowerCase().endsWith('.pdf');
+});
+
 const accessToken = computed<string>(() => store.state.shares.accessToken);
 const sharedFiles = computed<SharedFileI[]>(() => store.state.shares.sharedFiles);
 
@@ -349,13 +412,45 @@ async function triggerStreamingDownload(): Promise<void> {
   }
 }
 
+// Load raw content for direct file view (when dl=1)
+async function loadRawContent(): Promise<void> {
+  if (!sharedFiles.value.length) return;
+
+  const file = sharedFiles.value[0];
+  fileUrl.value = file.url;
+
+  // For text files, fetch the content as text
+  if (isTextContent.value) {
+    try {
+      const response = await fetch(file.url);
+      const contentType = response.headers.get('content-type') || deduceContentType(file.name);
+
+      // Set response headers for raw file view
+      if (contentType) {
+        // Update document headers to reflect raw file serving
+        document.contentType = contentType;
+      }
+
+      const text = await response.text();
+      rawContent.value = text;
+    } catch (err) {
+      console.error('Error loading raw content:', err);
+      rawContent.value = '[Error loading content]';
+    }
+  } else {
+    // For media files (images, videos, audio, pdf), set rawContent to trigger display
+    rawContent.value = '';
+  }
+}
+
 async function verify(): Promise<void> {
   verifying.value = true;
   verifyError.value = '';
   try {
     await store.dispatch('shares/verifySharePassword', { token, password: password.value });
     if (isDirectDownload.value) {
-      await triggerStreamingDownload();
+      await fetchSharedFiles();
+      await loadRawContent();
     } else {
       await fetchSharedFiles();
     }
@@ -430,8 +525,8 @@ async function handleDirectDownload(): Promise<void> {
     return;
   }
 
-  // Trigger streaming download
-  await triggerStreamingDownload();
+  // Load raw content for display instead of downloading
+  await loadRawContent();
 }
 
 onMounted(async () => {
