@@ -162,27 +162,34 @@ router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} - sky`;
   }
 
-  if (
-    to.matched.some(
-      (record: RouteRecordRaw) => record.meta?.requiresAuth,
-    )
-  ) {
+  // Direct raw download proxy: bypass Vue component and serve file directly
+  if (to.name === 'share' && to.query.dl === '1') {
+    const token = to.params.token as string;
+    const apiBaseUrl = process.env.VUE_APP_STORAGE_API || '';
+    window.location.href = `${apiBaseUrl}/api/public/shares/${token}/content?dl=1`;
+    return;
+  }
+
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // this route requires auth, check if logged in
+    // if not, redirect to login page.
     if (!localStorage.getItem('token')) {
       const { VUE_APP_DG_USERS_APP } = process.env;
       window.location.href = `${VUE_APP_DG_USERS_APP}/auth/provider?app=sky`;
-      return false;
+      return;
     }
   }
 
   if (to.query.redirect && !to.path.startsWith('/auth')) {
     if (to.query.redirect === 'undefined') {
-      return next({ name: 'app-home' });
+      next({ name: 'app-home' });
+      return;
     }
-    // redirect to the to path
-    return next(to.query.redirect as string);
+    next(to.query.redirect as string);
+    return;
   }
 
-  return next();
+  next();
 });
 
 export default router;
