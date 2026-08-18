@@ -156,6 +156,14 @@ router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} - sky`;
   }
 
+  // Direct raw download proxy: bypass Vue component and serve file directly
+  if (to.name === 'share' && to.query.dl === '1') {
+    const token = to.params.token as string;
+    const apiBaseUrl = process.env.VUE_APP_STORAGE_API || '';
+    window.location.href = `${apiBaseUrl}/api/public/shares/${token}/content?dl=1`;
+    return;
+  }
+
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
