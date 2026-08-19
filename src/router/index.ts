@@ -39,6 +39,15 @@ const routes: Array<RouteRecordRaw> = [
       title: 'Shared with you',
     },
   },
+  // share proxy route (direct file download)
+  {
+    path: '/share-proxy/:token',
+    name: 'share-proxy',
+    component: () => import('../views/share-proxy.vue'),
+    meta: {
+      title: 'Downloading...',
+    },
+  },
   // app routes
   {
     path: '/app',
@@ -156,11 +165,13 @@ router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} - sky`;
   }
 
-  // Direct raw download proxy: bypass Vue component and serve file directly
+  // Direct download proxy: redirect to share-proxy route when dl=1 is present
   if (to.name === 'share' && to.query.dl === '1') {
-    const token = to.params.token as string;
-    const apiBaseUrl = process.env.VUE_APP_STORAGE_API || '';
-    window.location.href = `${apiBaseUrl}/api/public/shares/${token}/content?dl=1`;
+    next({
+      name: 'share-proxy',
+      params: { token: to.params.token },
+      query: to.query,
+    });
     return;
   }
 
