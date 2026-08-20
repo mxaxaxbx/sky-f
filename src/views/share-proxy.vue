@@ -27,7 +27,7 @@ const token = route.params.token as string;
 
 onMounted(() => {
   // Get API base URL from environment
-  const apiBaseUrl = process.env.VUE_APP_STORAGE_API || '';
+  const apiBaseUrl = process.env.VUE_APP_DG_SKY_SVC || '';
 
   try {
     // Navigate directly to the backend endpoint
