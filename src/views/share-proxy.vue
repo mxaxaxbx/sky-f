@@ -20,24 +20,22 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 
 const route = useRoute();
-const store = useStore();
-
 const error = ref('');
 const token = route.params.token as string;
 
-onMounted(async () => {
-  try {
-    // Get the presigned URL from the backend (handles redirect without CORS issues)
-    const presignedUrl = await store.dispatch('shares/getPublicShareContent', token);
+onMounted(() => {
+  // Get API base URL from environment
+  const apiBaseUrl = process.env.VUE_APP_STORAGE_API || '';
 
-    // Navigate directly to the presigned URL - browser will render natively
-    // No CORS issues because browser follows redirects naturally
-    window.location.href = presignedUrl;
+  try {
+    // Navigate directly to the backend endpoint
+    // Browser will follow the 302 redirect to R2 presigned URL
+    // No CORS issues because navigation ≠ XMLHttpRequest
+    window.location.href = `${apiBaseUrl}/api/public/shares/${token}/content`;
   } catch (err: any) {
-    error.value = err?.response?.data?.error || 'Failed to load the file.';
+    error.value = 'Failed to load the file.';
     console.error('Load error:', err);
   }
 });
