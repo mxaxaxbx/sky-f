@@ -30,18 +30,12 @@ const token = route.params.token as string;
 
 onMounted(async () => {
   try {
-    // Fetch the raw file content via the store action
-    const response = await store.dispatch('shares/getPublicShareContentStream', {
-      token,
-    });
+    // Get the presigned URL from the backend (handles redirect without CORS issues)
+    const presignedUrl = await store.dispatch('shares/getPublicShareContent', token);
 
-    // Create blob with proper content-type so browser renders it natively
-    const contentType = response.headers['content-type'] || 'application/octet-stream';
-    const blob = new Blob([response.data], { type: contentType });
-
-    // Create object URL and navigate to it - browser will render natively
-    const objectUrl = URL.createObjectURL(blob);
-    window.location.href = objectUrl;
+    // Navigate directly to the presigned URL - browser will render natively
+    // No CORS issues because browser follows redirects naturally
+    window.location.href = presignedUrl;
   } catch (err: any) {
     error.value = err?.response?.data?.error || 'Failed to load the file.';
     console.error('Load error:', err);
