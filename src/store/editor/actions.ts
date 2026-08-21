@@ -115,4 +115,28 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
     commit('SET_CURRENT_FILE_CONTENT', content);
     commit('SET_HAS_UNSAVED_CHANGES', true);
   },
+
+  async loadFileById({ commit }, fileId: string | number) {
+    const response = await fetch(`${process.env.VUE_APP_DGTK_API}/storage/files/${fileId}/content`, {
+      method: 'GET',
+      headers: {
+        Authorization: `DGTK ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load file: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data.content || '';
+    const fileName = data.file?.name || `file-${fileId}`;
+    const fileSize = data.file?.size || 0;
+
+    commit('SET_CURRENT_FILE_NAME', fileName);
+    commit('SET_CURRENT_FILE_CONTENT', content);
+    commit('SET_FILE_SIZE', fileSize);
+    commit('SET_HAS_UNSAVED_CHANGES', false);
+    commit('SET_FILE_HANDLE', null);
+  },
 };

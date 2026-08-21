@@ -896,6 +896,22 @@
                           <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
                           <span>Rename</span>
                         </button>
+                        <!-- edit text file -->
+                        <button
+                          v-if="isEditableFile(file)"
+                          type="button"
+                          @click="() => { router.push(`/app/editor/${file.id}`); close(); }"
+                          class="
+                            flex items-center justify-start w-full
+                            rounded-xl px-3 py-1 border border-transparent
+
+                            hover:bg-[var(--hover-bg)]
+                            hover:border-[var(--color-primary)]
+                            transition-colors duration-300"
+                        >
+                          <img src="/icon/icon-edit.svg" alt="edit" class="h-6 mr-4 grayscale"/>
+                          <span>Edit</span>
+                        </button>
                       </div>
 
                       <!--actions file-->
@@ -1549,6 +1565,12 @@ function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function isEditableFile(file: FileI): boolean {
+  const editableExtensions = ['.txt', '.csv', '.md'];
+  const fileName = file.name?.toLowerCase() || '';
+  return editableExtensions.some((ext) => fileName.endsWith(ext));
 }
 
 function clearSelection() {

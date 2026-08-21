@@ -41,9 +41,11 @@ import {
   computed,
   ref,
   onBeforeUnmount,
+  onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { onBeforeRouteLeave } from 'vue-router';
+import { useRoute, onBeforeRouteLeave } from 'vue-router';
+
 import EditorToolbar from '../components/editor/EditorToolbar.vue';
 import EditorComponent from '../components/editor/EditorComponent.vue';
 import MarkdownPreview from '../components/editor/MarkdownPreview.vue';
@@ -57,6 +59,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const route = useRoute();
 
     const currentFileName = computed(() => store.state.editor.currentFileName);
     const hasUnsavedChanges = computed(() => store.state.editor.hasUnsavedChanges);
@@ -116,6 +119,21 @@ export default defineComponent({
     const triggerRedo = () => {
       // Stub
     };
+
+    onMounted(async () => {
+      const fileId = route.params.id as string | undefined;
+      if (fileId) {
+        try {
+          await store.dispatch('loadFileById', fileId);
+        } catch (error) {
+          console.error('Failed to load file:', error);
+          store.commit('notifications/addNotification', {
+            type: 'error',
+            message: 'Failed to load file',
+          });
+        }
+      }
+    });
 
     const formatFileSize = (bytes: number): string => {
       if (bytes === 0) return '0 B';
