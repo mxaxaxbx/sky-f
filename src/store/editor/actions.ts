@@ -1,4 +1,5 @@
 import { ActionTree } from 'vuex';
+import { storageClient } from '@/http-client';
 import { EditorStateI } from './state';
 import { RootStateI } from '../state';
 
@@ -114,5 +115,19 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
   updateContent({ commit }, content: string) {
     commit('SET_CURRENT_FILE_CONTENT', content);
     commit('SET_HAS_UNSAVED_CHANGES', true);
+  },
+
+  async loadFileById({ commit }, fileId: string | number) {
+    const { data } = await storageClient.get(`/api/storage/files/${fileId}/content`);
+
+    const content = data.content || '';
+    const fileName = data.file?.name || `file-${fileId}`;
+    const fileSize = data.file?.size || 0;
+
+    commit('SET_CURRENT_FILE_NAME', fileName);
+    commit('SET_CURRENT_FILE_CONTENT', content);
+    commit('SET_FILE_SIZE', fileSize);
+    commit('SET_HAS_UNSAVED_CHANGES', false);
+    commit('SET_FILE_HANDLE', null);
   },
 };
