@@ -1,4 +1,5 @@
 import { ActionTree } from 'vuex';
+import { storageClient } from '@/http-client';
 import { EditorStateI } from './state';
 import { RootStateI } from '../state';
 
@@ -117,18 +118,8 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
   },
 
   async loadFileById({ commit }, fileId: string | number) {
-    const response = await fetch(`${process.env.VUE_APP_DGTK_API}/storage/files/${fileId}/content`, {
-      method: 'GET',
-      headers: {
-        Authorization: `DGTK ${localStorage.getItem('token')}`,
-      },
-    });
+    const { data } = await storageClient.get(`/api/storage/files/${fileId}/content`);
 
-    if (!response.ok) {
-      throw new Error(`Failed to load file: ${response.statusText}`);
-    }
-
-    const data = await response.json();
     const content = data.content || '';
     const fileName = data.file?.name || `file-${fileId}`;
     const fileSize = data.file?.size || 0;
