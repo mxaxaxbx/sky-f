@@ -22,7 +22,7 @@ function customErrorHandler(error: any) {
 
   switch (error.response.status) {
     case 401: {
-      const isSharePage = /^\/share\//.test(window.location.pathname);
+      const isSharePage = /^\/(share|share-proxy)\//.test(window.location.pathname);
       if (!isSharePage) {
         window.location.href = getAuthProviderRedirectUrl();
       }
