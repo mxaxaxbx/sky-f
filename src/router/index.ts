@@ -142,18 +142,9 @@ const routes: Array<RouteRecordRaw> = [
       },
       // editor
       {
-        path: 'editor',
-        name: 'app-editor',
-        component: () => import('../views/EditorView.vue'),
-        meta: {
-          title: 'Editor',
-          requiresAuth: true,
-        },
-      },
-      {
         path: 'editor/:id',
         name: 'app-editor-file',
-        component: () => import('../views/EditorView.vue'),
+        component: () => import('../views/editor-view.vue'),
         meta: {
           title: 'Editor',
           requiresAuth: true,
