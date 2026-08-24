@@ -118,7 +118,7 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
   },
 
   async loadFileById({ commit }, fileId: string | number) {
-    const { data } = await storageClient.get(`/api/storage/files/${fileId}/content`);
+    const { data } = await storageClient.get(`/api/files/${fileId}/content`);
     console.log('editor-data->', data);
 
     const content = data.content || '';
