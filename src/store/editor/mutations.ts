@@ -7,6 +7,7 @@ export const mutations: MutationTree<EditorStateI> = {
   },
   SET_CURRENT_FILE_CONTENT(state, content: string) {
     state.currentFileContent = content;
+    console.log('SET_CURRENT_FILE_CONTENT->', content);
   },
   SET_HAS_UNSAVED_CHANGES(state, hasUnsavedChanges: boolean) {
     state.hasUnsavedChanges = hasUnsavedChanges;
