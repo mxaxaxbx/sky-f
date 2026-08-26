@@ -2,13 +2,37 @@
   <div class="editor-view flex flex-col h-screen w-full bg-gray-900 text-white">
     <EditorToolbar
       :fileName="currentFileName"
-      :hasUnsavedChanges="hasUnsavedChanges"
+      :hasUnsavedChanges="isEditMode ? true : hasUnsavedChanges"
       :showFormatOptions="isMarkdown"
       @open="openLocalFile"
-      @save="saveLocalFile"
+      @save="saveLocalFileWithContent"
       @undo="triggerUndo"
       @redo="triggerRedo"
     />
+
+    <div v-if="!isEditMode && currentFileName" class="px-4 py-2 bg-gray-800 border-b border-gray-700 flex gap-2">
+      <button
+        @click="enableEditMode"
+        class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
+      >
+        Edit
+      </button>
+    </div>
+
+    <div v-if="isEditMode" class="px-4 py-2 bg-gray-800 border-b border-gray-700 flex gap-2">
+      <button
+        @click="saveLocalFileWithContent"
+        class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
+      >
+        Save Changes
+      </button>
+      <button
+        @click="disableEditMode"
+        class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded"
+      >
+        Cancel
+      </button>
+    </div>
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
       <!-- Editor Pane -->
@@ -17,9 +41,11 @@
         :class="{ 'border-b md:border-b-0 md:border-r border-gray-700': isMarkdown && showPreview }"
       >
         <EditorComponent
-          v-model="fileContent"
+          :model-value="isEditMode ? editedContent : fileContent"
+          @update:model-value="(val) => { if (isEditMode) editedContent = val; }"
           :language="editorLanguage"
           :is-large-file="isLargeFile"
+          :read-only="!isEditMode"
           ref="editorComponentRef"
         />
         <div v-if="isLargeFile" class="absolute top-2 right-2 px-2 py-1 bg-yellow-900 text-yellow-200 text-xs rounded pointer-events-none">
@@ -65,12 +91,21 @@ const isMarkdown = computed(() => {
 
 const editorLanguage = computed(() => (isMarkdown.value ? 'markdown' : 'plaintext'));
 
-const fileContent = computed({
-  get: () => rawFileContent.value,
-  set: (val: string) => store.dispatch('updateContent', val),
-});
+const editedContent = ref('');
+const isEditMode = ref(false);
+
+const fileContent = computed(() => rawFileContent.value);
 
 const showPreview = ref(true);
+
+const enableEditMode = () => {
+  editedContent.value = rawFileContent.value;
+  isEditMode.value = true;
+};
+
+const disableEditMode = () => {
+  isEditMode.value = false;
+};
 
 const openLocalFile = () => {
   store.dispatch('openLocalFile');
@@ -78,6 +113,14 @@ const openLocalFile = () => {
 
 const saveLocalFile = () => {
   store.dispatch('saveLocalFile');
+};
+
+const saveLocalFileWithContent = async () => {
+  if (isEditMode.value) {
+    store.dispatch('updateContent', editedContent.value);
+  }
+  saveLocalFile();
+  disableEditMode();
 };
 
 onBeforeRouteLeave((to, from, next) => {
