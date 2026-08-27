@@ -22,73 +22,117 @@ Implement a **chunked streaming architecture** where:
 
 ## Backend Implementation
 
-### 1. Video Validation & Limits
+### 1. Video Upload Validation (Modified Existing Resource)
+We added a middleware interceptor to your existing generate-upload-url endpoint. It checks the array of files requested for upload; if any file is of type video/* and exceeds the 2GB limit, it blocks the request.
 
-**File:** `src/middleware/videoValidation.ts` (or similar)
+**Endpoint:** POST /api/storage/generate-upload-url
+**Auth Required:** Yes (Bearer Token)
 
-```
-- Add max video file size constant (e.g., 2GB limit)
-- Add max video dimension/bitrate checks
-- Return 413 Payload Too Large for oversized files
-- Return 400 Bad Request with clear error message
-```
+#### cURL Request (Triggering the Size Limit)
+bash
+curl -X POST VUE_APP_DG_SKY_SVC/api/storage/generate-upload-url \
+  -H "Authorization: DGTK <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '[
+        {
+          "name": "summer-vacation.mp4",
+          "size": 3758096384, 
+          "content_type": "video/mp4"
+        }
+      ]'
+(Note: 3758096384 bytes is approximately 3.5GB)
 
-**Endpoint Response:**
-```json
+#### JSON Response (413 Payload Too Large)
+json
 {
   "error": "Video file too large",
   "maxSize": "2GB",
   "fileSize": "3.5GB"
 }
-```
 
-### 2. HTTP Range Request Support
+---
 
-**File:** Modify video serving endpoint (likely in your file/storage controller)
+### 2. Stream Video File with HTTP Range Support (New Resource)
+This new endpoint allows the frontend player to request chunks of a video file for adaptive streaming. It automatically proxies the Range header to your Cloudflare R2 bucket and streams the result back.
 
-**Requirements:**
-- Detect `Range` header in request (format: `bytes=start-end`)
-- Return `206 Partial Content` with:
-  - `Content-Range: bytes start-end/total`
-  - `Content-Length: chunk-size`
-  - `Accept-Ranges: bytes`
-- Support multiple ranges for adaptive playback
+**Endpoint:** GET /api/files/:id/stream
+**Auth Required:** Yes (Bearer Token)
 
-**Example:**
-```
-Request:  Range: bytes=0-1048575
-Response: 206 Partial Content
-          Content-Range: bytes 0-1048575/5242880000
-          Content-Length: 1048576
-```
+#### cURL Request
+bash
+curl -v -X GET http://<VUE_APP_DG_SKY_SVC>/api/files/123/stream \
+  -H "Authorization: DGTK <TOKEN>" \
+  -H "Range: bytes=0-1048575"
+(Note: This requests the first 1MB chunk of the video file).
 
-### 3. Video Metadata Extraction (Optional but Recommended)
+#### HTTP Response (206 Partial Content)
+http
+HTTP/1.1 206 Partial Content
+Content-Type: video/mp4
+Content-Disposition: inline; filename="summer-vacation.mp4"
+Content-Length: 1048576
+Content-Range: bytes 0-1048575/157286400
+Accept-Ranges: bytes
+Date: Thu, 27 Aug 2026 12:00:00 GMT
 
-**File:** Separate endpoint `/api/videos/:id/metadata`
+[... Binary Video Chunk Data (1MB) ...]
+If a Range header is omitted, the endpoint will return a 200 OK and stream the entire video file sequentially.
 
-- Duration
-- Resolution
-- Bitrate
-- Format/codec info
-- File size
+---
 
-**Purpose:** Frontend can warn user before attempting preview
+### 3. Get Video Metadata (New Resource)
+This endpoint retrieves details for a specific video file. Currently, it retrieves the base information from the database. When ffmpeg/ffprobe is introduced to your host environment, this endpoint can be expanded to return duration, bitrate, and resolution.
+
+**Endpoint:** GET /api/videos/:id/metadata
+**Auth Required:** Yes (Bearer Token)
+
+#### cURL Request
+bash
+curl -X GET http://<VUE_APP_DG_SKY_SVC>/api/videos/123/metadata \
+  -H "Authorization: DGTK TOKEN" \
+  -H "Content-Type: application/json"
+
+#### JSON Response (200 OK)
+json
+{
+  "fileSize": 157286400,
+  "format": "video/mp4",
+  "duration": "unknown (ffmpeg required)",
+  "resolution": "unknown (ffmpeg required)",
+  "bitrate": "unknown (ffmpeg required)"
+}
+
+#### JSON Response (400 Bad Request - If file is not a video)
+If the requested file ID belongs to an image or a document:
+json
+{
+  "error": "file is not a video"
+}
 
 ---
 
 ## Frontend Implementation
 
-### 1. Pre-Preview Size Validation
+### 1. Pre-Preview Size Validation ✅ COMPLETED
 
-**File:** `src/components/app/preview-modal.vue` (your selected file)
+**File:** `src/components/app/preview-modal.vue`
+
+**Implementation:**
+- Added `MAX_PREVIEW_SIZE` constant (500MB)
+- Added `isVideoTooLarge` reactive flag
+- Size validation in file watcher checks videos before loading
+- User-friendly warning UI with file size display
+- Two action buttons: "Load Anyway" and "Download Instead"
+- All content preview sections hidden when video exceeds size limit
 
 ```javascript
-// Before showing video preview
 const MAX_PREVIEW_SIZE = 500 * 1024 * 1024; // 500MB for preview
+const isVideoTooLarge = ref(false);
 
-if (file.size > MAX_PREVIEW_SIZE) {
-  showWarning("Video too large for preview, will stream");
-  // Show alternative: download link, metadata viewer, etc.
+// In watcher:
+if (newFile.contentType?.startsWith('video/') && newFile.size > MAX_PREVIEW_SIZE) {
+  isVideoTooLarge.value = true;
+  return;
 }
 ```
 
@@ -229,8 +273,8 @@ const updateLoadingProgress = (event) => {
 ### Phase 2: Frontend (Weeks 2-3)
 
 1. **Update preview-modal.vue:**
-   - [ ] Add file size validation
-   - [ ] Add warning message for large videos
+   - [x] Add file size validation
+   - [x] Add warning message for large videos
    - [ ] Ensure Range request support (browser native)
 
 2. **Add Loading/Progress UI:**
