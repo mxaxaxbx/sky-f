@@ -213,7 +213,45 @@
       >
         <!-- preview -->
         <div class="flex-1 flex items-center justify-center overflow-hidden h-full w-full rounded-2xl bg-white/5">
+          <!-- video size warning -->
+          <div v-if="isVideoTooLarge" class="flex flex-col items-center gap-6 text-center px-6 max-w-md">
+            <div class="text-6xl">⚠️</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white mb-2">Video Too Large for Preview</h3>
+              <p class="text-[var(--text-terceary)] text-sm mb-4">
+                This video is {{ (file.size / (1024 * 1024)).toFixed(0) }}MB and exceeds the 500MB preview limit to prevent browser crashes.
+              </p>
+              <p class="text-[var(--text-terceary)] text-xs mb-6">
+                The file can still be streamed, but preview loading may take time.
+              </p>
+            </div>
+            <div class="flex gap-3">
+              <button
+                @click="isVideoTooLarge = false"
+                class="
+                  px-4 py-2 rounded-lg
+                  bg-[var(--color-primary)] text-black font-medium text-sm
+                  hover:opacity-90
+                  transition-all duration-300
+                "
+              >
+                Load Anyway
+              </button>
+              <button
+                @click="$emit('download', file)"
+                class="
+                  px-4 py-2 rounded-lg
+                  border border-[var(--color-primary)] text-[var(--color-primary)] font-medium text-sm
+                  hover:bg-[var(--color-primary)]/10
+                  transition-all duration-300
+                "
+              >
+                Download Instead
+              </button>
+            </div>
+          </div>
           <!-- images -->
+          <template v-if="!isVideoTooLarge">
           <!-- eslint-disable-next-line vuejs-accessibility/mouse-events-have-key-events -->
           <img
             class="max-w-full max-h-full object-contain cursor-pointer"
@@ -816,6 +854,7 @@
               <br>We recommend downloading it to view its contents...
             </p>
           </div>
+          </template>
         </div>
 
         <!-- zoom controls -->
@@ -1026,6 +1065,9 @@ const castStatusText = computed(() => {
   if (castState.value === 'NO_DEVICES_AVAILABLE') return '';
   return 'Cast unavailable';
 });
+
+const MAX_PREVIEW_SIZE = 500 * 1024 * 1024;
+const isVideoTooLarge = ref(false);
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 type HlsInstance = {
@@ -1784,9 +1826,15 @@ watch(() => props.modelValue, async (newFile) => {
   docxDownloadUrl.value = null;
   hlsReady.value = false;
   pendingHlsPlay.value = false;
+  isVideoTooLarge.value = false;
   await destroyHlsPlayer();
 
   if (!newFile) return;
+
+  if (newFile.contentType?.startsWith('video/') && newFile.size > MAX_PREVIEW_SIZE) {
+    isVideoTooLarge.value = true;
+    return;
+  }
 
   if (isHlsPlaylist(newFile)) {
     if (isWrappedPlaylistFile(newFile)) {
