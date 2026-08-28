@@ -136,26 +136,37 @@ if (newFile.contentType?.startsWith('video/') && newFile.size > MAX_PREVIEW_SIZE
 }
 ```
 
-### 2. Update Video Element to Support Streaming
+### 2. Update Video Element to Support Streaming ✅ COMPLETED
 
 **Modifications to preview-modal.vue:**
 
-Replace direct `src` binding with:
-```vue
-<!-- Current approach (problematic) -->
-<video :src="currentBlobURL" />
+Replaced direct `src` binding with `<source>` element and added streaming event handlers:
 
-<!-- New approach: Use MediaSource API or stream chunks -->
+```vue
+<!-- Updated approach: Use streaming with Range requests -->
 <video 
   ref="videoRef"
+  controls
   @play="handlePlay"
   @seeking="handleSeeking"
+  @timeupdate="onTimeUpdate"
+  @loadedmetadata="onLoadedMetadata"
+  @ended="isPlaying = false"
+  @click="togglePlay"
+  @keydown.space.prevent="togglePlay"
   style="view-transition-name: preview-content"
 >
-  <source :src="streamURL" type="video/mp4" />
+  <source :src="videoStreamURL" :type="file.contentType" />
   <track kind="captions" />
 </video>
 ```
+
+**Implementation Details:**
+- Added `videoStreamURL` computed property that returns `/api/files/:id/stream` for video files
+- Added `handlePlay()` function to track playback state
+- Added `handleSeeking()` function to log seek position for monitoring
+- Added native `controls` attribute for HTML5 video player controls
+- Implementation uses Option A (HTTP Range Requests) for native browser streaming support
 
 ### 3. Implement Streaming Strategy (Choose One)
 
@@ -275,7 +286,9 @@ const updateLoadingProgress = (event) => {
 1. **Update preview-modal.vue:**
    - [x] Add file size validation
    - [x] Add warning message for large videos
-   - [ ] Ensure Range request support (browser native)
+   - [x] Update video element to support streaming with `<source>` element
+   - [x] Add event handlers for play and seeking
+   - [x] Implement Range request support (browser native)
 
 2. **Add Loading/Progress UI:**
    - [ ] Show spinner during video buffering

@@ -288,11 +288,12 @@
               "
             >
               <video
-                :src="currentBlobURL"
                 :title="`Video preview of ${file.name || 'video'}`"
                 class="max-w-full max-h-full object-contain cursor-pointer"
                 ref="videoRef"
-
+                controls
+                @play="handlePlay"
+                @seeking="handleSeeking"
                 @timeupdate="onTimeUpdate"
                 @loadedmetadata="onLoadedMetadata"
                 @ended="isPlaying = false"
@@ -300,6 +301,7 @@
                 @keydown.space.prevent="togglePlay"
                 style="view-transition-name: preview-content"
               >
+                <source :src="videoStreamURL" :type="file.contentType" />
                 <track kind="captions" />
               </video>
 
@@ -1031,6 +1033,14 @@ const currentPreviewIndex = computed(() => files.value.findIndex((f) => f.id ===
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 const canSeek = computed(() => Number.isFinite(duration.value) && duration.value > 0);
 
+const videoStreamURL = computed(() => {
+  if (!file.value) return '';
+  if (file.value.contentType?.startsWith('video/')) {
+    return `/api/files/${file.value.id}/stream`;
+  }
+  return '';
+});
+
 const audioCover = ref<string | null>(null);
 const currentBlobURL = ref<string | null>(null);
 const textContent = ref<string | null>(null);
@@ -1391,6 +1401,18 @@ async function getBase64(currentFile: FileI) {
   }
 
   return url;
+}
+
+function handlePlay() {
+  isPlaying.value = true;
+}
+
+function handleSeeking() {
+  if (!videoRef.value) return;
+  const media = videoRef.value;
+  if (!duration.value || !Number.isFinite(duration.value)) return;
+  const seekPercent = ((media.currentTime / duration.value) * 100).toFixed(2);
+  console.log(`Seeking to ${seekPercent}% (${media.currentTime.toFixed(2)}s)`);
 }
 
 async function togglePlay() {
