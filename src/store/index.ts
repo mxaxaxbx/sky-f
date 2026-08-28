@@ -10,6 +10,7 @@ import shares from './shares';
 import breadcrumbs from './breadcrumbs';
 import editor from './editor';
 import trash from './trash';
+import videostream from './videostream';
 
 import { state, RootStateI } from './state';
 import { mutations } from './mutations';
@@ -35,5 +36,6 @@ store.registerModule('shares', shares);
 store.registerModule('breadcrumbs', breadcrumbs);
 store.registerModule('editor', editor);
 store.registerModule('trash', trash);
+store.registerModule('videostream', videostream);
 
 export default store;
