@@ -1033,13 +1033,7 @@ const currentPreviewIndex = computed(() => files.value.findIndex((f) => f.id ===
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 const canSeek = computed(() => Number.isFinite(duration.value) && duration.value > 0);
 
-const videoStreamURL = computed(() => {
-  if (!file.value) return '';
-  if (file.value.contentType?.startsWith('video/')) {
-    return `/api/files/${file.value.id}/stream`;
-  }
-  return '';
-});
+const videoStreamURL = ref('');
 
 const audioCover = ref<string | null>(null);
 const currentBlobURL = ref<string | null>(null);
@@ -1337,6 +1331,13 @@ async function extractAudioCover(blob: Blob) {
 
 async function getBase64(currentFile: FileI) {
   if (isHlsPlaylist(currentFile)) return '';
+
+  if (currentFile.contentType.startsWith('video/')) {
+    const url = await store.dispatch('videostream/getStreamUrl', currentFile);
+    videoStreamURL.value = url;
+    currentBlobURL.value = url;
+    return url;
+  }
 
   const base64 = await store.dispatch('files/getCacheFile', { id: currentFile.id });
 
@@ -1843,6 +1844,7 @@ watch(() => props.modelValue, async (newFile) => {
   imageDimensions.value = null;
   duration.value = 0;
   currentBlobURL.value = null;
+  videoStreamURL.value = '';
   textContent.value = null;
   pdfDownloadUrl.value = null;
   docxDownloadUrl.value = null;

@@ -22,36 +22,6 @@ Implement a **chunked streaming architecture** where:
 
 ## Backend Implementation
 
-### 1. Video Upload Validation (Modified Existing Resource)
-We added a middleware interceptor to your existing generate-upload-url endpoint. It checks the array of files requested for upload; if any file is of type video/* and exceeds the 2GB limit, it blocks the request.
-
-**Endpoint:** POST /api/storage/generate-upload-url
-**Auth Required:** Yes (Bearer Token)
-
-#### cURL Request (Triggering the Size Limit)
-bash
-curl -X POST VUE_APP_DG_SKY_SVC/api/storage/generate-upload-url \
-  -H "Authorization: DGTK <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '[
-        {
-          "name": "summer-vacation.mp4",
-          "size": 3758096384, 
-          "content_type": "video/mp4"
-        }
-      ]'
-(Note: 3758096384 bytes is approximately 3.5GB)
-
-#### JSON Response (413 Payload Too Large)
-json
-{
-  "error": "Video file too large",
-  "maxSize": "2GB",
-  "fileSize": "3.5GB"
-}
-
----
-
 ### 2. Stream Video File with HTTP Range Support (New Resource)
 This new endpoint allows the frontend player to request chunks of a video file for adaptive streaming. It automatically proxies the Range header to your Cloudflare R2 bucket and streams the result back.
 
