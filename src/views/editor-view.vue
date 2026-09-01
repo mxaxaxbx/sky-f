@@ -55,7 +55,7 @@
 
       <!-- Markdown Preview Pane -->
       <div v-if="isMarkdown && showPreview" class="flex-1 h-full min-h-0 overflow-y-auto bg-gray-900">
-        <MarkdownPreview :content="fileContent" />
+        <MarkdownPreview :content="fileContent" :is-large-file="isLargeFile" />
       </div>
     </div>
   </div>
