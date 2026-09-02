@@ -8,6 +8,7 @@ import clickOutside from './directives/click-outside';
 import checkPerm from './directives/perm';
 import { registerServiceWorker } from './registerServiceWorker';
 import { checkAndEmptyOldTrash } from './services/trash-scheduler';
+import { initPrefetcher } from './services/prefetcher';
 
 import './index.css';
 
@@ -26,3 +27,6 @@ checkAndEmptyOldTrash();
 setInterval(checkAndEmptyOldTrash, 60 * 60 * 1000);
 
 registerServiceWorker();
+
+// Start route-based prefetcher (speculation rules)
+initPrefetcher(router as any);

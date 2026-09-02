@@ -13,8 +13,9 @@ export const actions: ActionTree<VideoStreamStateI, RootStateI> = {
     if (!payload.contentType?.startsWith('video/')) {
       return '';
     }
+    const { VUE_APP_DG_SKY_SVC } = process.env;
 
-    return `/api/files/${payload.id}/stream`;
+    return `${VUE_APP_DG_SKY_SVC}/api/files/${payload.id}/stream`;
   },
 
   async getVideoMetadata(
