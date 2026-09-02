@@ -31,6 +31,7 @@ export default defineComponent({
     const parsedMarkdown = ref('');
     const workerRef = ref<Worker | null>(null);
     const msgId = ref(0);
+    const LARGE_PREVIEW_LIMIT = 500000;
 
     const supportsGPU = () => {
       // Check for WebGPU or WebGL2 as a proxy for GPU support
@@ -43,8 +44,17 @@ export default defineComponent({
       }
     };
 
+    const showLargeFilePlaceholder = () => {
+      parsedMarkdown.value = '<div class="text-sm text-yellow-200 bg-yellow-900/30 border border-yellow-700 rounded p-3">Large file preview is disabled to protect browser performance. Open the file in the editor for the raw content.</div>';
+    };
+
     const useWorker = (): boolean => props.isLargeFile || supportsGPU();
     const parseInMainThread = (text: string) => {
+      if (props.isLargeFile || (text || '').length > LARGE_PREVIEW_LIMIT) {
+        showLargeFilePlaceholder();
+        return;
+      }
+
       try {
         const res = marked.parse(text || '');
         Promise.resolve(res)
@@ -77,6 +87,10 @@ export default defineComponent({
     };
 
     const parseWithWorker = (text: string) => {
+      if (props.isLargeFile || (text || '').length > LARGE_PREVIEW_LIMIT) {
+        showLargeFilePlaceholder();
+        return;
+      }
       if (!('Worker' in window)) {
         parseInMainThread(text);
         return;
