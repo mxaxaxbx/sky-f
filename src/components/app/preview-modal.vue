@@ -1333,8 +1333,11 @@ async function extractAudioCover(blob: Blob) {
 async function getBase64(currentFile: FileI) {
   if (isHlsPlaylist(currentFile)) return '';
 
+  console.log('currentFile->', currentFile);
+
   if (currentFile.contentType.startsWith('video/')) {
     const url = await store.dispatch('videostream/getStreamUrl', currentFile);
+    console.log('videoStreamURL->', url);
     videoStreamURL.value = url;
     currentBlobURL.value = url;
     return url;
