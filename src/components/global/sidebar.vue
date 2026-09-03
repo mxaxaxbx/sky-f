@@ -104,7 +104,7 @@
                   </router-link>
                 </li>
                 <!-- Editor -->
-                <li>
+                <!-- <li>
                   <router-link
                     to="/app/editor"
                     @click="handleNavClick"
@@ -132,7 +132,6 @@
                       !border-[var(--border)] hover:!border-[var(--color-primary)]
                     ">
                     <div class="w-6 h-6 flex items-center justify-center">
-                      <!-- You could use a specific icon if available, reusing document icon here or text -->
                       <img
                         :src="getIcon(
                           '/app/editor',
@@ -148,7 +147,7 @@
                       Editor
                     </span>
                   </router-link>
-                </li>
+                </li> -->
                 <!-- trash folder -->
                 <li>
                   <router-link
