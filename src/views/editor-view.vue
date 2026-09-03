@@ -153,10 +153,11 @@ const triggerRedo = () => {
 onMounted(async () => {
   const fileId = route.params.id as string | undefined;
   if (fileId) {
+    console.debug('[editor-view] mounting editor for fileId', fileId, 'route', route.fullPath);
     try {
       await store.dispatch('editor/loadFileById', fileId);
     } catch (error) {
-      console.error('Failed to load file:', error);
+      console.error('[editor-view] Failed to load file:', error);
       store.commit('notifications/addNotification', {
         type: 'error',
         message: 'Failed to load file',

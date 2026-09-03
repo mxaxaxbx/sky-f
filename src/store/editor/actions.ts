@@ -118,16 +118,24 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
   },
 
   async loadFileById({ commit }, fileId: string | number) {
-    const { data } = await storageClient.get(`/api/files/${fileId}/content`);
+    try {
+      console.debug('[editor] loadFileById', fileId);
+      const { data } = await storageClient.get(`/api/files/${fileId}/content`);
 
-    const content = typeof data?.content === 'string' ? data.content : '';
-    const fileName = data?.file?.name || `file-${fileId}`;
-    const fileSize = Number(data?.file?.size) || 0;
+      const content = typeof data?.content === 'string' ? data.content : '';
+      const fileName = data?.file?.name || `file-${fileId}`;
+      const fileSize = Number(data?.file?.size) || content.length || 0;
 
-    commit('SET_CURRENT_FILE_NAME', fileName);
-    commit('SET_CURRENT_FILE_CONTENT', content);
-    commit('SET_FILE_SIZE', fileSize || content.length);
-    commit('SET_HAS_UNSAVED_CHANGES', false);
-    commit('SET_FILE_HANDLE', null);
+      console.debug('[editor] file metadata', { fileId, fileName, fileSize, contentLength: content?.length });
+
+      commit('SET_CURRENT_FILE_NAME', fileName);
+      commit('SET_CURRENT_FILE_CONTENT', content);
+      commit('SET_FILE_SIZE', fileSize || content.length);
+      commit('SET_HAS_UNSAVED_CHANGES', false);
+      commit('SET_FILE_HANDLE', null);
+    } catch (err) {
+      console.error('[editor] loadFileById failed', fileId, err);
+      throw err;
+    }
   },
 };
