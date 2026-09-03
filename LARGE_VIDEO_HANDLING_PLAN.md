@@ -138,26 +138,9 @@ Replaced direct `src` binding with `<source>` element and added streaming event 
 - Added native `controls` attribute for HTML5 video player controls
 - Implementation uses Option A (HTTP Range Requests) for native browser streaming support
 
-### 3. Implement Streaming Strategy (Choose One)
+### 3. Implement Streaming Strategy
 
-#### **Option A: HTTP Range Requests (Recommended for simplicity)**
 
-**File:** `src/utils/videoStreaming.ts`
-
-```javascript
-// Browser natively supports Range requests with <video> tag
-// Just ensure backend implements Range header support
-// No frontend code needed - browser handles it automatically
-
-// Verify Range support:
-async function checkRangeSupport(url) {
-  const response = await fetch(url, { method: 'HEAD' });
-  return response.headers.get('Accept-Ranges') === 'bytes';
-}
-```
-
-**Pros:** Works natively with `<video>` tag, minimal code
-**Cons:** Server must implement Range headers
 
 #### **Option B: MediaSource Extensions (MSE) - More Control**
 
@@ -187,49 +170,7 @@ mediaSource.addEventListener('sourceopen', async () => {
 **Pros:** Maximum control, can implement adaptive bitrate
 **Cons:** More complex, requires chunking on backend
 
-#### **Option C: Hybrid - Stream with Fallback**
 
-Use Range requests with timeout fallback to MSE if needed.
-
-### 4. Update Modal to Show Loading State
-
-**File:** `src/components/app/preview-modal.vue`
-
-```vue
-<template>
-  <div class="video-container">
-    <!-- Loading indicator for large videos -->
-    <div v-if="isLoadingVideo" class="loading-overlay">
-      <div class="spinner"></div>
-      <p>Loading large video... {{ loadingProgress }}%</p>
-    </div>
-    
-    <video
-      ref="videoRef"
-      :src="videoStreamURL"
-      @loadstart="isLoadingVideo = true"
-      @canplay="isLoadingVideo = false"
-      @progress="updateLoadingProgress"
-    />
-  </div>
-</template>
-
-<script setup>
-const isLoadingVideo = ref(false);
-const loadingProgress = ref(0);
-
-const updateLoadingProgress = (event) => {
-  const video = event.target;
-  if (video.duration) {
-    loadingProgress.value = Math.round(
-      (video.buffered.length > 0 
-        ? video.buffered.end(video.buffered.length - 1) 
-        : 0) / video.duration * 100
-    );
-  }
-};
-</script>
-```
 
 ---
 

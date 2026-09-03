@@ -287,10 +287,11 @@
                 bg-gradient-to-t from-black to-transparent
               "
             >
-              <video
+              <VideoStreamer
+                :file="file"
+                :streamUrl="videoStreamURL"
                 :title="`Video preview of ${file.name || 'video'}`"
                 class="max-w-full max-h-full object-contain cursor-pointer"
-                ref="videoRef"
                 controls
                 @play="handlePlay"
                 @seeking="handleSeeking"
@@ -299,11 +300,10 @@
                 @ended="isPlaying = false"
                 @click="togglePlay"
                 @keydown.space.prevent="togglePlay"
+                @media-ready="(el) => (videoRef.value = el)"
+                @media-destroyed="() => (videoRef.value = null)"
                 style="view-transition-name: preview-content"
-              >
-                <source :src="videoStreamURL" :type="file.contentType" />
-                <track kind="captions" />
-              </video>
+              />
 
               <!-- controles -->
               <div
@@ -1010,6 +1010,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { FileI } from '@/store/files/state';
+import VideoStreamer from '@/components/app/video-streamer.vue';
 
 const props = defineProps<{
   modelValue: FileI;
@@ -1332,8 +1333,11 @@ async function extractAudioCover(blob: Blob) {
 async function getBase64(currentFile: FileI) {
   if (isHlsPlaylist(currentFile)) return '';
 
+  console.log('currentFile->', currentFile);
+
   if (currentFile.contentType.startsWith('video/')) {
     const url = await store.dispatch('videostream/getStreamUrl', currentFile);
+    console.log('videoStreamURL->', url);
     videoStreamURL.value = url;
     currentBlobURL.value = url;
     return url;
