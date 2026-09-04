@@ -111,7 +111,8 @@ async function initStream(url?: string) {
   } catch (err) {
     console.error('Failed to start MSE stream, falling back to blob:', err);
     try {
-      currentBlobUrl = await fetchAsBlobUrl(url, props.token);
+      const token = localStorage.getItem('token');
+      currentBlobUrl = await fetchAsBlobUrl(url, token ?? '');
       videoEl.src = currentBlobUrl;
     } catch (blobErr) {
       console.error('Authenticated fallback fetch also failed:', blobErr);
