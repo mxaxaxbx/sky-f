@@ -9,6 +9,26 @@ export type StreamController = {
   abort: () => void;
 };
 
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `DGTK ${token}` } : {};
+}
+
+async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<Response> {
+  const baseHeaders = init.headers instanceof Headers
+    ? Object.fromEntries(init.headers.entries())
+    : init.headers ?? {};
+
+  return fetch(url, {
+    ...init,
+    credentials: 'include',
+    headers: {
+      ...baseHeaders,
+      ...getAuthHeaders(),
+    },
+  });
+}
+
 export async function streamWithMSE(
   videoEl: HTMLVideoElement,
   streamUrl: string,
@@ -32,20 +52,37 @@ export async function streamWithMSE(
   let sourceBuffer: SourceBuffer | null = null;
 
   function waitForUpdateEnd(sb: SourceBuffer) {
-    return new Promise<void>((resolve) => {
-      if (sb.updating) {
-        const onEnd = () => {
-          sb.removeEventListener('updateend', onEnd);
-          resolve();
-        };
-        sb.addEventListener('updateend', onEnd);
-      } else {
+    return new Promise<void>((resolve, reject) => {
+      if (!sb.updating) {
         resolve();
+        return;
       }
+
+      const listeners: {
+        onEnd?: () => void;
+        onErr?: () => void;
+      } = {};
+
+      function removeListeners() {
+        sb.removeEventListener('updateend', listeners.onEnd as EventListener);
+        sb.removeEventListener('error', listeners.onErr as EventListener);
+      }
+
+      listeners.onEnd = () => {
+        removeListeners();
+        resolve();
+      };
+      listeners.onErr = () => {
+        removeListeners();
+        reject(new Error('SourceBuffer append error'));
+      };
+
+      sb.addEventListener('updateend', listeners.onEnd as EventListener);
+      sb.addEventListener('error', listeners.onErr as EventListener);
     });
   }
 
-  const onSourceOpen = async () => {
+  async function onSourceOpen() {
     try {
       // try to create a SourceBuffer for the given codec
       if (!mediaSource || mediaSource.readyState === 'closed') return;
@@ -59,7 +96,13 @@ export async function streamWithMSE(
         } catch (e) {
           // ignore
         }
-        videoElement.src = streamUrl;
+
+        const fallbackResponse = await fetchWithAuth(streamUrl);
+        if (!fallbackResponse.ok) {
+          throw new Error(`Fallback fetch failed with ${fallbackResponse.status}`);
+        }
+        const blob = await fallbackResponse.blob();
+        videoElement.src = URL.createObjectURL(blob);
         return;
       }
 
@@ -70,10 +113,9 @@ export async function streamWithMSE(
         for (let start = 0; start < fileSize; start += chunkSize) {
           if (abortController.signal.aborted) break;
           const end = Math.min(start + chunkSize - 1, fileSize - 1);
-          const res = await fetch(streamUrl, {
+          const res = await fetchWithAuth(streamUrl, {
             headers: { Range: `bytes=${start}-${end}` },
             signal: abortController.signal,
-            credentials: 'include',
           });
 
           if (!res.ok && res.status !== 206) {
@@ -88,7 +130,7 @@ export async function streamWithMSE(
         }
       } else {
         // file size unknown: fetch entire resource and append progressively
-        const res = await fetch(streamUrl, { signal: abortController.signal, credentials: 'include' });
+        const res = await fetchWithAuth(streamUrl, { signal: abortController.signal });
         if (!res.ok) throw new Error(`Fetch failed with ${res.status}`);
 
         // Try to stream via reader and append in slices
@@ -127,12 +169,22 @@ export async function streamWithMSE(
         } catch (e) {
           // ignore
         }
+
+        try {
+          const fallbackResponse = await fetchWithAuth(streamUrl);
+          if (fallbackResponse.ok) {
+            const blob = await fallbackResponse.blob();
+            videoElement.src = URL.createObjectURL(blob);
+            return;
+          }
+        } catch (fallbackErr) {
+          console.warn('Auth fallback fetch failed:', fallbackErr);
+        }
+
         videoElement.src = streamUrl;
       }
     }
-  };
-
-  mediaSource.addEventListener('sourceopen', onSourceOpen);
+  }
 
   const cleanup = () => {
     try {
@@ -154,6 +206,8 @@ export async function streamWithMSE(
       }
     } catch {}
   };
+
+  mediaSource.addEventListener('sourceopen', onSourceOpen);
 
   return {
     abort: () => {

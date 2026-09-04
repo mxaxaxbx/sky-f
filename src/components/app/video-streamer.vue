@@ -12,109 +12,137 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
-  defineComponent,
   onMounted,
   onBeforeUnmount,
+  watch,
   ref,
+  withDefaults,
+  defineProps,
+  defineEmits,
 } from 'vue';
 import { useStore } from 'vuex';
 import {
   streamWithMSE,
-  StreamController,
+  type StreamController,
 } from '@/utils/mediaSourceStreaming';
 
-export default defineComponent({
-  name: 'VideoStreamer',
-  props: {
+type VideoFile = {
+  id?: string;
+  contentType?: string;
+  size?: number;
+  name?: string;
+};
+
+const props = withDefaults(
+  defineProps<{
     // Either provide a fully formed stream URL, or provide a `file` object
-    // with `id`, `contentType`, `size`, `name` fields.
-    streamUrl: {
-      type: String,
-      required: false,
-    },
-    file: {
-      type: Object as () => {
-        id?: string;
-        contentType?: string;
-        size?: number;
-        name?: string;
-      },
-      required: false,
-    },
-    chunkSize: {
-      type: Number,
-      required: false,
-      default: 1024 * 1024,
-    },
-    mimeCodec: {
-      type: String,
-      required: false,
-    },
-    // Parent can receive the internal media element via event `media-ready`
-    mediaRef: {
-      type: Object as () => { value: HTMLVideoElement | null } | null,
-      required: false,
-    },
+    // with `id`, `contentType`, `size`, `name`.
+    streamUrl?: string;
+    file?: VideoFile;
+    chunkSize?: number;
+    mimeCodec?: string;
+  }>(),
+  {
+    chunkSize: 1024 * 1024,
   },
-  emits: ['media-ready', 'media-destroyed'],
-  setup(props, { emit }) {
-    const internalVideoRef = ref<HTMLVideoElement | null>(null);
-    const store = useStore();
-    let controller: StreamController | null = null;
+);
 
-    onMounted(async () => {
-      const videoEl = internalVideoRef.value;
-      if (!videoEl) return;
+const emit = defineEmits<{
+  'media-ready': [value: HTMLVideoElement];
+  'media-destroyed': [];
+}>();
 
-      let url = props.streamUrl;
-      if (!url && props.file && props.file.id) {
-        try {
-          const { dispatch } = store as any;
-          url = await dispatch('videostream/getStreamUrl', { id: props.file.id, contentType: props.file.contentType });
-        } catch (e) {
-          /* fall back to env-based url construction */
-          const svc = (process.env as any).VUE_APP_DG_SKY_SVC;
-          if (svc && props.file && props.file.id) url = `${svc}/api/files/${props.file.id}/stream`;
-        }
-      }
+const internalVideoRef = ref<HTMLVideoElement | null>(null);
+const store = useStore();
 
-      if (!url) {
-        // nothing to stream
-        if (props.file && props.file.contentType) {
-          videoEl.src = '';
-        }
-        return;
-      }
+let controller: StreamController | null = null;
+let currentBlobUrl: string | null = null;
 
-      try {
-        controller = await streamWithMSE(videoEl, url, props.file?.size, { chunkSize: props.chunkSize, mimeCodec: props.mimeCodec });
-      } catch (err) {
-        console.error('Failed to start MSE stream:', err);
-        // fallback to direct src
-        videoEl.src = url;
-      }
+function revokeBlobUrl() {
+  if (currentBlobUrl) {
+    URL.revokeObjectURL(currentBlobUrl);
+    currentBlobUrl = null;
+  }
+}
 
-      // notify parent that media element is ready
-      try {
-        emit('media-ready', videoEl);
-      } catch (e) {
-        // ignore emit errors
-      }
+async function fetchAsBlobUrl(url: string, token?: string) {
+  const res = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    throw new Error(`Stream fetch failed: ${res.status}`);
+  }
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+async function resolveUrl(): Promise<string | undefined> {
+  if (props.streamUrl) return props.streamUrl;
+  if (props.file?.id) {
+    return store.dispatch('videostream/getStreamUrl', {
+      id: props.file.id,
+      contentType: props.file.contentType,
     });
+  }
+  return undefined;
+}
 
-    onBeforeUnmount(() => {
-      if (controller) controller.abort();
-      try {
-        emit('media-destroyed');
-      } catch (e) {
-        // ignore
-      }
-    });
+async function initStream(url?: string) {
+  const videoEl = internalVideoRef.value;
+  if (!videoEl || !url) return;
 
-    return { videoRef: internalVideoRef };
+  // Tear down any previous stream/blob before starting a new one.
+  controller?.abort();
+  controller = null;
+  revokeBlobUrl();
+
+  try {
+    const token = localStorage.getItem('token');
+    // Preferred path: MSE streaming, which supports range requests / seeking.
+    // NOTE: streamWithMSE must forward `Authorization: Bearer ${token}` on
+    // its internal fetch calls for this to actually authenticate.
+    controller = await streamWithMSE(videoEl, url, props.file?.size, {
+      chunkSize: props.chunkSize,
+      mimeCodec: props.mimeCodec,
+      token,
+    } as any);
+  } catch (err) {
+    console.error('Failed to start MSE stream, falling back to blob:', err);
+    try {
+      currentBlobUrl = await fetchAsBlobUrl(url, props.token);
+      videoEl.src = currentBlobUrl;
+    } catch (blobErr) {
+      console.error('Authenticated fallback fetch also failed:', blobErr);
+    }
+  }
+}
+
+onMounted(async () => {
+  const videoEl = internalVideoRef.value;
+  if (!videoEl) return;
+
+  const url = await resolveUrl();
+  await initStream(url);
+
+  emit('media-ready', videoEl);
+});
+
+// React to a streamUrl/file that resolves *after* mount (e.g. async Vuex
+// dispatch in the parent) — this was the original bug: nothing watched it.
+watch(
+  () => [props.streamUrl, props.file?.id],
+  async () => {
+    const url = await resolveUrl();
+    if (url) initStream(url);
   },
+);
+
+onBeforeUnmount(() => {
+  controller?.abort();
+  revokeBlobUrl();
+  emit('media-destroyed');
 });
 </script>
 
