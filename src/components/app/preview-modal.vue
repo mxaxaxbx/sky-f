@@ -289,20 +289,11 @@
             >
               <VideoStreamer
                 :file="file"
-                :streamUrl="videoStreamURL"
+                :stream-url="videoStreamURL"
                 :title="`Video preview of ${file.name || 'video'}`"
                 class="max-w-full max-h-full object-contain cursor-pointer"
-                controls
-                @play="handlePlay"
-                @seeking="handleSeeking"
-                @timeupdate="onTimeUpdate"
-                @loadedmetadata="onLoadedMetadata"
-                @ended="isPlaying = false"
-                @click="togglePlay"
-                @keydown.space.prevent="togglePlay"
-                @media-ready="(el) => (videoRef.value = el)"
-                @media-destroyed="() => (videoRef.value = null)"
-                style="view-transition-name: preview-content"
+                @media-ready="onMediaReady"
+                @media-destroyed="onMediaDestroyed"
               />
 
               <!-- controles -->

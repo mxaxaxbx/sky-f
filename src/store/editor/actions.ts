@@ -126,7 +126,15 @@ export const actions: ActionTree<EditorStateI, RootStateI> = {
       const fileName = data?.file?.name || `file-${fileId}`;
       const fileSize = Number(data?.file?.size) || content.length || 0;
 
-      console.debug('[editor] file metadata', { fileId, fileName, fileSize, contentLength: content?.length });
+      console.debug(
+        '[editor] file metadata',
+        {
+          fileId,
+          fileName,
+          fileSize,
+          contentLength: content?.length,
+        },
+      );
 
       commit('SET_CURRENT_FILE_NAME', fileName);
       commit('SET_CURRENT_FILE_CONTENT', content);
