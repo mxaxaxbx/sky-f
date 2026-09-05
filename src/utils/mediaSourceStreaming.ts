@@ -1,3 +1,4 @@
+import { VideoMetadataI } from '@/store/videostream/state';
 /* eslint-disable no-await-in-loop, no-param-reassign, no-empty */
 /* Utility to stream a video to a HTMLVideoElement using MediaSource Extensions (MSE).
  * Usage:
@@ -34,8 +35,9 @@ export async function streamWithMSE(
   streamUrl: string,
   fileSize?: number,
   opts?: { chunkSize?: number; mimeCodec?: string },
+  metadata?: VideoMetadataI,
 ): Promise<StreamController> {
-  const chunkSize = opts?.chunkSize ?? 1024 * 1024; // 1MB default
+  const chunkSize = metadata?.chunkSize ?? opts?.chunkSize ?? 1024 * 1024; // 1MB default
   const mimeCodec = opts?.mimeCodec ?? 'video/mp4; codecs="avc1.42E01E,mp4a.40.2"';
 
   if (!('MediaSource' in window)) {
@@ -128,6 +130,8 @@ export async function streamWithMSE(
           await waitForUpdateEnd(sourceBuffer);
           sourceBuffer.appendBuffer(new Uint8Array(chunk));
         }
+        // ensure last chunk is fully processed before ending stream
+        await waitForUpdateEnd(sourceBuffer);
       } else {
         // file size unknown: fetch entire resource and append progressively
         const res = await fetchWithAuth(streamUrl, { signal: abortController.signal });

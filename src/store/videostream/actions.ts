@@ -1,6 +1,8 @@
 import { ActionContext, ActionTree } from 'vuex';
 import { storageClient } from '@/http-client';
 
+import { snakeToCamel } from '@/utils';
+
 import { RootStateI } from '../state';
 import { VideoStreamStateI } from './state';
 import { FileI } from '../files/state';
@@ -30,6 +32,7 @@ export const actions: ActionTree<VideoStreamStateI, RootStateI> = {
     }
 
     const { data } = await storageClient.get(`/api/videos/${payload.id}/metadata`);
+    _context.commit('SET_VIDEOSTREAM_METADATA', snakeToCamel(data));
     return data;
   },
 };
