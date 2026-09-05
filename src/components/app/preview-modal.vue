@@ -1695,6 +1695,14 @@ function onTouchEnd(e: TouchEvent) {
   }
 }
 
+function onMediaReady(videoElement: HTMLVideoElement): void {
+  videoRef.value = videoElement;
+}
+
+function onMediaDestroyed(): void {
+  videoRef.value = null;
+}
+
 function formatTime(seconds: number): string {
   if (!seconds || !Number.isFinite(seconds)) return '00:00';
   const m = Math.floor(seconds / 60);
