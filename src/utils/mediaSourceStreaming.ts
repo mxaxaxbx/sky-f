@@ -176,12 +176,13 @@ export async function streamWithMSE(
           }
         };
 
-        // Fetch initial chunk to start playback
+        // Fetch initial chunks to start playback
         const initialFetch = async (): Promise<void> => {
           try {
-            if (!abortController.signal.aborted) {
-              await fetchChunk(0);
-              nextChunkIndex = 1;
+            for (let i = 0; i < Math.min(3, Math.ceil(totalSize / chunkSize)); i += 1) {
+              if (abortController.signal.aborted) break;
+              await fetchChunk(i);
+              nextChunkIndex = i + 1;
             }
           } catch (err) {
             console.error('Initial chunk fetch error:', err);
