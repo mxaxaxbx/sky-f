@@ -46,7 +46,7 @@ const props = withDefaults(
     mimeCodec?: string;
   }>(),
   {
-    chunkSize: 1024 * 1024,
+    chunkSize: 1024 * 1024, // 1MB chunks by default
   },
 );
 
