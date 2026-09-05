@@ -18,6 +18,7 @@ import {
   onBeforeUnmount,
   watch,
   ref,
+  computed,
   withDefaults,
   defineProps,
   defineEmits,
@@ -29,7 +30,7 @@ import {
 } from '@/utils/mediaSourceStreaming';
 
 type VideoFile = {
-  id?: string;
+  id?: string | number;
   contentType?: string;
   size?: number;
   name?: string;
@@ -56,6 +57,8 @@ const emit = defineEmits<{
 
 const internalVideoRef = ref<HTMLVideoElement | null>(null);
 const store = useStore();
+
+const metadata = computed(() => store.state.videostream.metadata);
 
 let controller: StreamController | null = null;
 let currentBlobUrl: string | null = null;
@@ -103,11 +106,17 @@ async function initStream(url?: string) {
     // Preferred path: MSE streaming, which supports range requests / seeking.
     // NOTE: streamWithMSE must forward `Authorization: Bearer ${token}` on
     // its internal fetch calls for this to actually authenticate.
-    controller = await streamWithMSE(videoEl, url, props.file?.size, {
-      chunkSize: props.chunkSize,
-      mimeCodec: props.mimeCodec,
-      token,
-    } as any);
+    controller = await streamWithMSE(
+      videoEl,
+      url,
+      props.file?.size,
+      {
+        chunkSize: props.chunkSize,
+        mimeCodec: props.mimeCodec,
+        token,
+      } as any,
+      metadata.value,
+    );
   } catch (err) {
     console.error('Failed to start MSE stream, falling back to blob:', err);
     try {
@@ -120,9 +129,21 @@ async function initStream(url?: string) {
   }
 }
 
+async function getMetadata() {
+  if (!props.file?.id) return;
+  try {
+    await store.dispatch('videostream/getVideoMetadata', {
+      id: props.file.id,
+    });
+  } catch (err) {
+    console.error('Failed to fetch video metadata:', err);
+  }
+}
+
 onMounted(async () => {
   const videoEl = internalVideoRef.value;
   if (!videoEl) return;
+  await getMetadata();
 
   const url = await resolveUrl();
   await initStream(url);
