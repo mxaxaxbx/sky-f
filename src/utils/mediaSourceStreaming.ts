@@ -115,7 +115,7 @@ export async function streamWithMSE(
         let isFetching = false;
         let nextChunkIndex = 0;
         const totalSize = fileSize;
-        const BUFFER_AHEAD_CHUNKS = 10;
+        const BUFFER_AHEAD_CHUNKS = 2;
 
         const fetchChunk = async (chunkIndex: number): Promise<void> => {
           const start = chunkIndex * chunkSize;
@@ -176,14 +176,12 @@ export async function streamWithMSE(
           }
         };
 
-        // Start with aggressive initial fetch
+        // Fetch initial chunk to start playback
         const initialFetch = async (): Promise<void> => {
           try {
-            // Fetch first 5 chunks immediately to kickstart playback
-            for (let i = 0; i < Math.min(5, Math.ceil(totalSize / chunkSize)); i += 1) {
-              if (abortController.signal.aborted) break;
-              await fetchChunk(i);
-              nextChunkIndex = i + 1;
+            if (!abortController.signal.aborted) {
+              await fetchChunk(0);
+              nextChunkIndex = 1;
             }
           } catch (err) {
             console.error('Initial chunk fetch error:', err);
