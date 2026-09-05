@@ -156,6 +156,7 @@ onMounted(async () => {
 watch(
   () => [props.streamUrl, props.file?.id],
   async () => {
+    await getMetadata();
     const url = await resolveUrl();
     if (url) initStream(url);
   },

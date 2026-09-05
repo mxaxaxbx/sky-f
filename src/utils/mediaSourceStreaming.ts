@@ -112,97 +112,109 @@ export async function streamWithMSE(
 
       // if fileSize known, use range requests to fetch progressively
       if (typeof fileSize === 'number' && fileSize > 0 && sourceBuffer) {
-        let fetching = false;
-        let nextChunkToFetch = 0;
-        const bufferedChunks = new Set<number>();
+        let isFetching = false;
+        let nextChunkIndex = 0;
         const totalSize = fileSize;
+        const BUFFER_AHEAD_CHUNKS = 10;
 
-        const fetchNextChunks = async (): Promise<void> => {
-          if (fetching || abortController.signal.aborted) return;
-          fetching = true;
+        const fetchChunk = async (chunkIndex: number): Promise<void> => {
+          const start = chunkIndex * chunkSize;
+          const end = Math.min(start + chunkSize - 1, totalSize - 1);
 
-          try {
-            // Fetch up to 3 chunks ahead of current playback position
-            const currentTime = videoElement.currentTime || 0;
-            const bytesPerSecond = totalSize / (videoElement.duration || 1);
-            const targetBytes = Math.max(currentTime * bytesPerSecond + chunkSize * 3, chunkSize);
+          const res = await fetchWithAuth(streamUrl, {
+            headers: { Range: `bytes=${start}-${end}` },
+            signal: abortController.signal,
+          });
 
-            let chunkIndex = nextChunkToFetch;
-            while (chunkIndex * chunkSize < targetBytes && chunkIndex * chunkSize < totalSize && !abortController.signal.aborted) {
-              if (!bufferedChunks.has(chunkIndex)) {
-                const start = chunkIndex * chunkSize;
-                const end = Math.min(start + chunkSize - 1, totalSize - 1);
+          if (!res.ok && res.status !== 206) {
+            throw new Error(`Unexpected response ${res.status} from server`);
+          }
 
-                bufferedChunks.add(chunkIndex);
-
-                const res = await fetchWithAuth(streamUrl, {
-                  headers: { Range: `bytes=${start}-${end}` },
-                  signal: abortController.signal,
-                });
-
-                if (!res.ok && res.status !== 206) {
-                  throw new Error(`Unexpected response ${res.status} from server`);
-                }
-
-                const chunk = await res.arrayBuffer();
-                if (sourceBuffer) {
-                  await waitForUpdateEnd(sourceBuffer);
-                  sourceBuffer.appendBuffer(new Uint8Array(chunk));
-                }
-              }
-              chunkIndex += 1;
-            }
-            nextChunkToFetch = chunkIndex;
-          } finally {
-            fetching = false;
+          const chunk = await res.arrayBuffer();
+          if (sourceBuffer && !abortController.signal.aborted) {
+            await waitForUpdateEnd(sourceBuffer);
+            sourceBuffer.appendBuffer(new Uint8Array(chunk));
           }
         };
 
-        // Fetch initial chunk immediately
-        await fetchNextChunks();
+        const fetchMoreChunks = async (): Promise<void> => {
+          if (isFetching || abortController.signal.aborted) return;
+          isFetching = true;
+
+          try {
+            // Calculate how many chunks we should have buffered based on playback position
+            const currentTime = videoElement.currentTime || 0;
+            const duration = videoElement.duration || totalSize / 1024 / 1024 / 5; // rough estimate if duration unknown
+            const bytesPerSecond = duration > 0 ? totalSize / duration : 1024 * 1024;
+            const currentBytePos = currentTime * bytesPerSecond;
+            const targetBytePos = currentBytePos + BUFFER_AHEAD_CHUNKS * chunkSize;
+
+            // Fetch chunks up to target position
+            let chunkIndex = nextChunkIndex;
+            while (
+              chunkIndex * chunkSize < targetBytePos
+              && chunkIndex * chunkSize < totalSize
+              && !abortController.signal.aborted
+            ) {
+              await fetchChunk(chunkIndex);
+              chunkIndex += 1;
+            }
+            nextChunkIndex = chunkIndex;
+
+            // If we've fetched everything, signal end of stream
+            if (nextChunkIndex * chunkSize >= totalSize && mediaSource.readyState === 'open') {
+              try {
+                mediaSource.endOfStream();
+              } catch {
+                // ignore if already ended
+              }
+            }
+          } catch (err) {
+            console.error('Chunk fetch error:', err);
+          } finally {
+            isFetching = false;
+          }
+        };
+
+        // Start with aggressive initial fetch
+        const initialFetch = async (): Promise<void> => {
+          try {
+            // Fetch first 5 chunks immediately to kickstart playback
+            for (let i = 0; i < Math.min(5, Math.ceil(totalSize / chunkSize)); i += 1) {
+              if (abortController.signal.aborted) break;
+              await fetchChunk(i);
+              nextChunkIndex = i + 1;
+            }
+          } catch (err) {
+            console.error('Initial chunk fetch error:', err);
+          }
+        };
+
+        await initialFetch();
 
         // Continue fetching as video plays
         const timeUpdateHandler = (): void => {
-          fetchNextChunks().catch(() => {
+          fetchMoreChunks().catch(() => {
             // ignore
           });
         };
         videoElement.addEventListener('timeupdate', timeUpdateHandler as EventListener);
 
-        // When playback ends, signal end of stream and clean up
+        // Fetch more when video seeks
+        const seekHandler = (): void => {
+          fetchMoreChunks().catch(() => {
+            // ignore
+          });
+        };
+        videoElement.addEventListener('seeking', seekHandler as EventListener);
+
+        // Cleanup on end
         const endedHandler = (): void => {
           videoElement.removeEventListener('timeupdate', timeUpdateHandler);
+          videoElement.removeEventListener('seeking', seekHandler);
           videoElement.removeEventListener('ended', endedHandler);
-          if (!abortController.signal.aborted && mediaSource.readyState === 'open') {
-            try {
-              mediaSource.endOfStream();
-            } catch {
-              // ignore if already ended
-            }
-          }
         };
         videoElement.addEventListener('ended', endedHandler);
-
-        // Also signal end when all chunks are fetched
-        const checkIfComplete = async (): Promise<void> => {
-          let waitCount = 0;
-          while (nextChunkToFetch * chunkSize < totalSize && !abortController.signal.aborted && waitCount < 300) {
-            await new Promise((resolve) => {
-              setTimeout(resolve, 100);
-            });
-            waitCount += 1;
-          }
-          if (!abortController.signal.aborted && mediaSource.readyState === 'open') {
-            try {
-              mediaSource.endOfStream();
-            } catch {
-              // ignore if already ended
-            }
-          }
-        };
-        checkIfComplete().catch(() => {
-          // ignore
-        });
       } else {
         // file size unknown: fetch entire resource and append progressively
         const res = await fetchWithAuth(streamUrl, { signal: abortController.signal });
