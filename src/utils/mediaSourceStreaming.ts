@@ -20,7 +20,9 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<Respo
     ? Object.fromEntries(init.headers.entries())
     : init.headers ?? {};
 
-  return fetch(url, {
+  console.log('[fetchWithAuth] Starting fetch', { url, rangeHeader: (init.headers as any)?.Range });
+  const startTime = performance.now();
+  const response = await fetch(url, {
     ...init,
     credentials: 'include',
     headers: {
@@ -28,6 +30,14 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<Respo
       ...getAuthHeaders(),
     },
   });
+  const duration = performance.now() - startTime;
+  console.log('[fetchWithAuth] Fetch completed', {
+    url,
+    status: response.status,
+    ok: response.ok,
+    durationMs: duration,
+  });
+  return response;
 }
 
 export async function streamWithMSE(
@@ -37,6 +47,7 @@ export async function streamWithMSE(
   opts?: { chunkSize?: number; mimeCodec?: string },
   metadata?: VideoMetadataI,
 ): Promise<StreamController> {
+  console.log('[streamWithMSE] Starting', { streamUrl, fileSize, hasMetadata: !!metadata });
   const chunkSize = metadata?.chunkSize ?? opts?.chunkSize ?? 1024 * 1024; // 1MB default
   const mimeCodec = opts?.mimeCodec ?? 'video/mp4; codecs="avc1.42E01E,mp4a.40.2"';
 
@@ -49,7 +60,9 @@ export async function streamWithMSE(
 
   // attach media source to video element
   const videoElement = videoEl;
-  videoElement.src = URL.createObjectURL(mediaSource);
+  const mediasourceBlobUrl = URL.createObjectURL(mediaSource);
+  console.log('[streamWithMSE] Created MediaSource blob URL', { blobUrl: mediasourceBlobUrl });
+  videoElement.src = mediasourceBlobUrl;
 
   let sourceBuffer: SourceBuffer | null = null;
 
@@ -90,6 +103,7 @@ export async function streamWithMSE(
       if (!mediaSource || mediaSource.readyState === 'closed') return;
 
       if (!MediaSource.isTypeSupported(mimeCodec)) {
+        console.log('[onSourceOpen] Codec not supported, using fallback', { mimeCodec });
         // Fallback: let the element try native playback of the returned stream
         // by clearing the src and pointing directly to the URL.
         // (This will happen when codec is not supported.)
@@ -104,14 +118,19 @@ export async function streamWithMSE(
           throw new Error(`Fallback fetch failed with ${fallbackResponse.status}`);
         }
         const blob = await fallbackResponse.blob();
-        videoElement.src = URL.createObjectURL(blob);
+        console.log('[onSourceOpen] Fallback blob created', { blobSize: blob.size, blobType: blob.type });
+        const blobUrl = URL.createObjectURL(blob);
+        console.log('[onSourceOpen] Fallback blob URL created', { blobUrl });
+        videoElement.src = blobUrl;
         return;
       }
 
       sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+      console.log('[onSourceOpen] SourceBuffer created', { mimeCodec });
 
       // if fileSize known, use range requests to fetch progressively
       if (typeof fileSize === 'number' && fileSize > 0 && sourceBuffer) {
+        console.log('[onSourceOpen] Using chunked fetching with range requests', { fileSize, chunkSize });
         let isFetching = false;
         let nextChunkIndex = 0;
         const totalSize = fileSize;
@@ -120,9 +139,18 @@ export async function streamWithMSE(
         const fetchChunk = async (chunkIndex: number): Promise<void> => {
           const start = chunkIndex * chunkSize;
           const end = Math.min(start + chunkSize - 1, totalSize - 1);
+          const range = `bytes=${start}-${end}`;
 
+          console.log('[fetchChunk] Fetching chunk', {
+            chunkIndex,
+            start,
+            end,
+            range,
+          });
           const res = await fetchWithAuth(streamUrl, {
-            headers: { Range: `bytes=${start}-${end}` },
+            headers: {
+              Range: range,
+            },
             signal: abortController.signal,
           });
 
@@ -131,9 +159,11 @@ export async function streamWithMSE(
           }
 
           const chunk = await res.arrayBuffer();
+          console.log('[fetchChunk] Chunk data received', { chunkIndex, size: chunk.byteLength });
           if (sourceBuffer && !abortController.signal.aborted) {
             await waitForUpdateEnd(sourceBuffer);
             sourceBuffer.appendBuffer(new Uint8Array(chunk));
+            console.log('[fetchChunk] Chunk appended to sourceBuffer', { chunkIndex });
           }
         };
 
@@ -179,11 +209,14 @@ export async function streamWithMSE(
         // Fetch initial chunks to start playback
         const initialFetch = async (): Promise<void> => {
           try {
-            for (let i = 0; i < Math.min(3, Math.ceil(totalSize / chunkSize)); i += 1) {
+            const initialChunkCount = Math.min(3, Math.ceil(totalSize / chunkSize));
+            console.log('[initialFetch] Starting', { initialChunkCount, totalSize });
+            for (let i = 0; i < initialChunkCount; i += 1) {
               if (abortController.signal.aborted) break;
               await fetchChunk(i);
               nextChunkIndex = i + 1;
             }
+            console.log('[initialFetch] Complete', { fetchedChunks: nextChunkIndex });
           } catch (err) {
             console.error('Initial chunk fetch error:', err);
           }
@@ -215,6 +248,7 @@ export async function streamWithMSE(
         };
         videoElement.addEventListener('ended', endedHandler);
       } else {
+        console.log('[onSourceOpen] No fileSize, fetching entire resource');
         // file size unknown: fetch entire resource and append progressively
         const res = await fetchWithAuth(streamUrl, { signal: abortController.signal });
         if (!res.ok) throw new Error(`Fetch failed with ${res.status}`);
@@ -222,27 +256,38 @@ export async function streamWithMSE(
         // Try to stream via reader and append in slices
         const reader = res.body?.getReader();
         if (!reader) {
+          console.log('[onSourceOpen] No reader available, fetching as arrayBuffer');
           const ab = await res.arrayBuffer();
+          console.log('[onSourceOpen] ArrayBuffer received', { size: ab.byteLength });
           await waitForUpdateEnd(sourceBuffer);
           sourceBuffer.appendBuffer(new Uint8Array(ab));
+          console.log('[onSourceOpen] ArrayBuffer appended to sourceBuffer');
         } else {
+          console.log('[onSourceOpen] Streaming via reader');
           let done = false;
+          let chunkCount = 0;
           while (!done && !abortController.signal.aborted) {
             const { value, done: rdone } = await reader.read();
             done = rdone;
             if (value && value.length) {
+              chunkCount += 1;
+              console.log('[onSourceOpen] Reader chunk', { chunkNumber: chunkCount, size: value.length });
               await waitForUpdateEnd(sourceBuffer);
               sourceBuffer.appendBuffer(value);
             }
           }
+          console.log('[onSourceOpen] Reader streaming complete', { totalChunks: chunkCount });
         }
       }
 
       // signal end of stream if not aborted
       if (!abortController.signal.aborted && mediaSource.readyState === 'open') {
         try {
+          console.log('[onSourceOpen] Signaling end of stream');
           mediaSource.endOfStream();
+          console.log('[onSourceOpen] End of stream signaled');
         } catch (e) {
+          console.log('[onSourceOpen] Error signaling end of stream (may already be ended)', { error: e });
           // ignore if already ended
         }
       }
@@ -257,16 +302,21 @@ export async function streamWithMSE(
         }
 
         try {
+          console.log('[onSourceOpen] Error recovery: attempting blob fallback');
           const fallbackResponse = await fetchWithAuth(streamUrl);
           if (fallbackResponse.ok) {
             const blob = await fallbackResponse.blob();
-            videoElement.src = URL.createObjectURL(blob);
+            console.log('[onSourceOpen] Error recovery blob created', { blobSize: blob.size, blobType: blob.type });
+            const blobUrl = URL.createObjectURL(blob);
+            console.log('[onSourceOpen] Error recovery blob URL created', { blobUrl });
+            videoElement.src = blobUrl;
             return;
           }
         } catch (fallbackErr) {
           console.warn('Auth fallback fetch failed:', fallbackErr);
         }
 
+        console.log('[onSourceOpen] All blob fallbacks failed, using direct streamUrl');
         videoElement.src = streamUrl;
       }
     }
@@ -297,11 +347,13 @@ export async function streamWithMSE(
 
   return {
     abort: () => {
+      console.log('[streamWithMSE.abort] Aborting stream');
       abortController.abort();
       try {
         if (mediaSource.readyState === 'open') mediaSource.endOfStream();
       } catch {}
       cleanup();
+      console.log('[streamWithMSE.abort] Abort complete');
     },
   };
 }
