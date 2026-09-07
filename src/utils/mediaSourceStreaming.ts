@@ -160,10 +160,21 @@ export async function streamWithMSE(
 
           const chunk = await res.arrayBuffer();
           console.log('[fetchChunk] Chunk data received', { chunkIndex, size: chunk.byteLength });
-          if (sourceBuffer && !abortController.signal.aborted) {
-            await waitForUpdateEnd(sourceBuffer);
-            sourceBuffer.appendBuffer(new Uint8Array(chunk));
-            console.log('[fetchChunk] Chunk appended to sourceBuffer', { chunkIndex });
+          if (sourceBuffer && !abortController.signal.aborted && mediaSource.readyState === 'open') {
+            try {
+              await waitForUpdateEnd(sourceBuffer);
+              sourceBuffer.appendBuffer(new Uint8Array(chunk));
+              console.log('[fetchChunk] Chunk appended to sourceBuffer', { chunkIndex });
+            } catch (err) {
+              console.warn('[fetchChunk] Failed to append chunk (sourceBuffer may have been removed)', {
+                chunkIndex,
+                error: (err as Error).message,
+              });
+              // SourceBuffer was likely removed during cleanup, abort further operations
+              if (!abortController.signal.aborted) {
+                abortController.abort();
+              }
+            }
           }
         };
 
@@ -259,9 +270,16 @@ export async function streamWithMSE(
           console.log('[onSourceOpen] No reader available, fetching as arrayBuffer');
           const ab = await res.arrayBuffer();
           console.log('[onSourceOpen] ArrayBuffer received', { size: ab.byteLength });
-          await waitForUpdateEnd(sourceBuffer);
-          sourceBuffer.appendBuffer(new Uint8Array(ab));
-          console.log('[onSourceOpen] ArrayBuffer appended to sourceBuffer');
+          if (sourceBuffer && mediaSource.readyState === 'open') {
+            try {
+              await waitForUpdateEnd(sourceBuffer);
+              sourceBuffer.appendBuffer(new Uint8Array(ab));
+              console.log('[onSourceOpen] ArrayBuffer appended to sourceBuffer');
+            } catch (err) {
+              console.warn('[onSourceOpen] Failed to append arrayBuffer', { error: (err as Error).message });
+              throw err;
+            }
+          }
         } else {
           console.log('[onSourceOpen] Streaming via reader');
           let done = false;
@@ -272,8 +290,21 @@ export async function streamWithMSE(
             if (value && value.length) {
               chunkCount += 1;
               console.log('[onSourceOpen] Reader chunk', { chunkNumber: chunkCount, size: value.length });
-              await waitForUpdateEnd(sourceBuffer);
-              sourceBuffer.appendBuffer(value);
+              if (sourceBuffer && mediaSource.readyState === 'open') {
+                try {
+                  await waitForUpdateEnd(sourceBuffer);
+                  sourceBuffer.appendBuffer(value);
+                } catch (err) {
+                  console.warn('[onSourceOpen] Failed to append reader chunk', {
+                    chunkNumber: chunkCount,
+                    error: (err as Error).message,
+                  });
+                  // SourceBuffer was likely removed, abort further operations
+                  break;
+                }
+              } else {
+                break;
+              }
             }
           }
           console.log('[onSourceOpen] Reader streaming complete', { totalChunks: chunkCount });
@@ -328,10 +359,17 @@ export async function streamWithMSE(
     } catch {}
     try {
       if (sourceBuffer && mediaSource.readyState === 'open') {
-        if (sourceBuffer.updating) {
-          // best-effort: wait a moment then remove
+        const sb = sourceBuffer;
+        // Wait for any pending updates to complete before removing
+        if (sb.updating) {
+          sb.addEventListener('updateend', () => {
+            try {
+              mediaSource.removeSourceBuffer(sb);
+            } catch {}
+          }, { once: true });
+        } else {
+          mediaSource.removeSourceBuffer(sb);
         }
-        mediaSource.removeSourceBuffer(sourceBuffer);
       }
     } catch {}
     try {
