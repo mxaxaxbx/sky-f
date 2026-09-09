@@ -241,6 +241,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
     if (win) {
       win.location.href = url;
+      console.log('file downloaded with opened window');
     } else {
       // fallback por si el popup fue bloqueado
       const linkEl = document.createElement('a');
@@ -248,9 +249,8 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       linkEl.target = '_blank';
       linkEl.click();
       linkEl.remove();
+      console.log('file downloaded');
     }
-
-    console.log('Error downloading file');
   },
 
   async saveCacheFile(
