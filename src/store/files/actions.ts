@@ -233,7 +233,24 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
       return;
     }
 
-    console.log('Error downloading file');
+    const win = window.open('', '_blank');
+    const { data } = await storageClient.get(
+      `/api/storage/get-download-url/${payload.id}`,
+    );
+    const { url } = data;
+
+    if (win) {
+      win.location.href = url;
+      console.log('file downloaded with opened window');
+    } else {
+      // fallback por si el popup fue bloqueado
+      const linkEl = document.createElement('a');
+      linkEl.href = url;
+      linkEl.target = '_blank';
+      linkEl.click();
+      linkEl.remove();
+      console.log('file downloaded');
+    }
   },
 
   async saveCacheFile(
@@ -321,7 +338,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     context: ActionContext<FilesStateI, RootStateI>,
     payload: FileI,
   ): Promise<void> {
-    // Abrir la ventana ANTES del await — Safari requiere que sea síncrono
+    // open a new window before wait - Safari requires async
     const win = window.open('', '_blank');
     const { data } = await storageClient.get(
       `/api/storage/get-download-url/${payload.id}`,
