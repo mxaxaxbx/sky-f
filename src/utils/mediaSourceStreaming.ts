@@ -40,16 +40,124 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<Respo
   return response;
 }
 
+export function resolveMimeCodec(
+  metadata?: VideoMetadataI,
+  file?: { name?: string; contentType?: string },
+  explicitCodec?: string,
+): string {
+  if (explicitCodec) {
+    return explicitCodec;
+  }
+
+  const format = (metadata?.format || '').toLowerCase();
+  const container = (metadata?.container || '').toLowerCase();
+  const contentType = (file?.contentType || '').toLowerCase();
+  const fileName = (file?.name || '').toLowerCase();
+
+  const isWebm = (
+    format.includes('webm')
+    || container.includes('webm')
+    || contentType.includes('webm')
+    || fileName.endsWith('.webm')
+  );
+
+  const isOgg = (
+    format.includes('ogg')
+    || contentType.includes('ogg')
+    || fileName.endsWith('.ogg')
+    || fileName.endsWith('.ogv')
+  );
+
+  const vCodecRaw = (metadata?.videoCodec || metadata?.codec || '').toLowerCase();
+  const aCodecRaw = (metadata?.audioCodec || '').toLowerCase();
+
+  const candidates: string[] = [];
+
+  if (isWebm) {
+    let vCodec = 'vp8';
+    if (vCodecRaw.includes('vp9')) vCodec = 'vp9';
+    else if (vCodecRaw.includes('vp8')) vCodec = 'vp8';
+    else if (vCodecRaw.includes('av1') || vCodecRaw.includes('av01')) vCodec = 'av01.0.08M.08';
+    else if (vCodecRaw) vCodec = vCodecRaw;
+
+    let aCodec = '';
+    if (aCodecRaw.includes('vorbis')) aCodec = 'vorbis';
+    else if (aCodecRaw.includes('opus')) aCodec = 'opus';
+    else if (aCodecRaw) aCodec = aCodecRaw;
+
+    if (vCodec && aCodec) {
+      candidates.push(`video/webm; codecs="${vCodec}, ${aCodec}"`);
+      candidates.push(`video/webm; codecs="${vCodec},${aCodec}"`);
+    }
+    if (vCodec) {
+      candidates.push(`video/webm; codecs="${vCodec}"`);
+    }
+    candidates.push('video/webm');
+  } else if (isOgg) {
+    candidates.push('video/ogg; codecs="theora, vorbis"');
+    candidates.push('video/ogg; codecs="theora"');
+    candidates.push('video/ogg');
+  } else {
+    // Default MP4 / generic
+    let vCodec = 'avc1.42E01E';
+    if (vCodecRaw.includes('avc') || vCodecRaw.includes('h264') || vCodecRaw.includes('264')) {
+      vCodec = 'avc1.42E01E';
+    } else if (vCodecRaw.includes('hevc') || vCodecRaw.includes('h265') || vCodecRaw.includes('265')) {
+      vCodec = 'hev1.1.6.L93.B0';
+    } else if (vCodecRaw.includes('vp9')) {
+      vCodec = 'vp09.00.10.08';
+    } else if (vCodecRaw.includes('av1') || vCodecRaw.includes('av01')) {
+      vCodec = 'av01.0.08M.08';
+    }
+
+    let aCodec = 'mp4a.40.2';
+    if (aCodecRaw.includes('mp3')) {
+      aCodec = 'mp4a.40.34';
+    } else if (aCodecRaw.includes('aac')) {
+      aCodec = 'mp4a.40.2';
+    } else if (aCodecRaw.includes('opus')) {
+      aCodec = 'opus';
+    }
+
+    if (vCodec === 'avc1.42E01E') {
+      candidates.push(`video/mp4; codecs="avc1.42E01E,${aCodec}"`);
+      candidates.push(`video/mp4; codecs="avc1.4D401F,${aCodec}"`);
+      candidates.push(`video/mp4; codecs="avc1.640028,${aCodec}"`);
+      candidates.push('video/mp4; codecs="avc1.42E01E"');
+    } else {
+      candidates.push(`video/mp4; codecs="${vCodec},${aCodec}"`);
+      candidates.push(`video/mp4; codecs="${vCodec}"`);
+    }
+    candidates.push('video/mp4');
+  }
+
+  if (typeof MediaSource !== 'undefined' && typeof MediaSource.isTypeSupported === 'function') {
+    for (let i = 0; i < candidates.length; i += 1) {
+      if (MediaSource.isTypeSupported(candidates[i])) {
+        return candidates[i];
+      }
+    }
+  }
+
+  return candidates[0] || 'video/mp4; codecs="avc1.42E01E,mp4a.40.2"';
+}
+
 export async function streamWithMSE(
   videoEl: HTMLVideoElement,
   streamUrl: string,
   fileSize?: number,
   opts?: { chunkSize?: number; mimeCodec?: string },
   metadata?: VideoMetadataI,
+  file?: { name?: string; contentType?: string },
 ): Promise<StreamController> {
-  console.log('[streamWithMSE] Starting', { streamUrl, fileSize, hasMetadata: !!metadata });
+  const mimeCodec = resolveMimeCodec(metadata, file, opts?.mimeCodec);
+  console.log('[streamWithMSE] Starting', {
+    streamUrl,
+    fileSize,
+    hasMetadata: !!metadata,
+    mimeCodec,
+  });
   const chunkSize = metadata?.chunkSize ?? opts?.chunkSize ?? 1024 * 1024; // 1MB default
-  const mimeCodec = opts?.mimeCodec ?? 'video/mp4; codecs="avc1.42E01E,mp4a.40.2"';
 
   if (!('MediaSource' in window)) {
     throw new Error('MediaSource API is not available in this browser');
@@ -99,9 +207,14 @@ export async function streamWithMSE(
 
   async function onSourceOpen() {
     try {
-      // Log metadata duration if available (browser will compute actual duration)
-      if (metadata?.duration && typeof metadata.duration === 'number') {
-        console.log('[onSourceOpen] Metadata duration available', { duration: metadata.duration });
+      // Set metadata duration if available so browser computes actual duration immediately
+      if (metadata?.duration && typeof metadata.duration === 'number' && Number.isFinite(metadata.duration) && metadata.duration > 0) {
+        console.log('[onSourceOpen] Setting MediaSource duration from metadata', { duration: metadata.duration });
+        try {
+          mediaSource.duration = metadata.duration;
+        } catch (durErr) {
+          console.warn('[onSourceOpen] Could not set MediaSource duration:', durErr);
+        }
       }
 
       // try to create a SourceBuffer for the given codec
@@ -116,6 +229,10 @@ export async function streamWithMSE(
           URL.revokeObjectURL(videoElement.src);
         } catch (e) {
           // ignore
+        }
+
+        if (fileSize && fileSize > 50 * 1024 * 1024) {
+          throw new Error(`Codec ${mimeCodec} not supported in MSE and file too large for in-memory blob fallback (${fileSize} bytes)`);
         }
 
         const fallbackResponse = await fetchWithAuth(streamUrl);
@@ -225,7 +342,7 @@ export async function streamWithMSE(
         // Fetch initial chunks to start playback
         const initialFetch = async (): Promise<void> => {
           try {
-            const initialChunkCount = Math.min(3, Math.ceil(totalSize / chunkSize));
+            const initialChunkCount = Math.min(1, Math.ceil(totalSize / chunkSize));
             console.log('[initialFetch] Starting', { initialChunkCount, totalSize });
             for (let i = 0; i < initialChunkCount; i += 1) {
               if (abortController.signal.aborted) break;
@@ -250,6 +367,9 @@ export async function streamWithMSE(
             console.log('[streamWithMSE] End of stream signaled after initial fetch');
           } catch (err) {
             console.warn('[streamWithMSE] Error signaling end of stream, attempting fallback:', err);
+            if (fileSize && fileSize > 50 * 1024 * 1024) {
+              throw err;
+            }
             // SourceBuffer error occurred, fall back to direct blob playback
             try {
               URL.revokeObjectURL(videoElement.src);
@@ -369,6 +489,10 @@ export async function streamWithMSE(
           // ignore
         }
 
+        if (fileSize && fileSize > 50 * 1024 * 1024) {
+          throw err;
+        }
+
         try {
           console.log('[onSourceOpen] Error recovery: attempting blob fallback');
           const fallbackResponse = await fetchWithAuth(streamUrl);
@@ -390,7 +514,38 @@ export async function streamWithMSE(
     }
   }
 
+  const onVideoElementError = async () => {
+    console.warn('[streamWithMSE] videoElement error event triggered, attempting blob fallback', videoElement.error);
+    if (!abortController.signal.aborted) {
+      abortController.abort();
+      if (fileSize && fileSize > 50 * 1024 * 1024) {
+        console.warn('[streamWithMSE] File too large for in-memory blob error recovery');
+        return;
+      }
+      try {
+        URL.revokeObjectURL(videoElement.src);
+      } catch (e) {
+        // ignore
+      }
+      try {
+        const fallbackResponse = await fetchWithAuth(streamUrl);
+        if (fallbackResponse.ok) {
+          const blob = await fallbackResponse.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          videoElement.src = blobUrl;
+          console.log('[streamWithMSE] Fallback blob URL set after videoElement error');
+        }
+      } catch (fbErr) {
+        console.error('[streamWithMSE] Fallback on videoElement error failed', fbErr);
+      }
+    }
+  };
+  videoElement.addEventListener('error', onVideoElementError, { once: true });
+
   const cleanup = () => {
+    try {
+      videoElement.removeEventListener('error', onVideoElementError);
+    } catch {}
     try {
       mediaSource.removeEventListener('sourceopen', onSourceOpen);
     } catch {}

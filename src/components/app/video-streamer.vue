@@ -2,7 +2,7 @@
   <div class="w-full h-full flex items-center justify-center">
     <video
       ref="internalVideoRef"
-      controls
+      :controls="controls"
       class="max-w-full max-h-full object-contain"
       :title="`Video: ${file?.name || 'stream'}`"
       v-bind="$attrs"
@@ -45,9 +45,11 @@ const props = withDefaults(
     file?: VideoFile;
     chunkSize?: number;
     mimeCodec?: string;
+    controls?: boolean;
   }>(),
   {
     chunkSize: 1024 * 1024, // 1MB chunks by default
+    controls: false,
   },
 );
 
@@ -82,6 +84,25 @@ async function fetchAsBlobUrl(url: string, token?: string) {
   return URL.createObjectURL(blob);
 }
 
+async function getDirectDownloadUrl(): Promise<string | null> {
+  if (props.file?.id) {
+    try {
+      const directUrl = await store.dispatch('files/getDownloadUrl', {
+        id: props.file.id,
+        contentType: props.file.contentType,
+        name: props.file.name,
+        size: props.file.size,
+      });
+      if (directUrl && typeof directUrl === 'string' && directUrl.startsWith('http')) {
+        return directUrl;
+      }
+    } catch (err) {
+      console.warn('[video-streamer] Could not retrieve direct storage URL:', err);
+    }
+  }
+  return null;
+}
+
 async function resolveUrl(): Promise<string | undefined> {
   if (props.streamUrl) return props.streamUrl;
   if (props.file?.id) {
@@ -95,18 +116,41 @@ async function resolveUrl(): Promise<string | undefined> {
 
 async function initStream(url?: string) {
   const videoEl = internalVideoRef.value;
-  if (!videoEl || !url) return;
+  if (!videoEl) return;
 
   // Tear down any previous stream/blob before starting a new one.
   controller?.abort();
   controller = null;
   revokeBlobUrl();
 
+  const token = localStorage.getItem('token');
+  const fileSize = props.file?.size || 0;
+  const isLargeVideo = fileSize > 20 * 1024 * 1024; // > 20MB
+
+  // For large videos (e.g. >20MB), bypass MSE chunking and in-memory blobs.
+  // Use direct presigned storage URL with native browser HTTP 206 Range requests.
+  // This eliminates browser crashes (out-of-memory) and enables instant seeking across gigabyte-sized videos.
+  if (isLargeVideo && props.file?.id) {
+    console.log('[video-streamer] Large video detected, obtaining direct storage URL for native Range streaming', {
+      fileSize,
+      name: props.file?.name,
+    });
+    const directUrl = await getDirectDownloadUrl();
+    if (directUrl) {
+      console.log('[video-streamer] Direct storage URL set on video element for native Range streaming');
+      videoEl.src = directUrl;
+      return;
+    }
+    console.warn('[video-streamer] Direct storage URL unavailable, proceeding to MSE/fallback');
+  }
+
+  const streamUrl = url || (await resolveUrl());
+  if (!streamUrl) return;
+
   try {
-    const token = localStorage.getItem('token');
     controller = await streamWithMSE(
       videoEl,
-      url,
+      streamUrl,
       props.file?.size,
       {
         chunkSize: props.chunkSize,
@@ -114,15 +158,31 @@ async function initStream(url?: string) {
         token,
       } as any,
       metadata.value,
+      props.file,
     );
   } catch (err) {
-    console.error('Failed to start MSE stream, falling back to blob:', err);
-    try {
-      const token = localStorage.getItem('token');
-      currentBlobUrl = await fetchAsBlobUrl(url, token ?? '');
-      videoEl.src = currentBlobUrl;
-    } catch (blobErr) {
-      console.error('Authenticated fallback fetch also failed:', blobErr);
+    console.error('Failed to start MSE stream, falling back:', err);
+
+    // Fallback 1: Try direct storage URL for native browser Range playback
+    if (props.file?.id) {
+      const directUrl = await getDirectDownloadUrl();
+      if (directUrl) {
+        console.log('[video-streamer] Fallback to direct storage URL successful');
+        videoEl.src = directUrl;
+        return;
+      }
+    }
+
+    // Fallback 2: Only small files (< 50MB) can safely fetch as blob in JS memory
+    if (fileSize < 50 * 1024 * 1024) {
+      try {
+        currentBlobUrl = await fetchAsBlobUrl(streamUrl, token ?? '');
+        videoEl.src = currentBlobUrl;
+      } catch (blobErr) {
+        console.error('Authenticated fallback fetch also failed:', blobErr);
+      }
+    } else {
+      console.warn('[video-streamer] File is too large for in-memory blob fallback (>50MB). Blob fetch aborted to protect browser.');
     }
   }
 }
@@ -149,8 +209,9 @@ async function getMetadata() {
     metadataFailed = true;
   }
 
-  // If metadata service failed or returned invalid data, extract from MP4
-  if (metadataFailed && props.file?.size) {
+  // If metadata service failed or returned invalid data, extract from MP4 (only for MP4 containers)
+  const isMp4 = props.file?.contentType?.includes('mp4') || props.file?.name?.toLowerCase().endsWith('.mp4');
+  if (metadataFailed && props.file?.size && isMp4) {
     console.log('[getMetadata] Service metadata unavailable, extracting from MP4...');
     const streamUrl = props.streamUrl || (await resolveUrl());
     if (streamUrl) {
