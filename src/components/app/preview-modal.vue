@@ -1003,6 +1003,7 @@ import {
 import { useStore } from 'vuex';
 import { FileI } from '@/store/files/state';
 import VideoStreamer from '@/components/app/video-streamer.vue';
+import Hls from 'hls.js';
 
 const props = defineProps<{
   modelValue: FileI;
@@ -1209,7 +1210,7 @@ async function resolveHlsStreamUrl(currentFile: FileI): Promise<string | null> {
 
 const isNativeHlsSupported = computed(() => {
   if (!hlsVideoRef.value) return false;
-  return hlsVideoRef.value.canPlayType('application/vnd.apple.mpegurl') !== '';
+  return !Hls.isSupported() && hlsVideoRef.value.canPlayType('application/vnd.apple.mpegurl') !== '';
 });
 
 function getActiveMediaElement() {
@@ -1240,14 +1241,6 @@ async function setupHlsPlayer(source: string) {
 
   await destroyHlsPlayer();
 
-  if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = source;
-    hlsReady.value = true;
-    return;
-  }
-
-  const { default: Hls } = await import('hls.js');
-
   if (Hls.isSupported()) {
     hlsInstance = new Hls();
     hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
@@ -1273,6 +1266,12 @@ async function setupHlsPlayer(source: string) {
       isPlaying.value = false;
     });
     hlsInstance.attachMedia(video);
+    return;
+  }
+
+  if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = source;
+    hlsReady.value = true;
     return;
   }
 
@@ -1335,6 +1334,19 @@ async function getBase64(currentFile: FileI) {
   console.log('currentFile->', currentFile);
 
   if (currentFile.contentType.startsWith('video/')) {
+    try {
+      const streamV2Data = await store.dispatch('videostream/getStreamV2', currentFile);
+      const m3u8Url = streamV2Data?.m3u8Url || streamV2Data?.url;
+      if (m3u8Url) {
+        console.log('[preview-modal] videoStreamURL (HLS streamv2)->', m3u8Url);
+        videoStreamURL.value = m3u8Url;
+        currentBlobURL.value = m3u8Url;
+        return m3u8Url;
+      }
+    } catch (err) {
+      console.warn('[preview-modal] getStreamV2 failed, falling back to legacy getStreamUrl:', err);
+    }
+
     const url = await store.dispatch('videostream/getStreamUrl', currentFile);
     console.log('videoStreamURL->', url);
     videoStreamURL.value = url;
