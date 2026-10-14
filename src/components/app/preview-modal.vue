@@ -399,7 +399,7 @@
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
                     <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
-                      {{ castStatusText }}
+                      <!-- {{ castStatusText }} -->
                     </span>
                     <button
                       @click="castVideo"
@@ -581,7 +581,7 @@
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
                     <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
-                      {{ castStatusText }}
+                      <!-- {{ castStatusText }} -->
                     </span>
                     <button
                       @click="castVideo"
