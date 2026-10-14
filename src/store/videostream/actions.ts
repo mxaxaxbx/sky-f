@@ -32,6 +32,7 @@ export const actions: ActionTree<VideoStreamStateI, RootStateI> = {
     }
 
     const { data } = await storageClient.get(`/api/videos/${payload.id}/metadata`);
+    console.log('getVideoMetadata', JSON.stringify(data, null, 2));
     _context.commit('SET_VIDEOSTREAM_METADATA', snakeToCamel(data));
     return data;
   },

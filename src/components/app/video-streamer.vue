@@ -28,6 +28,7 @@ import {
   streamWithMSE,
   type StreamController,
 } from '@/utils/mediaSourceStreaming';
+import { extractMP4Metadata } from '@/utils/mp4Metadata';
 
 type VideoFile = {
   id?: string | number;
@@ -72,7 +73,7 @@ function revokeBlobUrl() {
 
 async function fetchAsBlobUrl(url: string, token?: string) {
   const res = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: token ? { Authorization: `DGTK ${token}` } : {},
   });
   if (!res.ok) {
     throw new Error(`Stream fetch failed: ${res.status}`);
@@ -103,9 +104,6 @@ async function initStream(url?: string) {
 
   try {
     const token = localStorage.getItem('token');
-    // Preferred path: MSE streaming, which supports range requests / seeking.
-    // NOTE: streamWithMSE must forward `Authorization: Bearer ${token}` on
-    // its internal fetch calls for this to actually authenticate.
     controller = await streamWithMSE(
       videoEl,
       url,
@@ -131,12 +129,45 @@ async function initStream(url?: string) {
 
 async function getMetadata() {
   if (!props.file?.id) return;
+  let metadataFailed = false;
+
   try {
     await store.dispatch('videostream/getVideoMetadata', {
       id: props.file.id,
+      contentType: props.file.contentType,
     });
+
+    // Check if metadata is usable (not "unknown")
+    const meta = store.state.videostream.metadata;
+    const hasValidMetadata = meta?.duration && meta.duration !== 'unknown (ffmpeg required)';
+
+    if (!hasValidMetadata) {
+      metadataFailed = true;
+    }
   } catch (err) {
     console.error('Failed to fetch video metadata:', err);
+    metadataFailed = true;
+  }
+
+  // If metadata service failed or returned invalid data, extract from MP4
+  if (metadataFailed && props.file?.size) {
+    console.log('[getMetadata] Service metadata unavailable, extracting from MP4...');
+    const streamUrl = props.streamUrl || (await resolveUrl());
+    if (streamUrl) {
+      const token = localStorage.getItem('token');
+      const extracted = await extractMP4Metadata(streamUrl, props.file.size, token ?? undefined);
+
+      if (extracted.duration) {
+        console.log('[getMetadata] Successfully extracted duration from MP4:', extracted.duration);
+        const meta = store.state.videostream.metadata;
+        store.commit('SET_VIDEOSTREAM_METADATA', {
+          ...meta,
+          duration: extracted.duration,
+        });
+      } else {
+        console.warn('[getMetadata] Failed to extract MP4 metadata:', extracted.error);
+      }
+    }
   }
 }
 

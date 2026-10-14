@@ -110,7 +110,7 @@ export const actions: ActionTree<ShareStateI, RootStateI> = {
     const { data } = await storageClient.get(
       `/api/public/shares/${payload.token}/download`,
       accessToken
-        ? { headers: { Authorization: `Bearer ${accessToken}` } }
+        ? { headers: { Authorization: `DGTK ${accessToken}` } }
         : undefined,
     );
 

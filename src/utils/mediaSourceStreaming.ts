@@ -99,6 +99,11 @@ export async function streamWithMSE(
 
   async function onSourceOpen() {
     try {
+      // Log metadata duration if available (browser will compute actual duration)
+      if (metadata?.duration && typeof metadata.duration === 'number') {
+        console.log('[onSourceOpen] Metadata duration available', { duration: metadata.duration });
+      }
+
       // try to create a SourceBuffer for the given codec
       if (!mediaSource || mediaSource.readyState === 'closed') return;
 
@@ -235,6 +240,35 @@ export async function streamWithMSE(
 
         await initialFetch();
 
+        // If entire file was fetched in initial pass, signal end of stream
+        if (nextChunkIndex * chunkSize >= totalSize && mediaSource.readyState === 'open') {
+          try {
+            if (sourceBuffer) {
+              await waitForUpdateEnd(sourceBuffer);
+            }
+            mediaSource.endOfStream();
+            console.log('[streamWithMSE] End of stream signaled after initial fetch');
+          } catch (err) {
+            console.warn('[streamWithMSE] Error signaling end of stream, attempting fallback:', err);
+            // SourceBuffer error occurred, fall back to direct blob playback
+            try {
+              URL.revokeObjectURL(videoElement.src);
+              abortController.abort();
+            } catch (e) {
+              // ignore
+            }
+            const fallbackResponse = await fetchWithAuth(streamUrl);
+            if (fallbackResponse.ok) {
+              const blob = await fallbackResponse.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              videoElement.src = blobUrl;
+              console.log('[streamWithMSE] Fallback blob URL set successfully');
+              return;
+            }
+            throw err;
+          }
+        }
+
         // Continue fetching as video plays
         const timeUpdateHandler = (): void => {
           fetchMoreChunks().catch(() => {
@@ -309,17 +343,20 @@ export async function streamWithMSE(
           }
           console.log('[onSourceOpen] Reader streaming complete', { totalChunks: chunkCount });
         }
-      }
 
-      // signal end of stream if not aborted
-      if (!abortController.signal.aborted && mediaSource.readyState === 'open') {
-        try {
-          console.log('[onSourceOpen] Signaling end of stream');
-          mediaSource.endOfStream();
-          console.log('[onSourceOpen] End of stream signaled');
-        } catch (e) {
-          console.log('[onSourceOpen] Error signaling end of stream (may already be ended)', { error: e });
-          // ignore if already ended
+        // signal end of stream only for non-chunked case
+        if (!abortController.signal.aborted && mediaSource.readyState === 'open') {
+          try {
+            if (sourceBuffer) {
+              await waitForUpdateEnd(sourceBuffer);
+            }
+            console.log('[onSourceOpen] Signaling end of stream');
+            mediaSource.endOfStream();
+            console.log('[onSourceOpen] End of stream signaled');
+          } catch (e) {
+            console.log('[onSourceOpen] Error signaling end of stream (may already be ended)', { error: e });
+            // ignore if already ended
+          }
         }
       }
     } catch (err) {
