@@ -10,11 +10,11 @@ export interface MP4Metadata {
 async function fetchMP4Range(
   url: string,
   start: number,
-  end: number,
+  end?: number,
   token?: string,
 ): Promise<ArrayBuffer> {
   const headers: Record<string, string> = {
-    Range: `bytes=${start}-${end}`,
+    Range: end !== undefined ? `bytes=${start}-${end}` : `bytes=${start}-`,
   };
   if (token) {
     headers.Authorization = `DGTK ${token}`;

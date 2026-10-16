@@ -40,6 +40,145 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<Respo
   return response;
 }
 
+const LARGE_VIDEO_THRESHOLD = 50 * 1024 * 1024; // 50MB
+
+export function formatRangeHeader(start: number, end?: number): string {
+  return end !== undefined ? `bytes=${start}-${end}` : `bytes=${start}-`;
+}
+
+function parseContentRangeTotal(contentRange: string | null): number | null {
+  if (!contentRange) return null;
+  const match = contentRange.match(/\/(\d+)$/);
+  if (!match) return null;
+  const total = Number(match[1]);
+  return Number.isFinite(total) && total > 0 ? total : null;
+}
+
+function parseContentRangeBounds(
+  contentRange: string | null,
+): { start: number; end: number; total?: number } | null {
+  if (!contentRange) return null;
+  const match = contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/i);
+  if (!match) return null;
+  const start = Number(match[1]);
+  const end = Number(match[2]);
+  const total = match[3] !== '*' ? Number(match[3]) : undefined;
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  return { start, end, total };
+}
+
+async function readRangeResponseChunk(
+  res: Response,
+  maxChunkBytes: number,
+  openEnded: boolean,
+): Promise<ArrayBuffer> {
+  const bounds = parseContentRangeBounds(res.headers.get('Content-Range'));
+  const declaredLength = bounds
+    ? bounds.end - bounds.start + 1
+    : Number(res.headers.get('Content-Length') || 0);
+
+  // If the server already returned a bounded chunk (e.g. ~2.75MB), read it directly
+  if (!openEnded || !res.body || (declaredLength > 0 && declaredLength <= maxChunkBytes * 8)) {
+    return res.arrayBuffer();
+  }
+
+  // Otherwise read up to maxChunkBytes from the stream and cancel like Chrome
+  const reader = res.body.getReader();
+  const slices: Uint8Array[] = [];
+  let totalRead = 0;
+
+  while (totalRead < maxChunkBytes) {
+    const { value, done } = await reader.read();
+    if (value && value.byteLength > 0) {
+      slices.push(value);
+      totalRead += value.byteLength;
+    }
+    if (done) {
+      break;
+    }
+  }
+
+  if (totalRead >= maxChunkBytes) {
+    try {
+      await reader.cancel();
+    } catch {
+      // ignore cancel errors
+    }
+  }
+
+  const combined = new Uint8Array(totalRead);
+  let offset = 0;
+  slices.forEach((slice) => {
+    combined.set(slice, offset);
+    offset += slice.byteLength;
+  });
+  return combined.buffer;
+}
+
+export async function fetchBlobWithRangeChunks(
+  streamUrl: string,
+  fileSize?: number,
+  chunkSize?: number,
+  signal?: AbortSignal,
+  contentType?: string,
+): Promise<Blob> {
+  const resolvedChunkSize = chunkSize ?? 1024 * 1024;
+  const chunks: ArrayBuffer[] = [];
+  let totalSize = typeof fileSize === 'number' && fileSize > 0 ? fileSize : 0;
+  const isLargeVideo = totalSize > LARGE_VIDEO_THRESHOLD;
+  let start = 0;
+
+  while (!signal?.aborted) {
+    let end: number | undefined;
+    if (!isLargeVideo) {
+      end = totalSize > 0
+        ? Math.min(start + resolvedChunkSize - 1, totalSize - 1)
+        : start + resolvedChunkSize - 1;
+    }
+    const range = formatRangeHeader(start, end);
+
+    const res = await fetchWithAuth(streamUrl, {
+      headers: {
+        Range: range,
+      },
+      signal,
+    });
+
+    if (!res.ok && res.status !== 206) {
+      throw new Error(`Unexpected response ${res.status} from server`);
+    }
+
+    if (!totalSize) {
+      const parsedTotal = parseContentRangeTotal(res.headers.get('Content-Range'));
+      if (parsedTotal) {
+        totalSize = parsedTotal;
+      }
+    }
+
+    const chunk = await readRangeResponseChunk(res, resolvedChunkSize, end === undefined);
+    if (chunk.byteLength === 0) {
+      break;
+    }
+
+    chunks.push(chunk);
+    start += chunk.byteLength;
+
+    if (res.status === 200) {
+      break;
+    }
+
+    if (totalSize > 0 && start >= totalSize) {
+      break;
+    }
+
+    if (!totalSize && chunk.byteLength < resolvedChunkSize) {
+      break;
+    }
+  }
+
+  return new Blob(chunks, { type: contentType || 'video/mp4' });
+}
+
 export function resolveMimeCodec(
   metadata?: VideoMetadataI,
   file?: { name?: string; contentType?: string },
@@ -235,11 +374,13 @@ export async function streamWithMSE(
           throw new Error(`Codec ${mimeCodec} not supported in MSE and file too large for in-memory blob fallback (${fileSize} bytes)`);
         }
 
-        const fallbackResponse = await fetchWithAuth(streamUrl);
-        if (!fallbackResponse.ok) {
-          throw new Error(`Fallback fetch failed with ${fallbackResponse.status}`);
-        }
-        const blob = await fallbackResponse.blob();
+        const blob = await fetchBlobWithRangeChunks(
+          streamUrl,
+          fileSize,
+          chunkSize,
+          abortController.signal,
+          file?.contentType,
+        );
         console.log('[onSourceOpen] Fallback blob created', { blobSize: blob.size, blobType: blob.type });
         const blobUrl = URL.createObjectURL(blob);
         console.log('[onSourceOpen] Fallback blob URL created', { blobUrl });
@@ -254,17 +395,23 @@ export async function streamWithMSE(
       if (typeof fileSize === 'number' && fileSize > 0 && sourceBuffer) {
         console.log('[onSourceOpen] Using chunked fetching with range requests', { fileSize, chunkSize });
         let isFetching = false;
-        let nextChunkIndex = 0;
+        let nextByteOffset = 0;
+        let chunkCounter = 0;
         const totalSize = fileSize;
+        const isLargeVideo = totalSize > LARGE_VIDEO_THRESHOLD;
         const BUFFER_AHEAD_CHUNKS = 2;
 
-        const fetchChunk = async (chunkIndex: number): Promise<void> => {
-          const start = chunkIndex * chunkSize;
-          const end = Math.min(start + chunkSize - 1, totalSize - 1);
-          const range = `bytes=${start}-${end}`;
+        const fetchChunk = async (start: number, explicitEnd?: number): Promise<number> => {
+          let end: number | undefined = explicitEnd;
+          if (end === undefined && !isLargeVideo) {
+            end = Math.min(start + chunkSize - 1, totalSize - 1);
+          }
+          const range = formatRangeHeader(start, end);
+          chunkCounter += 1;
+          const currentChunkNum = chunkCounter;
 
           console.log('[fetchChunk] Fetching chunk', {
-            chunkIndex,
+            chunkIndex: currentChunkNum,
             start,
             end,
             range,
@@ -280,16 +427,21 @@ export async function streamWithMSE(
             throw new Error(`Unexpected response ${res.status} from server`);
           }
 
-          const chunk = await res.arrayBuffer();
-          console.log('[fetchChunk] Chunk data received', { chunkIndex, size: chunk.byteLength });
+          const chunk = await readRangeResponseChunk(res, chunkSize, end === undefined);
+          console.log('[fetchChunk] Chunk data received', {
+            chunkIndex: currentChunkNum,
+            size: chunk.byteLength,
+            range,
+          });
           if (sourceBuffer && !abortController.signal.aborted && mediaSource.readyState === 'open') {
             try {
               await waitForUpdateEnd(sourceBuffer);
               sourceBuffer.appendBuffer(new Uint8Array(chunk));
-              console.log('[fetchChunk] Chunk appended to sourceBuffer', { chunkIndex });
+              await waitForUpdateEnd(sourceBuffer);
+              console.log('[fetchChunk] Chunk appended to sourceBuffer', { chunkIndex: currentChunkNum });
             } catch (err) {
               console.warn('[fetchChunk] Failed to append chunk (sourceBuffer may have been removed)', {
-                chunkIndex,
+                chunkIndex: currentChunkNum,
                 error: (err as Error).message,
               });
               // SourceBuffer was likely removed during cleanup, abort further operations
@@ -298,34 +450,44 @@ export async function streamWithMSE(
               }
             }
           }
+          return chunk.byteLength;
         };
 
-        const fetchMoreChunks = async (): Promise<void> => {
+        const fetchMoreChunks = async (isSeek = false): Promise<void> => {
           if (isFetching || abortController.signal.aborted) return;
           isFetching = true;
 
           try {
-            // Calculate how many chunks we should have buffered based on playback position
+            // Calculate how many bytes we should have buffered based on playback position
             const currentTime = videoElement.currentTime || 0;
-            const duration = videoElement.duration || totalSize / 1024 / 1024 / 5; // rough estimate if duration unknown
+            const metaDuration = typeof metadata?.duration === 'number'
+              && Number.isFinite(metadata.duration)
+              && metadata.duration > 0
+              ? metadata.duration
+              : 0;
+            const duration = (Number.isFinite(videoElement.duration) && videoElement.duration > 0)
+              ? videoElement.duration
+              : (metaDuration || totalSize / 1024 / 1024 / 5); // rough estimate if duration unknown
             const bytesPerSecond = duration > 0 ? totalSize / duration : 1024 * 1024;
-            const currentBytePos = currentTime * bytesPerSecond;
-            const targetBytePos = currentBytePos + BUFFER_AHEAD_CHUNKS * chunkSize;
+            const currentBytePos = Math.floor(currentTime * bytesPerSecond);
+            if (isSeek && currentBytePos > 0 && currentBytePos < totalSize) {
+              nextByteOffset = currentBytePos;
+            }
+            const targetBytePos = Math.max(currentBytePos, nextByteOffset) + BUFFER_AHEAD_CHUNKS * chunkSize;
 
             // Fetch chunks up to target position
-            let chunkIndex = nextChunkIndex;
             while (
-              chunkIndex * chunkSize < targetBytePos
-              && chunkIndex * chunkSize < totalSize
+              nextByteOffset < targetBytePos
+              && nextByteOffset < totalSize
               && !abortController.signal.aborted
             ) {
-              await fetchChunk(chunkIndex);
-              chunkIndex += 1;
+              const bytesRead = await fetchChunk(nextByteOffset);
+              if (bytesRead <= 0) break;
+              nextByteOffset += bytesRead;
             }
-            nextChunkIndex = chunkIndex;
 
             // If we've fetched everything, signal end of stream
-            if (nextChunkIndex * chunkSize >= totalSize && mediaSource.readyState === 'open') {
+            if (nextByteOffset >= totalSize && mediaSource.readyState === 'open') {
               try {
                 mediaSource.endOfStream();
               } catch {
@@ -345,11 +507,12 @@ export async function streamWithMSE(
             const initialChunkCount = Math.min(1, Math.ceil(totalSize / chunkSize));
             console.log('[initialFetch] Starting', { initialChunkCount, totalSize });
             for (let i = 0; i < initialChunkCount; i += 1) {
-              if (abortController.signal.aborted) break;
-              await fetchChunk(i);
-              nextChunkIndex = i + 1;
+              if (abortController.signal.aborted || nextByteOffset >= totalSize) break;
+              const bytesRead = await fetchChunk(nextByteOffset);
+              if (bytesRead <= 0) break;
+              nextByteOffset += bytesRead;
             }
-            console.log('[initialFetch] Complete', { fetchedChunks: nextChunkIndex });
+            console.log('[initialFetch] Complete', { nextByteOffset });
           } catch (err) {
             console.error('Initial chunk fetch error:', err);
           }
@@ -358,7 +521,7 @@ export async function streamWithMSE(
         await initialFetch();
 
         // If entire file was fetched in initial pass, signal end of stream
-        if (nextChunkIndex * chunkSize >= totalSize && mediaSource.readyState === 'open') {
+        if (nextByteOffset >= totalSize && mediaSource.readyState === 'open') {
           try {
             if (sourceBuffer) {
               await waitForUpdateEnd(sourceBuffer);
@@ -367,8 +530,9 @@ export async function streamWithMSE(
             console.log('[streamWithMSE] End of stream signaled after initial fetch');
           } catch (err) {
             console.warn('[streamWithMSE] Error signaling end of stream, attempting fallback:', err);
-            if (fileSize && fileSize > 50 * 1024 * 1024) {
-              throw err;
+            if (fileSize && fileSize > LARGE_VIDEO_THRESHOLD) {
+              videoElement.src = streamUrl;
+              return;
             }
             // SourceBuffer error occurred, fall back to direct blob playback
             try {
@@ -377,21 +541,23 @@ export async function streamWithMSE(
             } catch (e) {
               // ignore
             }
-            const fallbackResponse = await fetchWithAuth(streamUrl);
-            if (fallbackResponse.ok) {
-              const blob = await fallbackResponse.blob();
-              const blobUrl = URL.createObjectURL(blob);
-              videoElement.src = blobUrl;
-              console.log('[streamWithMSE] Fallback blob URL set successfully');
-              return;
-            }
-            throw err;
+            const blob = await fetchBlobWithRangeChunks(
+              streamUrl,
+              fileSize,
+              chunkSize,
+              undefined,
+              file?.contentType,
+            );
+            const blobUrl = URL.createObjectURL(blob);
+            videoElement.src = blobUrl;
+            console.log('[streamWithMSE] Fallback range-chunked blob URL set successfully');
+            return;
           }
         }
 
         // Continue fetching as video plays
         const timeUpdateHandler = (): void => {
-          fetchMoreChunks().catch(() => {
+          fetchMoreChunks(false).catch(() => {
             // ignore
           });
         };
@@ -399,7 +565,7 @@ export async function streamWithMSE(
 
         // Fetch more when video seeks
         const seekHandler = (): void => {
-          fetchMoreChunks().catch(() => {
+          fetchMoreChunks(true).catch(() => {
             // ignore
           });
         };
@@ -413,10 +579,15 @@ export async function streamWithMSE(
         };
         videoElement.addEventListener('ended', endedHandler);
       } else {
-        console.log('[onSourceOpen] No fileSize, fetching entire resource');
-        // file size unknown: fetch entire resource and append progressively
-        const res = await fetchWithAuth(streamUrl, { signal: abortController.signal });
-        if (!res.ok) throw new Error(`Fetch failed with ${res.status}`);
+        console.log('[onSourceOpen] No fileSize, fetching with Range bytes=0-');
+        // file size unknown: send Range header like Chrome and append progressively
+        const res = await fetchWithAuth(streamUrl, {
+          headers: {
+            Range: 'bytes=0-',
+          },
+          signal: abortController.signal,
+        });
+        if (!res.ok && res.status !== 206) throw new Error(`Fetch failed with ${res.status}`);
 
         // Try to stream via reader and append in slices
         const reader = res.body?.getReader();
@@ -489,23 +660,27 @@ export async function streamWithMSE(
           // ignore
         }
 
-        if (fileSize && fileSize > 50 * 1024 * 1024) {
-          throw err;
+        if (fileSize && fileSize > LARGE_VIDEO_THRESHOLD) {
+          videoElement.src = streamUrl;
+          return;
         }
 
         try {
-          console.log('[onSourceOpen] Error recovery: attempting blob fallback');
-          const fallbackResponse = await fetchWithAuth(streamUrl);
-          if (fallbackResponse.ok) {
-            const blob = await fallbackResponse.blob();
-            console.log('[onSourceOpen] Error recovery blob created', { blobSize: blob.size, blobType: blob.type });
-            const blobUrl = URL.createObjectURL(blob);
-            console.log('[onSourceOpen] Error recovery blob URL created', { blobUrl });
-            videoElement.src = blobUrl;
-            return;
-          }
+          console.log('[onSourceOpen] Error recovery: attempting range-chunked blob fallback');
+          const blob = await fetchBlobWithRangeChunks(
+            streamUrl,
+            fileSize,
+            chunkSize,
+            undefined,
+            file?.contentType,
+          );
+          console.log('[onSourceOpen] Error recovery blob created', { blobSize: blob.size, blobType: blob.type });
+          const blobUrl = URL.createObjectURL(blob);
+          console.log('[onSourceOpen] Error recovery blob URL created', { blobUrl });
+          videoElement.src = blobUrl;
+          return;
         } catch (fallbackErr) {
-          console.warn('Auth fallback fetch failed:', fallbackErr);
+          console.warn('Auth range fallback fetch failed:', fallbackErr);
         }
 
         console.log('[onSourceOpen] All blob fallbacks failed, using direct streamUrl');
@@ -515,11 +690,17 @@ export async function streamWithMSE(
   }
 
   const onVideoElementError = async () => {
-    console.warn('[streamWithMSE] videoElement error event triggered, attempting blob fallback', videoElement.error);
+    console.warn('[streamWithMSE] videoElement error event triggered, attempting range-chunked blob fallback', videoElement.error);
     if (!abortController.signal.aborted) {
       abortController.abort();
-      if (fileSize && fileSize > 50 * 1024 * 1024) {
-        console.warn('[streamWithMSE] File too large for in-memory blob error recovery');
+      if (fileSize && fileSize > LARGE_VIDEO_THRESHOLD) {
+        console.warn('[streamWithMSE] Large video MSE error, falling back to direct streamUrl');
+        try {
+          URL.revokeObjectURL(videoElement.src);
+        } catch (e) {
+          // ignore
+        }
+        videoElement.src = streamUrl;
         return;
       }
       try {
@@ -528,13 +709,16 @@ export async function streamWithMSE(
         // ignore
       }
       try {
-        const fallbackResponse = await fetchWithAuth(streamUrl);
-        if (fallbackResponse.ok) {
-          const blob = await fallbackResponse.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          videoElement.src = blobUrl;
-          console.log('[streamWithMSE] Fallback blob URL set after videoElement error');
-        }
+        const blob = await fetchBlobWithRangeChunks(
+          streamUrl,
+          fileSize,
+          opts?.chunkSize ?? 1024 * 1024,
+          undefined,
+          file?.contentType,
+        );
+        const blobUrl = URL.createObjectURL(blob);
+        videoElement.src = blobUrl;
+        console.log('[streamWithMSE] Fallback range-chunked blob URL set after videoElement error');
       } catch (fbErr) {
         console.error('[streamWithMSE] Fallback on videoElement error failed', fbErr);
       }

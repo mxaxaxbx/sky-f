@@ -1235,16 +1235,41 @@ async function destroyHlsPlayer() {
   }
 }
 
+function buildProxiedHlsUrl(rawUrl: string, token?: string | null): string {
+  let result = rawUrl;
+  if (token && !result.includes('token=')) {
+    result += `${result.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
+  }
+  if (!result.includes('proxy=')) {
+    result += `${result.includes('?') ? '&' : '?'}proxy=true`;
+  }
+  if (!result.includes('redirect=')) {
+    result += `${result.includes('?') ? '&' : '?'}redirect=false`;
+  }
+  return result;
+}
+
 async function setupHlsPlayer(source: string) {
   const video = hlsVideoRef.value;
   if (!video) return;
 
   await destroyHlsPlayer();
 
+  const token = localStorage.getItem('token');
+  const proxiedSource = buildProxiedHlsUrl(source, token);
+
   if (Hls.isSupported()) {
-    hlsInstance = new Hls();
+    hlsInstance = new Hls({
+      xhrSetup: (xhr, url) => {
+        const targetUrl = buildProxiedHlsUrl(url, token);
+        xhr.open('GET', targetUrl, true);
+        if (token) {
+          xhr.setRequestHeader('Authorization', `DGTK ${token}`);
+        }
+      },
+    });
     hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
-      hlsInstance?.loadSource(source);
+      hlsInstance?.loadSource(proxiedSource);
     });
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
       hlsReady.value = true;
@@ -1270,12 +1295,12 @@ async function setupHlsPlayer(source: string) {
   }
 
   if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = source;
+    video.src = proxiedSource;
     hlsReady.value = true;
     return;
   }
 
-  video.src = source;
+  video.src = proxiedSource;
   hlsReady.value = true;
 }
 
@@ -1334,19 +1359,6 @@ async function getBase64(currentFile: FileI) {
   console.log('currentFile->', currentFile);
 
   if (currentFile.contentType.startsWith('video/')) {
-    try {
-      const streamV2Data = await store.dispatch('videostream/getStreamV2', currentFile);
-      const m3u8Url = streamV2Data?.m3u8Url || streamV2Data?.url;
-      if (m3u8Url) {
-        console.log('[preview-modal] videoStreamURL (HLS streamv2)->', m3u8Url);
-        videoStreamURL.value = m3u8Url;
-        currentBlobURL.value = m3u8Url;
-        return m3u8Url;
-      }
-    } catch (err) {
-      console.warn('[preview-modal] getStreamV2 failed, falling back to legacy getStreamUrl:', err);
-    }
-
     const url = await store.dispatch('videostream/getStreamUrl', currentFile);
     console.log('videoStreamURL->', url);
     videoStreamURL.value = url;
