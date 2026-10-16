@@ -110,13 +110,16 @@ async function initStream() {
   const url = await resolveStreamUrl();
   if (!url) return;
 
+  const resolvedFileSize = props.file?.size || metadata.value?.fileSize;
+  const resolvedChunkSize = metadata.value?.chunkSize || props.chunkSize;
+
   try {
     controller = await streamWithMSE(
       videoEl,
       url,
-      props.file?.size,
+      resolvedFileSize,
       {
-        chunkSize: props.chunkSize,
+        chunkSize: resolvedChunkSize,
         mimeCodec: props.mimeCodec,
       },
       metadata.value,
@@ -124,22 +127,18 @@ async function initStream() {
     );
   } catch (err) {
     console.warn('[video-streamer] MSE streaming failed, falling back to Range chunk fetch:', err);
-    const fileSize = props.file?.size || 0;
-    if (!fileSize || fileSize <= 50 * 1024 * 1024) {
-      try {
-        const blob = await fetchBlobWithRangeChunks(
-          url,
-          props.file?.size,
-          props.chunkSize,
-          undefined,
-          props.file?.contentType,
-        );
-        currentBlobUrl = URL.createObjectURL(blob);
-        videoEl.src = currentBlobUrl;
-      } catch (blobErr) {
-        console.error('[video-streamer] Range chunk blob fallback failed:', blobErr);
-      }
-    } else {
+    try {
+      const blob = await fetchBlobWithRangeChunks(
+        url,
+        resolvedFileSize,
+        resolvedChunkSize,
+        undefined,
+        props.file?.contentType,
+      );
+      currentBlobUrl = URL.createObjectURL(blob);
+      videoEl.src = currentBlobUrl;
+    } catch (blobErr) {
+      console.error('[video-streamer] Range chunk blob fallback failed:', blobErr);
       videoEl.src = url;
     }
   }
@@ -155,9 +154,11 @@ async function getMetadata() {
       contentType: props.file.contentType,
     });
 
-    // Check if metadata is usable (not "unknown")
+    // Check if metadata is usable (valid numeric duration)
     const meta = store.state.videostream.metadata;
-    const hasValidMetadata = meta?.duration && meta.duration !== 'unknown (ffmpeg required)';
+    const hasValidMetadata = typeof meta?.duration === 'number'
+      && Number.isFinite(meta.duration)
+      && meta.duration > 0;
 
     if (!hasValidMetadata) {
       metadataFailed = true;
@@ -169,12 +170,13 @@ async function getMetadata() {
 
   // If metadata service failed or returned invalid data, extract from MP4 (only for MP4 containers)
   const isMp4 = props.file?.contentType?.includes('mp4') || props.file?.name?.toLowerCase().endsWith('.mp4');
-  if (metadataFailed && props.file?.size && isMp4) {
+  const effectiveSize = props.file?.size || store.state.videostream.metadata?.fileSize;
+  if (metadataFailed && effectiveSize && isMp4) {
     console.log('[getMetadata] Service metadata unavailable, extracting from MP4...');
     const rawStreamUrl = await resolveStreamUrl();
     if (rawStreamUrl) {
       const token = localStorage.getItem('token');
-      const extracted = await extractMP4Metadata(rawStreamUrl, props.file.size, token ?? undefined);
+      const extracted = await extractMP4Metadata(rawStreamUrl, effectiveSize, token ?? undefined);
 
       if (extracted.duration) {
         console.log('[getMetadata] Successfully extracted duration from MP4:', extracted.duration);
