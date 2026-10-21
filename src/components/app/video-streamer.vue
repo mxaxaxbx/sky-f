@@ -2,7 +2,7 @@
   <div class="w-full h-full flex items-center justify-center">
     <video
       ref="internalVideoRef"
-      controls
+      :controls="controls"
       class="max-w-full max-h-full object-contain"
       :title="`Video: ${file?.name || 'stream'}`"
       v-bind="$attrs"
@@ -26,8 +26,10 @@ import {
 import { useStore } from 'vuex';
 import {
   streamWithMSE,
-  type StreamController,
+  fetchBlobWithRangeChunks,
+  StreamController,
 } from '@/utils/mediaSourceStreaming';
+import { extractMP4Metadata } from '@/utils/mp4Metadata';
 
 type VideoFile = {
   id?: string | number;
@@ -44,9 +46,11 @@ const props = withDefaults(
     file?: VideoFile;
     chunkSize?: number;
     mimeCodec?: string;
+    controls?: boolean;
   }>(),
   {
     chunkSize: 1024 * 1024, // 1MB chunks by default
+    controls: false,
   },
 );
 
@@ -70,73 +74,121 @@ function revokeBlobUrl() {
   }
 }
 
-async function fetchAsBlobUrl(url: string, token?: string) {
-  const res = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) {
-    throw new Error(`Stream fetch failed: ${res.status}`);
+function destroyPlayer() {
+  if (controller) {
+    controller.abort();
+    controller = null;
   }
-  const blob = await res.blob();
-  return URL.createObjectURL(blob);
-}
-
-async function resolveUrl(): Promise<string | undefined> {
-  if (props.streamUrl) return props.streamUrl;
-  if (props.file?.id) {
-    return store.dispatch('videostream/getStreamUrl', {
-      id: props.file.id,
-      contentType: props.file.contentType,
-    });
-  }
-  return undefined;
-}
-
-async function initStream(url?: string) {
-  const videoEl = internalVideoRef.value;
-  if (!videoEl || !url) return;
-
-  // Tear down any previous stream/blob before starting a new one.
-  controller?.abort();
-  controller = null;
   revokeBlobUrl();
+  const videoEl = internalVideoRef.value;
+  if (videoEl) {
+    videoEl.removeAttribute('src');
+    videoEl.load();
+  }
+}
+
+async function resolveStreamUrl(): Promise<string> {
+  if (props.streamUrl) {
+    return props.streamUrl;
+  }
+  if (props.file?.id) {
+    const streamUrl = await store.dispatch('videostream/getStreamUrl', {
+      id: props.file.id,
+      contentType: props.file.contentType || 'video/mp4',
+    });
+    return streamUrl || '';
+  }
+  return '';
+}
+
+async function initStream() {
+  const videoEl = internalVideoRef.value;
+  if (!videoEl) return;
+
+  destroyPlayer();
+
+  const url = await resolveStreamUrl();
+  if (!url) return;
+
+  const resolvedFileSize = props.file?.size || metadata.value?.fileSize;
+  const resolvedChunkSize = metadata.value?.chunkSize || props.chunkSize;
 
   try {
-    const token = localStorage.getItem('token');
-    // Preferred path: MSE streaming, which supports range requests / seeking.
-    // NOTE: streamWithMSE must forward `Authorization: Bearer ${token}` on
-    // its internal fetch calls for this to actually authenticate.
     controller = await streamWithMSE(
       videoEl,
       url,
-      props.file?.size,
+      resolvedFileSize,
       {
-        chunkSize: props.chunkSize,
+        chunkSize: resolvedChunkSize,
         mimeCodec: props.mimeCodec,
-        token,
-      } as any,
+      },
       metadata.value,
+      props.file,
     );
   } catch (err) {
-    console.error('Failed to start MSE stream, falling back to blob:', err);
+    console.warn('[video-streamer] MSE streaming failed, falling back to Range chunk fetch:', err);
     try {
-      const token = localStorage.getItem('token');
-      currentBlobUrl = await fetchAsBlobUrl(url, token ?? '');
+      const blob = await fetchBlobWithRangeChunks(
+        url,
+        resolvedFileSize,
+        resolvedChunkSize,
+        undefined,
+        props.file?.contentType,
+      );
+      currentBlobUrl = URL.createObjectURL(blob);
       videoEl.src = currentBlobUrl;
     } catch (blobErr) {
-      console.error('Authenticated fallback fetch also failed:', blobErr);
+      console.error('[video-streamer] Range chunk blob fallback failed:', blobErr);
+      videoEl.src = url;
     }
   }
 }
 
 async function getMetadata() {
   if (!props.file?.id) return;
+  let metadataFailed = false;
+
   try {
     await store.dispatch('videostream/getVideoMetadata', {
       id: props.file.id,
+      contentType: props.file.contentType,
     });
+
+    // Check if metadata is usable (valid numeric duration)
+    const meta = store.state.videostream.metadata;
+    const hasValidMetadata = typeof meta?.duration === 'number'
+      && Number.isFinite(meta.duration)
+      && meta.duration > 0;
+
+    if (!hasValidMetadata) {
+      metadataFailed = true;
+    }
   } catch (err) {
     console.error('Failed to fetch video metadata:', err);
+    metadataFailed = true;
+  }
+
+  // If metadata service failed or returned invalid data, extract from MP4 (only for MP4 containers)
+  const isMp4 = props.file?.contentType?.includes('mp4') || props.file?.name?.toLowerCase().endsWith('.mp4');
+  const effectiveSize = props.file?.size || store.state.videostream.metadata?.fileSize;
+  if (metadataFailed && effectiveSize && isMp4) {
+    console.log('[getMetadata] Service metadata unavailable, extracting from MP4...');
+    const rawStreamUrl = await resolveStreamUrl();
+    if (rawStreamUrl) {
+      const token = localStorage.getItem('token');
+      const extracted = await extractMP4Metadata(rawStreamUrl, effectiveSize, token ?? undefined);
+
+      if (extracted.duration) {
+        console.log('[getMetadata] Successfully extracted duration from MP4:', extracted.duration);
+        const meta = store.state.videostream.metadata;
+        store.commit('SET_VIDEOSTREAM_METADATA', {
+          ...meta,
+          duration: extracted.duration,
+        });
+      } else {
+        console.warn('[getMetadata] Failed to extract MP4 metadata:', extracted.error);
+      }
+    }
   }
 }
 
@@ -144,9 +196,7 @@ onMounted(async () => {
   const videoEl = internalVideoRef.value;
   if (!videoEl) return;
   await getMetadata();
-
-  const url = await resolveUrl();
-  await initStream(url);
+  await initStream();
 
   emit('media-ready', videoEl);
 });
@@ -157,14 +207,12 @@ watch(
   () => [props.streamUrl, props.file?.id],
   async () => {
     await getMetadata();
-    const url = await resolveUrl();
-    if (url) initStream(url);
+    await initStream();
   },
 );
 
 onBeforeUnmount(() => {
-  controller?.abort();
-  revokeBlobUrl();
+  destroyPlayer();
   emit('media-destroyed');
 });
 </script>

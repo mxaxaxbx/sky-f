@@ -219,15 +219,15 @@
             <div>
               <h3 class="text-xl font-semibold text-white mb-2">Video Too Large for Preview</h3>
               <p class="text-[var(--text-terceary)] text-sm mb-4">
-                This video is {{ (file.size / (1024 * 1024)).toFixed(0) }}MB and exceeds the 500MB preview limit to prevent browser crashes.
+                This video is {{ (file.size / (1024 * 1024)).toFixed(0) }}MB and exceeds the {{ (MAX_PREVIEW_SIZE / (1024 * 1024)).toFixed(0) }}MB preview limit.
               </p>
               <p class="text-[var(--text-terceary)] text-xs mb-6">
-                The file can still be streamed, but preview loading may take time.
+                You can still stream the video directly.
               </p>
             </div>
             <div class="flex gap-3">
               <button
-                @click="isVideoTooLarge = false"
+                @click="loadLargeVideoAnyway"
                 class="
                   px-4 py-2 rounded-lg
                   bg-[var(--color-primary)] text-black font-medium text-sm
@@ -292,6 +292,7 @@
                 :stream-url="videoStreamURL"
                 :title="`Video preview of ${file.name || 'video'}`"
                 class="max-w-full max-h-full object-contain cursor-pointer"
+                @click="togglePlay"
                 @media-ready="onMediaReady"
                 @media-destroyed="onMediaDestroyed"
               />
@@ -398,7 +399,7 @@
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
                     <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
-                      {{ castStatusText }}
+                      <!-- {{ castStatusText }} -->
                     </span>
                     <button
                       @click="castVideo"
@@ -580,7 +581,7 @@
                   <!-- fullscreen -->
                   <div class="flex-1 flex items-center justify-end gap-1">
                     <span class="mr-2 text-xs text-[var(--text-terceary)] whitespace-nowrap">
-                      {{ castStatusText }}
+                      <!-- {{ castStatusText }} -->
                     </span>
                     <button
                       @click="castVideo"
@@ -1002,6 +1003,7 @@ import {
 import { useStore } from 'vuex';
 import { FileI } from '@/store/files/state';
 import VideoStreamer from '@/components/app/video-streamer.vue';
+import Hls from 'hls.js';
 
 const props = defineProps<{
   modelValue: FileI;
@@ -1062,8 +1064,15 @@ const castStatusText = computed(() => {
   return 'Cast unavailable';
 });
 
-const MAX_PREVIEW_SIZE = 500 * 1024 * 1024;
+const MAX_PREVIEW_SIZE = 1024 * 1024 * 1024; // 1GB
 const isVideoTooLarge = ref(false);
+
+async function loadLargeVideoAnyway() {
+  isVideoTooLarge.value = false;
+  if (file.value) {
+    await getBase64(file.value);
+  }
+}
 
 let hideHeaderTimeout: ReturnType<typeof setTimeout> | null = null;
 type HlsInstance = {
@@ -1201,7 +1210,7 @@ async function resolveHlsStreamUrl(currentFile: FileI): Promise<string | null> {
 
 const isNativeHlsSupported = computed(() => {
   if (!hlsVideoRef.value) return false;
-  return hlsVideoRef.value.canPlayType('application/vnd.apple.mpegurl') !== '';
+  return !Hls.isSupported() && hlsVideoRef.value.canPlayType('application/vnd.apple.mpegurl') !== '';
 });
 
 function getActiveMediaElement() {
@@ -1226,24 +1235,41 @@ async function destroyHlsPlayer() {
   }
 }
 
+function buildProxiedHlsUrl(rawUrl: string, token?: string | null): string {
+  let result = rawUrl;
+  if (token && !result.includes('token=')) {
+    result += `${result.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
+  }
+  if (!result.includes('proxy=')) {
+    result += `${result.includes('?') ? '&' : '?'}proxy=true`;
+  }
+  if (!result.includes('redirect=')) {
+    result += `${result.includes('?') ? '&' : '?'}redirect=false`;
+  }
+  return result;
+}
+
 async function setupHlsPlayer(source: string) {
   const video = hlsVideoRef.value;
   if (!video) return;
 
   await destroyHlsPlayer();
 
-  if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = source;
-    hlsReady.value = true;
-    return;
-  }
-
-  const { default: Hls } = await import('hls.js');
+  const token = localStorage.getItem('token');
+  const proxiedSource = buildProxiedHlsUrl(source, token);
 
   if (Hls.isSupported()) {
-    hlsInstance = new Hls();
+    hlsInstance = new Hls({
+      xhrSetup: (xhr, url) => {
+        const targetUrl = buildProxiedHlsUrl(url, token);
+        xhr.open('GET', targetUrl, true);
+        if (token) {
+          xhr.setRequestHeader('Authorization', `DGTK ${token}`);
+        }
+      },
+    });
     hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
-      hlsInstance?.loadSource(source);
+      hlsInstance?.loadSource(proxiedSource);
     });
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
       hlsReady.value = true;
@@ -1268,7 +1294,13 @@ async function setupHlsPlayer(source: string) {
     return;
   }
 
-  video.src = source;
+  if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = proxiedSource;
+    hlsReady.value = true;
+    return;
+  }
+
+  video.src = proxiedSource;
   hlsReady.value = true;
 }
 
@@ -1445,12 +1477,22 @@ async function togglePlay() {
 function onTimeUpdate() {
   const media = getActiveMediaElement();
   currentTime.value = media?.currentTime ?? 0;
+  if ((!duration.value || duration.value === 0) && media?.duration && Number.isFinite(media.duration) && media.duration > 0) {
+    duration.value = media.duration;
+  }
 }
 
 function onLoadedMetadata() {
   const media = getActiveMediaElement();
   if (!media) return;
-  duration.value = Number.isFinite(media.duration) ? media.duration : 0;
+  const metaDuration = store.state.videostream?.metadata?.duration;
+  if (Number.isFinite(media.duration) && media.duration > 0) {
+    duration.value = media.duration;
+  } else if (typeof metaDuration === 'number' && Number.isFinite(metaDuration) && metaDuration > 0) {
+    duration.value = metaDuration;
+  } else {
+    duration.value = 0;
+  }
   media.volume = volume.value;
 }
 
@@ -1695,11 +1737,38 @@ function onTouchEnd(e: TouchEvent) {
   }
 }
 
+function handlePause(): void {
+  isPlaying.value = false;
+}
+
+function handleEnded(): void {
+  isPlaying.value = false;
+}
+
 function onMediaReady(videoElement: HTMLVideoElement): void {
   videoRef.value = videoElement;
+  videoElement.addEventListener('timeupdate', onTimeUpdate);
+  videoElement.addEventListener('loadedmetadata', onLoadedMetadata);
+  videoElement.addEventListener('durationchange', onLoadedMetadata);
+  videoElement.addEventListener('play', handlePlay);
+  videoElement.addEventListener('pause', handlePause);
+  videoElement.addEventListener('ended', handleEnded);
+
+  const metaDuration = store.state.videostream?.metadata?.duration;
+  if (typeof metaDuration === 'number' && Number.isFinite(metaDuration) && metaDuration > 0) {
+    duration.value = metaDuration;
+  }
 }
 
 function onMediaDestroyed(): void {
+  if (videoRef.value) {
+    videoRef.value.removeEventListener('timeupdate', onTimeUpdate);
+    videoRef.value.removeEventListener('loadedmetadata', onLoadedMetadata);
+    videoRef.value.removeEventListener('durationchange', onLoadedMetadata);
+    videoRef.value.removeEventListener('play', handlePlay);
+    videoRef.value.removeEventListener('pause', handlePause);
+    videoRef.value.removeEventListener('ended', handleEnded);
+  }
   videoRef.value = null;
 }
 
