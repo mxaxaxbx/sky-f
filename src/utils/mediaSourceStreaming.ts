@@ -15,19 +15,27 @@ function getAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `DGTK ${token}` } : {};
 }
 
+function isSameOrigin(url: string): boolean {
+  return new URL(url, window.location.href).origin === window.location.origin;
+}
+
 async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<Response> {
   const baseHeaders = init.headers instanceof Headers
     ? Object.fromEntries(init.headers.entries())
     : init.headers ?? {};
+  // Presigned storage URLs are cross-origin and carry their own signature.
+  // Cookies or the DGTK header there force a CORS preflight that the bucket
+  // cannot satisfy, and would leak the API token to a third party.
+  const sameOrigin = isSameOrigin(url);
 
   console.log('[fetchWithAuth] Starting fetch', { url, rangeHeader: (init.headers as any)?.Range });
   const startTime = performance.now();
   const response = await fetch(url, {
     ...init,
-    credentials: 'include',
+    credentials: sameOrigin ? 'include' : 'omit',
     headers: {
       ...baseHeaders,
-      ...getAuthHeaders(),
+      ...(sameOrigin ? getAuthHeaders() : {}),
     },
   });
   const duration = performance.now() - startTime;
