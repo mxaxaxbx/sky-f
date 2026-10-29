@@ -92,10 +92,11 @@ async function resolveStreamUrl(): Promise<string> {
     return props.streamUrl;
   }
   if (props.file?.id) {
-    const streamUrl = await store.dispatch('videostream/getStreamUrl', {
-      id: props.file.id,
-      contentType: props.file.contentType || 'video/mp4',
-    });
+    // const streamUrl = await store.dispatch('videostream/getStreamUrl', {
+    //   id: props.file.id,
+    //   contentType: props.file.contentType || 'video/mp4',
+    // });
+    const streamUrl = await store.dispatch('files/getDownloadUrl', { id: props.file.id });
     return streamUrl || '';
   }
   return '';
