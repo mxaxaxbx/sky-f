@@ -1,75 +1,105 @@
 <template>
-  <div>
-    <!-- Hero Section -->
-    <heroSection />
-    <!-- Features Section -->
-    <featuresSection />
-  <!-- map Section -->
-    <mapSection />
-</div>
-</template>
-<script setup>
-import {
-  ref,
-  defineAsyncComponent,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
-} from 'vue';
+  <div class="home-shell">
+    <div class="home-beam home-beam-left" />
+    <div class="home-beam home-beam-right" />
+    <div class="home-grid" />
+    <div class="home-noise" />
 
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+    <main class="home-content">
+      <heroSection />
+      <featuresSection />
+      <mapSection />
+    </main>
+  </div>
+</template>
+
+<script setup>
+import { defineAsyncComponent } from 'vue';
 
 const heroSection = defineAsyncComponent(() => import('./hero.vue'));
 const featuresSection = defineAsyncComponent(() => import('./features.vue'));
 const mapSection = defineAsyncComponent(() => import('./map.vue'));
-const testimonialSection = defineAsyncComponent(() => import('./testimonial.vue'));
-
-const email = ref('');
-const message = ref('');
-const isError = ref(false);
-
-function submit() {
-  if (!email.value || !email.value.includes('@')) {
-    message.value = 'Please enter a valid email address.';
-    isError.value = true;
-  } else {
-    message.value = 'Thanks! We’ve received your email.';
-    isError.value = false;
-    // Opcional: limpiar después de unos segundos
-    setTimeout(() => {
-      message.value = '';
-      email.value = '';
-    }, 3100);
-  }
-}
 </script>
+
 <style scoped>
-.btn-nav {
-  @apply w-10 h-10 rounded-full
-  border border-blue-500 text-blue-500 hover:bg-blue-100 transition
-  flex items-center justify-center;
-}
-.icon {
-  @apply w-4 h-4;
-}
-@keyframes sparkle {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-    filter: brightness(2);
-  }
-  50% {
-    filter: brightness(1.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-    filter: brightness(1);
-  }
+.home-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(10, 119, 243, 0.18), transparent 32%),
+    linear-gradient(180deg, rgba(10, 119, 243, 0.04), transparent 18%),
+    var(--bg);
 }
 
-.sparkle-in {
-  animation: sparkle 0.5s ease-in-out forwards;
+.home-beam {
+  position: absolute;
+  inset: auto;
+  width: 36rem;
+  height: 36rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-beam-left {
+  top: -10rem;
+  left: -8rem;
+  background: rgba(10, 119, 243, 0.35);
+}
+
+.home-beam-right {
+  right: -8rem;
+  top: 8rem;
+  background: rgba(143, 193, 255, 0.2);
+}
+
+.home-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 42%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 42%, transparent 100%);
+  z-index: 0;
+}
+
+.home-noise {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 0.7px, transparent 0.7px);
+  background-size: 12px 12px;
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-content {
+  position: relative;
+  z-index: 1;
+}
+
+:deep(section) {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .home-shell {
+    background:
+      radial-gradient(circle at top, rgba(10, 119, 243, 0.22), transparent 28%),
+      var(--bg);
+  }
+
+  .home-beam {
+    width: 18rem;
+    height: 18rem;
+    filter: blur(64px);
+  }
 }
 </style>

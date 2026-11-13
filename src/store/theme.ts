@@ -12,7 +12,7 @@ export interface ThemeStateI {
 }
 
 export const state: ThemeStateI = {
-  theme: (localStorage.getItem('theme') as ThemeStateI['theme']) || 'dark',
+  theme: (localStorage.getItem('theme') as ThemeStateI['theme']) || 'light',
 };
 
 export const mutations: MutationTree<ThemeStateI> = {

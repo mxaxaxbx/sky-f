@@ -2,77 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tema base (dark) */
+/* Drive-like cloud storage palette */
 :root {
-    --bg: #1d1d1d;
-    --bg-modal: #1d1d1dbf;
-    --bg-modal-2: #25252577;
-    --bg-secondary: #252525;
+    --bg: #0f172a;
+    --bg-modal: rgba(15, 23, 42, 0.78);
+    --bg-modal-2: rgba(15, 23, 42, 0.7);
+    --bg-secondary: #111c2f;
     --color-primary: #0A77F3;
-    --text: #ffffff;
-    --text-secondary: #dcdcdc;
-    --text-terceary: #a3a3a3;
-    --border: #3d3d3d;
-    --sun:#345D8D;
-    --spaceship:#202F41;
-    --bg-path: #142B47;
-    --bg-path-secondary: #CFE6FF;
-    --color-secondary: #40516d;
-  
+    --text: #edf4ff;
+    --text-secondary: #bdcce5;
+    --text-terceary: #8ea5c6;
+    --border: #24364f;
+    --sun:#8ab9ff;
+    --spaceship:#17263d;
+    --bg-path: #122545;
+    --bg-path-secondary: #dcecff;
+    --color-secondary: #7aa7df;
+
     /* hover */
     --hover-border: #0A77F3;
-    --hover-bg: #202F41;
-    --hover-bg-gray: #2a2a2a;
-    --hover-border-gray: #9CA3AF;
+    --hover-bg: #14355d;
+    --hover-bg-gray: #1a2942;
+    --hover-border-gray: #5f7ba6;
 
     /* notifications */
     --error-border: #FF2121;
-    --error-bg: #282525cc;
+    --error-bg: rgba(48, 21, 21, 0.8);
     --success-border: #00B44B;
-    --success-bg: #1b3828cc;
+    --success-bg: rgba(19, 51, 39, 0.8);
     --info-border: #009dff;
-    --info-bg: #252728cc;
+    --info-bg: rgba(18, 38, 56, 0.8);
     --warning-border: #ffa600;
-    --warning-bg: #373226cc;
+    --warning-bg: rgba(58, 46, 15, 0.8);
     --delete-color:#ffa600;
-    --delete-bg: #373226;
-    --delete-shadow:0 0 5px 3px rgba(255,166,0,0.3);
+    --delete-bg: rgba(58, 46, 15, 0.8);
+    --delete-shadow:0 0 5px 3px rgba(255,166,0,0.25);
   }
 
-  /* Tema claro */
+  /* Light "Google Drive" base */
 .light {
-  --bg: #f5f5f5;
-  --bg-modal: rgba(255, 255, 255, 0.6);
-  --bg-modal-2: #ffffff76;
-  --bg-secondary: #Fbfbfb;
-  --text: #1d1d1d;
-  --text-secondary: #3d3d3d;
-  --text-terceary: #797979;
-  --border: #DCDCDC;
-  --sun:#BFDCFF;
+  --bg: #f5f7fb;
+  --bg-modal: rgba(255, 255, 255, 0.7);
+  --bg-modal-2: rgba(255, 255, 255, 0.82);
+  --bg-secondary: #ffffff;
+  --text: #161616;
+  --text-secondary: #4f5d74;
+  --text-terceary: #75829a;
+  --border: #dfe7f3;
+  --sun:#dfeeff;
   --spaceship:#ffffff;
-  --bg-path: #FDFDFD;
-  --bg-path-secondary: #002e5f;
-  --color-secondary: #c0c6d0;
-  
+  --bg-path: #f8fbff;
+  --bg-path-secondary: #0a77f3;
+  --color-secondary: #d7e7ff;
+
   /* hover */
   --hover-border: #0A77F3;
-  --hover-bg: #E9F3FF;
-  --hover-bg-gray: #ffffff;
-  --hover-border-gray: #b9b9b9;
+  --hover-bg: #edf5ff;
+  --hover-bg-gray: #f8fbff;
+  --hover-border-gray: #bfd8ff;
 
   /* notifications */
   --error-border: #FF2121;
-  --error-bg: #ffddddcc;
+  --error-bg: rgba(255, 221, 221, 0.8);
   --success-border: #00B44B;
-  --success-bg: #DDFFE8cc;
-  --info-border: #009dff;
-  --info-bg: #caedffcc;
+  --success-bg: rgba(221, 255, 232, 0.8);
+  --info-border: #0A77F3;
+  --info-bg: rgba(226, 241, 255, 0.8);
   --warning-border: #ffa600;
-  --warning-bg: #fffad2cc;
+  --warning-bg: rgba(255, 244, 201, 0.8);
   --delete-color:#ff0000;
   --delete-bg:#ffe8e8;
-  --delete-shadow: 0 0 5px 3px rgba(255, 36, 36, 0.2);
+  --delete-shadow: 0 0 5px 3px rgba(255, 36, 36, 0.12);
 }
 * {
   transition:
@@ -103,7 +103,7 @@
 
 /* Hover del grupo */
 .group:hover .bg-line {
-  --line-color: color-mix(in srgb, #F83B66 100%, transparent);
+  --line-color: color-mix(in srgb, var(--color-primary) 100%, transparent);
 
   background: linear-gradient(
     to right,
@@ -113,7 +113,7 @@
   );
 
   background-size: 100% 100%;
-  opacity: 1; /* ← esta es la que da el efecto suave */
+  opacity: 1;
 }
 
 .bg-slide {
