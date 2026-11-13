@@ -1391,7 +1391,7 @@ async function getBase64(currentFile: FileI) {
     return url;
   }
 
-  const url = await store.dispatch('files/getDownloadUrl', { id: currentFile.id });
+  const url = await store.dispatch('files/getDownloadUrl', currentFile);
   currentBlobURL.value = url;
 
   if (currentFile.contentType.startsWith('audio/')) {
@@ -1818,7 +1818,7 @@ async function castVideo() {
     return;
   }
 
-  const url = await store.dispatch('files/getDownloadUrl', { id: file.value.id });
+  const url = await store.dispatch('files/getDownloadUrl', file.value);
 
   const mediaType = isHlsPlaylist(file.value)
     ? 'application/vnd.apple.mpegurl'

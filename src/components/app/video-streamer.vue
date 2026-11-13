@@ -96,7 +96,7 @@ async function resolveStreamUrl(): Promise<string> {
     //   id: props.file.id,
     //   contentType: props.file.contentType || 'video/mp4',
     // });
-    const streamUrl = await store.dispatch('files/getDownloadUrl', { id: props.file.id });
+    const streamUrl = await store.dispatch('files/getDownloadUrl', props.file);
     return streamUrl || '';
   }
   return '';

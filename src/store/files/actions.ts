@@ -201,8 +201,27 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async downloadFile(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI,
+    payload: FileI & { url?: string },
   ): Promise<void> {
+    if (typeof payload.id === 'string' && payload.id.startsWith('shared-')) {
+      const url = await context.dispatch('getDownloadUrl', payload);
+      try {
+        const blob = await fetch(url).then((r) => r.blob());
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = payload.name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (err) {
+        console.warn('Falling back to direct URL download', err);
+        window.open(url, '_blank');
+      }
+      return;
+    }
+
     const cached = await context.dispatch('getCacheFile', {
       id: payload.id,
     });
@@ -235,10 +254,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
     }
 
     const win = window.open('', '_blank');
-    const { data } = await storageClient.get(
-      `/api/storage/get-download-url/${payload.id}`,
-    );
-    const { url } = data;
+    const url = await context.dispatch('getDownloadUrl', payload);
 
     if (win) {
       win.location.href = url;
@@ -337,14 +353,11 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
   async previewFile(
     context: ActionContext<FilesStateI, RootStateI>,
-    payload: FileI,
+    payload: FileI & { url?: string },
   ): Promise<void> {
     // open a new window before wait - Safari requires async
     const win = window.open('', '_blank');
-    const { data } = await storageClient.get(
-      `/api/storage/get-download-url/${payload.id}`,
-    );
-    const { url } = data;
+    const url = await context.dispatch('getDownloadUrl', payload);
     if (win) {
       win.location.href = url;
     } else {
