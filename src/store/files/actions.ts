@@ -159,6 +159,7 @@ export const actions: ActionTree<FilesStateI, RootStateI> = {
 
             xhr.open('PUT', item.r2Url);
             xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+            xhr.setRequestHeader('If-None-Match', '*');
             xhr.send(file);
           });
         }),
