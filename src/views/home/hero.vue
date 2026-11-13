@@ -1,7 +1,7 @@
 <template>
   <section class="hero-shell">
     <div class="hero-inner">
-      <div class="hero-copy">
+      <div class="hero-copy animate__animated animate__fadeInUp">
         <h1>
           Store, share, and move work forward.
         </h1>
@@ -10,19 +10,19 @@
           Keep your files, folders, and ideas secure in one private workspace built for fast access anywhere.
         </p>
 
-        <div class="hero-actions">
+        <div class="hero-actions animate__animated animate__fadeInUp animate__delay-1s">
           <a href="/app" class="primary-btn">Get started</a>
           <a href="/app" class="secondary-btn">Open workspace</a>
         </div>
 
-        <div class="hero-points">
+        <div class="hero-points animate__animated animate__fadeInUp animate__delay-1s">
           <span>Fast sync</span>
           <span>Private sharing</span>
           <span>Anywhere access</span>
         </div>
       </div>
 
-      <div class="hero-visual" aria-label="Storage workspace preview">
+      <div class="hero-visual animate__animated animate__zoomIn animate__delay-0.5s" aria-label="Storage workspace preview">
         <div class="dashboard-card">
           <div class="card-header">
             <span class="dot dot-red" />

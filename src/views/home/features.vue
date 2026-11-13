@@ -11,7 +11,7 @@
     </div>
 
     <div class="features-grid">
-      <article class="feature-card feature-main">
+      <article class="feature-card feature-main animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
         <div class="feature-icon">
           <svg viewBox="0 0 64 64" aria-hidden="true">
             <path d="M49 22.5c-1.3-8.9-8.7-15.5-17.7-15.5-8.9 0-16.6 6.3-17.6 15.1C6.2 23.4 2 28.5 2 35c0 7.7 6.3 14 14 14h32c7.7 0 14-6.3 14-14 0-6.7-4.8-12.2-13-12.5Z" fill="rgba(10,119,243,0.18)"/>
@@ -34,7 +34,7 @@
         </ul>
       </article>
 
-      <article class="feature-card">
+      <article class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
         <div class="feature-icon small">
           <svg viewBox="0 0 64 64" aria-hidden="true">
             <rect x="14" y="18" width="36" height="30" rx="6" fill="rgba(10,119,243,0.12)" stroke="var(--color-primary)" stroke-width="3"/>
@@ -51,7 +51,7 @@
         </div>
       </article>
 
-      <article class="feature-card">
+      <article class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
         <div class="feature-icon small">
           <svg viewBox="0 0 64 64" aria-hidden="true">
             <circle cx="32" cy="32" r="18" fill="rgba(10,119,243,0.12)" stroke="var(--color-primary)" stroke-width="3"/>
