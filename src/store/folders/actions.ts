@@ -112,7 +112,7 @@ export const actions: ActionTree<FoldersStateI, RootStateI> = {
     context: ActionContext<FoldersStateI, RootStateI>,
     payload: FolderI[],
   ): Promise<void> {
-    const { data } = await storageClient.post('/api/trash/restore-folders-in-root-folder', camelToSnake(payload));
+    const { data } = await storageClient.post('/api/trash/restore-folders', camelToSnake(payload));
     console.log('data', data);
   },
 
